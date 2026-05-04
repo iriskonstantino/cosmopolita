@@ -1249,12 +1249,24 @@ body.links-on .wl:hover{color:var(--red)}
 }
 .codex-entry{display:none}
 .codex-entry.active{display:block}
-.codex-hero-img img.codex-logo-fallback{
-  width:min(340px,52vw);
-  height:auto;
-  align-self:center;
-  margin:auto;
+.codex-native-script-img{
+  display:block;
+  max-width:min(560px,70vw);
+  max-height:118px;
+  object-fit:contain;
+  object-position:left center;
+  margin:0 0 1rem;
+  filter:drop-shadow(0 8px 20px rgba(255,255,255,0.35));
 }
+.codex-hero-alt{
+  font-family:var(--mono);
+  font-size:0.62rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:#999;
+  margin-top:0.65rem;
+}
+.codex-hero-alt:empty{display:none}
 .codex-article-wrap{
   display:grid;
   grid-template-columns:1fr 284px;
@@ -1353,6 +1365,7 @@ body.links-on .wl:hover{color:var(--red)}
   padding:2.4rem;
   box-sizing:border-box;
 }
+.codex-infobox-image:empty{display:none}
 #wiki-detail-panel{
   border-left:1px solid var(--border);
   background:var(--white);
@@ -1987,7 +2000,9 @@ body:not(.admin-on) .admin-only{
       <div class="char-hero-overlay"></div>
       <div class="char-hero-text">
         <div class="char-hero-super" id="codex-entry-cat"></div>
+        <div id="codex-native-script"></div>
         <div class="char-hero-name" id="codex-entry-title"></div>
+        <div class="codex-hero-alt" id="codex-entry-alt"></div>
         <div class="char-hero-epithet" id="codex-entry-short"></div>
       </div>
       <div class="char-hero-scroll">Scroll to read &darr;</div>
@@ -2049,6 +2064,15 @@ body:not(.admin-on) .admin-only{
       </div>
       <div class="cm-field full">
         <div id="codex-image-upload-status" class="char-image-current"></div>
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Native script image URL</label>
+        <input id="codex-edit-native-script-image" class="cm-input" placeholder="https://... or assets/..." />
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Upload native script image</label>
+        <input id="codex-native-script-upload" class="cm-input" type="file" accept="image/*" onchange="handleCodexImageUpload(event,'nativeScriptImage')" />
+        <div class="char-image-note">For nations and languages: renders above the hero title and syncs through Supabase/GitHub Pages.</div>
       </div>
       <div class="cm-field full">
         <label class="cm-label">Hero alt text</label>
@@ -4237,7 +4261,11 @@ async function uploadCodexImageToSupabase(file, target='hero'){
   if(!isAdmin()) throw new Error('Only the site admin can upload shared Codex images.');
   const safeName = cleanStorageFileName(file.name || 'codex-image.png');
   const uniqueId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}-${Math.floor(Math.random()*1000000)}`;
-  const folder = target === 'mapImage' ? 'codex/maps' : 'codex/heroes';
+  const folder = target === 'mapImage'
+    ? 'codex/maps'
+    : target === 'nativeScriptImage'
+      ? 'codex/native-scripts'
+      : 'codex/heroes';
   const path = `${folder}/${uniqueId}-${safeName}`;
   const { error } = await client.storage
     .from(CHARACTER_IMAGE_BUCKET)
@@ -5145,6 +5173,7 @@ async function showAssets(){
 let _editingCodexKey = null;
 
 function normalizeCodexEntry(key, entry={}){
+  const heroAlt = entry.heroAlt || entry.hero_alt || entry.alt || entry.subtitle || '';
   return Object.assign({
     key,
     t:key,
@@ -5159,6 +5188,7 @@ function normalizeCodexEntry(key, entry={}){
     tags:[]
   }, entry, {
     key,
+    heroAlt,
     meta:Array.isArray(entry.meta) ? entry.meta : [],
     tags:Array.isArray(entry.tags) ? entry.tags : splitTagText(entry.tags || '')
   });
@@ -5177,9 +5207,9 @@ function isCodexPlaceLike(entry){
 
 function codexHeroImage(entry){
   if(isCodexPlaceLike(entry)){
-    return entry.mapImage || entry.heroImage || 'logo.png';
+    return entry.mapImage || entry.heroImage || '';
   }
-  return entry.heroImage || entry.mapImage || 'logo.png';
+  return entry.heroImage || entry.mapImage || '';
 }
 
 function codexSearchText(entry){
@@ -5289,12 +5319,11 @@ function codexArticleHTML(entry){
 function codexPanelHTML(entry){
   const tags = (entry.tags || []).map(tag=>`<span class="affil-tag">${escHtml(tag)}</span>`).join('');
   const image = codexHeroImage(entry);
-  const imageIsLogo = image === 'logo.png';
   const metaRows = (entry.meta || []).map(row=>`
     <tr><td>${escHtml(row[0])}</td><td>${escHtml(row[1])}</td></tr>
   `).join('');
   return `
-    <img class="codex-infobox-image ${imageIsLogo ? 'logo' : ''}" src="${escHtml(image)}" alt="${escHtml(entry.heroAlt || entry.t)}" onerror="this.src='logo.png';this.classList.add('logo');" />
+    ${image ? `<img class="codex-infobox-image" src="${escHtml(image)}" alt="${escHtml(entry.heroAlt || entry.t)}" onerror="this.remove();" />` : ''}
     <div class="codex-infobox-title">${escHtml(entry.t)}</div>
     <div class="codex-infobox-cat">${escHtml(entry.cat || 'Codex Entry')}</div>
     <div class="stat-name">Infobox</div>
@@ -5323,11 +5352,11 @@ function showCodexEntry(key){
   const hero = document.getElementById('codex-hero-img');
   const src = codexHeroImage(entry);
   if(hero){
-    const isLogo = src === 'logo.png';
-    hero.innerHTML = `<img class="${isLogo ? 'codex-logo-fallback' : ''}" src="${escHtml(src)}" alt="${escHtml(entry.heroAlt || entry.t)}" onerror="this.src='logo.png';this.classList.add('codex-logo-fallback');" />`;
+    hero.innerHTML = src ? `<img src="${escHtml(src)}" alt="${escHtml(entry.heroAlt || entry.t)}" onerror="this.remove();" />` : '';
   }
   document.getElementById('codex-entry-cat').textContent = entry.cat || 'Codex Entry';
   document.getElementById('codex-entry-title').innerHTML = escHtml(entry.t).replace(/\s+/g,'<br>');
+  document.getElementById('codex-entry-alt').textContent = entry.heroAlt || '';
   document.getElementById('codex-entry-short').textContent = entry.short || '';
   const content = document.getElementById('wiki-pg-content');
   if(content){
