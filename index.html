@@ -1252,7 +1252,7 @@ body.links-on .wl:hover{color:var(--red)}
 /* ─── TOC CHAPTER LIST ──────────────────── */
 #toc-list{
   padding:3rem 2.5rem 5rem;
-  max-width:740px;
+  max-width:920px;
 }
 .toc-heading{
   font-family:var(--display);
@@ -1262,7 +1262,119 @@ body.links-on .wl:hover{color:var(--red)}
   text-transform:uppercase;
   border-bottom:1.5px solid var(--ink);
   padding-bottom:0.6rem;
-  margin-bottom:2rem;
+  margin-bottom:1.3rem;
+}
+.toc-dashboard{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
+  gap:1rem;
+  margin:0 0 3rem;
+}
+.toc-dash-card{
+  border:1.5px solid var(--ink);
+  background:var(--paper);
+  padding:1.15rem 1.2rem;
+  text-align:left;
+  cursor:pointer;
+  transition:background .16s,color .16s,border-color .16s;
+  min-height:9.5rem;
+  width:100%;
+  font:inherit;
+  color:var(--ink);
+}
+.toc-dash-card:not(.summary):hover{background:var(--ink);color:var(--white)}
+.toc-dash-card:not(.summary):hover .toc-dash-label,
+.toc-dash-card:not(.summary):hover .toc-dash-meta,
+.toc-dash-card:not(.summary):hover .toc-dash-action{color:var(--white)}
+.toc-dash-card.primary{
+  background:var(--ink);
+  color:var(--white);
+}
+.toc-dash-card.primary .toc-dash-label,
+.toc-dash-card.primary .toc-dash-meta,
+.toc-dash-card.primary .toc-dash-action{color:var(--white)}
+.toc-dash-card.primary:hover{background:var(--red);border-color:var(--red)}
+.toc-dash-stack{
+  display:grid;
+  gap:1rem;
+}
+.toc-dash-card.compact{
+  min-height:0;
+  padding:1rem 1.05rem;
+}
+.toc-dash-card.summary{cursor:default}
+.toc-dash-label{
+  font-family:var(--mono);
+  font-size:0.56rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:#aaa;
+  margin-bottom:0.75rem;
+}
+.toc-dash-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:clamp(1.25rem,2.5vw,2.15rem);
+  line-height:1.04;
+  letter-spacing:0.02em;
+}
+.toc-dash-card.compact .toc-dash-title{font-size:1.15rem;line-height:1.12}
+.toc-dash-meta{
+  font-family:var(--mono);
+  font-size:0.58rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:#8d8a84;
+  line-height:1.55;
+  margin-top:0.85rem;
+}
+.toc-dash-action{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.58rem;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--red);
+  margin-top:1.2rem;
+}
+.toc-archive-label{
+  font-family:var(--mono);
+  font-size:0.58rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:#aaa;
+  border-bottom:1.5px solid var(--ink);
+  padding-bottom:0.7rem;
+  margin-bottom:1rem;
+}
+.toc-volume{
+  margin:2.1rem 0 0;
+}
+.toc-volume-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:1.25rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:0.4rem;
+}
+.toc-book-title,
+.toc-part-title{
+  font-family:var(--mono);
+  text-transform:uppercase;
+  color:#aaa;
+}
+.toc-book-title{
+  font-size:0.58rem;
+  letter-spacing:0.18em;
+  margin:1.2rem 0 0.55rem;
+}
+.toc-part-title{
+  font-size:0.54rem;
+  letter-spacing:0.14em;
+  color:#c2beb6;
+  margin:0.8rem 0 0.25rem;
 }
 .toc-entry{
   display:grid;
@@ -1586,6 +1698,10 @@ body:not(.admin-on) .admin-only{
 @media(max-width:720px){
   .char-image-tools{grid-template-columns:1fr;}
   .char-actions-row{grid-template-columns:1fr;}
+  .toc-dashboard{grid-template-columns:1fr;}
+  #toc-list{padding:2rem 1.25rem 4rem;}
+  .toc-entry{grid-template-columns:2rem 1fr;gap:0 0.8rem;}
+  .toc-meta-tag{grid-column:2;color:#aaa;margin-top:0.35rem;}
 }
 @media(max-width:1050px){
   #cv-reading-wrap,
@@ -1709,6 +1825,8 @@ body:not(.admin-on) .admin-only{
   <div style="display:grid;grid-template-columns:1fr 284px">
     <div id="toc-list">
       <div class="toc-heading">Chapters</div>
+      <div id="toc-dashboard"></div>
+      <div class="toc-archive-label">Archive</div>
       <div id="toc-entries"></div>
       <button class="toc-add-btn admin-only" onclick="openNewChapterModal()">+ New Chapter</button>
       <div class="content-tools admin-only">
@@ -2386,26 +2504,121 @@ function renderChapter(ch){
 // ════════════════════════════════════════════════════════
 // TOC RENDER
 // ════════════════════════════════════════════════════════
+function getFirstChapter(){
+  return chapters && chapters.length ? chapters[0] : null;
+}
+
+function getLatestChapter(){
+  return chapters && chapters.length ? chapters[chapters.length - 1] : null;
+}
+
+function chapterHierarchyLabel(ch){
+  if(!ch) return '';
+  return [ch.volume, ch.book, ch.part, ch.novel].filter(Boolean).join(' · ');
+}
+
+function groupChaptersForTOC(list){
+  const groups = [];
+  (list || []).forEach((ch, index)=>{
+    const volumeName = ch.volume || 'Uncollected Volume';
+    const bookName = ch.book || 'Untitled Book';
+    const partName = ch.part || 'Unparted';
+    let volume = groups.find(g=>g.name===volumeName);
+    if(!volume){
+      volume = {name:volumeName, books:[]};
+      groups.push(volume);
+    }
+    let book = volume.books.find(g=>g.name===bookName);
+    if(!book){
+      book = {name:bookName, parts:[]};
+      volume.books.push(book);
+    }
+    let part = book.parts.find(g=>g.name===partName);
+    if(!part){
+      part = {name:partName, chapters:[]};
+      book.parts.push(part);
+    }
+    part.chapters.push({chapter:ch, index});
+  });
+  return groups;
+}
+
+function tocChapterEntry(ch, i){
+  const narr = ch.meta && ch.meta.narrator ? `<span class="toc-meta-tag">${escHtml(ch.meta.narrator)}</span>` : '';
+  const hierarchy = chapterHierarchyLabel(ch);
+  return `
+    <div class="toc-entry" onclick="showChapter('${escHtml(ch.id)}')">
+      <div class="toc-num">${escHtml(ch.num || (i+1))}</div>
+      <div class="toc-info">
+        <div class="toc-title">${escHtml(ch.chapter||ch.book||'Untitled Chapter')}</div>
+        ${hierarchy ? `<div class="toc-sub">${escHtml(hierarchy)}</div>` : ''}
+      </div>
+      ${narr}
+    </div>`;
+}
+
+function renderTOCDashboard(){
+  const dashboard = document.getElementById('toc-dashboard');
+  if(!dashboard) return;
+  const first = getFirstChapter();
+  const latest = getLatestChapter();
+  if(!first || !latest){
+    dashboard.innerHTML = '';
+    return;
+  }
+  const sameChapter = first.id === latest.id;
+  const latestMeta = chapterHierarchyLabel(latest);
+  const firstMeta = chapterHierarchyLabel(first);
+  const latestTitle = latest.chapter || latest.book || 'Latest Chapter';
+  const firstTitle = first.chapter || first.book || 'Chapter I';
+  const archiveContext = latest.volume || latest.book || latest.novel || 'Cosmopolita';
+  dashboard.innerHTML = `
+    <div class="toc-dashboard">
+      <button class="toc-dash-card primary" type="button" onclick="showChapter('${escHtml(latest.id)}')">
+        <div class="toc-dash-label">Latest Chapter</div>
+        <div class="toc-dash-title">${escHtml(latestTitle)}</div>
+        ${latestMeta ? `<div class="toc-dash-meta">${escHtml(latestMeta)}</div>` : ''}
+        <div class="toc-dash-action">Read Latest</div>
+      </button>
+      <div class="toc-dash-stack">
+        <button class="toc-dash-card compact" type="button" onclick="showChapter('${escHtml(first.id)}')">
+          <div class="toc-dash-label">Start From Beginning</div>
+          <div class="toc-dash-title">${escHtml(firstTitle)}</div>
+          ${firstMeta ? `<div class="toc-dash-meta">${escHtml(firstMeta)}</div>` : ''}
+        </button>
+        <div class="toc-dash-card compact summary" aria-label="All chapters summary">
+          <div class="toc-dash-label">All Chapters</div>
+          <div class="toc-dash-title">${chapters.length} ${chapters.length===1?'Chapter':'Chapters'}</div>
+          <div class="toc-dash-meta">${escHtml(archiveContext)}${sameChapter ? ' · Current opening' : ' · Latest available'}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function renderTOC(){
+  renderTOCDashboard();
   const container = document.getElementById('toc-entries');
   if(!container) return;
   if(chapters.length === 0){
     container.innerHTML = '<p style="color:#aaa;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.08em;padding:1rem 0">No chapters yet. Add one below.</p>';
     return;
   }
-  container.innerHTML = chapters.map((ch, i)=>{
-    const narr = ch.meta.narrator ? `<span class="toc-meta-tag">${ch.meta.narrator}</span>` : '';
-    const hierarchy = [ch.part, ch.book, ch.volume, ch.novel].filter(Boolean).join(' \u00b7 ');
-    return `
-      <div class="toc-entry" onclick="showChapter('${ch.id}')">
-        <div class="toc-num">${ch.num || (i+1)}</div>
-        <div class="toc-info">
-          <div class="toc-title">${ch.chapter||ch.book||''}</div>
-          ${hierarchy ? `<div class="toc-sub">${hierarchy}</div>` : ''}
+  container.innerHTML = groupChaptersForTOC(chapters).map(volume=>`
+    <section class="toc-volume">
+      <div class="toc-volume-title">${escHtml(volume.name)}</div>
+      ${volume.books.map(book=>`
+        <div class="toc-book">
+          <div class="toc-book-title">${escHtml(book.name)}</div>
+          ${book.parts.map(part=>`
+            <div class="toc-part">
+              <div class="toc-part-title">${escHtml(part.name)}</div>
+              ${part.chapters.map(({chapter,index})=>tocChapterEntry(chapter,index)).join('')}
+            </div>
+          `).join('')}
         </div>
-        ${narr}
-      </div>`;
-  }).join('');
+      `).join('')}
+    </section>
+  `).join('');
 }
 
 // ════════════════════════════════════════════════════════
@@ -2647,13 +2860,9 @@ function _showViewById(id){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ── Begin reading — goes to TOC then first chapter ──
+// ── Begin reading — opens the chapter dashboard ──
 function beginReading(){
-  if(chapters.length>0){
-    showChapter(chapters[0].id);
-  } else {
-    showLanding();
-  }
+  showLanding();
 }
 
 // ── Show about ──
@@ -2793,21 +3002,55 @@ function normalizeCharacterId(name){
 
 function characterImageHTML(char, alt){
   const safeAlt = escHtml(alt || (char && char.name) || 'Character image');
-  if(char && char.imageFileId){
-    return `<img class="js-vault-img" data-vault-id="${escHtml(char.imageFileId)}" alt="${safeAlt}" />`;
+  const imageUrl = characterImageUrl(char);
+  if(imageUrl){
+    return `<img src="${escHtml(imageUrl)}" alt="${safeAlt}" onerror="handleCharacterImageError(this)" />`;
   }
-  if(char && char.image){
-    return `<img src="${char.image}" alt="${safeAlt}" />`;
+  if(char && char.imageFileId){
+    return `<img class="js-vault-img" data-vault-id="${escHtml(char.imageFileId)}" alt="${safeAlt}" onerror="handleCharacterImageError(this)" />`;
   }
   return '';
+}
+
+function characterImageUrl(char){
+  if(!char) return '';
+  const override = CHARACTER_IMAGE_OVERRIDES[char.id] || CHARACTER_IMAGE_OVERRIDES[normalizeCharacterId(char.name || '')];
+  if(override) return override;
+  if(!char.image) return '';
+  const url = String(char.image).trim();
+  if(!url) return '';
+  if(url.startsWith('data:image/')) return url;
+  if(/^https?:\/\//i.test(url)) return url;
+  if(url.startsWith('./') || url.startsWith('/') || /\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(url)) return url;
+  return '';
+}
+
+function characterImageOverrideName(char){
+  if(!char) return '';
+  const override = CHARACTER_IMAGE_OVERRIDES[char.id] || CHARACTER_IMAGE_OVERRIDES[normalizeCharacterId(char.name || '')];
+  return override ? override.split('/').pop() : '';
+}
+
+function handleCharacterImageError(img){
+  if(!img) return;
+  const broken = img.currentSrc || img.src || img.dataset.vaultId || '';
+  console.warn('Character image failed to load:', broken);
+  img.classList.remove('js-vault-img');
+  img.removeAttribute('data-vault-id');
+  img.removeAttribute('onerror');
+  img.src = EMPTY_IMG;
 }
 
 function setCharacterImageElement(img, char){
   if(!img) return;
   img.classList.remove('js-vault-img');
   img.removeAttribute('data-vault-id');
+  img.onerror = () => handleCharacterImageError(img);
   img.alt = (char && char.name) ? char.name : 'Character image';
-  if(char && char.imageFileId){
+  const imageUrl = characterImageUrl(char);
+  if(imageUrl){
+    img.src = imageUrl;
+  } else if(char && char.imageFileId){
     img.src = EMPTY_IMG;
     img.classList.add('js-vault-img');
     img.dataset.vaultId = char.imageFileId;
@@ -2953,11 +3196,14 @@ async function openCharacterModal(id){
     epithetField.value = char.epithet || '';
     bioField.value = char.bio ? char.bio.replace(/<\/p>/g,'\n\n').replace(/<[^>]+>/g,'').trim() : '';
     statsField.value = Object.entries(char.stats||{}).map(([k,v])=>`${k}: ${v}`).join('\n');
-    _pendingCharacterImage = char.image || '';
+    _pendingCharacterImage = characterImageUrl(char) || char.image || '';
     _pendingCharacterImageFileId = char.imageFileId || '';
-    _pendingCharacterImageName = char.imageName || '';
-    if(char.imageFileId) await setCharacterPreviewFromVault(char.imageFileId, char.imageName || 'Vault image');
-    else if(preview) preview.src = char.image || EMPTY_IMG;
+    _pendingCharacterImageName = characterImageOverrideName(char) || char.imageName || '';
+    if(_pendingCharacterImage) {
+      _pendingCharacterImageFileId = '';
+      if(preview) preview.src = _pendingCharacterImage;
+    } else if(char.imageFileId) await setCharacterPreviewFromVault(char.imageFileId, char.imageName || 'Vault image');
+    else if(preview) preview.src = EMPTY_IMG;
   } else {
     title.textContent = 'New Character';
     nameField.value = '';
@@ -3410,6 +3656,9 @@ const SUPABASE_URL = 'https://qbnjgbdasliljynpxalp.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_eyf3d9vMWBqdGPLKXKFlCQ_B_6ZnOQr';
 const ADMIN_EMAILS = ['pcygnus2112@gmail.com'];
 const CHARACTER_IMAGE_BUCKET = 'character-images';
+const CHARACTER_IMAGE_OVERRIDES = {
+  'maiko-sierra': 'assets/characters/maiko-sierra-transparent.png'
+};
 let _notesDBPromise = null;
 const _noteSaveTimers = {};
 let _supabaseClient = null;
