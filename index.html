@@ -1249,6 +1249,16 @@ body.links-on .wl:hover{color:var(--red)}
 }
 .codex-entry{display:none}
 .codex-entry.active{display:block}
+.codex-hero-mark{
+  position:absolute;
+  top:6rem;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(150px,28vw);
+  height:auto;
+  z-index:2;
+  filter:drop-shadow(0 10px 28px rgba(0,0,0,0.18));
+}
 .codex-hero-img img.codex-logo-fallback{
   width:min(340px,52vw);
   height:auto;
@@ -1278,6 +1288,12 @@ body.links-on .wl:hover{color:var(--red)}
 .wiki-content{
   padding:2.5rem;
   max-width:820px;
+  background:var(--white);
+}
+.wiki-content.codex-wiki-article{
+  font-family:var(--serif);
+  max-width:880px;
+  border-right:1px solid var(--border);
 }
 .wiki-content p{
   margin-bottom:1.5em;
@@ -1289,10 +1305,11 @@ body.links-on .wl:hover{color:var(--red)}
 }
 .wiki-content h2{
   font-family:var(--display);
-  font-weight:600;
-  font-size:1.35rem;
-  margin-top:2rem;
-  margin-bottom:0.8rem;
+  font-weight:700;
+  font-size:1.18rem;
+  letter-spacing:0.04em;
+  margin-top:2.2rem;
+  margin-bottom:0.9rem;
   color:var(--ink);
   border-bottom:1px solid var(--border);
   padding-bottom:0.4rem;
@@ -1315,6 +1332,36 @@ body.links-on .wl:hover{color:var(--red)}
   color:var(--link);
   border-bottom-color:currentColor;
   cursor:pointer;
+}
+.codex-infobox-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:1.35rem;
+  line-height:1;
+  color:var(--ink);
+  margin-bottom:0.35rem;
+}
+.codex-infobox-cat{
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:#aaa;
+  line-height:1.5;
+  margin-bottom:1.1rem;
+}
+.codex-infobox-image{
+  width:100%;
+  aspect-ratio:4/3;
+  border:1px solid var(--border);
+  background:var(--white);
+  object-fit:contain;
+  display:block;
+  margin-bottom:1.2rem;
+}
+.codex-infobox-image.logo{
+  padding:2.4rem;
+  box-sizing:border-box;
 }
 #wiki-detail-panel{
   border-left:1px solid var(--border);
@@ -1946,6 +1993,7 @@ body:not(.admin-on) .admin-only{
 
   <section class="codex-entry" id="codex-entry">
     <div class="char-hero" id="codex-hero-section">
+      <img class="codex-hero-mark" src="logo.png" alt="Cosmopolita" />
       <div class="char-hero-img codex-hero-img" id="codex-hero-img"></div>
       <div class="char-hero-overlay"></div>
       <div class="char-hero-text">
@@ -1997,8 +2045,21 @@ body:not(.admin-on) .admin-only{
         <input id="codex-edit-hero-image" class="cm-input" placeholder="https://... or assets/..." />
       </div>
       <div class="cm-field full">
+        <label class="cm-label">Upload hero image</label>
+        <input id="codex-hero-upload" class="cm-input" type="file" accept="image/*" onchange="handleCodexImageUpload(event,'heroImage')" />
+        <div class="char-image-note">Uploads to Supabase Storage and fills the hero image URL for GitHub Pages.</div>
+      </div>
+      <div class="cm-field full">
         <label class="cm-label">Map image URL</label>
         <input id="codex-edit-map-image" class="cm-input" placeholder="https://... or assets/..." />
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Upload map image</label>
+        <input id="codex-map-upload" class="cm-input" type="file" accept="image/*" onchange="handleCodexImageUpload(event,'mapImage')" />
+        <div class="char-image-note">For nations, locations, and settings, map images are preferred in the hero and infobox.</div>
+      </div>
+      <div class="cm-field full">
+        <div id="codex-image-upload-status" class="char-image-current"></div>
       </div>
       <div class="cm-field full">
         <label class="cm-label">Hero alt text</label>
@@ -4181,6 +4242,27 @@ async function uploadCharacterImageToSupabase(file){
   return { url: data.publicUrl, path, name: file.name };
 }
 
+async function uploadCodexImageToSupabase(file, target='hero'){
+  const client = notesClient();
+  if(!client) throw new Error('Supabase is not configured.');
+  if(!isAdmin()) throw new Error('Only the site admin can upload shared Codex images.');
+  const safeName = cleanStorageFileName(file.name || 'codex-image.png');
+  const uniqueId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}-${Math.floor(Math.random()*1000000)}`;
+  const folder = target === 'mapImage' ? 'codex/maps' : 'codex/heroes';
+  const path = `${folder}/${uniqueId}-${safeName}`;
+  const { error } = await client.storage
+    .from(CHARACTER_IMAGE_BUCKET)
+    .upload(path, file, {
+      cacheControl: '31536000',
+      contentType: file.type || 'image/png',
+      upsert: false
+    });
+  if(error) throw error;
+  const { data } = client.storage.from(CHARACTER_IMAGE_BUCKET).getPublicUrl(path);
+  if(!data || !data.publicUrl) throw new Error('Supabase did not return an image URL.');
+  return { url: data.publicUrl, path, name: file.name };
+}
+
 function isAdmin(){
   return !!(_notesUser && ADMIN_EMAILS.includes(String(_notesUser.email || '').toLowerCase()));
 }
@@ -5212,23 +5294,25 @@ function codexArticleHTML(entry){
   if(!html){
     html = parseCodexText(entry.desc || entry.short || 'No entry text available.');
   }
-  if(entry.meta && entry.meta.length){
-    html += '<h2>Details</h2><table class="wdp-table">';
-    entry.meta.forEach(row=>{
-      html += `<tr><td>${escHtml(row[0])}</td><td>${escHtml(row[1])}</td></tr>`;
-    });
-    html += '</table>';
-  }
   return html;
 }
 
 function codexPanelHTML(entry){
   const tags = (entry.tags || []).map(tag=>`<span class="affil-tag">${escHtml(tag)}</span>`).join('');
+  const image = codexHeroImage(entry);
+  const imageIsLogo = image === 'logo.png';
+  const metaRows = (entry.meta || []).map(row=>`
+    <tr><td>${escHtml(row[0])}</td><td>${escHtml(row[1])}</td></tr>
+  `).join('');
   return `
-    <div class="stat-name">Codex</div>
+    <img class="codex-infobox-image ${imageIsLogo ? 'logo' : ''}" src="${escHtml(image)}" alt="${escHtml(entry.heroAlt || entry.t)}" onerror="this.src='logo.png';this.classList.add('logo');" />
+    <div class="codex-infobox-title">${escHtml(entry.t)}</div>
+    <div class="codex-infobox-cat">${escHtml(entry.cat || 'Codex Entry')}</div>
+    <div class="stat-name">Infobox</div>
     <table class="stat-table">
       <tr><td>Type</td><td>${escHtml(entry.kind || entry.cat || 'Entry')}</td></tr>
       ${entry.short ? `<tr><td>Summary</td><td>${escHtml(entry.short)}</td></tr>` : ''}
+      ${metaRows}
     </table>
     ${tags ? `<div class="stat-section">Tags</div><div>${tags}</div>` : ''}
     ${isAdmin() ? `<button class="ch-ctrl-btn admin-only" type="button" onclick="openCodexEntryEditor('${escHtml(entry.key)}')">Edit entry</button>` : ''}
@@ -5260,6 +5344,7 @@ function showCodexEntry(key){
   if(content){
     content.innerHTML = codexArticleHTML(entry);
     content.classList.add('links-on');
+    content.classList.add('codex-wiki-article');
     attachWlListeners(content);
   }
   const panel = document.getElementById('codex-entry-panel');
@@ -5333,6 +5418,8 @@ function openCodexEntryEditor(key=''){
   document.getElementById('codex-edit-tags').value = (entry.tags || []).join(', ');
   document.getElementById('codex-edit-desc').value = entry.desc || entry.b || '';
   document.getElementById('codex-edit-meta').value = codexMetaToText(entry.meta);
+  const status = document.getElementById('codex-image-upload-status');
+  if(status) status.textContent = '';
   document.getElementById('codex-entry-modal-overlay').classList.add('open');
 }
 
@@ -5344,6 +5431,33 @@ function closeCodexEntryEditor(){
 
 function handleCodexEntryModalOverlayClick(event){
   if(event.target && event.target.id === 'codex-entry-modal-overlay') closeCodexEntryEditor();
+}
+
+async function handleCodexImageUpload(event, targetField){
+  if(!requireAdmin()) return;
+  const input = event.target;
+  const file = input && input.files && input.files[0];
+  if(!file) return;
+  if(!String(file.type || '').startsWith('image/')){
+    alert('Choose an image file for the Codex entry.');
+    input.value = '';
+    return;
+  }
+  const status = document.getElementById('codex-image-upload-status');
+  if(status) status.textContent = 'Uploading image to Supabase...';
+  try{
+    const item = await uploadCodexImageToSupabase(file, targetField);
+    const fieldId = targetField === 'mapImage' ? 'codex-edit-map-image' : 'codex-edit-hero-image';
+    const field = document.getElementById(fieldId);
+    if(field) field.value = item.url;
+    if(status) status.textContent = `Uploaded ${item.name}. Save the entry to publish this image URL.`;
+  }catch(err){
+    console.error('Codex image Supabase upload failed:', err);
+    if(status) status.textContent = 'Upload failed.';
+    alert('Could not upload this Codex image to Supabase Storage. Make sure you are logged in as admin and the storage bucket is public-readable.');
+  }finally{
+    input.value = '';
+  }
 }
 
 async function saveCodexEntryEditor(){
