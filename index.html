@@ -276,12 +276,18 @@ body{
 /* ─── READING LAYOUT ─────────────────── */
 .reading-wrap{
   display:grid;
-  grid-template-columns:1fr 0px 284px;
+  grid-template-columns:minmax(0,1fr) 0px 0px 284px;
   position:relative;
   transition:grid-template-columns .32s cubic-bezier(.4,0,.2,1);
 }
+.reading-wrap.notes-open{
+  grid-template-columns:minmax(0,1fr) 300px 0px 284px;
+}
 .reading-wrap.detail-open{
-  grid-template-columns:1fr 300px 284px;
+  grid-template-columns:minmax(0,1fr) 0px 300px 284px;
+}
+.reading-wrap.notes-open.detail-open{
+  grid-template-columns:minmax(0,1fr) 280px 280px 284px;
 }
 #about-view .reading-wrap{
   grid-template-columns:1fr 284px;
@@ -423,6 +429,179 @@ body.links-on .wl:hover{color:var(--red)}
   transition:color .12s,border-color .12s;
 }
 .pnav:hover,.pnav.active{color:var(--ink);border-left-color:var(--ink)}
+
+/* ─── READER NOTES PANEL ─────────────── */
+#reader-notes-panel{
+  border-left:1px solid var(--border);
+  background:var(--white);
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  opacity:0;
+  transition:opacity .28s .08s;
+}
+.reading-wrap.notes-open #reader-notes-panel{
+  overflow-y:auto;
+  opacity:1;
+}
+#reader-notes-panel::-webkit-scrollbar{width:4px}
+#reader-notes-panel::-webkit-scrollbar-thumb{background:var(--border)}
+.notes-header{
+  padding:1.1rem 1.1rem 0.8rem;
+  border-bottom:1.5px solid var(--ink);
+  position:sticky;
+  top:0;
+  background:var(--white);
+  z-index:2;
+  flex-shrink:0;
+}
+.notes-category{
+  font-family:var(--mono);
+  font-size:0.52rem;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:#bbb;
+  margin-bottom:0.3rem;
+}
+.notes-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:1.05rem;
+  letter-spacing:0.04em;
+  color:var(--ink);
+  line-height:1.1;
+  margin-bottom:0.5rem;
+}
+.notes-close{
+  display:inline-flex;
+  align-items:center;
+  gap:0.35rem;
+  font-family:var(--mono);
+  font-size:0.52rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:#bbb;
+  cursor:pointer;
+  transition:color .12s;
+  border:none;
+  background:none;
+  padding:0;
+}
+.notes-close:hover{color:var(--ink)}
+.notes-close::before{content:'\2715';font-size:0.6rem}
+.notes-body{
+  padding:1rem 1.1rem 2rem;
+  flex:1;
+}
+.notes-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:0.6rem;
+  margin-bottom:0.9rem;
+}
+.notes-panel-btn,
+.note-new-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:34px;
+  font-family:var(--display);
+  font-weight:600;
+  font-size:0.64rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  padding:0.42rem 0.8rem;
+  color:var(--ink);
+  background:transparent;
+  border:1.5px solid var(--ink);
+  cursor:pointer;
+  transition:background .14s,color .14s;
+}
+.notes-panel-btn:hover,
+.note-new-btn:hover{
+  background:var(--ink);
+  color:var(--white);
+}
+.notes-panel-btn{
+  width:100%;
+  margin-bottom:0.45rem;
+}
+.notes-status{
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.08em;
+  line-height:1.45;
+  text-transform:uppercase;
+  color:#999;
+}
+.note-card{
+  border-top:1px solid var(--border);
+  padding:0.85rem 0 0.95rem;
+}
+.note-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:0.6rem;
+  margin-bottom:0.5rem;
+}
+.note-date{
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#aaa;
+}
+.note-delete{
+  border:none;
+  background:none;
+  color:#aaa;
+  cursor:pointer;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  padding:0;
+}
+.note-delete:hover{color:var(--red)}
+.note-body-input{
+  width:100%;
+  min-height:130px;
+  box-sizing:border-box;
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:0.84rem;
+  line-height:1.65;
+  resize:vertical;
+  padding:0.65rem;
+  outline:none;
+}
+.note-body-input:focus{border-color:var(--ink)}
+.note-empty{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.85rem;
+  font-family:var(--mono);
+  font-size:0.56rem;
+  letter-spacing:0.1em;
+  line-height:1.55;
+  text-transform:uppercase;
+  color:#aaa;
+}
+.note-save-state{
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:#aaa;
+  margin-top:0.35rem;
+}
 
 /* ─── HOVER TOOLTIP ─────────────────── */
 #tooltip{
@@ -1321,6 +1500,34 @@ body.links-on .wl:hover{color:var(--red)}
   .char-image-tools{grid-template-columns:1fr;}
   .char-actions-row{grid-template-columns:1fr;}
 }
+@media(max-width:1050px){
+  #cv-reading-wrap,
+  #cv-reading-wrap.notes-open,
+  #cv-reading-wrap.detail-open,
+  #cv-reading-wrap.notes-open.detail-open{
+    grid-template-columns:1fr;
+  }
+  #reader-notes-panel,
+  #detail-panel{
+    display:none;
+    position:relative;
+    top:auto;
+    height:auto;
+    min-height:0;
+    opacity:1;
+    border-top:1px solid var(--border);
+  }
+  #cv-reading-wrap.notes-open #reader-notes-panel,
+  #cv-reading-wrap.detail-open #detail-panel{
+    display:flex;
+  }
+  #cv-side-panel{
+    position:relative;
+    top:auto;
+    height:auto;
+    border-top:1px solid var(--border);
+  }
+}
 
 </style>
 </head>
@@ -1461,6 +1668,21 @@ body.links-on .wl:hover{color:var(--red)}
     <!-- ── TEXT ── -->
     <article class="chapter-text" id="cv-text"></article>
 
+    <!-- ── READER NOTES PANEL ── -->
+    <div id="reader-notes-panel">
+      <div class="notes-header">
+        <div class="notes-category">Reader Notes</div>
+        <div class="notes-title" id="notes-panel-title">Chapter Notes</div>
+        <button class="notes-close" onclick="closeNotesPanel()">Close notes</button>
+      </div>
+      <div class="notes-body">
+        <div class="notes-toolbar">
+          <button class="note-new-btn" onclick="createReaderNote()">+ New Note</button>
+        </div>
+        <div id="notes-list"></div>
+      </div>
+    </div>
+
     <!-- ── DETAIL PANEL ── -->
     <div id="detail-panel">
       <div class="dp-header">
@@ -1484,6 +1706,12 @@ body.links-on .wl:hover{color:var(--red)}
           <span class="toggle-lbl">Show Hyperlinks</span>
         </div>
         <button class="dp-new-entry-btn" onclick="openNewEntry()">+ New Entry</button>
+      </div>
+
+      <div class="panel-sec">
+        <div class="panel-hd">Reader Notes</div>
+        <button class="notes-panel-btn" id="notes-toggle-btn" onclick="toggleNotesPanel()">Open Notes</button>
+        <div class="notes-status" id="notes-summary">Notes loading...</div>
       </div>
 
       <div class="panel-sec">
@@ -2047,6 +2275,8 @@ function renderChapter(ch){
   if(prevCh) nLinks += `<a href="#" class="pnav" onclick="showChapter('${prevCh.id}');return false">\u2190 ${prevCh.chapter||prevCh.book||''}</a>`;
   if(nextCh) nLinks += `<a href="#" class="pnav" onclick="showChapter('${nextCh.id}');return false">${nextCh.chapter||nextCh.book||''} \u2192</a>`;
   navLinks.innerHTML = nLinks;
+
+  renderReaderNotes();
 }
 
 // ════════════════════════════════════════════════════════
@@ -3020,6 +3250,209 @@ function escHtml(s){
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Per-chapter reader notes, stored in IndexedDB like the file vault ──
+const NOTES_DB_NAME = 'cosmopolita_reader_notes';
+const NOTES_DB_VERSION = 1;
+const NOTES_STORE = 'notes';
+let _notesDBPromise = null;
+const _noteSaveTimers = {};
+
+function readerNoteId(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'note-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+}
+
+function openNotesDB(){
+  if(_notesDBPromise) return _notesDBPromise;
+  _notesDBPromise = new Promise((resolve,reject)=>{
+    if(!window.indexedDB){ reject(new Error('IndexedDB is not available in this browser.')); return; }
+    const req = indexedDB.open(NOTES_DB_NAME, NOTES_DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if(!db.objectStoreNames.contains(NOTES_STORE)){
+        const store = db.createObjectStore(NOTES_STORE, { keyPath:'id' });
+        store.createIndex('chapterId','chapterId',{unique:false});
+        store.createIndex('updatedAt','updatedAt',{unique:false});
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error('Could not open reader notes.'));
+  });
+  return _notesDBPromise;
+}
+
+async function notesGetForChapter(chapterId){
+  if(!chapterId) return [];
+  const db = await openNotesDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(NOTES_STORE, 'readonly');
+    const index = tx.objectStore(NOTES_STORE).index('chapterId');
+    const req = index.getAll(chapterId);
+    req.onsuccess = () => resolve((req.result || []).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)));
+    req.onerror = () => reject(req.error || new Error('Could not load reader notes.'));
+  });
+}
+
+async function notesPut(note){
+  const db = await openNotesDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(NOTES_STORE, 'readwrite');
+    tx.objectStore(NOTES_STORE).put(note);
+    tx.oncomplete = () => resolve(note);
+    tx.onerror = () => reject(tx.error || new Error('Could not save reader note.'));
+  });
+}
+
+async function notesDelete(id){
+  const db = await openNotesDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(NOTES_STORE, 'readwrite');
+    tx.objectStore(NOTES_STORE).delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error || new Error('Could not delete reader note.'));
+  });
+}
+
+function updateNotesPanelButton(){
+  const rw = document.getElementById('cv-reading-wrap');
+  const btn = document.getElementById('notes-toggle-btn');
+  if(btn) btn.textContent = rw && rw.classList.contains('notes-open') ? 'Close Notes' : 'Open Notes';
+}
+
+function openNotesPanel(){
+  const rw = document.getElementById('cv-reading-wrap');
+  if(rw) rw.classList.add('notes-open');
+  updateNotesPanelButton();
+  renderReaderNotes();
+}
+
+function closeNotesPanel(){
+  const rw = document.getElementById('cv-reading-wrap');
+  if(rw) rw.classList.remove('notes-open');
+  updateNotesPanelButton();
+}
+
+function toggleNotesPanel(){
+  const rw = document.getElementById('cv-reading-wrap');
+  if(!rw) return;
+  if(rw.classList.contains('notes-open')) closeNotesPanel();
+  else openNotesPanel();
+}
+
+function readerNoteDate(ts){
+  if(!ts) return 'Just now';
+  return new Date(ts).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+}
+
+function updateNotesSummary(notes, statusText){
+  const summary = document.getElementById('notes-summary');
+  if(!summary) return;
+  if(statusText){
+    summary.textContent = statusText;
+    return;
+  }
+  const count = Array.isArray(notes) ? notes.length : 0;
+  summary.textContent = count === 1 ? '1 note saved for this chapter.' : `${count} notes saved for this chapter.`;
+}
+
+async function renderReaderNotes(focusId){
+  const list = document.getElementById('notes-list');
+  const title = document.getElementById('notes-panel-title');
+  const ch = chapters.find(c=>c.id===_currentChapterId);
+  if(title) title.textContent = ch && ch.chapter ? ch.chapter : 'Chapter Notes';
+  updateNotesPanelButton();
+  if(!list){
+    try{ updateNotesSummary(await notesGetForChapter(_currentChapterId)); }catch(e){}
+    return;
+  }
+  if(!_currentChapterId){
+    list.innerHTML = '<div class="note-empty">Open a chapter to start taking notes.</div>';
+    updateNotesSummary([], 'No chapter open.');
+    return;
+  }
+  try{
+    const notes = await notesGetForChapter(_currentChapterId);
+    updateNotesSummary(notes);
+    if(!notes.length){
+      list.innerHTML = '<div class="note-empty">No notes yet. Create one and it will stay attached to this chapter in this browser.</div>';
+      return;
+    }
+    list.innerHTML = notes.map(note=>{
+      const created = note.createdAt || note.updatedAt || Date.now();
+      const updated = note.updatedAt || created;
+      return `<div class="note-card" id="note-card-${note.id}" data-note-id="${note.id}" data-created-at="${created}">
+        <div class="note-meta">
+          <div class="note-date">Updated ${escHtml(readerNoteDate(updated))}</div>
+          <button class="note-delete" onclick="deleteReaderNote('${note.id}')">Delete</button>
+        </div>
+        <textarea class="note-body-input" id="note-body-${note.id}" oninput="queueReaderNoteSave('${note.id}')" placeholder="Write a note for this chapter...">${escHtml(note.body || '')}</textarea>
+        <div class="note-save-state" id="note-state-${note.id}">Saved</div>
+      </div>`;
+    }).join('');
+    if(focusId){
+      const input = document.getElementById('note-body-' + focusId);
+      if(input) input.focus();
+    }
+  }catch(e){
+    console.error('Reader notes failed:', e);
+    list.innerHTML = '<div class="note-empty">Reader notes could not load in this browser.</div>';
+    updateNotesSummary([], 'Notes unavailable.');
+  }
+}
+
+async function createReaderNote(){
+  if(!_currentChapterId) return;
+  openNotesPanel();
+  const now = Date.now();
+  const note = {id:readerNoteId(), chapterId:_currentChapterId, body:'', createdAt:now, updatedAt:now};
+  try{
+    if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+    await notesPut(note);
+    await renderReaderNotes(note.id);
+  }catch(e){
+    console.error('Could not create reader note:', e);
+    alert('Could not create a note in this browser.');
+  }
+}
+
+function queueReaderNoteSave(id){
+  const state = document.getElementById('note-state-' + id);
+  if(state) state.textContent = 'Saving...';
+  clearTimeout(_noteSaveTimers[id]);
+  _noteSaveTimers[id] = setTimeout(()=>saveReaderNote(id), 450);
+}
+
+async function saveReaderNote(id){
+  const bodyEl = document.getElementById('note-body-' + id);
+  const card = document.getElementById('note-card-' + id);
+  const state = document.getElementById('note-state-' + id);
+  if(!bodyEl || !card || !_currentChapterId) return;
+  const now = Date.now();
+  const createdAt = Number(card.dataset.createdAt || now);
+  const note = {id, chapterId:_currentChapterId, body:bodyEl.value, createdAt, updatedAt:now};
+  try{
+    if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+    await notesPut(note);
+    if(state) state.textContent = 'Saved';
+    updateNotesSummary(await notesGetForChapter(_currentChapterId));
+  }catch(e){
+    console.error('Could not save reader note:', e);
+    if(state) state.textContent = 'Save failed';
+  }
+}
+
+async function deleteReaderNote(id){
+  if(!confirm('Delete this reader note?')) return;
+  clearTimeout(_noteSaveTimers[id]);
+  try{
+    await notesDelete(id);
+    await renderReaderNotes();
+  }catch(e){
+    console.error('Could not delete reader note:', e);
+    alert('Could not delete this note.');
+  }
+}
+
 function toggleDetailEdit(){
   _detailEditMode = !_detailEditMode;
   const d = _detailKey ? E[_detailKey] : {};
@@ -3109,7 +3542,7 @@ function closeDetail(){
 
 function closeIb(){ib.classList.remove('show'); tt.classList.remove('show');}
 document.addEventListener('click',e=>{
-  if(!e.target.closest('.wl') && !e.target.closest('#infobox') && !e.target.closest('#detail-panel') && !e.target.closest('#cv-side-panel')){
+  if(!e.target.closest('.wl') && !e.target.closest('#infobox') && !e.target.closest('#detail-panel') && !e.target.closest('#reader-notes-panel') && !e.target.closest('#cv-side-panel')){
     closeIb();
     closeDetail();
   }
