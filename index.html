@@ -1004,7 +1004,8 @@ body.links-on .wl:hover{color:var(--red)}
 .char-stat-panel td[contenteditable="true"]:focus{
   outline:1px dashed var(--ink);
 }
-#character-modal-overlay{
+#character-modal-overlay,
+#codex-entry-modal-overlay{
   position:fixed;inset:0;
   background:rgba(15,14,13,0.72);
   z-index:9000;
@@ -1014,8 +1015,10 @@ body.links-on .wl:hover{color:var(--red)}
   padding-top:64px;
   overflow-y:auto;
 }
-#character-modal-overlay.open{display:flex}
-#character-modal{
+#character-modal-overlay.open,
+#codex-entry-modal-overlay.open{display:flex}
+#character-modal,
+#codex-entry-modal{
   background:var(--white);
   border:1.5px solid var(--ink);
   width:min(700px,95vw);
@@ -1134,14 +1137,127 @@ body.links-on .wl:hover{color:var(--red)}
 }
 /* ─── WIKI VIEW ──────────────────────── */
 #wiki-view{display:none}
-.wiki-header{
+.codex-home{
+  min-height:calc(100vh - 64px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:7rem 2.5rem 5rem;
   background:var(--white);
-  border-bottom:1.5px solid var(--ink);
-  padding:2.4rem 2.5rem 2rem;
+}
+.codex-home-inner{
+  width:min(720px,100%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.codex-logo{
+  width:min(260px,48vw);
+  height:auto;
+  display:block;
+  margin-bottom:2.4rem;
+}
+.codex-search-row{
+  width:100%;
   display:grid;
-  grid-template-columns:1fr 118px;
-  min-height:200px;
-  overflow:hidden;
+  grid-template-columns:1fr auto;
+  gap:0.75rem;
+  align-items:center;
+}
+.codex-search{
+  width:100%;
+  min-height:52px;
+  border:1.5px solid var(--ink);
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:0.72rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  padding:0.9rem 1rem;
+  box-sizing:border-box;
+}
+.codex-lucky,
+.codex-admin-btn{
+  min-height:52px;
+  border:1.5px solid var(--ink);
+  background:var(--white);
+  color:var(--ink);
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.64rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  padding:0 1.1rem;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.codex-lucky:hover,
+.codex-admin-btn:hover{background:var(--ink);color:var(--white)}
+.codex-admin-actions{
+  display:flex;
+  gap:0.65rem;
+  margin-top:0.8rem;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.codex-results{
+  width:100%;
+  margin-top:1.4rem;
+  border-top:1px solid var(--border);
+}
+.codex-result{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:1rem;
+  text-align:left;
+  border:0;
+  border-bottom:1px solid var(--border);
+  background:transparent;
+  padding:1rem 0;
+  cursor:pointer;
+}
+.codex-result-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:1.05rem;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+.codex-result-cat,
+.codex-result-short{
+  font-family:var(--mono);
+  font-size:0.56rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:#aaa;
+  line-height:1.5;
+}
+.codex-result-short{
+  text-transform:none;
+  letter-spacing:0.04em;
+  color:#777;
+  margin-top:0.35rem;
+}
+.codex-result-arrow{
+  font-family:var(--display);
+  font-weight:700;
+  color:var(--red);
+  align-self:center;
+}
+.codex-entry{display:none}
+.codex-entry.active{display:block}
+.codex-hero-img img.codex-logo-fallback{
+  width:min(340px,52vw);
+  height:auto;
+  align-self:center;
+  margin:auto;
+}
+.codex-article-wrap{
+  display:grid;
+  grid-template-columns:1fr 284px;
 }
 .wiki-title{
   font-family:var(--display);
@@ -1158,15 +1274,6 @@ body.links-on .wl:hover{color:var(--red)}
   text-transform:uppercase;
   color:#bbb;
   margin-bottom:0.8rem;
-}
-.wiki-wrap{
-  display:grid;
-  grid-template-columns:1fr 0px 284px;
-  position:relative;
-  transition:grid-template-columns .32s cubic-bezier(.4,0,.2,1);
-}
-.wiki-wrap.wiki-detail-open{
-  grid-template-columns:1fr 300px 284px;
 }
 .wiki-content{
   padding:2.5rem;
@@ -1204,7 +1311,7 @@ body.links-on .wl:hover{color:var(--red)}
   border-bottom:1px solid transparent;
   cursor:default;
 }
-.wiki-wrap.wiki-links-on .wiki-content .wl{
+.wiki-content.links-on .wl{
   color:var(--link);
   border-bottom-color:currentColor;
   cursor:pointer;
@@ -1778,6 +1885,11 @@ body:not(.admin-on) .admin-only{
   .char-actions-row{grid-template-columns:1fr;}
   .char-filter-panel{padding:1rem 1.25rem 0;}
   .char-org-grid{grid-template-columns:1fr;}
+  .codex-home{padding:6rem 1.25rem 4rem;}
+  .codex-search-row{grid-template-columns:1fr;}
+  .codex-lucky{width:100%;}
+  .codex-result{grid-template-columns:1fr;}
+  .codex-article-wrap{grid-template-columns:1fr;}
   .toc-dashboard{grid-template-columns:1fr;}
   #toc-list{padding:2rem 1.25rem 4rem;}
   .toc-entry{grid-template-columns:2rem 1fr;gap:0 0.8rem;}
@@ -1818,44 +1930,99 @@ body:not(.admin-on) .admin-only{
 
 <!-- ════ WIKI / CODEX ══════════════════════════ -->
 <div id="wiki-view" style="display:none">
-  <div class="wiki-header">
-    <div class="wiki-left">
-      <div class="wiki-category">Cosmopolita Codex</div>
-      <div class="wiki-title" id="wiki-pg-title">ARCON</div>
-    </div>
-    <div class="chdr-deco">
-      <div class="deco-gold"></div>
-      <div class="deco-red"></div>
-      <div class="deco-navy">
-        <div class="deco-tris">
-          <div class="tri-col"><div class="tri-w"></div><div class="tri-g"></div></div>
-          <div class="tri-col"><div class="tri-w"></div></div>
-          <div class="tri-col"><div class="tri-w"></div><div class="tri-g"></div></div>
-        </div>
+  <section class="codex-home" id="codex-home">
+    <div class="codex-home-inner">
+      <img class="codex-logo" src="logo.png" alt="Cosmopolita" />
+      <div class="codex-search-row">
+        <input id="codex-search" class="codex-search" type="search" placeholder="Search the Codex" oninput="renderCodexSearchResults(this.value)" onkeydown="handleCodexSearchKey(event)" />
+        <button class="codex-lucky" type="button" onclick="codexFeelingLucky()">I'm Feeling Lucky</button>
       </div>
-    </div>
-  </div>
-  
-  <div class="wiki-wrap">
-    <article class="wiki-content" id="wiki-pg-content"></article>
-    
-    <div id="wiki-detail-panel">
-      <div class="wdp-header">
-        <div class="wdp-title" id="wdp-title">—</div>
-        <button class="wdp-close" onclick="closeWikiDetail()">Close</button>
+      <div class="codex-admin-actions admin-only">
+        <button class="codex-admin-btn" type="button" onclick="openCodexEntryEditor()">New Entry</button>
       </div>
-      <div class="wdp-body" id="wdp-body"></div>
+      <div id="codex-results" class="codex-results"></div>
     </div>
-    
-    <aside class="side-panel">
-      <div class="panel-sec">
-        <div class="panel-hd">Wiki Navigation</div>
-        <a href="#" class="pnav active" onclick="showWikiEntry('arcon'); return false;">ARCON</a>
+  </section>
+
+  <section class="codex-entry" id="codex-entry">
+    <div class="char-hero" id="codex-hero-section">
+      <div class="char-hero-img codex-hero-img" id="codex-hero-img"></div>
+      <div class="char-hero-overlay"></div>
+      <div class="char-hero-text">
+        <div class="char-hero-super" id="codex-entry-cat"></div>
+        <div class="char-hero-name" id="codex-entry-title"></div>
+        <div class="char-hero-epithet" id="codex-entry-short"></div>
       </div>
-    </aside>
-  </div>
+      <div class="char-hero-scroll">Scroll to read &darr;</div>
+    </div>
+    <div class="codex-article-wrap">
+      <article class="wiki-content" id="wiki-pg-content"></article>
+      <aside class="char-stat-panel" id="codex-entry-panel"></aside>
+    </div>
+  </section>
 </div>
 
+<div id="codex-entry-modal-overlay" onclick="handleCodexEntryModalOverlayClick(event)">
+  <div id="codex-entry-modal" onclick="event.stopPropagation()">
+    <div class="cm-header">
+      <div>
+        <div class="cm-title" id="codex-modal-title">Codex Entry</div>
+        <div class="cm-hint">Add or edit Codex entries with hero imagery, map imagery, tags, and infobox rows.</div>
+      </div>
+      <button class="cm-close" type="button" onclick="closeCodexEntryEditor()">Close</button>
+    </div>
+    <div class="cm-grid">
+      <div class="cm-field">
+        <label class="cm-label">Entry key</label>
+        <input id="codex-edit-key" class="cm-input" placeholder="port-actual" />
+      </div>
+      <div class="cm-field">
+        <label class="cm-label">Title</label>
+        <input id="codex-edit-title" class="cm-input" />
+      </div>
+      <div class="cm-field">
+        <label class="cm-label">Category</label>
+        <input id="codex-edit-cat" class="cm-input" placeholder="Place · City-State" />
+      </div>
+      <div class="cm-field">
+        <label class="cm-label">Kind</label>
+        <input id="codex-edit-kind" class="cm-input" placeholder="location, nation, setting, organization" />
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Short description</label>
+        <input id="codex-edit-short" class="cm-input" />
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Hero image URL</label>
+        <input id="codex-edit-hero-image" class="cm-input" placeholder="https://... or assets/..." />
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Map image URL</label>
+        <input id="codex-edit-map-image" class="cm-input" placeholder="https://... or assets/..." />
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Hero alt text</label>
+        <input id="codex-edit-hero-alt" class="cm-input" />
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Tags</label>
+        <input id="codex-edit-tags" class="cm-input" placeholder="comma separated" />
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Wiki entry</label>
+        <textarea id="codex-edit-desc" class="cm-textarea" rows="7"></textarea>
+      </div>
+      <div class="cm-field full">
+        <label class="cm-label">Info rows</label>
+        <textarea id="codex-edit-meta" class="cm-textarea" rows="5" placeholder="Status: Active&#10;Population: 2.3 million"></textarea>
+      </div>
+    </div>
+    <div class="cm-actions">
+      <button class="cm-btn secondary" type="button" onclick="closeCodexEntryEditor()">Cancel</button>
+      <button class="cm-btn primary" type="button" onclick="saveCodexEntryEditor()">Save entry</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════ TOP NAV ════════════════════════════════════ -->
 <nav id="topnav">
@@ -1864,7 +2031,7 @@ body:not(.admin-on) .admin-only{
   <nav id="topnav-nav">
     <button class="tnav-link" id="tnav-toc"      onclick="showLanding()">Table of Contents</button>
     <button class="tnav-link" id="tnav-chars"    onclick="showCharacters()">Characters</button>
-    <button class="tnav-link" id="tnav-codex"    onclick="showWikiEntry('arcon')">Codex</button>
+    <button class="tnav-link" id="tnav-codex"    onclick="showWikiEntry()">Codex</button>
     <button class="tnav-link" id="tnav-assets"   onclick="showAssets()">Files</button>
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
@@ -2111,9 +2278,9 @@ body:not(.admin-on) .admin-only{
   <div class="chapter-header">
     <div class="chdr-left">
       <div class="chdr-supertitle">
-        <span onclick="showLanding()" style="cursor:pointer;">Table of Contents</span> &middot; 
-        <span onclick="showCharacters()" style="cursor:pointer;">Characters</span> &middot; 
-        <span onclick="showWikiEntry('arcon')" style="cursor:pointer;">Codex</span> &middot; 
+        <span onclick="showLanding()" style="cursor:pointer;">Table of Contents</span> &middot;
+        <span onclick="showCharacters()" style="cursor:pointer;">Characters</span> &middot;
+        <span onclick="showWikiEntry()" style="cursor:pointer;">Codex</span> &middot;
         <span onclick="showAbout()" style="cursor:pointer;">About</span>
       </div>
       <div class="chdr-title">ABOUT COSMOPOLITA</div>
@@ -2705,7 +2872,8 @@ function attachWlListeners(root){
     el.removeEventListener('click', el._wlClick);
 
     el._wlEnter = function(e){
-      if(!on)return;
+      const codexLink = el.closest('#wiki-view');
+      if(!on && !codexLink)return;
       const d=E[el.dataset.e]; if(!d) return;
       document.getElementById('tt-title').textContent=d.t;
       document.getElementById('tt-body').textContent=d.short||d.b;
@@ -2714,15 +2882,21 @@ function attachWlListeners(root){
       tt.classList.add('show');
     };
     el._wlMove = function(e){
-      if(!on||!tt.classList.contains('show'))return;
+      const codexLink = el.closest('#wiki-view');
+      if((!on && !codexLink)||!tt.classList.contains('show'))return;
       tt.style.left=Math.min(e.clientX+14,innerWidth-240)+'px';
       tt.style.top=Math.min(e.clientY+14,innerHeight-80)+'px';
     };
     el._wlLeave = function(){ tt.classList.remove('show'); };
     el._wlClick = function(e){
-      if(!on)return;
+      const codexLink = el.closest('#wiki-view');
+      if(!on && !codexLink)return;
       e.preventDefault();e.stopPropagation();
       const key=el.dataset.e; const d=E[key]; if(!d) return;
+      if(codexLink){
+        showCodexEntry(key);
+        return;
+      }
       openDetail(d, key);
     };
 
@@ -2738,6 +2912,15 @@ function attachWlListeners(root){
 // ════════════════════════════════════════════════════════
 
 const DEFAULT_E={
+  'arcon':{
+    t:'ARCON',
+    cat:'Organization · Megastructure',
+    kind:'organization',
+    short:'Archeofuturist revolutionary collective, megastructure operator, and mystic architectural conglomerate-faith.',
+    desc:'ARCON, the Archeofuturist Revolutionary Collective of Neo-Rye, was a megastructure and mystic architectural conglomerate-faith based in the megacity of the same name in Kallisorr. One of the major mythicorps left in Junos after the rise of Choism, ARCON held a monopoly on the planning, construction, and operation of hyperstructures, while also becoming infamous for its private security, weapons manufacturing, cyberware development, and esoteric cult reputation.',
+    tags:['mythicorp','megastructure','kallisorr','neo-rye'],
+    meta:[['Founded','2979'],['Founder','Verité Beauséjour'],['Leader','Cerise Mulberry'],['Members','~3,750,000'],['Status','Active'],['Headquarters','Yamanipirik, Kallisorr'],['Specialties','Megastructures, weapons, security']]
+  },
   'port-actual':{
     t:'Port-Actual', cat:'Place · City-State',
     short:'Chief entrepôt of the Concordant Fringe. Administrative territory of ambiguous sovereignty.',
@@ -3787,12 +3970,13 @@ window.addEventListener('scroll',()=>{
     lc.style.opacity=f;
     lc.style.transform=`translateY(${scrollY*0.27}px)`;
   }
-  // char hero parallax + fade
-  const hero=document.getElementById('char-hero-section');
-  if(hero){
+  // hero reveal parallax + fade
+  ['char-hero-section','codex-hero-section'].forEach(heroId=>{
+    const hero=document.getElementById(heroId);
+    if(!hero) return;
     const heroTop=hero.getBoundingClientRect().top + scrollY;
     const rel=scrollY - heroTop;
-    const ph=document.getElementById('char-hero-photo');
+    const ph=hero.querySelector('img');
     const overlay=hero.querySelector('.char-hero-overlay');
     if(ph){
       const f=Math.max(0,1-rel/(innerHeight*0.7));
@@ -3805,7 +3989,7 @@ window.addEventListener('scroll',()=>{
       const fade=Math.max(0,Math.min(1,(rel-transitionStart)/transitionLength));
       overlay.style.opacity=fade;
     }
-  }
+  });
 });
 
 
@@ -3887,8 +4071,28 @@ function renderDetailEdit(d){
       <input id="de-cat" value="${escHtml(d.cat||'')}">
     </div>
     <div class="dp-field">
+      <label>Kind</label>
+      <input id="de-kind" value="${escHtml(d.kind||'')}" placeholder="location, nation, setting, organization">
+    </div>
+    <div class="dp-field">
       <label>Short (tooltip)</label>
       <input id="de-short" value="${escHtml(d.short||'')}">
+    </div>
+    <div class="dp-field">
+      <label>Hero image URL</label>
+      <input id="de-hero-image" value="${escHtml(d.heroImage||'')}" placeholder="https://... or assets/...">
+    </div>
+    <div class="dp-field">
+      <label>Map image URL</label>
+      <input id="de-map-image" value="${escHtml(d.mapImage||'')}" placeholder="https://... or assets/...">
+    </div>
+    <div class="dp-field">
+      <label>Hero alt text</label>
+      <input id="de-hero-alt" value="${escHtml(d.heroAlt||'')}">
+    </div>
+    <div class="dp-field">
+      <label>Tags</label>
+      <input id="de-tags" value="${escHtml(Array.isArray(d.tags) ? d.tags.join(', ') : (d.tags||''))}" placeholder="comma separated">
     </div>
     <div class="dp-field">
       <label>Description</label>
@@ -4529,7 +4733,12 @@ function saveDetailEdit(){
   if(!key){ alert('Entry key is required.'); return; }
   const title = document.getElementById('de-title').value.trim();
   const cat   = document.getElementById('de-cat').value.trim();
+  const kind  = document.getElementById('de-kind') ? document.getElementById('de-kind').value.trim() : '';
   const short = document.getElementById('de-short').value.trim();
+  const heroImage = document.getElementById('de-hero-image') ? document.getElementById('de-hero-image').value.trim() : '';
+  const mapImage = document.getElementById('de-map-image') ? document.getElementById('de-map-image').value.trim() : '';
+  const heroAlt = document.getElementById('de-hero-alt') ? document.getElementById('de-hero-alt').value.trim() : '';
+  const tags = document.getElementById('de-tags') ? splitTagText(document.getElementById('de-tags').value) : [];
   const desc  = document.getElementById('de-desc').value.trim();
   
   // Collect meta rows
@@ -4544,7 +4753,7 @@ function saveDetailEdit(){
   // If key changed, remove old
   if(_detailKey && _detailKey !== key) delete E[_detailKey];
   
-  E[key] = {t:title, cat, short, desc, meta};
+  E[key] = {t:title, cat, kind, short, desc, meta, heroImage, mapImage, heroAlt, tags};
   saveEntities();
   syncCodexEntryToSupabase(key, E[key]).catch(err=>{
     console.error('Codex entry sync failed:', err);
@@ -4588,37 +4797,6 @@ document.addEventListener('click',e=>{
     closeDetail();
   }
 });
-
-// ── WIKI DATA ──
-const W = {
-  'arcon': {
-    t: 'ARCON',
-    cat: 'Organization · Megastructure',
-    html: `<h2>The Archeofuturist Revolutionary Collective of Neo-Rye</h2>
-<p><strong>ARCON</strong> was a megastructure and mystic architectural conglomerate-faith based in their megacity of the same name in Kallisorr. One of the major mythicorps left in Junos after the rise of Choism, ARCON held a monopoly on the planning, construction and operation of hyperstructures, such as the Stade Monica and the Perfumed Cathedral. The mythicorp is also the largest distributor of Kallisorian merchandise throughout Junosopolis, Phesriaana and Koalescia. ARCON-branded weapons and military vehicles are among the most sought after by police and security firms. Over the years, it has developed a dark reputation as an esoteric cult.</p>
-<p>ARCON maintains the largest and most powerful armed forces of any mythicorp in the world, with their guards renowned worldwide and feared by many. Leadership was held by a shadow elite, who used the corporation to further their political and religious beliefs. Although their operations were primarily in megastructures, weapons and aerospace manufacturing and corporate security, ARCON's end goal was to unify the entire Ru race into a singular state, ideally controlled directly by them, known as Neo-Rye.</p>
-<h2>History</h2>
-<h3>Founding (2979)</h3>
-<p>ARCON was founded in 2979 by Verité Beauséjour, an Agathean aristocrat. The company originally was focused on weapons manufacturing and took full advantage of the new hyperdevelopment of experimental hypercities being made at the time. ARCON solidified itself as the ruler of the Agathean Province and began to develop the region.</p>
-<h2>Operations</h2>
-<h3>Security Division</h3>
-<p>ARCON Security operates as one of the largest private security forces in the world.</p>
-<h3>Weapons Manufacturing</h3>
-<p>ARCON-manufactured weapons are among the most sought after by law enforcement and security firms.</p>
-<h3>Cyberware Manufacturing</h3>
-<p>Advanced cyberware and augmentation technology development.</p>`,
-    infobox: [
-      ['Founded', '2979'],
-      ['Founder', 'Verité Beauséjour'],
-      ['Leader', 'Cerise Mulberry'],
-      ['Members', '~3,750,000'],
-      ['Status', 'Active'],
-      ['Headquarters', 'Yamanipirik, Kallisorr'],
-      ['Specialties', 'Megastructures, weapons, security']
-    ]
-  }
-};
-
 
 // ════════════════════════════════════════════════════════
 // OFFLINE FILE VAULT — stores 10MB+ uploads as IndexedDB blobs
@@ -4893,19 +5071,210 @@ async function showAssets(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function showWikiEntry(key) {
-  const entry = W[key];
-  if(!entry) return;
+let _editingCodexKey = null;
+
+function normalizeCodexEntry(key, entry={}){
+  return Object.assign({
+    key,
+    t:key,
+    cat:'Codex Entry',
+    short:'',
+    desc:'',
+    meta:[],
+    kind:'',
+    heroImage:'',
+    mapImage:'',
+    heroAlt:'',
+    tags:[]
+  }, entry, {
+    key,
+    meta:Array.isArray(entry.meta) ? entry.meta : [],
+    tags:Array.isArray(entry.tags) ? entry.tags : splitTagText(entry.tags || '')
+  });
+}
+
+function codexEntries(){
+  return Object.keys(E || {})
+    .map(key=>normalizeCodexEntry(key, E[key]))
+    .sort((a,b)=>String(a.t || '').localeCompare(String(b.t || '')));
+}
+
+function isCodexPlaceLike(entry){
+  const text = `${entry.kind || ''} ${entry.cat || ''}`.toLowerCase();
+  return /(place|location|setting|nation|city|state|territory|province|region|facility)/.test(text);
+}
+
+function codexHeroImage(entry){
+  if(isCodexPlaceLike(entry)){
+    return entry.mapImage || entry.heroImage || 'logo.png';
+  }
+  return entry.heroImage || entry.mapImage || 'logo.png';
+}
+
+function codexSearchText(entry){
+  return [
+    entry.t,
+    entry.cat,
+    entry.kind,
+    entry.short,
+    entry.desc,
+    ...(entry.tags || []),
+    ...(entry.meta || []).flat()
+  ].join(' ').toLowerCase();
+}
+
+function codexSearch(query){
+  const term = String(query || '').trim().toLowerCase();
+  const entries = codexEntries();
+  if(!term) return [];
+  return entries.filter(entry=>codexSearchText(entry).includes(term)).sort((a,b)=>{
+    const aTitle = String(a.t || '').toLowerCase();
+    const bTitle = String(b.t || '').toLowerCase();
+    const aScore = aTitle === term ? 0 : aTitle.startsWith(term) ? 1 : 2;
+    const bScore = bTitle === term ? 0 : bTitle.startsWith(term) ? 1 : 2;
+    return aScore - bScore || aTitle.localeCompare(bTitle);
+  });
+}
+
+function renderCodexSearchResults(query=''){
+  const results = document.getElementById('codex-results');
+  if(!results) return;
+  const matches = codexSearch(query).slice(0, 12);
+  if(!String(query || '').trim()){
+    results.innerHTML = '';
+    return;
+  }
+  if(!matches.length){
+    results.innerHTML = '<div class="empty-state">No Codex entries found.</div>';
+    return;
+  }
+  results.innerHTML = matches.map(entry=>`
+    <button class="codex-result" type="button" onclick="showCodexEntry('${escHtml(entry.key)}')">
+      <span>
+        <span class="codex-result-title">${escHtml(entry.t)}</span>
+        <span class="codex-result-cat">${escHtml(entry.cat)}</span>
+        ${entry.short ? `<span class="codex-result-short">${escHtml(entry.short)}</span>` : ''}
+      </span>
+      <span class="codex-result-arrow">&rarr;</span>
+    </button>
+  `).join('');
+}
+
+function handleCodexSearchKey(event){
+  if(event.key !== 'Enter') return;
+  const match = codexSearch(event.target.value)[0];
+  if(match) showCodexEntry(match.key);
+}
+
+function codexFeelingLucky(){
+  const entries = codexEntries();
+  if(!entries.length) return;
+  const pick = entries[Math.floor(Math.random() * entries.length)];
+  showCodexEntry(pick.key);
+}
+
+function showCodexHome(){
   _pushNav('wiki-view');
-  document.getElementById('wiki-pg-title').textContent = entry.t;
-  document.getElementById('wiki-pg-content').innerHTML = entry.html;
+  updateAdminUI();
+  const home = document.getElementById('codex-home');
+  const detail = document.getElementById('codex-entry');
+  if(home) home.style.display = 'flex';
+  if(detail) detail.classList.remove('active');
   document.getElementById('wiki-view').style.display = 'block';
   hideOthers('wiki-view');
+  renderCodexSearchResults('');
   window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(()=>{
+    const search = document.getElementById('codex-search');
+    if(search) search.focus();
+  }, 60);
+}
+
+function parseCodexText(raw){
+  const linked = String(raw || '').replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, (_, key, label)=>{
+    const cleanKey = String(key || '').trim();
+    return `<a class="wl" data-e="${escHtml(cleanKey)}">${escHtml(String(label || '').trim())}</a>`;
+  }).replace(/\[\[([^\]]+)\]\]/g, (_, key)=>{
+    const cleanKey = String(key || '').trim();
+    return `<a class="wl" data-e="${escHtml(cleanKey)}">${escHtml(cleanKey)}</a>`;
+  });
+  if(typeof marked !== 'undefined'){
+    return marked.parse(linked);
+  }
+  return linked
+    .split(/\n\n+/)
+    .map(p=>`<p>${p.replace(/\n/g,' ')}</p>`)
+    .join('');
+}
+
+function codexArticleHTML(entry){
+  let html = entry.html || '';
+  if(!html){
+    html = parseCodexText(entry.desc || entry.short || 'No entry text available.');
+  }
+  if(entry.meta && entry.meta.length){
+    html += '<h2>Details</h2><table class="wdp-table">';
+    entry.meta.forEach(row=>{
+      html += `<tr><td>${escHtml(row[0])}</td><td>${escHtml(row[1])}</td></tr>`;
+    });
+    html += '</table>';
+  }
+  return html;
+}
+
+function codexPanelHTML(entry){
+  const tags = (entry.tags || []).map(tag=>`<span class="affil-tag">${escHtml(tag)}</span>`).join('');
+  return `
+    <div class="stat-name">Codex</div>
+    <table class="stat-table">
+      <tr><td>Type</td><td>${escHtml(entry.kind || entry.cat || 'Entry')}</td></tr>
+      ${entry.short ? `<tr><td>Summary</td><td>${escHtml(entry.short)}</td></tr>` : ''}
+    </table>
+    ${tags ? `<div class="stat-section">Tags</div><div>${tags}</div>` : ''}
+    ${isAdmin() ? `<button class="ch-ctrl-btn admin-only" type="button" onclick="openCodexEntryEditor('${escHtml(entry.key)}')">Edit entry</button>` : ''}
+  `;
+}
+
+function showCodexEntry(key){
+  const entry = normalizeCodexEntry(key, E[key]);
+  if(!entry || !E[key]) return;
+  _pushNav('wiki-view');
+  updateAdminUI();
+  const home = document.getElementById('codex-home');
+  const detail = document.getElementById('codex-entry');
+  if(home) home.style.display = 'none';
+  if(detail) detail.classList.add('active');
+  document.getElementById('wiki-view').style.display = 'block';
+  hideOthers('wiki-view');
+
+  const hero = document.getElementById('codex-hero-img');
+  const src = codexHeroImage(entry);
+  if(hero){
+    const isLogo = src === 'logo.png';
+    hero.innerHTML = `<img class="${isLogo ? 'codex-logo-fallback' : ''}" src="${escHtml(src)}" alt="${escHtml(entry.heroAlt || entry.t)}" onerror="this.src='logo.png';this.classList.add('codex-logo-fallback');" />`;
+  }
+  document.getElementById('codex-entry-cat').textContent = entry.cat || 'Codex Entry';
+  document.getElementById('codex-entry-title').innerHTML = escHtml(entry.t).replace(/\s+/g,'<br>');
+  document.getElementById('codex-entry-short').textContent = entry.short || '';
+  const content = document.getElementById('wiki-pg-content');
+  if(content){
+    content.innerHTML = codexArticleHTML(entry);
+    content.classList.add('links-on');
+    attachWlListeners(content);
+  }
+  const panel = document.getElementById('codex-entry-panel');
+  if(panel) panel.innerHTML = codexPanelHTML(entry);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showWikiEntry(key) {
+  if(key) showCodexEntry(key);
+  else showCodexHome();
 }
 
 function openWikiDetail(d) {
   const wp = document.querySelector('.wiki-wrap');
+  if(!wp) return;
   document.getElementById('wdp-title').textContent = d.t;
   const body = document.getElementById('wdp-body');
   let html = '<p>' + (d.desc || d.short || '') + '</p>';
@@ -4922,7 +5291,95 @@ function openWikiDetail(d) {
 }
 
 function closeWikiDetail() {
-  document.querySelector('.wiki-wrap').classList.remove('wiki-detail-open');
+  const wrap = document.querySelector('.wiki-wrap');
+  if(wrap) wrap.classList.remove('wiki-detail-open');
+}
+
+function parseCodexMetaRows(text){
+  return String(text || '').split(/\n+/).reduce((rows,line)=>{
+    const parts = line.split(':');
+    const key = parts.shift().trim();
+    const value = parts.join(':').trim();
+    if(key) rows.push([key, value]);
+    return rows;
+  }, []);
+}
+
+function codexMetaToText(meta){
+  return (Array.isArray(meta) ? meta : []).map(row=>`${row[0] || ''}: ${row[1] || ''}`).join('\n');
+}
+
+function normalizeCodexKey(title){
+  return String(title || 'entry')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-+|-+$/g,'') || `entry-${Date.now()}`;
+}
+
+function openCodexEntryEditor(key=''){
+  if(!requireAdmin()) return;
+  _editingCodexKey = key || null;
+  const entry = key && E[key] ? normalizeCodexEntry(key, E[key]) : normalizeCodexEntry('', {});
+  document.getElementById('codex-modal-title').textContent = key ? 'Edit Codex Entry' : 'New Codex Entry';
+  document.getElementById('codex-edit-key').value = key || '';
+  document.getElementById('codex-edit-title').value = entry.t || '';
+  document.getElementById('codex-edit-cat').value = entry.cat || '';
+  document.getElementById('codex-edit-kind').value = entry.kind || '';
+  document.getElementById('codex-edit-short').value = entry.short || '';
+  document.getElementById('codex-edit-hero-image').value = entry.heroImage || '';
+  document.getElementById('codex-edit-map-image').value = entry.mapImage || '';
+  document.getElementById('codex-edit-hero-alt').value = entry.heroAlt || '';
+  document.getElementById('codex-edit-tags').value = (entry.tags || []).join(', ');
+  document.getElementById('codex-edit-desc').value = entry.desc || entry.b || '';
+  document.getElementById('codex-edit-meta').value = codexMetaToText(entry.meta);
+  document.getElementById('codex-entry-modal-overlay').classList.add('open');
+}
+
+function closeCodexEntryEditor(){
+  const overlay = document.getElementById('codex-entry-modal-overlay');
+  if(overlay) overlay.classList.remove('open');
+  _editingCodexKey = null;
+}
+
+function handleCodexEntryModalOverlayClick(event){
+  if(event.target && event.target.id === 'codex-entry-modal-overlay') closeCodexEntryEditor();
+}
+
+async function saveCodexEntryEditor(){
+  if(!requireAdmin()) return;
+  const keyField = document.getElementById('codex-edit-key');
+  const title = document.getElementById('codex-edit-title').value.trim();
+  let key = keyField.value.trim() || normalizeCodexKey(title);
+  key = normalizeCodexKey(key);
+  if(!title){ alert('Entry title is required.'); return; }
+  keyField.value = key;
+  const entry = {
+    t:title,
+    cat:document.getElementById('codex-edit-cat').value.trim(),
+    kind:document.getElementById('codex-edit-kind').value.trim(),
+    short:document.getElementById('codex-edit-short').value.trim(),
+    desc:document.getElementById('codex-edit-desc').value.trim(),
+    heroImage:document.getElementById('codex-edit-hero-image').value.trim(),
+    mapImage:document.getElementById('codex-edit-map-image').value.trim(),
+    heroAlt:document.getElementById('codex-edit-hero-alt').value.trim(),
+    tags:splitTagText(document.getElementById('codex-edit-tags').value),
+    meta:parseCodexMetaRows(document.getElementById('codex-edit-meta').value)
+  };
+  if(_editingCodexKey && _editingCodexKey !== key){
+    delete E[_editingCodexKey];
+    deleteCodexEntryFromSupabase(_editingCodexKey).catch(err=>console.error('Old Codex entry delete sync failed:', err));
+  }
+  E[key] = entry;
+  saveEntities();
+  try{
+    await syncCodexEntryToSupabase(key, entry);
+  }catch(err){
+    console.error('Codex entry sync failed:', err);
+    alert('Entry saved in this browser, but Supabase sync failed. Check your admin login and content policies.');
+  }
+  closeCodexEntryEditor();
+  showCodexEntry(key);
 }
 </script>
 
@@ -5026,9 +5483,9 @@ function closeWikiDetail() {
   <div class="chapter-header">
     <div class="chdr-left">
       <div class="chdr-supertitle">
-        <span onclick="showLanding()" style="cursor:pointer;">Table of Contents</span> &middot; 
-        <span onclick="showCharacters()" style="cursor:pointer;">Characters</span> &middot; 
-        <span onclick="showWikiEntry('arcon')" style="cursor:pointer;">Codex</span> &middot; 
+        <span onclick="showLanding()" style="cursor:pointer;">Table of Contents</span> &middot;
+        <span onclick="showCharacters()" style="cursor:pointer;">Characters</span> &middot;
+        <span onclick="showWikiEntry()" style="cursor:pointer;">Codex</span> &middot;
         <span onclick="showAbout()" style="cursor:pointer;">About</span>
       </div>
       <div class="chdr-title">Characters</div>
