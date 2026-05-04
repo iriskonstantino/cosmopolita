@@ -10,8 +10,16 @@ create table if not exists public.codex_entries (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.chapters (
+  id text primary key,
+  position integer not null default 0,
+  data jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
 alter table public.characters enable row level security;
 alter table public.codex_entries enable row level security;
+alter table public.chapters enable row level security;
 
 create policy "Anyone can read characters"
   on public.characters
@@ -52,5 +60,26 @@ create policy "Admin can update codex entries"
 
 create policy "Admin can delete codex entries"
   on public.codex_entries
+  for delete
+  using ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com');
+
+create policy "Anyone can read chapters"
+  on public.chapters
+  for select
+  using (true);
+
+create policy "Admin can create chapters"
+  on public.chapters
+  for insert
+  with check ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com');
+
+create policy "Admin can update chapters"
+  on public.chapters
+  for update
+  using ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com')
+  with check ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com');
+
+create policy "Admin can delete chapters"
+  on public.chapters
   for delete
   using ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com');

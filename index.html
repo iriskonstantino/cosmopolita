@@ -2300,10 +2300,12 @@ function loadChapters(){
   return cloneDefaultChapters();
 }
 
-function saveChapters(chs){
+function saveChapters(chs, options={}){
   try {
     localStorage.setItem(CHAPTERS_STORAGE_KEY, JSON.stringify(chs));
-    setContentStatus('Draft saved in this browser. Export chapters, then commit data/chapters.json to publish.');
+    if(!options.localOnly){
+      setContentStatus('Draft saved in this browser. Admin saves also sync to Supabase for GitHub Pages readers.');
+    }
   } catch(e){}
 }
 
@@ -2338,7 +2340,7 @@ function exportChapters(){
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-  setContentStatus('Exported chapters.json. Replace data/chapters.json with it, then commit and push.');
+  setContentStatus('Exported chapters.json as a backup/static fallback. Admin saves sync to Supabase when chapter policies are installed.');
 }
 
 function importChapters(event){
@@ -2350,7 +2352,7 @@ function importChapters(event){
       chapters = normalizeChapterList(JSON.parse(reader.result));
       saveChapters(chapters);
       renderTOC();
-      setContentStatus('Imported chapters into this browser draft. Export when ready to publish.');
+      setContentStatus('Imported chapters into this browser draft. Save chapters as admin to sync them to Supabase.');
     }catch(e){
       alert(e.message || 'Could not import chapters JSON.');
     }finally{
@@ -3445,7 +3447,7 @@ function handleModalOverlayClick(e){
   if(e.target === document.getElementById('chapter-modal-overlay')) closeNewChapterModal();
 }
 
-function saveChapter(){
+async function saveChapter(){
   if(!requireAdmin()) return;
   const book    = document.getElementById('cm-book').value.trim();
   const chapter = document.getElementById('cm-chapter').value.trim();
@@ -3480,6 +3482,13 @@ function saveChapter(){
   }
 
   saveChapters(chapters);
+  try{
+    await syncChaptersToSupabase();
+    setContentStatus('Chapters synced to Supabase. GitHub Pages readers will see them after refresh.');
+  }catch(err){
+    console.error('Chapter sync failed:', err);
+    alert('Chapter saved in this browser, but Supabase sync failed. Run supabase-chapters-schema.sql, confirm you are logged in as the admin, then try saving again.');
+  }
   closeNewChapterModal();
   renderTOC();
 
@@ -3487,11 +3496,19 @@ function saveChapter(){
   showChapter(chData.id);
 }
 
-function deleteChapter(id){
+async function deleteChapter(id){
   if(!requireAdmin()) return;
   if(!confirm('Delete this chapter? This cannot be undone.')) return;
   chapters = chapters.filter(c=>c.id!==id);
   saveChapters(chapters);
+  try{
+    await deleteChapterFromSupabase(id);
+    await syncChaptersToSupabase();
+    setContentStatus('Chapter deleted from Supabase and remaining chapter order synced.');
+  }catch(err){
+    console.error('Chapter delete sync failed:', err);
+    alert('Chapter deleted in this browser, but Supabase delete failed. Check your admin login and Supabase chapter policies.');
+  }
   showLanding();
 }
 
@@ -3742,9 +3759,49 @@ async function loadUniversalContent(){
       E = Object.assign({}, DEFAULT_E, remoteEntries);
       saveEntities({localOnly:true});
     }
+    try{
+      const {data:chapterRows,error:chapterError} = await client
+        .from('chapters')
+        .select('id,position,data')
+        .order('position', {ascending:true});
+      if(chapterError) throw chapterError;
+      if(Array.isArray(chapterRows) && chapterRows.length){
+        chapters = normalizeChapterList(chapterRows.map(row=>row.data).filter(Boolean));
+        saveChapters(chapters, {localOnly:true});
+        renderTOC();
+        if(_currentChapterId){
+          const current = chapters.find(c=>c.id===_currentChapterId);
+          if(current) renderChapter(current);
+        }
+        setContentStatus('Loaded shared chapters from Supabase.');
+      }
+    }catch(chapterErr){
+      console.warn('Shared chapter sync unavailable:', chapterErr);
+    }
   }catch(err){
     console.error('Universal content sync failed:', err);
   }
+}
+
+async function syncChaptersToSupabase(){
+  const client = notesClient();
+  if(!client || !isAdmin()) return;
+  const now = new Date().toISOString();
+  const rows = chapters.map((chapter, position)=>({
+    id:chapter.id,
+    position,
+    data:chapter,
+    updated_at:now
+  }));
+  const {error} = await client.from('chapters').upsert(rows);
+  if(error) throw error;
+}
+
+async function deleteChapterFromSupabase(id){
+  const client = notesClient();
+  if(!client || !isAdmin() || !id) return;
+  const {error} = await client.from('chapters').delete().eq('id', id);
+  if(error) throw error;
 }
 
 async function syncCharacterToSupabase(char){
