@@ -1840,18 +1840,18 @@ function saveChapters(chs){
 
 async function loadPublishedChapters(force=false){
   try{
-    if(!force && localStorage.getItem(CHAPTERS_STORAGE_KEY)){
-      setContentStatus('Using browser draft. Export chapters to update data/chapters.json for GitHub Pages.');
-      return;
-    }
     const res = await fetch(CHAPTERS_DATA_URL, {cache:'no-store'});
     if(!res.ok) throw new Error('Could not load ' + CHAPTERS_DATA_URL);
     chapters = normalizeChapterList(await res.json());
-    if(force) localStorage.setItem(CHAPTERS_STORAGE_KEY, JSON.stringify(chapters));
+    if(force) localStorage.removeItem(CHAPTERS_STORAGE_KEY);
     renderTOC();
-    setContentStatus(force ? 'Published chapters reloaded into this browser draft.' : 'Loaded published chapters from data/chapters.json.');
+    setContentStatus(force ? 'Published chapters reloaded. Browser draft cleared.' : 'Loaded published chapters from data/chapters.json.');
   }catch(e){
-    setContentStatus('Using built-in chapters. Open through a local server or GitHub Pages to auto-load data/chapters.json.');
+    if(localStorage.getItem(CHAPTERS_STORAGE_KEY)){
+      setContentStatus('Using browser draft because data/chapters.json could not be loaded.');
+    } else {
+      setContentStatus('Using built-in chapters. Open through a local server or GitHub Pages to auto-load data/chapters.json.');
+    }
   }
 }
 
