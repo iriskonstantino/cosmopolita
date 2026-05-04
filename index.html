@@ -205,11 +205,12 @@ body{
   vertical-align:middle;
 }
 .chdr-architect{
-  font-size:1.2rem;
-  letter-spacing:0.2em;
+  font-family:var(--mono);
+  font-size:0.8rem;
+  letter-spacing:0.34em;
   color:var(--ink);
-  margin-bottom:0.18rem;
-  font-weight:400;
+  margin-bottom:0.34rem;
+  font-weight:700;
   text-transform:uppercase;
 }
 .chdr-title{
@@ -553,6 +554,30 @@ body.links-on .wl:hover{color:var(--red)}
   height:1px;background:var(--border);
   margin:1rem 0;
 }
+.dp-new-entry-btn{
+  width:auto;
+  min-width:148px;
+  min-height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--display);
+  font-weight:600;
+  font-size:0.68rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  padding:0.42rem 0.8rem;
+  margin-top:0.55rem;
+  color:var(--ink);
+  background:transparent;
+  border:1.5px solid var(--ink);
+  cursor:pointer;
+  transition:background .14s,color .14s;
+}
+.dp-new-entry-btn:hover{
+  background:var(--ink);
+  color:var(--white);
+}
 
 /* ─── NEXT CHAPTER BUTTON ─────────────── */
 .next-chapter-btn{
@@ -613,20 +638,24 @@ body.links-on .wl:hover{color:var(--red)}
   color:#bbb;
 }
 .char-actions-row{
-  display:flex;
-  flex-wrap:wrap;
-  gap:0.8rem;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(260px,360px));
+  gap:1rem;
   align-items:center;
-  justify-content:space-between;
+  justify-content:start;
   max-width:1040px;
   padding:2.2rem 2.5rem 0;
 }
-.char-actions-row .cm-input{
-  flex:0 1 360px;
-  min-width:min(100%,260px);
+.char-actions-row .cm-input,
+.char-actions-row .cm-btn{
+  width:100%;
+  min-height:44px;
+  box-sizing:border-box;
 }
 .char-actions-row .cm-btn{
-  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 .char-stat-panel td[contenteditable="true"]{
   outline:none;
@@ -1290,6 +1319,7 @@ body.links-on .wl:hover{color:var(--red)}
 }
 @media(max-width:720px){
   .char-image-tools{grid-template-columns:1fr;}
+  .char-actions-row{grid-template-columns:1fr;}
 }
 
 </style>
