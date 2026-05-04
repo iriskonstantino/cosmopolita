@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 /* ─── PERSISTENT TOPNAV ──────────────── */
@@ -538,6 +539,59 @@ body.links-on .wl:hover{color:var(--red)}
   text-transform:uppercase;
   color:#999;
 }
+.notes-auth{
+  display:grid;
+  gap:0.5rem;
+}
+.notes-auth input{
+  width:100%;
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:0.58rem;
+  letter-spacing:0.04em;
+  padding:0.48rem 0.55rem;
+  outline:none;
+}
+.notes-auth input:focus{border-color:var(--ink)}
+.notes-auth-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.45rem;
+}
+.notes-auth-btn{
+  min-height:32px;
+  font-family:var(--display);
+  font-weight:600;
+  font-size:0.58rem;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:var(--ink);
+  background:transparent;
+  border:1.5px solid var(--ink);
+  cursor:pointer;
+  transition:background .14s,color .14s;
+}
+.notes-auth-btn:hover{background:var(--ink);color:var(--white)}
+.notes-auth-btn.primary{background:var(--ink);color:var(--white)}
+.notes-auth-btn.primary:hover{background:#333}
+.notes-user{
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.08em;
+  line-height:1.45;
+  color:var(--ink);
+  word-break:break-word;
+}
+.notes-config-warning{
+  font-family:var(--mono);
+  font-size:0.52rem;
+  letter-spacing:0.08em;
+  line-height:1.5;
+  text-transform:uppercase;
+  color:#999;
+}
 .note-card{
   border-top:1px solid var(--border);
   padding:0.85rem 0 0.95rem;
@@ -549,6 +603,16 @@ body.links-on .wl:hover{color:var(--red)}
   gap:0.6rem;
   margin-bottom:0.5rem;
 }
+.note-toggle{
+  display:block;
+  flex:1;
+  min-width:0;
+  border:none;
+  background:none;
+  padding:0;
+  text-align:left;
+  cursor:pointer;
+}
 .note-date{
   font-family:var(--mono);
   font-size:0.5rem;
@@ -556,6 +620,18 @@ body.links-on .wl:hover{color:var(--red)}
   text-transform:uppercase;
   color:#aaa;
 }
+.note-preview{
+  font-family:var(--serif);
+  font-size:0.72rem;
+  line-height:1.35;
+  color:#555;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-top:0.18rem;
+}
+.note-card.collapsed .note-editor-wrap{display:none}
+.note-card:not(.collapsed) .note-preview{display:none}
 .note-delete{
   border:none;
   background:none;
@@ -1710,6 +1786,16 @@ body.links-on .wl:hover{color:var(--red)}
 
       <div class="panel-sec">
         <div class="panel-hd">Reader Notes</div>
+        <div class="notes-auth" id="notes-auth-box">
+          <div id="notes-auth-status" class="notes-config-warning">Local notes active. Supabase not configured.</div>
+          <input id="notes-auth-email" type="email" placeholder="Email">
+          <input id="notes-auth-password" type="password" placeholder="Password">
+          <div class="notes-auth-row" id="notes-auth-buttons">
+            <button class="notes-auth-btn primary" type="button" onclick="signInNotes()">Log In</button>
+            <button class="notes-auth-btn" type="button" onclick="signUpNotes()">Sign Up</button>
+          </div>
+          <button class="notes-auth-btn" id="notes-sign-out-btn" type="button" onclick="signOutNotes()" style="display:none">Log Out</button>
+        </div>
         <button class="notes-panel-btn" id="notes-toggle-btn" onclick="toggleNotesPanel()">Open Notes</button>
         <div class="notes-status" id="notes-summary">Notes loading...</div>
       </div>
@@ -2486,6 +2572,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   initCharacterFeature();
   setTextLayout(loadTextAlignment());
   initFileVaultUI();
+  initNotesAuth();
 });
 function _updateNavUI(){
   const btn=document.getElementById('topnav-back');
@@ -3254,8 +3341,31 @@ function escHtml(s){
 const NOTES_DB_NAME = 'cosmopolita_reader_notes';
 const NOTES_DB_VERSION = 1;
 const NOTES_STORE = 'notes';
+// Fill these with your Supabase project settings before publishing.
+// Keep the anon key public; Row Level Security in supabase-notes-schema.sql protects each user's notes.
+const SUPABASE_URL = '';
+const SUPABASE_ANON_KEY = '';
 let _notesDBPromise = null;
 const _noteSaveTimers = {};
+let _supabaseClient = null;
+let _notesUser = null;
+let _notesSyncReady = false;
+let _notesLastRemoteSync = '';
+let _expandedNoteId = null;
+
+function supabaseConfigured(){
+  return !!(SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase);
+}
+
+function notesClient(){
+  if(!supabaseConfigured()) return null;
+  if(!_supabaseClient){
+    _supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true}
+    });
+  }
+  return _supabaseClient;
+}
 
 function readerNoteId(){
   if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -3293,6 +3403,16 @@ async function notesGetForChapter(chapterId){
   });
 }
 
+async function notesGetAllLocal(){
+  const db = await openNotesDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(NOTES_STORE, 'readonly');
+    const req = tx.objectStore(NOTES_STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error || new Error('Could not load reader notes.'));
+  });
+}
+
 async function notesPut(note){
   const db = await openNotesDB();
   return new Promise((resolve,reject)=>{
@@ -3303,6 +3423,10 @@ async function notesPut(note){
   });
 }
 
+async function notesPutLocalOnly(note){
+  return notesPut(note);
+}
+
 async function notesDelete(id){
   const db = await openNotesDB();
   return new Promise((resolve,reject)=>{
@@ -3311,6 +3435,156 @@ async function notesDelete(id){
     tx.oncomplete = resolve;
     tx.onerror = () => reject(tx.error || new Error('Could not delete reader note.'));
   });
+}
+
+function remoteNotePayload(note){
+  return {
+    id:note.id,
+    user_id:_notesUser ? _notesUser.id : null,
+    chapter_id:note.chapterId,
+    body:note.body || '',
+    created_at:new Date(note.createdAt || Date.now()).toISOString(),
+    updated_at:new Date(note.updatedAt || Date.now()).toISOString()
+  };
+}
+
+function localNoteFromRemote(row){
+  return {
+    id:row.id,
+    chapterId:row.chapter_id,
+    body:row.body || '',
+    createdAt:row.created_at ? new Date(row.created_at).getTime() : Date.now(),
+    updatedAt:row.updated_at ? new Date(row.updated_at).getTime() : Date.now()
+  };
+}
+
+async function notesUpsertRemote(note){
+  const client = notesClient();
+  if(!client || !_notesUser) return;
+  const {error} = await client.from('reader_notes').upsert(remoteNotePayload(note));
+  if(error) throw error;
+}
+
+async function notesDeleteRemote(id){
+  const client = notesClient();
+  if(!client || !_notesUser) return;
+  const {error} = await client.from('reader_notes').delete().eq('id', id).eq('user_id', _notesUser.id);
+  if(error) throw error;
+}
+
+async function syncNotesWithSupabase(){
+  const client = notesClient();
+  if(!client || !_notesUser) return;
+  const localNotes = await notesGetAllLocal();
+  for(const note of localNotes){
+    await notesUpsertRemote(note);
+  }
+  const {data, error} = await client.from('reader_notes').select('*').eq('user_id', _notesUser.id);
+  if(error) throw error;
+  for(const row of data || []){
+    await notesPutLocalOnly(localNoteFromRemote(row));
+  }
+  _notesLastRemoteSync = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  _notesSyncReady = true;
+  updateNotesAuthUI();
+  renderReaderNotes();
+}
+
+async function initNotesAuth(){
+  const client = notesClient();
+  if(!client){
+    updateNotesAuthUI();
+    return;
+  }
+  const {data} = await client.auth.getUser();
+  _notesUser = data && data.user ? data.user : null;
+  client.auth.onAuthStateChange((_event, session)=>{
+    _notesUser = session && session.user ? session.user : null;
+    _notesSyncReady = false;
+    updateNotesAuthUI();
+    if(_notesUser) syncNotesWithSupabase().catch(err=>{
+      console.error('Notes sync failed:', err);
+      updateNotesAuthUI('Sync failed. Local notes still active.');
+    });
+    else renderReaderNotes();
+  });
+  updateNotesAuthUI();
+  if(_notesUser){
+    syncNotesWithSupabase().catch(err=>{
+      console.error('Notes sync failed:', err);
+      updateNotesAuthUI('Sync failed. Local notes still active.');
+    });
+  }
+}
+
+function notesAuthValues(){
+  return {
+    email:(document.getElementById('notes-auth-email')?.value || '').trim(),
+    password:document.getElementById('notes-auth-password')?.value || ''
+  };
+}
+
+async function signInNotes(){
+  const client = notesClient();
+  if(!client){ updateNotesAuthUI('Add Supabase URL and anon key in index.html first.'); return; }
+  const {email,password} = notesAuthValues();
+  if(!email || !password){ updateNotesAuthUI('Email and password required.'); return; }
+  updateNotesAuthUI('Signing in...');
+  const {error} = await client.auth.signInWithPassword({email,password});
+  if(error) updateNotesAuthUI(error.message);
+}
+
+async function signUpNotes(){
+  const client = notesClient();
+  if(!client){ updateNotesAuthUI('Add Supabase URL and anon key in index.html first.'); return; }
+  const {email,password} = notesAuthValues();
+  if(!email || !password){ updateNotesAuthUI('Email and password required.'); return; }
+  updateNotesAuthUI('Creating account...');
+  const {error} = await client.auth.signUp({email,password});
+  updateNotesAuthUI(error ? error.message : 'Account created. Check email if confirmation is enabled.');
+}
+
+async function signOutNotes(){
+  const client = notesClient();
+  if(!client) return;
+  await client.auth.signOut();
+  _notesUser = null;
+  _notesSyncReady = false;
+  updateNotesAuthUI();
+  renderReaderNotes();
+}
+
+function updateNotesAuthUI(message){
+  const status = document.getElementById('notes-auth-status');
+  const email = document.getElementById('notes-auth-email');
+  const pass = document.getElementById('notes-auth-password');
+  const buttons = document.getElementById('notes-auth-buttons');
+  const logout = document.getElementById('notes-sign-out-btn');
+  if(!status) return;
+  if(!supabaseConfigured()){
+    status.className = 'notes-config-warning';
+    status.textContent = 'Local notes active. Add Supabase credentials to sync across browsers.';
+    if(email) email.style.display = '';
+    if(pass) pass.style.display = '';
+    if(buttons) buttons.style.display = 'grid';
+    if(logout) logout.style.display = 'none';
+    return;
+  }
+  if(_notesUser){
+    status.className = 'notes-user';
+    status.textContent = message || (_notesSyncReady ? `Synced as ${_notesUser.email}${_notesLastRemoteSync ? ' at ' + _notesLastRemoteSync : ''}.` : `Logged in as ${_notesUser.email}. Syncing...`);
+    if(email) email.style.display = 'none';
+    if(pass) pass.style.display = 'none';
+    if(buttons) buttons.style.display = 'none';
+    if(logout) logout.style.display = '';
+  }else{
+    status.className = 'notes-config-warning';
+    status.textContent = message || 'Log in to sync notes across browsers.';
+    if(email) email.style.display = '';
+    if(pass) pass.style.display = '';
+    if(buttons) buttons.style.display = 'grid';
+    if(logout) logout.style.display = 'none';
+  }
 }
 
 function updateNotesPanelButton(){
@@ -3380,16 +3654,24 @@ async function renderReaderNotes(focusId){
     list.innerHTML = notes.map(note=>{
       const created = note.createdAt || note.updatedAt || Date.now();
       const updated = note.updatedAt || created;
-      return `<div class="note-card" id="note-card-${note.id}" data-note-id="${note.id}" data-created-at="${created}">
+      const collapsed = notes.length > 1 && focusId !== note.id && _expandedNoteId !== note.id;
+      const preview = (note.body || '').trim() || 'Empty note';
+      return `<div class="note-card ${collapsed ? 'collapsed' : ''}" id="note-card-${note.id}" data-note-id="${note.id}" data-created-at="${created}">
         <div class="note-meta">
-          <div class="note-date">Updated ${escHtml(readerNoteDate(updated))}</div>
+          <button class="note-toggle" type="button" onclick="toggleReaderNote('${note.id}')">
+            <div class="note-date">Updated ${escHtml(readerNoteDate(updated))}</div>
+            <div class="note-preview">${escHtml(preview)}</div>
+          </button>
           <button class="note-delete" onclick="deleteReaderNote('${note.id}')">Delete</button>
         </div>
-        <textarea class="note-body-input" id="note-body-${note.id}" oninput="queueReaderNoteSave('${note.id}')" placeholder="Write a note for this chapter...">${escHtml(note.body || '')}</textarea>
-        <div class="note-save-state" id="note-state-${note.id}">Saved</div>
+        <div class="note-editor-wrap">
+          <textarea class="note-body-input" id="note-body-${note.id}" oninput="queueReaderNoteSave('${note.id}')" placeholder="Write a note for this chapter...">${escHtml(note.body || '')}</textarea>
+          <div class="note-save-state" id="note-state-${note.id}">Saved${_notesUser ? ' locally and online' : ''}</div>
+        </div>
       </div>`;
     }).join('');
     if(focusId){
+      _expandedNoteId = focusId;
       const input = document.getElementById('note-body-' + focusId);
       if(input) input.focus();
     }
@@ -3400,6 +3682,17 @@ async function renderReaderNotes(focusId){
   }
 }
 
+function toggleReaderNote(id){
+  const card = document.getElementById('note-card-' + id);
+  if(!card) return;
+  const willOpen = card.classList.contains('collapsed');
+  document.querySelectorAll('#notes-list .note-card').forEach(el=>{
+    if(el.id !== 'note-card-' + id) el.classList.add('collapsed');
+  });
+  card.classList.toggle('collapsed', !willOpen);
+  _expandedNoteId = willOpen ? id : null;
+}
+
 async function createReaderNote(){
   if(!_currentChapterId) return;
   openNotesPanel();
@@ -3408,6 +3701,7 @@ async function createReaderNote(){
   try{
     if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
     await notesPut(note);
+    if(_notesUser) await notesUpsertRemote(note);
     await renderReaderNotes(note.id);
   }catch(e){
     console.error('Could not create reader note:', e);
@@ -3433,11 +3727,13 @@ async function saveReaderNote(id){
   try{
     if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
     await notesPut(note);
-    if(state) state.textContent = 'Saved';
+    if(_notesUser) await notesUpsertRemote(note);
+    if(state) state.textContent = _notesUser ? 'Saved locally and online' : 'Saved';
     updateNotesSummary(await notesGetForChapter(_currentChapterId));
+    updateNotesAuthUI();
   }catch(e){
     console.error('Could not save reader note:', e);
-    if(state) state.textContent = 'Save failed';
+    if(state) state.textContent = _notesUser ? 'Saved locally, online sync failed' : 'Save failed';
   }
 }
 
@@ -3446,6 +3742,8 @@ async function deleteReaderNote(id){
   clearTimeout(_noteSaveTimers[id]);
   try{
     await notesDelete(id);
+    if(_notesUser) await notesDeleteRemote(id);
+    if(_expandedNoteId === id) _expandedNoteId = null;
     await renderReaderNotes();
   }catch(e){
     console.error('Could not delete reader note:', e);
