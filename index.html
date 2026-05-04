@@ -835,8 +835,14 @@ body.links-on .wl:hover{color:var(--red)}
 }
 
 /* ─── NEXT CHAPTER BUTTON ─────────────── */
+.chapter-bottom-nav{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:2.2rem;
+  padding-top:1.4rem;
+  border-top:1px solid var(--border);
+}
 .next-chapter-btn{
-  margin-top:3rem;
   padding:0.8rem 1.6rem;
   font-family:var(--display);
   font-size:0.75rem;
@@ -1008,7 +1014,9 @@ body.links-on .wl:hover{color:var(--red)}
   position:absolute;
   inset:0;
   background:linear-gradient(to top, rgba(250,248,243,0.97) 0%, rgba(250,248,243,0.6) 32%, rgba(250,248,243,0) 65%);
+  opacity:0;
   pointer-events:none;
+  transition:opacity .12s linear;
 }
 .char-hero-text{
   position:relative;
@@ -2324,13 +2332,15 @@ function renderChapter(ch){
   const bodyEl = document.getElementById('cv-text');
   const parsed = parseBody(ch.body);
   
-  // Navigation buttons
+  // Bottom navigation button
   const prevCh = idx > 0 ? chapters[idx-1] : null;
   const nextCh = idx < chapters.length-1 ? chapters[idx+1] : null;
-  let navBtns = '<div style="display:flex;gap:1rem;margin-top:3rem">';
-  if(prevCh) navBtns += `<button class="next-chapter-btn" onclick="showChapter('${prevCh.id}')">← ${prevCh.chapter||prevCh.book||''}</button>`;
-  if(nextCh) navBtns += `<button class="next-chapter-btn" onclick="showChapter('${nextCh.id}')">${nextCh.chapter||nextCh.book||''} →</button>`;
-  navBtns += '</div>';
+  const navBtns = `
+    <div class="chapter-bottom-nav">
+      ${nextCh
+        ? `<button class="next-chapter-btn" onclick="showChapter('${nextCh.id}')">Next Chapter \u2192 ${nextCh.chapter||nextCh.book||''}</button>`
+        : `<button class="next-chapter-btn" onclick="openNewChapterModal()">Add Next Chapter</button>`}
+    </div>`;
 
   // Edit/delete controls
   const controls = `
@@ -2339,7 +2349,7 @@ function renderChapter(ch){
       <button class="ch-ctrl-btn danger" onclick="deleteChapter('${ch.id}')">Delete Chapter</button>
     </div>`;
 
-  bodyEl.innerHTML = parsed + navBtns + controls;
+  bodyEl.innerHTML = parsed + controls + navBtns;
 
   // Re-attach wl event listeners
   attachWlListeners(bodyEl);
@@ -2625,6 +2635,8 @@ function _showViewById(id){
   if(id==='char-detail-view'){
     const ph=document.getElementById('char-hero-photo');
     if(ph){ph.style.opacity=1;ph.style.transform='';}
+    const overlay=document.querySelector('#char-hero-section .char-hero-overlay');
+    if(overlay) overlay.style.opacity=0;
   }
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -2704,6 +2716,8 @@ function showCharDetail(id){
   populateCharacterDetail(char);
   const ph=document.getElementById('char-hero-photo');
   if(ph){ ph.style.opacity=1; ph.style.transform=''; }
+  const overlay=document.querySelector('#char-hero-section .char-hero-overlay');
+  if(overlay) overlay.style.opacity=0;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -3228,10 +3242,17 @@ window.addEventListener('scroll',()=>{
     const heroTop=hero.getBoundingClientRect().top + scrollY;
     const rel=scrollY - heroTop;
     const ph=document.getElementById('char-hero-photo');
+    const overlay=hero.querySelector('.char-hero-overlay');
     if(ph){
       const f=Math.max(0,1-rel/(innerHeight*0.7));
       ph.style.opacity=f;
       ph.style.transform=`translateY(${rel*0.18}px)`;
+    }
+    if(overlay){
+      const transitionStart=innerHeight*0.42;
+      const transitionLength=innerHeight*0.34;
+      const fade=Math.max(0,Math.min(1,(rel-transitionStart)/transitionLength));
+      overlay.style.opacity=fade;
     }
   }
 });
