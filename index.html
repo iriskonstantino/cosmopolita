@@ -1822,7 +1822,7 @@ body:not(.admin-on) .admin-only{
       </div>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 284px">
+  <div>
     <div id="toc-list">
       <div class="toc-heading">Chapters</div>
       <div id="toc-dashboard"></div>
@@ -1837,15 +1837,6 @@ body:not(.admin-on) .admin-only{
       <input id="chapter-import-input" type="file" accept="application/json,.json" style="display:none" onchange="importChapters(event)">
       <div id="content-status" class="content-status"></div>
     </div>
-    <aside class="side-panel">
-      <div class="panel-sec">
-        <div class="panel-hd">Navigation</div>
-        <a href="#" class="pnav active">Table of Contents</a>
-        <a href="#" class="pnav" onclick="showCharacters();return false">Characters</a>
-        <a href="#" class="pnav" onclick="showWikiEntry('arcon');return false">Codex</a>
-        <a href="#" class="pnav" onclick="showAbout();return false">About</a>
-      </div>
-    </aside>
   </div>
 </div>
 
@@ -2514,7 +2505,7 @@ function getLatestChapter(){
 
 function chapterHierarchyLabel(ch){
   if(!ch) return '';
-  return [ch.volume, ch.book, ch.part, ch.novel].filter(Boolean).join(' · ');
+  return [ch.part, ch.book, ch.volume, ch.novel].filter(Boolean).join(' · ');
 }
 
 function groupChaptersForTOC(list){
