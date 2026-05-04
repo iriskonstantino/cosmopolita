@@ -1006,6 +1006,22 @@ body.links-on .wl:hover{color:var(--red)}
   width:fit-content;
 }
 .toc-add-btn:hover{background:var(--ink);color:var(--white)}
+.content-tools{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.6rem;
+  margin-top:1rem;
+}
+.content-status{
+  font-family:var(--mono);
+  font-size:0.56rem;
+  line-height:1.55;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#aaa;
+  margin-top:0.85rem;
+  max-width:620px;
+}
 
 /* ─── NEW CHAPTER MODAL ─────────────────── */
 #chapter-modal-overlay{
@@ -1363,6 +1379,13 @@ body.links-on .wl:hover{color:var(--red)}
       <div class="toc-heading">Chapters</div>
       <div id="toc-entries"></div>
       <button class="toc-add-btn" onclick="openNewChapterModal()">+ New Chapter</button>
+      <div class="content-tools">
+        <button class="ch-ctrl-btn" onclick="exportChapters()">Export Chapters</button>
+        <button class="ch-ctrl-btn" onclick="document.getElementById('chapter-import-input').click()">Import Chapters</button>
+        <button class="ch-ctrl-btn" onclick="loadPublishedChapters(true)">Reload Published</button>
+      </div>
+      <input id="chapter-import-input" type="file" accept="application/json,.json" style="display:none" onchange="importChapters(event)">
+      <div id="content-status" class="content-status"></div>
     </div>
     <aside class="side-panel">
       <div class="panel-sec">
@@ -1697,8 +1720,13 @@ Start a new section with: ===Section Title==="></textarea>
 <script>
 
 // ════════════════════════════════════════════════════════
-// CHAPTER DATA — persisted to localStorage
+// CHAPTER DATA
+// Canonical published content lives in data/chapters.json.
+// Browser edits are local drafts until exported and committed.
 // ════════════════════════════════════════════════════════
+const CHAPTERS_STORAGE_KEY = 'cosmopolita_chapters';
+const CHAPTERS_DATA_URL = 'data/chapters.json';
+
 const CH1_BODY = `The [[port-actual|Port of Port-Actual]] was not, in any meaningful sense, a single port. By the time [[elzbieta|Elzbieta Vorn]] arrived on the 14th of Drymonth aboard the *Catechism of Tides*—a mid-displacement packet vessel flagged alternately to four jurisdictions depending on which was least inconvenient at any given moment—the port had achieved the administrative character of a small nation-state operating inside the body of a larger one, its [[compact|Compact authorities]] maintaining seventeen separate arrival counters and an unknown number of informal ones, staffed by officials whose authority derived from documents no one had verified in living memory.
 
 She had been told, by the travel writer [[sorekin|Benedikt Sorekin]], whose *Annotated Itineraries of the Concordant Fringe* she had read three times on the voyage and which she now carried folded open to page 342 like a talisman, that there were essentially two ways to clear arrival at [[port-actual|Port-Actual]]: through the [[meridian|Meridian Gate]], which processed passengers of documented or at least guessable origin, or through the [[estuarial|Estuarial Wickets]], which processed everyone else—a category whose breadth, Sorekin noted with his characteristic mix of precision and despair, had expanded considerably since the [[compact|Third Compact]] to include persons of undocumented origin, persons of disputed origin, persons whose origin was known but whose documentation had been rendered legally non-operative by one of the eleven Clarifying Instruments issued since the Compact's ratification, and persons who had simply, as Sorekin put it with admirable compression, *"arrived."*
@@ -1737,9 +1765,40 @@ const DEFAULT_CHAPTERS = [
   }
 ];
 
+function cloneDefaultChapters(){
+  return DEFAULT_CHAPTERS.map(c=>JSON.parse(JSON.stringify(c)));
+}
+
+function normalizeChapterList(raw){
+  const list = Array.isArray(raw) ? raw : raw && Array.isArray(raw.chapters) ? raw.chapters : null;
+  if(!list) throw new Error('Chapter JSON must be an array or an object with a chapters array.');
+  return list.map((c,i)=>({
+    id: c.id || ('ch-' + (i + 1)),
+    num: c.num || '',
+    novel: c.novel || '',
+    book: c.book || c.title || '',
+    volume: c.volume || '',
+    part: c.part || '',
+    chapter: c.chapter || c.name || '',
+    meta: {
+      narrator: c.meta && c.meta.narrator || '',
+      setting: c.meta && c.meta.setting || '',
+      year: c.meta && c.meta.year || '',
+      aesthetic: c.meta && c.meta.aesthetic || '',
+      mode: c.meta && c.meta.mode || ''
+    },
+    body: c.body || ''
+  }));
+}
+
+function setContentStatus(message){
+  const el = document.getElementById('content-status');
+  if(el) el.textContent = message || '';
+}
+
 function loadChapters(){
   try {
-    const saved = localStorage.getItem('cosmopolita_chapters');
+    const saved = localStorage.getItem(CHAPTERS_STORAGE_KEY);
     if(saved){
       const parsed = JSON.parse(saved);
       // Migrate old format (title/architect/subtitle) to new format (book/novel/volume/part/chapter)
@@ -1769,11 +1828,67 @@ function loadChapters(){
       return migrated;
     }
   } catch(e){}
-  return DEFAULT_CHAPTERS.map(c=>({...c}));
+  return cloneDefaultChapters();
 }
 
 function saveChapters(chs){
-  try { localStorage.setItem('cosmopolita_chapters', JSON.stringify(chs)); } catch(e){}
+  try {
+    localStorage.setItem(CHAPTERS_STORAGE_KEY, JSON.stringify(chs));
+    setContentStatus('Draft saved in this browser. Export chapters, then commit data/chapters.json to publish.');
+  } catch(e){}
+}
+
+async function loadPublishedChapters(force=false){
+  try{
+    if(!force && localStorage.getItem(CHAPTERS_STORAGE_KEY)){
+      setContentStatus('Using browser draft. Export chapters to update data/chapters.json for GitHub Pages.');
+      return;
+    }
+    const res = await fetch(CHAPTERS_DATA_URL, {cache:'no-store'});
+    if(!res.ok) throw new Error('Could not load ' + CHAPTERS_DATA_URL);
+    chapters = normalizeChapterList(await res.json());
+    if(force) localStorage.setItem(CHAPTERS_STORAGE_KEY, JSON.stringify(chapters));
+    renderTOC();
+    setContentStatus(force ? 'Published chapters reloaded into this browser draft.' : 'Loaded published chapters from data/chapters.json.');
+  }catch(e){
+    setContentStatus('Using built-in chapters. Open through a local server or GitHub Pages to auto-load data/chapters.json.');
+  }
+}
+
+function chapterExportPayload(){
+  return JSON.stringify({version:1, updatedAt:new Date().toISOString(), chapters}, null, 2);
+}
+
+function exportChapters(){
+  const blob = new Blob([chapterExportPayload()], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'chapters.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  setContentStatus('Exported chapters.json. Replace data/chapters.json with it, then commit and push.');
+}
+
+function importChapters(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      chapters = normalizeChapterList(JSON.parse(reader.result));
+      saveChapters(chapters);
+      renderTOC();
+      setContentStatus('Imported chapters into this browser draft. Export when ready to publish.');
+    }catch(e){
+      alert(e.message || 'Could not import chapters JSON.');
+    }finally{
+      event.target.value = '';
+    }
+  };
+  reader.readAsText(file);
 }
 
 let chapters = loadChapters();
@@ -2106,6 +2221,7 @@ function setTextLayout(mode){
 document.addEventListener('DOMContentLoaded',()=>{
   _updateNavUI();
   renderTOC();
+  loadPublishedChapters();
   initCharacterFeature();
   setTextLayout(loadTextAlignment());
   initFileVaultUI();
@@ -2133,7 +2249,13 @@ function goHome(){
   setTextLayout('center');
   hideOthers('landing');
   const lv=document.getElementById('landing');
-  lv.style.display='block';
+  lv.style.display='flex';
+  const lc=document.getElementById('landing-core');
+  if(lc){
+    lc.style.opacity=1;
+    lc.style.transform='';
+  }
+  window.scrollTo({top:0,behavior:'auto'});
 }
 function goBack(){
   if(_navHistory.length===0)return;
