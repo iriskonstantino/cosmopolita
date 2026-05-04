@@ -918,6 +918,84 @@ body.links-on .wl:hover{color:var(--red)}
   align-items:center;
   justify-content:center;
 }
+.char-filter-panel{
+  padding:1.2rem 2.5rem 0;
+  max-width:1180px;
+}
+.char-filter-tools{
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+  margin-bottom:0.85rem;
+}
+.char-filter-title{
+  font-family:var(--mono);
+  font-size:0.56rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:#aaa;
+}
+.char-filter-reset{
+  border:none;
+  background:transparent;
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.56rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--red);
+  cursor:pointer;
+  padding:0;
+}
+.char-filter-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:0.65rem;
+}
+.char-filter-select{
+  width:100%;
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:0.58rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:0.7rem 0.65rem;
+  min-height:42px;
+}
+.char-card-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.25rem;
+  margin-top:0.55rem;
+}
+.char-tag-chip{
+  display:inline-flex;
+  align-items:center;
+  max-width:100%;
+  border:1px solid var(--border);
+  color:#777;
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:0.12rem 0.34rem;
+  line-height:1.3;
+}
+.char-org-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.85rem;
+}
+.char-org-grid .cm-field{min-width:0}
+.char-org-note{
+  font-family:var(--mono);
+  font-size:0.56rem;
+  letter-spacing:0.06em;
+  color:#aaa;
+  line-height:1.5;
+}
 .char-stat-panel td[contenteditable="true"]{
   outline:none;
   padding:0.3rem 0.1rem;
@@ -1698,6 +1776,8 @@ body:not(.admin-on) .admin-only{
 @media(max-width:720px){
   .char-image-tools{grid-template-columns:1fr;}
   .char-actions-row{grid-template-columns:1fr;}
+  .char-filter-panel{padding:1rem 1.25rem 0;}
+  .char-org-grid{grid-template-columns:1fr;}
   .toc-dashboard{grid-template-columns:1fr;}
   #toc-list{padding:2rem 1.25rem 4rem;}
   .toc-entry{grid-template-columns:2rem 1fr;gap:0 0.8rem;}
@@ -2906,6 +2986,8 @@ function hideOthers(except){
 // ── Show characters index ──
 function showCharacters(){
   updateAdminUI();
+  renderCharacterFilters();
+  applyCharacterFilters();
   _pushNav('char-list-view');
   const cv=document.getElementById('char-list-view');
   cv.style.display='block';
@@ -2972,15 +3054,160 @@ let characters = loadCharacters();
 let _pendingCharacterImage = '';
 let _pendingCharacterImageFileId = '';
 let _pendingCharacterImageName = '';
+const CHARACTER_TAG_CATEGORIES = [
+  {key:'sort', label:'Sort'},
+  {key:'books', label:'Books'},
+  {key:'factions', label:'Factions'},
+  {key:'locations', label:'Locations'},
+  {key:'families', label:'Families'},
+  {key:'races', label:'Race'},
+  {key:'aesthetics', label:'Aesthetic'},
+  {key:'hairColors', label:'Hair Color'}
+];
+const CHARACTER_TAG_KEYS = CHARACTER_TAG_CATEGORIES.filter(cat=>cat.key!=='sort').map(cat=>cat.key);
+const CHARACTER_SORTS = [
+  {value:'az', label:'Alphabetical A-Z'},
+  {value:'za', label:'Alphabetical Z-A'}
+];
+let _characterFilters = {sort:'az'};
 const EMPTY_IMG = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%221%22 height=%221%22%3E%3C/svg%3E';
 const _vaultObjectURLs = new Map();
 
 function initCharacterFeature(){
-  renderCharacterGrid(characters);
+  renderCharacterFilters();
+  applyCharacterFilters();
   const search = document.getElementById('char-search');
   if(search){
-    search.addEventListener('input',()=>filterCharacters(search.value));
+    search.addEventListener('input', applyCharacterFilters);
   }
+}
+
+function emptyCharacterTags(){
+  return CHARACTER_TAG_KEYS.reduce((acc,key)=>{
+    acc[key] = [];
+    return acc;
+  }, {});
+}
+
+function splitTagText(text){
+  const seen = new Set();
+  return String(text || '')
+    .split(/[\n,;]+/)
+    .map(tag=>tag.trim())
+    .filter(Boolean)
+    .filter(tag=>{
+      const key = tag.toLowerCase();
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function normalizeCharacterTags(tags={}){
+  const normalized = emptyCharacterTags();
+  CHARACTER_TAG_KEYS.forEach(key=>{
+    const value = tags && tags[key];
+    normalized[key] = Array.isArray(value) ? splitTagText(value.join('\n')) : splitTagText(value);
+  });
+  return normalized;
+}
+
+function getCharacterTags(char){
+  return normalizeCharacterTags(char && char.tags);
+}
+
+function characterTagValues(char){
+  return Object.values(getCharacterTags(char)).flat();
+}
+
+function tagsToText(tags, key){
+  return (normalizeCharacterTags(tags)[key] || []).join(', ');
+}
+
+function readCharacterTagFields(){
+  const tags = emptyCharacterTags();
+  CHARACTER_TAG_KEYS.forEach(key=>{
+    const field = document.getElementById(`ch-tag-${key}`);
+    tags[key] = splitTagText(field ? field.value : '');
+  });
+  return tags;
+}
+
+function characterSearchText(char){
+  return [
+    char && char.name,
+    char && char.role,
+    char && char.epithet,
+    ...characterTagValues(char),
+    ...Object.entries((char && char.stats) || {}).flat()
+  ].join(' ').toLowerCase();
+}
+
+function characterMatchesFilter(char, key, value){
+  if(!value) return true;
+  return (getCharacterTags(char)[key] || []).some(tag=>tag.toLowerCase() === value.toLowerCase());
+}
+
+function characterFilterOptions(key){
+  const byLower = new Map();
+  characters.forEach(char=>{
+    (getCharacterTags(char)[key] || []).forEach(tag=>{
+      const lower = tag.toLowerCase();
+      if(!byLower.has(lower)) byLower.set(lower, tag);
+    });
+  });
+  return Array.from(byLower.values()).sort((a,b)=>a.localeCompare(b));
+}
+
+function renderCharacterFilters(){
+  const grid = document.getElementById('char-filter-grid');
+  if(!grid) return;
+  grid.innerHTML = CHARACTER_TAG_CATEGORIES.map(cat=>{
+    if(cat.key === 'sort'){
+      return `<select class="char-filter-select" aria-label="Sort characters" onchange="handleCharacterFilterChange('sort', this.value)">
+        ${CHARACTER_SORTS.map(opt=>`<option value="${escHtml(opt.value)}" ${(_characterFilters.sort || 'az')===opt.value?'selected':''}>${escHtml(opt.label)}</option>`).join('')}
+      </select>`;
+    }
+    const options = characterFilterOptions(cat.key);
+    return `<select class="char-filter-select" aria-label="Filter by ${escHtml(cat.label)}" onchange="handleCharacterFilterChange('${cat.key}', this.value)">
+      <option value="">All ${escHtml(cat.label)}</option>
+      ${options.map(option=>`<option value="${escHtml(option)}" ${_characterFilters[cat.key]===option?'selected':''}>${escHtml(option)}</option>`).join('')}
+    </select>`;
+  }).join('');
+}
+
+function handleCharacterFilterChange(key, value){
+  _characterFilters[key] = value;
+  applyCharacterFilters();
+}
+
+function resetCharacterFilters(){
+  _characterFilters = {sort:'az'};
+  const search = document.getElementById('char-search');
+  if(search) search.value = '';
+  renderCharacterFilters();
+  applyCharacterFilters();
+}
+
+function applyCharacterFilters(){
+  const search = document.getElementById('char-search');
+  const term = search ? search.value.trim().toLowerCase() : '';
+  let list = characters.filter(char=>{
+    const matchesSearch = !term || characterSearchText(char).includes(term);
+    const matchesTags = CHARACTER_TAG_KEYS.every(key=>characterMatchesFilter(char, key, _characterFilters[key]));
+    return matchesSearch && matchesTags;
+  });
+  list = [...list].sort((a,b)=>{
+    const order = (_characterFilters.sort === 'za') ? -1 : 1;
+    return order * String(a.name || '').localeCompare(String(b.name || ''));
+  });
+  renderCharacterGrid(list);
+}
+
+function characterCardTagHTML(char){
+  const tags = characterTagValues(char).slice(0, 4);
+  if(!tags.length) return '';
+  return `<div class="char-card-tags">${tags.map(tag=>`<span class="char-tag-chip">${escHtml(tag)}</span>`).join('')}</div>`;
 }
 
 function normalizeCharacterId(name){
@@ -3074,15 +3301,19 @@ function renderCharacterGrid(list){
   updateAdminUI();
   const grid = document.querySelector('#char-list-view .char-grid');
   if(!grid) return;
-  const sorted = [...list].sort((a,b)=>a.name.localeCompare(b.name));
-  grid.innerHTML = sorted.map(c=>`
-    <div class="char-card" onclick="showCharDetail('${c.id}')">
+  if(!list.length){
+    grid.innerHTML = '<div class="empty-state">No characters match those filters.</div>';
+    return;
+  }
+  grid.innerHTML = list.map(c=>`
+    <div class="char-card" onclick="showCharDetail('${escHtml(c.id)}')">
       <div class="char-card-img">
         ${characterImageHTML(c, c.name)}
       </div>
       <div class="char-card-body">
-        <div class="char-card-name">${c.name}</div>
-        <div class="char-card-role">${c.role}</div>
+        <div class="char-card-name">${escHtml(c.name)}</div>
+        <div class="char-card-role">${escHtml(c.role)}</div>
+        ${characterCardTagHTML(c)}
       </div>
     </div>
   `).join('');
@@ -3090,14 +3321,28 @@ function renderCharacterGrid(list){
 }
 
 function filterCharacters(query){
-  const term = query.trim().toLowerCase();
-  renderCharacterGrid(
-    characters.filter(c=>
-      c.name.toLowerCase().includes(term) ||
-      c.role.toLowerCase().includes(term) ||
-      (c.epithet||'').toLowerCase().includes(term)
-    )
-  );
+  const search = document.getElementById('char-search');
+  if(search && typeof query === 'string') search.value = query;
+  applyCharacterFilters();
+}
+
+function characterOrganizationHTML(char, admin){
+  const tags = getCharacterTags(char);
+  const rows = CHARACTER_TAG_CATEGORIES
+    .filter(cat=>cat.key !== 'sort' && tags[cat.key] && tags[cat.key].length)
+    .map(cat=>`
+      <tr>
+        <td>${escHtml(cat.label)}</td>
+        <td>${escHtml(tags[cat.key].join(', '))}</td>
+      </tr>
+    `).join('');
+  if(!rows) return '';
+  return `
+    <div class="stat-name">Organization</div>
+    <table class="stat-table">
+      ${rows}
+    </table>
+  `;
 }
 
 function populateCharacterDetail(char){
@@ -3124,12 +3369,13 @@ function populateCharacterDetail(char){
       <table class="stat-table">
         ${Object.entries(char.stats||{}).map(([key,value])=>`
           <tr>
-            <td>${key}</td>
-            <td contenteditable="${admin ? 'true' : 'false'}" data-stat-key="${key}" onblur="saveCharStatEdit('${char.id}', this)">${value}</td>
+            <td>${escHtml(key)}</td>
+            <td contenteditable="${admin ? 'true' : 'false'}" data-stat-key="${escHtml(key)}" onblur="saveCharStatEdit('${escHtml(char.id)}', this)">${escHtml(value)}</td>
           </tr>
         `).join('')}
       </table>
-      ${admin ? `<button class="ch-ctrl-btn admin-only" type="button" onclick="openCharacterModal('${char.id}')">Edit character</button>` : ''}
+      ${characterOrganizationHTML(char, admin)}
+      ${admin ? `<button class="ch-ctrl-btn admin-only" type="button" onclick="openCharacterModal('${escHtml(char.id)}')">Edit character</button>` : ''}
     `;
     hydrateVaultImages(statPanel);
   }
@@ -3172,6 +3418,10 @@ async function openCharacterModal(id){
   const epithetField = document.getElementById('ch-epithet');
   const bioField = document.getElementById('ch-bio');
   const statsField = document.getElementById('ch-stats');
+  const tagFields = CHARACTER_TAG_KEYS.reduce((acc,key)=>{
+    acc[key] = document.getElementById(`ch-tag-${key}`);
+    return acc;
+  }, {});
   const preview = document.getElementById('char-image-preview');
   const current = document.getElementById('char-image-current');
   _pendingCharacterImage = '';
@@ -3189,6 +3439,9 @@ async function openCharacterModal(id){
     epithetField.value = char.epithet || '';
     bioField.value = char.bio ? char.bio.replace(/<\/p>/g,'\n\n').replace(/<[^>]+>/g,'').trim() : '';
     statsField.value = Object.entries(char.stats||{}).map(([k,v])=>`${k}: ${v}`).join('\n');
+    CHARACTER_TAG_KEYS.forEach(key=>{
+      if(tagFields[key]) tagFields[key].value = tagsToText(char.tags, key);
+    });
     _pendingCharacterImage = characterImageUrl(char) || char.image || '';
     _pendingCharacterImageFileId = char.imageFileId || '';
     _pendingCharacterImageName = characterImageOverrideName(char) || char.imageName || '';
@@ -3204,6 +3457,9 @@ async function openCharacterModal(id){
     epithetField.value = '';
     bioField.value = '';
     statsField.value = '';
+    CHARACTER_TAG_KEYS.forEach(key=>{
+      if(tagFields[key]) tagFields[key].value = '';
+    });
   }
 
   await populateCharacterVaultSelect(_pendingCharacterImageFileId);
@@ -3322,6 +3578,7 @@ async function saveCharacter(){
   if(!name){ alert('Character name is required.'); return; }
 
   const stats = parseCharacterStats(statsText);
+  const tags = readCharacterTagFields();
   const bio = bioText ? formatCharacterBio(bioText) : '<p>No biography available.</p>';
   const image = _pendingCharacterImageFileId ? '' : (_pendingCharacterImage || '');
   const imageFileId = _pendingCharacterImageFileId || '';
@@ -3337,13 +3594,14 @@ async function saveCharacter(){
     char.epithet = epithet;
     char.bio = bio;
     char.stats = stats;
+    char.tags = tags;
     char.image = image;
     char.imageFileId = imageFileId;
     char.imageName = imageName;
     savedCharacter = char;
   } else {
     const id = normalizeCharacterId(name);
-    savedCharacter = { id, name, role, epithet, image, imageFileId, imageName, bio, stats };
+    savedCharacter = { id, name, role, epithet, image, imageFileId, imageName, bio, stats, tags };
     characters.push(savedCharacter);
     idToShow = id;
   }
@@ -3355,7 +3613,8 @@ async function saveCharacter(){
     console.error('Character sync failed:', err);
     alert('Character saved in this browser, but Supabase sync failed. Check the content schema and your admin login.');
   }
-  renderCharacterGrid(characters);
+  renderCharacterFilters();
+  applyCharacterFilters();
   closeCharacterModal();
   showCharDetail(idToShow);
 }
@@ -3745,7 +4004,8 @@ async function loadUniversalContent(){
     if(Array.isArray(charRows) && charRows.length){
       characters = charRows.map(row=>row.data).filter(Boolean);
       saveCharacters(characters, {localOnly:true});
-      renderCharacterGrid(characters);
+      renderCharacterFilters();
+      applyCharacterFilters();
       if(_currentCharacterId){
         const current = characters.find(c=>c.id===_currentCharacterId);
         if(current) populateCharacterDetail(current);
@@ -4716,6 +4976,40 @@ function closeWikiDetail() {
         <textarea id="ch-bio" class="cm-textarea"></textarea>
       </div>
       <div class="cm-field full">
+        <label class="cm-label">Organization tags</label>
+        <div class="char-org-note">Add any tags you need. Separate multiple entries with commas or new lines.</div>
+        <div class="char-org-grid">
+          <div class="cm-field">
+            <label class="cm-label">Books</label>
+            <textarea id="ch-tag-books" class="cm-textarea" rows="2" placeholder="Book I, Book II"></textarea>
+          </div>
+          <div class="cm-field">
+            <label class="cm-label">Factions</label>
+            <textarea id="ch-tag-factions" class="cm-textarea" rows="2" placeholder="Compact Archives, Joyanti"></textarea>
+          </div>
+          <div class="cm-field">
+            <label class="cm-label">Locations</label>
+            <textarea id="ch-tag-locations" class="cm-textarea" rows="2" placeholder="Port-Actual, Joyanti Highlands"></textarea>
+          </div>
+          <div class="cm-field">
+            <label class="cm-label">Families</label>
+            <textarea id="ch-tag-families" class="cm-textarea" rows="2" placeholder="Vorn, Karennso"></textarea>
+          </div>
+          <div class="cm-field">
+            <label class="cm-label">Race</label>
+            <textarea id="ch-tag-races" class="cm-textarea" rows="2" placeholder="Human, Arcon"></textarea>
+          </div>
+          <div class="cm-field">
+            <label class="cm-label">Aesthetic</label>
+            <textarea id="ch-tag-aesthetics" class="cm-textarea" rows="2" placeholder="Neo-Peregrine, Bureaucratic"></textarea>
+          </div>
+          <div class="cm-field">
+            <label class="cm-label">Hair color</label>
+            <textarea id="ch-tag-hairColors" class="cm-textarea" rows="2" placeholder="Black, Silver, Auburn"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="cm-field full">
         <label class="cm-label">Stats / infobox entries</label>
         <textarea id="ch-stats" class="cm-textarea" rows="5" placeholder="Age: 19\nOrigin: Port-Actual\nAffiliation: Compact"></textarea>
       </div>
@@ -4755,6 +5049,13 @@ function closeWikiDetail() {
   <div class="char-actions-row">
     <input id="char-search" class="cm-input" type="search" placeholder="Search characters…" />
     <button class="cm-btn primary admin-only" type="button" onclick="openCharacterModal()">Add character</button>
+  </div>
+  <div class="char-filter-panel">
+    <div class="char-filter-tools">
+      <div class="char-filter-title">Organize</div>
+      <button class="char-filter-reset" type="button" onclick="resetCharacterFilters()">Clear filters</button>
+    </div>
+    <div id="char-filter-grid" class="char-filter-grid"></div>
   </div>
   <div class="char-grid">
     <div class="char-card" onclick="showCharDetail('erin')">
