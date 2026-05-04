@@ -1785,7 +1785,7 @@ body.links-on .wl:hover{color:var(--red)}
       </div>
 
       <div class="panel-sec">
-        <div class="panel-hd">Reader Notes</div>
+        <div class="panel-hd">Account</div>
         <div class="notes-auth" id="notes-auth-box">
           <div id="notes-auth-status" class="notes-config-warning">Local notes active. Supabase not configured.</div>
           <input id="notes-auth-email" type="email" placeholder="Email">
@@ -1796,6 +1796,10 @@ body.links-on .wl:hover{color:var(--red)}
           </div>
           <button class="notes-auth-btn" id="notes-sign-out-btn" type="button" onclick="signOutNotes()" style="display:none">Log Out</button>
         </div>
+      </div>
+
+      <div class="panel-sec">
+        <div class="panel-hd">Reader Notes</div>
         <button class="notes-panel-btn" id="notes-toggle-btn" onclick="toggleNotesPanel()">Open Notes</button>
         <div class="notes-status" id="notes-summary">Notes loading...</div>
       </div>
