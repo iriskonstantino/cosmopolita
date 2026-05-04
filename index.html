@@ -2543,7 +2543,7 @@ function loadEntities(){
   }catch(e){}
   return Object.assign({},DEFAULT_E);
 }
-function saveEntities(){
+function saveEntities(options={}){
   // Only persist entries that differ from default or are new
   try{ localStorage.setItem('cosmopolita_entities',JSON.stringify(E)); }catch(e){}
 }
@@ -2592,6 +2592,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   setTextLayout(loadTextAlignment());
   initFileVaultUI();
   initNotesAuth();
+  loadUniversalContent();
 });
 function _updateNavUI(){
   const btn=document.getElementById('topnav-back');
@@ -2756,7 +2757,7 @@ function loadCharacters(){
   }
 }
 
-function saveCharacters(chars){
+function saveCharacters(chars, options={}){
   try{
     localStorage.setItem('cosmopolita_characters', JSON.stringify(chars));
   } catch(e){
@@ -2907,6 +2908,7 @@ function saveCharStatEdit(id, el){
   char.stats = char.stats || {};
   char.stats[key] = el.textContent.trim();
   saveCharacters(characters);
+  syncCharacterToSupabase(char).catch(err=>console.error('Character sync failed:', err));
 }
 
 function saveCharHeroEdit(el){
@@ -2919,6 +2921,7 @@ function saveCharHeroEdit(el){
   if(field==='name'){ value = value.replace(/\s+/g,' '); }
   char[field] = value;
   saveCharacters(characters);
+  syncCharacterToSupabase(char).catch(err=>console.error('Character sync failed:', err));
   if(field==='name'){
     el.innerHTML = value.replace(/\s+/g,'<br>');
   }
@@ -3040,17 +3043,20 @@ async function handleCharacterImageUpload(e){
     return;
   }
   const current = document.getElementById('char-image-current');
-  if(current) current.textContent = `Saving ${file.name} to vault…`;
+  if(current) current.textContent = `Uploading ${file.name} to Supabase…`;
   try{
-    if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-    const item = await vaultPutFile(file);
-    await populateCharacterVaultSelect(item.id);
-    await setCharacterPreviewFromVault(item.id, item.name);
-    if(current) current.textContent = `Saved to vault and selected: ${item.name} (${vaultFormatBytes(item.size)})`;
-    renderVault();
+    const item = await uploadCharacterImageToSupabase(file);
+    _pendingCharacterImage = item.url;
+    _pendingCharacterImageFileId = '';
+    _pendingCharacterImageName = item.name;
+    const preview = document.getElementById('char-image-preview');
+    if(preview) preview.src = item.url || EMPTY_IMG;
+    const select = document.getElementById('ch-vault-image-select');
+    if(select) select.value = '';
+    if(current) current.textContent = `Synced image selected: ${item.name}`;
   }catch(err){
-    console.error('Character image vault save failed:', err);
-    alert('Could not save this image to the vault. Try freeing browser storage or running the site from localhost.');
+    console.error('Character image Supabase upload failed:', err);
+    alert('Could not upload this image to Supabase Storage. Run supabase-storage-schema.sql in the Supabase SQL Editor, then try again while logged in as the admin.');
   }
 }
 
@@ -3067,7 +3073,7 @@ function clearCharacterImage(){
   if(current) current.textContent = 'No image selected.';
 }
 
-function saveCharacter(){
+async function saveCharacter(){
   if(!requireAdmin()) return;
   const name = document.getElementById('ch-name').value.trim();
   const role = document.getElementById('ch-role').value.trim();
@@ -3083,6 +3089,7 @@ function saveCharacter(){
   const imageName = _pendingCharacterImageName || '';
 
   let idToShow = _editingCharacterId;
+  let savedCharacter = null;
   if(_editingCharacterId){
     const char = characters.find(c=>c.id===_editingCharacterId);
     if(!char) return;
@@ -3094,13 +3101,21 @@ function saveCharacter(){
     char.image = image;
     char.imageFileId = imageFileId;
     char.imageName = imageName;
+    savedCharacter = char;
   } else {
     const id = normalizeCharacterId(name);
-    characters.push({ id, name, role, epithet, image, imageFileId, imageName, bio, stats });
+    savedCharacter = { id, name, role, epithet, image, imageFileId, imageName, bio, stats };
+    characters.push(savedCharacter);
     idToShow = id;
   }
 
   saveCharacters(characters);
+  try{
+    await syncCharacterToSupabase(savedCharacter);
+  }catch(err){
+    console.error('Character sync failed:', err);
+    alert('Character saved in this browser, but Supabase sync failed. Check the content schema and your admin login.');
+  }
   renderCharacterGrid(characters);
   closeCharacterModal();
   showCharDetail(idToShow);
@@ -3394,6 +3409,7 @@ const NOTES_STORE = 'notes';
 const SUPABASE_URL = 'https://qbnjgbdasliljynpxalp.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_eyf3d9vMWBqdGPLKXKFlCQ_B_6ZnOQr';
 const ADMIN_EMAILS = ['pcygnus2112@gmail.com'];
+const CHARACTER_IMAGE_BUCKET = 'character-images';
 let _notesDBPromise = null;
 const _noteSaveTimers = {};
 let _supabaseClient = null;
@@ -3416,6 +3432,35 @@ function notesClient(){
   return _supabaseClient;
 }
 
+function cleanStorageFileName(name){
+  const cleaned = String(name || 'character-image')
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 90);
+  return cleaned || 'character-image';
+}
+
+async function uploadCharacterImageToSupabase(file){
+  const client = notesClient();
+  if(!client) throw new Error('Supabase is not configured.');
+  if(!isAdmin()) throw new Error('Only the site admin can upload shared character images.');
+  const safeName = cleanStorageFileName(file.name);
+  const uniqueId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}-${Math.floor(Math.random()*1000000)}`;
+  const path = `characters/${uniqueId}-${safeName}`;
+  const { error } = await client.storage
+    .from(CHARACTER_IMAGE_BUCKET)
+    .upload(path, file, {
+      cacheControl: '31536000',
+      contentType: file.type || 'image/png',
+      upsert: false
+    });
+  if(error) throw error;
+  const { data } = client.storage.from(CHARACTER_IMAGE_BUCKET).getPublicUrl(path);
+  if(!data || !data.publicUrl) throw new Error('Supabase did not return an image URL.');
+  return { url: data.publicUrl, path, name: file.name };
+}
+
 function isAdmin(){
   return !!(_notesUser && ADMIN_EMAILS.includes(String(_notesUser.email || '').toLowerCase()));
 }
@@ -3428,6 +3473,67 @@ function requireAdmin(){
   if(isAdmin()) return true;
   alert('Only the site admin can edit published content.');
   return false;
+}
+
+async function loadUniversalContent(){
+  const client = notesClient();
+  if(!client) return;
+  try{
+    const [{data:charRows,error:charError},{data:entryRows,error:entryError}] = await Promise.all([
+      client.from('characters').select('id,data'),
+      client.from('codex_entries').select('entry_key,data')
+    ]);
+    if(charError) throw charError;
+    if(entryError) throw entryError;
+    if(Array.isArray(charRows) && charRows.length){
+      characters = charRows.map(row=>row.data).filter(Boolean);
+      saveCharacters(characters, {localOnly:true});
+      renderCharacterGrid(characters);
+      if(_currentCharacterId){
+        const current = characters.find(c=>c.id===_currentCharacterId);
+        if(current) populateCharacterDetail(current);
+      }
+    }
+    if(Array.isArray(entryRows) && entryRows.length){
+      const remoteEntries = {};
+      entryRows.forEach(row=>{
+        if(row.entry_key && row.data) remoteEntries[row.entry_key] = row.data;
+      });
+      E = Object.assign({}, DEFAULT_E, remoteEntries);
+      saveEntities({localOnly:true});
+    }
+  }catch(err){
+    console.error('Universal content sync failed:', err);
+  }
+}
+
+async function syncCharacterToSupabase(char){
+  const client = notesClient();
+  if(!client || !isAdmin() || !char || !char.id) return;
+  const {error} = await client.from('characters').upsert({
+    id:char.id,
+    data:char,
+    updated_at:new Date().toISOString()
+  });
+  if(error) throw error;
+}
+
+async function syncCodexEntryToSupabase(key, entry){
+  const client = notesClient();
+  if(!client || !isAdmin() || !key || !entry) return;
+  const {error} = await client.from('codex_entries').upsert({
+    entry_key:key,
+    data:entry,
+    updated_at:new Date().toISOString()
+  });
+  if(error) throw error;
+}
+
+async function deleteCodexEntryFromSupabase(key){
+  const client = notesClient();
+  if(!client || !isAdmin() || !key) return;
+  const {error} = await client.from('codex_entries').delete().eq('entry_key', key);
+  if(error) throw error;
 }
 
 function readerNoteId(){
@@ -3571,6 +3677,7 @@ async function initNotesAuth(){
       updateNotesAuthUI('Sync failed. Local notes still active.');
     });
     else renderReaderNotes();
+    loadUniversalContent();
   });
   updateNotesAuthUI();
   updateAdminUI();
@@ -3882,6 +3989,10 @@ function saveDetailEdit(){
   
   E[key] = {t:title, cat, short, desc, meta};
   saveEntities();
+  syncCodexEntryToSupabase(key, E[key]).catch(err=>{
+    console.error('Codex entry sync failed:', err);
+    alert('Entry saved in this browser, but Supabase sync failed. Check the content schema and your admin login.');
+  });
   
   _detailKey = key;
   _detailEditMode = false;
@@ -3899,8 +4010,10 @@ function deleteEntry(){
   if(!requireAdmin()) return;
   if(!_detailKey) return;
   if(!confirm('Delete entry "' + _detailKey + '"? This cannot be undone.')) return;
+  const key = _detailKey;
   delete E[_detailKey];
   saveEntities();
+  deleteCodexEntryFromSupabase(key).catch(err=>console.error('Codex entry delete sync failed:', err));
   closeDetail();
 }
 
@@ -4281,10 +4394,10 @@ function closeWikiDetail() {
       <div class="cm-field full">
         <label class="cm-label">Character image</label>
         <input id="ch-image-file" class="cm-input" type="file" accept="image/*" onchange="handleCharacterImageUpload(event)" />
-        <div class="char-image-note">Large images are saved to the IndexedDB vault; the character only stores a small reference ID.</div>
+        <div class="char-image-note">Images upload to Supabase Storage and sync across browsers once the character is saved.</div>
       </div>
       <div class="cm-field full">
-        <label class="cm-label">Use existing image from vault</label>
+        <label class="cm-label">Use existing local vault image</label>
         <div class="char-image-tools">
           <select id="ch-vault-image-select" class="cm-input" onchange="handleVaultImageSelectChange()">
             <option value="">Choose image from vault…</option>
@@ -4292,6 +4405,7 @@ function closeWikiDetail() {
           <button class="cm-btn secondary" type="button" onclick="refreshCharacterVaultImages()">Refresh</button>
           <button class="cm-btn secondary" type="button" onclick="clearCharacterImage()">Clear</button>
         </div>
+        <div class="char-image-note">Local vault images are legacy and only appear in this browser. Re-upload them above to make them permanent on GitHub Pages.</div>
         <div id="char-image-current" class="char-image-current"></div>
       </div>
       <div class="cm-field full">
