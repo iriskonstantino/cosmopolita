@@ -1312,6 +1312,9 @@ body.links-on .wl:hover{color:var(--red)}
   gap:0.6rem;
   margin-top:1rem;
 }
+body:not(.admin-on) .admin-only{
+  display:none!important;
+}
 .content-status{
   font-family:var(--mono);
   font-size:0.56rem;
@@ -1707,8 +1710,8 @@ body.links-on .wl:hover{color:var(--red)}
     <div id="toc-list">
       <div class="toc-heading">Chapters</div>
       <div id="toc-entries"></div>
-      <button class="toc-add-btn" onclick="openNewChapterModal()">+ New Chapter</button>
-      <div class="content-tools">
+      <button class="toc-add-btn admin-only" onclick="openNewChapterModal()">+ New Chapter</button>
+      <div class="content-tools admin-only">
         <button class="ch-ctrl-btn" onclick="exportChapters()">Export Chapters</button>
         <button class="ch-ctrl-btn" onclick="document.getElementById('chapter-import-input').click()">Import Chapters</button>
         <button class="ch-ctrl-btn" onclick="loadPublishedChapters(true)">Reload Published</button>
@@ -1789,7 +1792,7 @@ body.links-on .wl:hover{color:var(--red)}
           <div class="pill"></div>
           <span class="toggle-lbl">Show Hyperlinks</span>
         </div>
-        <button class="dp-new-entry-btn" onclick="openNewEntry()">+ New Entry</button>
+        <button class="dp-new-entry-btn admin-only" onclick="openNewEntry()">+ New Entry</button>
       </div>
 
       <div class="panel-sec">
@@ -1876,13 +1879,13 @@ body.links-on .wl:hover{color:var(--red)}
         The files stay inside this browser's offline database and can be downloaded back out later.
       </p>
 
-      <div id="vault-drop" class="file-drop" onclick="document.getElementById('vault-files').click()">
+      <div id="vault-drop" class="file-drop admin-only" onclick="document.getElementById('vault-files').click()">
         <input id="vault-files" type="file" multiple hidden onchange="vaultUploadFromInput(event)">
         <div class="file-drop-title">Drop files here or click to upload</div>
         <div class="file-drop-sub">Multiple 10MB+ files supported · stored as binary blobs · not localStorage</div>
       </div>
 
-      <div class="file-toolbar">
+      <div class="file-toolbar admin-only">
         <button class="cm-btn primary" onclick="document.getElementById('vault-files').click()">Upload Files</button>
         <button class="cm-btn secondary" onclick="renderVault()">Refresh</button>
         <button class="cm-btn secondary" onclick="vaultRequestPersistence()">Protect Storage</button>
@@ -2299,6 +2302,7 @@ function parseBody(raw){
 // RENDER CHAPTER into #chapter-view
 // ════════════════════════════════════════════════════════
 function renderChapter(ch){
+  updateAdminUI();
   _currentChapterId = ch.id;
   const idx = chapters.findIndex(c=>c.id===ch.id);
 
@@ -2339,12 +2343,12 @@ function renderChapter(ch){
     <div class="chapter-bottom-nav">
       ${nextCh
         ? `<button class="next-chapter-btn" onclick="showChapter('${nextCh.id}')">Next Chapter \u2192 ${nextCh.chapter||nextCh.book||''}</button>`
-        : `<button class="next-chapter-btn" onclick="openNewChapterModal()">Add Next Chapter</button>`}
+        : `<button class="next-chapter-btn admin-only" onclick="openNewChapterModal()">Add Next Chapter</button>`}
     </div>`;
 
   // Edit/delete controls
   const controls = `
-    <div class="ch-controls">
+    <div class="ch-controls admin-only">
       <button class="ch-ctrl-btn" onclick="openEditChapterModal('${ch.id}')">Edit Chapter</button>
       <button class="ch-ctrl-btn danger" onclick="deleteChapter('${ch.id}')">Delete Chapter</button>
     </div>`;
@@ -2580,6 +2584,7 @@ function setTextLayout(mode){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
+  updateAdminUI();
   _updateNavUI();
   renderTOC();
   loadPublishedChapters();
@@ -2697,6 +2702,7 @@ function hideOthers(except){
 
 // ── Show characters index ──
 function showCharacters(){
+  updateAdminUI();
   _pushNav('char-list-view');
   const cv=document.getElementById('char-list-view');
   cv.style.display='block';
@@ -2828,6 +2834,7 @@ async function hydrateVaultImages(root=document){
 }
 
 function renderCharacterGrid(list){
+  updateAdminUI();
   const grid = document.querySelector('#char-list-view .char-grid');
   if(!grid) return;
   const sorted = [...list].sort((a,b)=>a.name.localeCompare(b.name));
@@ -2857,6 +2864,7 @@ function filterCharacters(query){
 }
 
 function populateCharacterDetail(char){
+  const admin = isAdmin();
   const photo = document.getElementById('char-hero-photo');
   setCharacterImageElement(photo, char);
   const superEl = document.getElementById('char-hero-super');
@@ -2865,6 +2873,9 @@ function populateCharacterDetail(char){
   if(nameEl){ nameEl.innerHTML = (char.name || '').replace(/\s+/g,'<br>'); }
   const epithet = document.getElementById('char-hero-epithet');
   if(epithet){ epithet.textContent = char.epithet || ''; }
+  [superEl,nameEl,epithet].forEach(el=>{
+    if(el) el.setAttribute('contenteditable', admin ? 'true' : 'false');
+  });
   const bioEl = document.querySelector('#char-detail-view .char-bio-text');
   if(bioEl){ bioEl.innerHTML = char.bio || '<p>No biography available.</p>'; }
 
@@ -2877,17 +2888,18 @@ function populateCharacterDetail(char){
         ${Object.entries(char.stats||{}).map(([key,value])=>`
           <tr>
             <td>${key}</td>
-            <td contenteditable="true" data-stat-key="${key}" onblur="saveCharStatEdit('${char.id}', this)">${value}</td>
+            <td contenteditable="${admin ? 'true' : 'false'}" data-stat-key="${key}" onblur="saveCharStatEdit('${char.id}', this)">${value}</td>
           </tr>
         `).join('')}
       </table>
-      <button class="ch-ctrl-btn" type="button" onclick="openCharacterModal('${char.id}')">Edit character</button>
+      ${admin ? `<button class="ch-ctrl-btn admin-only" type="button" onclick="openCharacterModal('${char.id}')">Edit character</button>` : ''}
     `;
     hydrateVaultImages(statPanel);
   }
 }
 
 function saveCharStatEdit(id, el){
+  if(!isAdmin()) return;
   const key = el.dataset.statKey;
   if(!key) return;
   const char = characters.find(c=>c.id===id);
@@ -2898,6 +2910,7 @@ function saveCharStatEdit(id, el){
 }
 
 function saveCharHeroEdit(el){
+  if(!isAdmin()) return;
   if(!_currentCharacterId) return;
   const field = el.dataset.field;
   const char = characters.find(c=>c.id===_currentCharacterId);
@@ -2912,6 +2925,7 @@ function saveCharHeroEdit(el){
 }
 
 async function openCharacterModal(id){
+  if(!requireAdmin()) return;
   _editingCharacterId = id || null;
   const title = document.getElementById('ch-modal-title');
   const nameField = document.getElementById('ch-name');
@@ -2988,10 +3002,12 @@ async function populateCharacterVaultSelect(selectedId=''){
 }
 
 async function refreshCharacterVaultImages(){
+  if(!requireAdmin()) return;
   await populateCharacterVaultSelect(_pendingCharacterImageFileId);
 }
 
 async function handleVaultImageSelectChange(){
+  if(!requireAdmin()) return;
   const select = document.getElementById('ch-vault-image-select');
   if(!select || !select.value) return;
   await setCharacterPreviewFromVault(select.value);
@@ -3015,6 +3031,7 @@ async function setCharacterPreviewFromVault(id, fallbackName=''){
 }
 
 async function handleCharacterImageUpload(e){
+  if(!requireAdmin()) return;
   const file = e.target.files[0];
   if(!file) return;
   if(!String(file.type || '').startsWith('image/')){
@@ -3038,6 +3055,7 @@ async function handleCharacterImageUpload(e){
 }
 
 function clearCharacterImage(){
+  if(!requireAdmin()) return;
   _pendingCharacterImage = '';
   _pendingCharacterImageFileId = '';
   _pendingCharacterImageName = '';
@@ -3050,6 +3068,7 @@ function clearCharacterImage(){
 }
 
 function saveCharacter(){
+  if(!requireAdmin()) return;
   const name = document.getElementById('ch-name').value.trim();
   const role = document.getElementById('ch-role').value.trim();
   const epithet = document.getElementById('ch-epithet').value.trim();
@@ -3122,6 +3141,7 @@ function formatCharacterBio(text){
 // NEW / EDIT CHAPTER MODAL
 // ════════════════════════════════════════════════════════
 function openNewChapterModal(){
+  if(!requireAdmin()) return;
   _editingChapterId = null;
   document.getElementById('cm-modal-title').textContent = 'New Chapter';
   // clear fields
@@ -3144,6 +3164,7 @@ function openNewChapterModal(){
 }
 
 function openEditChapterModal(id){
+  if(!requireAdmin()) return;
   const ch = chapters.find(c=>c.id===id);
   if(!ch) return;
   _editingChapterId = id;
@@ -3173,6 +3194,7 @@ function handleModalOverlayClick(e){
 }
 
 function saveChapter(){
+  if(!requireAdmin()) return;
   const book    = document.getElementById('cm-book').value.trim();
   const chapter = document.getElementById('cm-chapter').value.trim();
   const body    = document.getElementById('cm-body').value.trim();
@@ -3214,6 +3236,7 @@ function saveChapter(){
 }
 
 function deleteChapter(id){
+  if(!requireAdmin()) return;
   if(!confirm('Delete this chapter? This cannot be undone.')) return;
   chapters = chapters.filter(c=>c.id!==id);
   saveChapters(chapters);
@@ -3307,7 +3330,7 @@ function renderDetailView(d){
   }
   body.innerHTML = html;
   const editBtn = document.getElementById('dp-edit-btn');
-  if(editBtn) editBtn.style.display = _detailKey ? 'inline-flex' : 'none';
+  if(editBtn) editBtn.style.display = _detailKey && isAdmin() ? 'inline-flex' : 'none';
 }
 
 function renderDetailEdit(d){
@@ -3370,6 +3393,7 @@ const NOTES_STORE = 'notes';
 // Keep the anon key public; Row Level Security in supabase-notes-schema.sql protects each user's notes.
 const SUPABASE_URL = 'https://qbnjgbdasliljynpxalp.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_eyf3d9vMWBqdGPLKXKFlCQ_B_6ZnOQr';
+const ADMIN_EMAILS = ['pcygnus2112@gmail.com'];
 let _notesDBPromise = null;
 const _noteSaveTimers = {};
 let _supabaseClient = null;
@@ -3390,6 +3414,20 @@ function notesClient(){
     });
   }
   return _supabaseClient;
+}
+
+function isAdmin(){
+  return !!(_notesUser && ADMIN_EMAILS.includes(String(_notesUser.email || '').toLowerCase()));
+}
+
+function updateAdminUI(){
+  document.body.classList.toggle('admin-on', isAdmin());
+}
+
+function requireAdmin(){
+  if(isAdmin()) return true;
+  alert('Only the site admin can edit published content.');
+  return false;
 }
 
 function readerNoteId(){
@@ -3526,6 +3564,7 @@ async function initNotesAuth(){
   client.auth.onAuthStateChange((_event, session)=>{
     _notesUser = session && session.user ? session.user : null;
     _notesSyncReady = false;
+    updateAdminUI();
     updateNotesAuthUI();
     if(_notesUser) syncNotesWithSupabase().catch(err=>{
       console.error('Notes sync failed:', err);
@@ -3534,6 +3573,7 @@ async function initNotesAuth(){
     else renderReaderNotes();
   });
   updateNotesAuthUI();
+  updateAdminUI();
   if(_notesUser){
     syncNotesWithSupabase().catch(err=>{
       console.error('Notes sync failed:', err);
@@ -3575,6 +3615,7 @@ async function signOutNotes(){
   await client.auth.signOut();
   _notesUser = null;
   _notesSyncReady = false;
+  updateAdminUI();
   updateNotesAuthUI();
   renderReaderNotes();
 }
@@ -3597,7 +3638,8 @@ function updateNotesAuthUI(message){
   }
   if(_notesUser){
     status.className = 'notes-user';
-    status.textContent = message || (_notesSyncReady ? `Synced as ${_notesUser.email}${_notesLastRemoteSync ? ' at ' + _notesLastRemoteSync : ''}.` : `Logged in as ${_notesUser.email}. Syncing...`);
+    const adminLabel = isAdmin() ? ' Admin tools enabled.' : '';
+    status.textContent = message || (_notesSyncReady ? `Synced as ${_notesUser.email}${_notesLastRemoteSync ? ' at ' + _notesLastRemoteSync : ''}.${adminLabel}` : `Logged in as ${_notesUser.email}. Syncing...${adminLabel}`);
     if(email) email.style.display = 'none';
     if(pass) pass.style.display = 'none';
     if(buttons) buttons.style.display = 'none';
@@ -3777,6 +3819,7 @@ async function deleteReaderNote(id){
 }
 
 function toggleDetailEdit(){
+  if(!requireAdmin()) return;
   _detailEditMode = !_detailEditMode;
   const d = _detailKey ? E[_detailKey] : {};
   if(_detailEditMode) renderDetailEdit(d);
@@ -3784,6 +3827,7 @@ function toggleDetailEdit(){
 }
 
 function openNewEntry(){
+  if(!requireAdmin()) return;
   const rw = document.getElementById('cv-reading-wrap');
   const dp = document.getElementById('detail-panel');
   if(!dp||!rw) return;
@@ -3796,6 +3840,7 @@ function openNewEntry(){
 
 let _metaRowCount = 0;
 function addMetaRow(){
+  if(!requireAdmin()) return;
   const container = document.getElementById('de-meta-rows');
   if(!container) return;
   const existing = container.querySelectorAll('.dp-meta-edit-row').length;
@@ -3809,11 +3854,13 @@ function addMetaRow(){
 }
 
 function removeMetaRow(i){
+  if(!requireAdmin()) return;
   const row = document.getElementById('meta-row-'+i);
   if(row) row.remove();
 }
 
 function saveDetailEdit(){
+  if(!requireAdmin()) return;
   const key = (document.getElementById('de-key').value||'').trim();
   if(!key){ alert('Entry key is required.'); return; }
   const title = document.getElementById('de-title').value.trim();
@@ -3849,6 +3896,7 @@ function cancelDetailEdit(){
 }
 
 function deleteEntry(){
+  if(!requireAdmin()) return;
   if(!_detailKey) return;
   if(!confirm('Delete entry "' + _detailKey + '"? This cannot be undone.')) return;
   delete E[_detailKey];
@@ -3998,6 +4046,7 @@ async function vaultObjectURL(id){
 }
 
 async function vaultDelete(id){
+  if(!requireAdmin()) return;
   vaultRevokeObjectURL(id);
   const db = await openVaultDB();
   await new Promise((resolve,reject)=>{
@@ -4010,6 +4059,7 @@ async function vaultDelete(id){
 }
 
 async function vaultClear(){
+  if(!requireAdmin()) return;
   if(!confirm('Clear every file in the local vault? This cannot be undone.')) return;
   vaultRevokeAllObjectURLs();
   const db = await openVaultDB();
@@ -4061,6 +4111,7 @@ async function vaultRequestPersistence(){
 }
 
 async function vaultUpload(files){
+  if(!requireAdmin()) return;
   files = Array.from(files || []).filter(Boolean);
   if(!files.length) return;
   const status = document.getElementById('vault-status');
@@ -4081,6 +4132,7 @@ async function vaultUpload(files){
 }
 
 function vaultUploadFromInput(e){
+  if(!requireAdmin()) return;
   vaultUpload(e.target.files);
   e.target.value = '';
 }
@@ -4130,7 +4182,7 @@ async function renderVault(){
         <div class="file-actions">
           <button class="ch-ctrl-btn" onclick="vaultOpen('${f.id}')">Open</button>
           <button class="ch-ctrl-btn" onclick="vaultDownload('${f.id}')">Download</button>
-          <button class="ch-ctrl-btn danger" onclick="vaultDelete('${f.id}')">Delete</button>
+          ${isAdmin() ? `<button class="ch-ctrl-btn danger admin-only" onclick="vaultDelete('${f.id}')">Delete</button>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -4161,6 +4213,7 @@ function initFileVaultUI(){
 }
 
 async function showAssets(){
+  updateAdminUI();
   _pushNav('assets-view');
   const av = document.getElementById('assets-view');
   av.style.display = 'block';
@@ -4290,7 +4343,7 @@ function closeWikiDetail() {
   </div>
   <div class="char-actions-row">
     <input id="char-search" class="cm-input" type="search" placeholder="Search characters…" />
-    <button class="cm-btn primary" type="button" onclick="openCharacterModal()">Add character</button>
+    <button class="cm-btn primary admin-only" type="button" onclick="openCharacterModal()">Add character</button>
   </div>
   <div class="char-grid">
     <div class="char-card" onclick="showCharDetail('erin')">
@@ -4315,9 +4368,9 @@ function closeWikiDetail() {
     </div>
     <div class="char-hero-overlay"></div>
     <div class="char-hero-text">
-      <div class="char-hero-super" id="char-hero-super" contenteditable="true" data-field="role" onblur="saveCharHeroEdit(this)">Person &middot; Protagonist &middot; Book II</div>
-      <div class="char-hero-name" id="char-hero-name" contenteditable="true" data-field="name" onblur="saveCharHeroEdit(this)">Erin<br>Karennso</div>
-      <div class="char-hero-epithet" id="char-hero-epithet" contenteditable="true" data-field="epithet" onblur="saveCharHeroEdit(this)">"The girl who kept arriving."</div>
+      <div class="char-hero-super" id="char-hero-super" contenteditable="false" data-field="role" onblur="saveCharHeroEdit(this)">Person &middot; Protagonist &middot; Book II</div>
+      <div class="char-hero-name" id="char-hero-name" contenteditable="false" data-field="name" onblur="saveCharHeroEdit(this)">Erin<br>Karennso</div>
+      <div class="char-hero-epithet" id="char-hero-epithet" contenteditable="false" data-field="epithet" onblur="saveCharHeroEdit(this)">"The girl who kept arriving."</div>
     </div>
     <div class="char-hero-scroll">Scroll to read ↓</div>
   </div>
