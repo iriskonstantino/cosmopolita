@@ -1251,11 +1251,11 @@ body.links-on .wl:hover{color:var(--red)}
 .codex-entry.active{display:block}
 .codex-native-script-img{
   display:block;
-  max-width:min(560px,70vw);
-  max-height:118px;
+  max-width:min(280px,42vw);
+  max-height:62px;
   object-fit:contain;
   object-position:left center;
-  margin:0 0 1rem;
+  margin:0 0 0.35rem;
   filter:drop-shadow(0 8px 20px rgba(255,255,255,0.35));
 }
 .codex-hero-alt{
@@ -1334,6 +1334,41 @@ body.links-on .wl:hover{color:var(--red)}
   color:var(--link);
   border-bottom-color:currentColor;
   cursor:pointer;
+}
+.codex-toc{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:1rem 1.1rem;
+  margin:0 0 2rem;
+  width:min(360px,100%);
+}
+.codex-toc-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.72rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:0.75rem;
+}
+.codex-toc-list{
+  margin:0;
+  padding:0;
+  list-style:none;
+  font-family:var(--mono);
+  font-size:0.64rem;
+  line-height:1.55;
+}
+.codex-toc-list li{margin:0.2rem 0}
+.codex-toc-list li.sub{padding-left:1rem}
+.codex-toc-list a{
+  color:#555;
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+}
+.codex-toc-list a:hover{
+  color:var(--red);
+  border-bottom-color:currentColor;
 }
 .codex-infobox-title{
   font-family:var(--display);
@@ -5317,6 +5352,44 @@ function codexArticleHTML(entry){
   return html;
 }
 
+function codexHeadingId(text, used){
+  const base = String(text || 'section')
+    .trim()
+    .toLowerCase()
+    .replace(/<[^>]+>/g,'')
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-+|-+$/g,'') || 'section';
+  let id = base;
+  let n = 2;
+  while(used.has(id)){
+    id = `${base}-${n}`;
+    n += 1;
+  }
+  used.add(id);
+  return id;
+}
+
+function buildCodexTOC(content){
+  if(!content) return;
+  const headings = Array.from(content.querySelectorAll('h2, h3'));
+  const old = content.querySelector('.codex-toc');
+  if(old) old.remove();
+  if(!headings.length) return;
+  const used = new Set();
+  const items = headings.map((heading, index)=>{
+    const text = heading.textContent.trim();
+    const id = heading.id || codexHeadingId(text, used);
+    heading.id = id;
+    const number = index + 1;
+    return `<li class="${heading.tagName.toLowerCase() === 'h3' ? 'sub' : ''}"><a href="#${escHtml(id)}">${number}. ${escHtml(text)}</a></li>`;
+  }).join('');
+  const toc = document.createElement('nav');
+  toc.className = 'codex-toc';
+  toc.setAttribute('aria-label', 'Contents');
+  toc.innerHTML = `<div class="codex-toc-title">Contents</div><ol class="codex-toc-list">${items}</ol>`;
+  content.insertBefore(toc, content.firstChild);
+}
+
 function codexPanelHTML(entry){
   const tags = (entry.tags || []).map(tag=>`<span class="affil-tag">${escHtml(tag)}</span>`).join('');
   const flag = codexFlagImage(entry);
@@ -5372,6 +5445,7 @@ function showCodexEntry(key){
     content.innerHTML = codexArticleHTML(entry);
     content.classList.add('links-on');
     content.classList.add('codex-wiki-article');
+    buildCodexTOC(content);
     attachWlListeners(content);
   }
   const panel = document.getElementById('codex-entry-panel');
