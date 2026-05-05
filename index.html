@@ -4215,6 +4215,14 @@ function renderDetailEdit(d){
       <input id="de-map-image" value="${escHtml(d.mapImage||'')}" placeholder="https://... or assets/...">
     </div>
     <div class="dp-field">
+      <label>Flag image URL</label>
+      <input id="de-flag-image" value="${escHtml(codexFlagImage(d))}" placeholder="https://... or assets/...">
+    </div>
+    <div class="dp-field">
+      <label>Native script image URL</label>
+      <input id="de-native-script-image" value="${escHtml(d.nativeScriptImage||'')}" placeholder="https://... or assets/...">
+    </div>
+    <div class="dp-field">
       <label>Hero alt text</label>
       <input id="de-hero-alt" value="${escHtml(d.heroAlt||'')}">
     </div>
@@ -4892,6 +4900,8 @@ function saveDetailEdit(){
   const short = document.getElementById('de-short').value.trim();
   const heroImage = document.getElementById('de-hero-image') ? document.getElementById('de-hero-image').value.trim() : '';
   const mapImage = document.getElementById('de-map-image') ? document.getElementById('de-map-image').value.trim() : '';
+  const flagImage = document.getElementById('de-flag-image') ? document.getElementById('de-flag-image').value.trim() : codexFlagImage(E[_detailKey] || {});
+  const nativeScriptImage = document.getElementById('de-native-script-image') ? document.getElementById('de-native-script-image').value.trim() : ((E[_detailKey] && E[_detailKey].nativeScriptImage) || '');
   const heroAlt = document.getElementById('de-hero-alt') ? document.getElementById('de-hero-alt').value.trim() : '';
   const tags = document.getElementById('de-tags') ? splitTagText(document.getElementById('de-tags').value) : [];
   const desc  = document.getElementById('de-desc').value.trim();
@@ -4908,7 +4918,7 @@ function saveDetailEdit(){
   // If key changed, remove old
   if(_detailKey && _detailKey !== key) delete E[_detailKey];
   
-  E[key] = {t:title, cat, kind, short, desc, meta, heroImage, mapImage, heroAlt, tags};
+  E[key] = {t:title, cat, kind, short, desc, meta, heroImage, mapImage, flagImage, nativeScriptImage, heroAlt, tags};
   saveEntities();
   syncCodexEntryToSupabase(key, E[key]).catch(err=>{
     console.error('Codex entry sync failed:', err);
@@ -5230,6 +5240,8 @@ let _editingCodexKey = null;
 
 function normalizeCodexEntry(key, entry={}){
   const heroAlt = entry.heroAlt || entry.hero_alt || entry.alt || entry.subtitle || '';
+  const flagImage = entry.flagImage || entry.flag_image || entry.flag || entry.flagUrl || entry.flagURL || entry.flagImageUrl || entry.flag_image_url || '';
+  const nativeScriptImage = entry.nativeScriptImage || entry.native_script_image || entry.nativeScript || entry.scriptImage || entry.nativeScriptUrl || entry.native_script_url || '';
   return Object.assign({
     key,
     t:key,
@@ -5246,6 +5258,8 @@ function normalizeCodexEntry(key, entry={}){
     tags:[]
   }, entry, {
     key,
+    flagImage,
+    nativeScriptImage,
     heroAlt,
     meta:Array.isArray(entry.meta) ? entry.meta : [],
     tags:Array.isArray(entry.tags) ? entry.tags : splitTagText(entry.tags || '')
@@ -5263,7 +5277,12 @@ function codexHeroImage(entry){
 }
 
 function codexFlagImage(entry){
-  return entry.flagImage || entry.flag_image || '';
+  return entry.flagImage || entry.flag_image || entry.flag || entry.flagUrl || entry.flagURL || entry.flagImageUrl || entry.flag_image_url || '';
+}
+
+function handleCodexImageError(img){
+  if(img && img.src) console.warn('Codex image failed to load:', img.src);
+  if(img) img.remove();
 }
 
 function codexSearchText(entry){
@@ -5417,10 +5436,10 @@ function codexPanelHTML(entry){
     <tr><td>${escHtml(row[0])}</td><td>${escHtml(row[1])}</td></tr>
   `).join('');
   return `
-    ${flag ? `<img class="codex-infobox-image codex-infobox-flag" src="${escHtml(flag)}" alt="${escHtml(entry.t)} flag" onerror="this.remove();" />` : ''}
+    ${flag ? `<img class="codex-infobox-image codex-infobox-flag" src="${escHtml(flag)}" alt="${escHtml(entry.t)} flag" onerror="handleCodexImageError(this)" />` : ''}
     <div class="codex-infobox-title">${escHtml(entry.t)}</div>
     <div class="codex-infobox-cat">${escHtml(entry.cat || 'Codex Entry')}</div>
-    ${nativeScript ? `<img class="codex-infobox-image codex-infobox-script" src="${escHtml(nativeScript)}" alt="${escHtml(entry.t)} native script" onerror="this.remove();" />` : ''}
+    ${nativeScript ? `<img class="codex-infobox-image codex-infobox-script" src="${escHtml(nativeScript)}" alt="${escHtml(entry.t)} native script" onerror="handleCodexImageError(this)" />` : ''}
     <div class="stat-name">Infobox</div>
     <table class="stat-table">
       <tr><td>Type</td><td>${escHtml(entry.kind || entry.cat || 'Entry')}</td></tr>
@@ -5575,7 +5594,8 @@ async function handleCodexImageUpload(event, targetField){
         : 'codex-edit-hero-image';
     const field = document.getElementById(fieldId);
     if(field) field.value = item.url;
-    if(status) status.textContent = `Uploaded ${item.name}. Save the entry to publish this image URL.`;
+    const label = targetField === 'flagImage' ? 'flag image' : targetField === 'nativeScriptImage' ? 'native script image' : 'hero image';
+    if(status) status.textContent = `Uploaded ${item.name} as the ${label}. Save the entry to show it on the published page.`;
   }catch(err){
     console.error('Codex image Supabase upload failed:', err);
     if(status) status.textContent = 'Upload failed.';
