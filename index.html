@@ -1269,7 +1269,11 @@ body.links-on .wl:hover{color:var(--red)}
 .codex-hero-alt:empty{display:none}
 .codex-article-wrap{
   display:grid;
-  grid-template-columns:1fr 284px;
+  grid-template-columns:minmax(160px,220px) minmax(0,760px) 284px;
+  gap:1.5rem;
+  justify-content:center;
+  align-items:start;
+  background:var(--white);
 }
 .wiki-title{
   font-family:var(--display);
@@ -1294,8 +1298,9 @@ body.links-on .wl:hover{color:var(--red)}
 }
 .wiki-content.codex-wiki-article{
   font-family:var(--serif);
-  max-width:880px;
-  border-right:1px solid var(--border);
+  width:100%;
+  max-width:none;
+  border-right:0;
 }
 .wiki-content p{
   margin-bottom:1.5em;
@@ -1339,8 +1344,12 @@ body.links-on .wl:hover{color:var(--red)}
   border:1px solid var(--border);
   background:var(--paper);
   padding:1rem 1.1rem;
-  margin:0 0 2rem;
-  width:min(360px,100%);
+  margin:2.5rem 0 0;
+  width:auto;
+  position:sticky;
+  top:5rem;
+  max-height:calc(100vh - 6.5rem);
+  overflow:auto;
 }
 .codex-toc-title{
   font-family:var(--display);
@@ -1395,6 +1404,14 @@ body.links-on .wl:hover{color:var(--red)}
   object-fit:contain;
   display:block;
   margin-bottom:1.2rem;
+}
+.codex-infobox-flag{
+  aspect-ratio:3/2;
+  margin-bottom:1rem;
+}
+.codex-infobox-script{
+  aspect-ratio:5/2;
+  margin:0.2rem 0 1.2rem;
 }
 .codex-infobox-image.logo{
   padding:2.4rem;
@@ -1975,6 +1992,7 @@ body:not(.admin-on) .admin-only{
   .codex-lucky{width:100%;}
   .codex-result{grid-template-columns:1fr;}
   .codex-article-wrap{grid-template-columns:1fr;}
+  .codex-toc{position:relative;top:auto;margin:1.25rem;}
   .toc-dashboard{grid-template-columns:1fr;}
   #toc-list{padding:2rem 1.25rem 4rem;}
   .toc-entry{grid-template-columns:2rem 1fr;gap:0 0.8rem;}
@@ -2043,6 +2061,7 @@ body:not(.admin-on) .admin-only{
       <div class="char-hero-scroll">Scroll to read &darr;</div>
     </div>
     <div class="codex-article-wrap">
+      <aside class="codex-toc-rail" id="codex-toc-rail"></aside>
       <article class="wiki-content" id="wiki-pg-content"></article>
       <aside class="char-stat-panel" id="codex-entry-panel"></aside>
     </div>
@@ -5371,9 +5390,9 @@ function codexHeadingId(text, used){
 
 function buildCodexTOC(content){
   if(!content) return;
+  const rail = document.getElementById('codex-toc-rail');
   const headings = Array.from(content.querySelectorAll('h2, h3'));
-  const old = content.querySelector('.codex-toc');
-  if(old) old.remove();
+  if(rail) rail.innerHTML = '';
   if(!headings.length) return;
   const used = new Set();
   const items = headings.map((heading, index)=>{
@@ -5387,7 +5406,7 @@ function buildCodexTOC(content){
   toc.className = 'codex-toc';
   toc.setAttribute('aria-label', 'Contents');
   toc.innerHTML = `<div class="codex-toc-title">Contents</div><ol class="codex-toc-list">${items}</ol>`;
-  content.insertBefore(toc, content.firstChild);
+  if(rail) rail.appendChild(toc);
 }
 
 function codexPanelHTML(entry){
@@ -5398,10 +5417,10 @@ function codexPanelHTML(entry){
     <tr><td>${escHtml(row[0])}</td><td>${escHtml(row[1])}</td></tr>
   `).join('');
   return `
-    ${flag ? `<img class="codex-infobox-image" src="${escHtml(flag)}" alt="${escHtml(entry.t)} flag" onerror="this.remove();" />` : ''}
-    ${nativeScript ? `<img class="codex-infobox-image" src="${escHtml(nativeScript)}" alt="${escHtml(entry.t)} native script" onerror="this.remove();" />` : ''}
+    ${flag ? `<img class="codex-infobox-image codex-infobox-flag" src="${escHtml(flag)}" alt="${escHtml(entry.t)} flag" onerror="this.remove();" />` : ''}
     <div class="codex-infobox-title">${escHtml(entry.t)}</div>
     <div class="codex-infobox-cat">${escHtml(entry.cat || 'Codex Entry')}</div>
+    ${nativeScript ? `<img class="codex-infobox-image codex-infobox-script" src="${escHtml(nativeScript)}" alt="${escHtml(entry.t)} native script" onerror="this.remove();" />` : ''}
     <div class="stat-name">Infobox</div>
     <table class="stat-table">
       <tr><td>Type</td><td>${escHtml(entry.kind || entry.cat || 'Entry')}</td></tr>
