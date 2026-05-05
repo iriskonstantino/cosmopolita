@@ -5184,6 +5184,7 @@ function normalizeCodexEntry(key, entry={}){
     kind:'',
     heroImage:'',
     mapImage:'',
+    nativeScriptImage:'',
     heroAlt:'',
     tags:[]
   }, entry, {
@@ -5219,6 +5220,7 @@ function codexSearchText(entry){
     entry.kind,
     entry.short,
     entry.desc,
+    entry.heroAlt,
     ...(entry.tags || []),
     ...(entry.meta || []).flat()
   ].join(' ').toLowerCase();
@@ -5319,11 +5321,13 @@ function codexArticleHTML(entry){
 function codexPanelHTML(entry){
   const tags = (entry.tags || []).map(tag=>`<span class="affil-tag">${escHtml(tag)}</span>`).join('');
   const image = codexHeroImage(entry);
+  const nativeScript = entry.nativeScriptImage || '';
   const metaRows = (entry.meta || []).map(row=>`
     <tr><td>${escHtml(row[0])}</td><td>${escHtml(row[1])}</td></tr>
   `).join('');
   return `
     ${image ? `<img class="codex-infobox-image" src="${escHtml(image)}" alt="${escHtml(entry.heroAlt || entry.t)}" onerror="this.remove();" />` : ''}
+    ${nativeScript ? `<img class="codex-infobox-image" src="${escHtml(nativeScript)}" alt="${escHtml(entry.t)} native script" onerror="this.remove();" />` : ''}
     <div class="codex-infobox-title">${escHtml(entry.t)}</div>
     <div class="codex-infobox-cat">${escHtml(entry.cat || 'Codex Entry')}</div>
     <div class="stat-name">Infobox</div>
@@ -5353,6 +5357,12 @@ function showCodexEntry(key){
   const src = codexHeroImage(entry);
   if(hero){
     hero.innerHTML = src ? `<img src="${escHtml(src)}" alt="${escHtml(entry.heroAlt || entry.t)}" onerror="this.remove();" />` : '';
+  }
+  const nativeScript = document.getElementById('codex-native-script');
+  if(nativeScript){
+    nativeScript.innerHTML = entry.nativeScriptImage
+      ? `<img class="codex-native-script-img" src="${escHtml(entry.nativeScriptImage)}" alt="${escHtml(entry.t)} native script" onerror="this.remove();" />`
+      : '';
   }
   document.getElementById('codex-entry-cat').textContent = entry.cat || 'Codex Entry';
   document.getElementById('codex-entry-title').innerHTML = escHtml(entry.t).replace(/\s+/g,'<br>');
@@ -5432,6 +5442,7 @@ function openCodexEntryEditor(key=''){
   document.getElementById('codex-edit-short').value = entry.short || '';
   document.getElementById('codex-edit-hero-image').value = entry.heroImage || '';
   document.getElementById('codex-edit-map-image').value = entry.mapImage || '';
+  document.getElementById('codex-edit-native-script-image').value = entry.nativeScriptImage || '';
   document.getElementById('codex-edit-hero-alt').value = entry.heroAlt || '';
   document.getElementById('codex-edit-tags').value = (entry.tags || []).join(', ');
   document.getElementById('codex-edit-desc').value = entry.desc || entry.b || '';
@@ -5465,7 +5476,11 @@ async function handleCodexImageUpload(event, targetField){
   if(status) status.textContent = 'Uploading image to Supabase...';
   try{
     const item = await uploadCodexImageToSupabase(file, targetField);
-    const fieldId = targetField === 'mapImage' ? 'codex-edit-map-image' : 'codex-edit-hero-image';
+    const fieldId = targetField === 'mapImage'
+      ? 'codex-edit-map-image'
+      : targetField === 'nativeScriptImage'
+        ? 'codex-edit-native-script-image'
+        : 'codex-edit-hero-image';
     const field = document.getElementById(fieldId);
     if(field) field.value = item.url;
     if(status) status.textContent = `Uploaded ${item.name}. Save the entry to publish this image URL.`;
@@ -5494,6 +5509,7 @@ async function saveCodexEntryEditor(){
     desc:document.getElementById('codex-edit-desc').value.trim(),
     heroImage:document.getElementById('codex-edit-hero-image').value.trim(),
     mapImage:document.getElementById('codex-edit-map-image').value.trim(),
+    nativeScriptImage:document.getElementById('codex-edit-native-script-image').value.trim(),
     heroAlt:document.getElementById('codex-edit-hero-alt').value.trim(),
     tags:splitTagText(document.getElementById('codex-edit-tags').value),
     meta:parseCodexMetaRows(document.getElementById('codex-edit-meta').value)
