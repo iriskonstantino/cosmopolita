@@ -1539,7 +1539,8 @@ body.links-on .wl:hover{color:var(--red)}
 /* ─── TOC CHAPTER LIST ──────────────────── */
 #toc-list{
   padding:3rem 2.5rem 5rem;
-  max-width:920px;
+  max-width:1180px;
+  margin:0 auto;
 }
 .toc-heading{
   font-family:var(--display);
@@ -1553,9 +1554,67 @@ body.links-on .wl:hover{color:var(--red)}
 }
 .toc-dashboard{
   display:grid;
-  grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
+  grid-template-columns:minmax(150px,0.48fr) minmax(0,1.35fr) minmax(260px,0.95fr);
   gap:1rem;
+  align-items:stretch;
   margin:0 0 3rem;
+}
+.toc-reader-rail{
+  border-top:1.5px solid var(--ink);
+  border-bottom:1.5px solid var(--ink);
+  padding:1.05rem 0.75rem 1rem 0;
+  color:var(--ink);
+  min-height:100%;
+}
+.toc-rail-kicker,
+.toc-rail-section{
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:#aaa;
+}
+.toc-rail-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:1rem;
+  line-height:1.05;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  margin:0.4rem 0 1rem;
+}
+.toc-rail-blurb{
+  font-family:var(--serif);
+  font-size:0.82rem;
+  line-height:1.55;
+  color:#3a3732;
+  margin:0 0 1.25rem;
+}
+.toc-rail-rule{
+  height:1px;
+  background:var(--border);
+  margin:0 0 1rem;
+}
+.toc-rail-order{
+  list-style:none;
+  margin:0.65rem 0 0;
+  padding:0;
+}
+.toc-rail-order li{
+  display:grid;
+  grid-template-columns:1.9rem 1fr;
+  gap:0.45rem;
+  align-items:start;
+  font-family:var(--mono);
+  font-size:0.56rem;
+  line-height:1.45;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#6f6b64;
+  margin-bottom:0.45rem;
+}
+.toc-rail-order span{
+  color:#b8b4ad;
 }
 .toc-dash-card{
   border:1.5px solid var(--ink);
@@ -1576,6 +1635,7 @@ body.links-on .wl:hover{color:var(--red)}
 .toc-dash-card.primary{
   background:var(--ink);
   color:var(--white);
+  min-height:100%;
 }
 .toc-dash-card.primary .toc-dash-label,
 .toc-dash-card.primary .toc-dash-meta,
@@ -1994,9 +2054,22 @@ body:not(.admin-on) .admin-only{
   .codex-article-wrap{grid-template-columns:1fr;}
   .codex-toc{position:relative;top:auto;margin:1.25rem;}
   .toc-dashboard{grid-template-columns:1fr;}
+  .toc-reader-rail{padding:1rem 0;border-top:1.5px solid var(--ink);border-bottom:1px solid var(--border)}
   #toc-list{padding:2rem 1.25rem 4rem;}
   .toc-entry{grid-template-columns:2rem 1fr;gap:0 0.8rem;}
   .toc-meta-tag{grid-column:2;color:#aaa;margin-top:0.35rem;}
+}
+@media(min-width:721px) and (max-width:1100px){
+  .toc-dashboard{
+    grid-template-columns:minmax(145px,0.5fr) minmax(0,1.2fr);
+  }
+  .toc-dash-stack{
+    grid-column:2;
+    grid-template-columns:1fr 1fr;
+  }
+  .toc-dash-card.compact{
+    min-height:8rem;
+  }
 }
 @media(max-width:1050px){
   #cv-reading-wrap,
@@ -2942,6 +3015,18 @@ function renderTOCDashboard(){
   const archiveContext = latest.volume || latest.book || latest.novel || 'Cosmopolita';
   dashboard.innerHTML = `
     <div class="toc-dashboard">
+      <aside class="toc-reader-rail" aria-label="Reader information">
+        <div class="toc-rail-kicker">Book I</div>
+        <div class="toc-rail-title">Logic of the Cervix</div>
+        <p class="toc-rail-blurb">A hypermodern imperial girlhood written through devotion, malls, sleep-pods, theology, and synthetic light.</p>
+        <div class="toc-rail-rule"></div>
+        <div class="toc-rail-section">Reading Order</div>
+        <ol class="toc-rail-order">
+          <li><span>01</span>Start from Beginning</li>
+          <li><span>02</span>Latest Chapter</li>
+          <li><span>03</span>Full Archive Below</li>
+        </ol>
+      </aside>
       <button class="toc-dash-card primary" type="button" onclick="showChapter('${escHtml(latest.id)}')">
         <div class="toc-dash-label">Latest Chapter</div>
         <div class="toc-dash-title">${escHtml(latestTitle)}</div>
@@ -4209,6 +4294,7 @@ function renderDetailEdit(d){
     <div class="dp-field">
       <label>Hero image URL</label>
       <input id="de-hero-image" value="${escHtml(d.heroImage||'')}" placeholder="https://... or assets/...">
+      <input id="de-hero-upload" type="file" accept="image/*" onchange="handleDetailCodexImageUpload(event,'heroImage')">
     </div>
     <div class="dp-field">
       <label>Map image URL</label>
@@ -4217,10 +4303,13 @@ function renderDetailEdit(d){
     <div class="dp-field">
       <label>Flag image URL</label>
       <input id="de-flag-image" value="${escHtml(codexFlagImage(d))}" placeholder="https://... or assets/...">
+      <input id="de-flag-upload" type="file" accept="image/*" onchange="handleDetailCodexImageUpload(event,'flagImage')">
     </div>
     <div class="dp-field">
       <label>Native script image URL</label>
       <input id="de-native-script-image" value="${escHtml(d.nativeScriptImage||'')}" placeholder="https://... or assets/...">
+      <input id="de-native-script-upload" type="file" accept="image/*" onchange="handleDetailCodexImageUpload(event,'nativeScriptImage')">
+      <div id="de-image-upload-status" class="char-image-current"></div>
     </div>
     <div class="dp-field">
       <label>Hero alt text</label>
@@ -5573,6 +5662,19 @@ function handleCodexEntryModalOverlayClick(event){
   if(event.target && event.target.id === 'codex-entry-modal-overlay') closeCodexEntryEditor();
 }
 
+function codexImageUploadTarget(targetField, context='modal'){
+  const prefix = context === 'detail' ? 'de' : 'codex-edit';
+  if(targetField === 'flagImage') return `${prefix}-flag-image`;
+  if(targetField === 'nativeScriptImage') return `${prefix}-native-script-image`;
+  return `${prefix}-hero-image`;
+}
+
+function codexImageUploadLabel(targetField){
+  if(targetField === 'flagImage') return 'flag image';
+  if(targetField === 'nativeScriptImage') return 'native script image';
+  return 'hero image';
+}
+
 async function handleCodexImageUpload(event, targetField){
   if(!requireAdmin()) return;
   const input = event.target;
@@ -5587,15 +5689,38 @@ async function handleCodexImageUpload(event, targetField){
   if(status) status.textContent = 'Uploading image to Supabase...';
   try{
     const item = await uploadCodexImageToSupabase(file, targetField);
-    const fieldId = targetField === 'flagImage'
-      ? 'codex-edit-flag-image'
-      : targetField === 'nativeScriptImage'
-        ? 'codex-edit-native-script-image'
-        : 'codex-edit-hero-image';
+    const fieldId = codexImageUploadTarget(targetField);
     const field = document.getElementById(fieldId);
     if(field) field.value = item.url;
-    const label = targetField === 'flagImage' ? 'flag image' : targetField === 'nativeScriptImage' ? 'native script image' : 'hero image';
+    const label = codexImageUploadLabel(targetField);
     if(status) status.textContent = `Uploaded ${item.name} as the ${label}. Save the entry to show it on the published page.`;
+  }catch(err){
+    console.error('Codex image Supabase upload failed:', err);
+    if(status) status.textContent = 'Upload failed.';
+    alert('Could not upload this Codex image to Supabase Storage. Make sure you are logged in as admin and the storage bucket is public-readable.');
+  }finally{
+    input.value = '';
+  }
+}
+
+async function handleDetailCodexImageUpload(event, targetField){
+  if(!requireAdmin()) return;
+  const input = event.target;
+  const file = input && input.files && input.files[0];
+  if(!file) return;
+  if(!String(file.type || '').startsWith('image/')){
+    alert('Choose an image file for the Codex entry.');
+    input.value = '';
+    return;
+  }
+  const status = document.getElementById('de-image-upload-status');
+  if(status) status.textContent = 'Uploading image to Supabase...';
+  try{
+    const item = await uploadCodexImageToSupabase(file, targetField);
+    const field = document.getElementById(codexImageUploadTarget(targetField, 'detail'));
+    if(field) field.value = item.url;
+    const label = codexImageUploadLabel(targetField);
+    if(status) status.textContent = `Uploaded ${item.name} as the ${label}. Save to show it on the published page.`;
   }catch(err){
     console.error('Codex image Supabase upload failed:', err);
     if(status) status.textContent = 'Upload failed.';
