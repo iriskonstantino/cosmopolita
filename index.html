@@ -762,6 +762,20 @@ body.links-on .wl:hover{color:var(--red)}
   padding:1rem 1.1rem 2rem;
   flex:1;
 }
+.dp-image{
+  width:100%;
+  aspect-ratio:4/5;
+  border:1px solid var(--border);
+  background:var(--paper);
+  margin-bottom:1rem;
+  overflow:hidden;
+}
+.dp-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
 .dp-desc{
   font-family:var(--serif);
   font-size:0.92rem;
@@ -4241,11 +4255,42 @@ function openDetail(d, key){
   rw.classList.add('detail-open');
 }
 
+function detailLookupSlug(value){
+  return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+
+function characterForDetail(key, d){
+  const candidates = [
+    key,
+    d && d.id,
+    d && d.characterId,
+    d && d.character_id,
+    d && d.t,
+    d && d.name
+  ].filter(Boolean);
+  return characters.find(char=>{
+    const charKeys = [char.id, char.name, detailLookupSlug(char.name)].filter(Boolean).map(v=>String(v).toLowerCase());
+    return candidates.some(candidate=>charKeys.includes(String(candidate).toLowerCase()) || charKeys.includes(detailLookupSlug(candidate)));
+  }) || null;
+}
+
+function detailImageHTML(d, key){
+  const character = characterForDetail(key, d);
+  if(character){
+    const html = characterImageHTML(character, character.name);
+    if(html) return `<div class="dp-image">${html}</div>`;
+  }
+  const url = d && (d.image || d.heroImage || d.portraitImage || d.portrait || '');
+  if(!url) return '';
+  return `<div class="dp-image"><img src="${escHtml(url)}" alt="${escHtml((d && (d.t || d.name)) || 'Entry image')}" onerror="handleCharacterImageError(this)" /></div>`;
+}
+
 function renderDetailView(d){
   document.getElementById('dp-cat').textContent = d.cat || 'Entry';
   document.getElementById('dp-title').textContent = d.t;
   const body = document.getElementById('dp-body');
-  let html = '<p class="dp-desc">' + (d.desc || d.b || '') + '</p>';
+  let html = detailImageHTML(d, _detailKey);
+  html += '<p class="dp-desc">' + (d.desc || d.b || '') + '</p>';
   if(d.meta && d.meta.length){
     html += '<div class="dp-also">Details</div><table class="dp-table">';
     d.meta.forEach(item=>{
@@ -4254,6 +4299,7 @@ function renderDetailView(d){
     html += '</table>';
   }
   body.innerHTML = html;
+  hydrateVaultImages(body);
   const editBtn = document.getElementById('dp-edit-btn');
   if(editBtn) editBtn.style.display = _detailKey && isAdmin() ? 'inline-flex' : 'none';
 }
