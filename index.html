@@ -2019,7 +2019,7 @@ body:not(.admin-on) .admin-only{
     <div class="cm-header">
       <div>
         <div class="cm-title" id="codex-modal-title">Codex Entry</div>
-        <div class="cm-hint">Add or edit Codex entries with hero imagery, map imagery, tags, and infobox rows.</div>
+        <div class="cm-hint">Add or edit Codex entries with hero imagery, flag imagery, tags, and infobox rows.</div>
       </div>
       <button class="cm-close" type="button" onclick="closeCodexEntryEditor()">Close</button>
     </div>
@@ -2054,13 +2054,13 @@ body:not(.admin-on) .admin-only{
         <div class="char-image-note">Uploads to Supabase Storage and fills the hero image URL for GitHub Pages.</div>
       </div>
       <div class="cm-field full">
-        <label class="cm-label">Map image URL</label>
-        <input id="codex-edit-map-image" class="cm-input" placeholder="https://... or assets/..." />
+        <label class="cm-label">Flag image URL</label>
+        <input id="codex-edit-flag-image" class="cm-input" placeholder="https://... or assets/..." />
       </div>
       <div class="cm-field full">
-        <label class="cm-label">Upload map image</label>
-        <input id="codex-map-upload" class="cm-input" type="file" accept="image/*" onchange="handleCodexImageUpload(event,'mapImage')" />
-        <div class="char-image-note">For nations, locations, and settings, map images are preferred in the hero and infobox.</div>
+        <label class="cm-label">Upload flag image</label>
+        <input id="codex-flag-upload" class="cm-input" type="file" accept="image/*" onchange="handleCodexImageUpload(event,'flagImage')" />
+        <div class="char-image-note">Uploads to Supabase Storage and appears in the right-side infobox.</div>
       </div>
       <div class="cm-field full">
         <div id="codex-image-upload-status" class="char-image-current"></div>
@@ -4261,8 +4261,10 @@ async function uploadCodexImageToSupabase(file, target='hero'){
   if(!isAdmin()) throw new Error('Only the site admin can upload shared Codex images.');
   const safeName = cleanStorageFileName(file.name || 'codex-image.png');
   const uniqueId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}-${Math.floor(Math.random()*1000000)}`;
-  const folder = target === 'mapImage'
-    ? 'codex/maps'
+  const folder = target === 'flagImage'
+    ? 'codex/flags'
+    : target === 'mapImage'
+      ? 'codex/maps'
     : target === 'nativeScriptImage'
       ? 'codex/native-scripts'
       : 'codex/heroes';
@@ -5184,6 +5186,7 @@ function normalizeCodexEntry(key, entry={}){
     kind:'',
     heroImage:'',
     mapImage:'',
+    flagImage:'',
     nativeScriptImage:'',
     heroAlt:'',
     tags:[]
@@ -5201,16 +5204,12 @@ function codexEntries(){
     .sort((a,b)=>String(a.t || '').localeCompare(String(b.t || '')));
 }
 
-function isCodexPlaceLike(entry){
-  const text = `${entry.kind || ''} ${entry.cat || ''}`.toLowerCase();
-  return /(place|location|setting|nation|city|state|territory|province|region|facility)/.test(text);
+function codexHeroImage(entry){
+  return entry.heroImage || entry.mapImage || '';
 }
 
-function codexHeroImage(entry){
-  if(isCodexPlaceLike(entry)){
-    return entry.mapImage || entry.heroImage || '';
-  }
-  return entry.heroImage || entry.mapImage || '';
+function codexFlagImage(entry){
+  return entry.flagImage || entry.flag_image || '';
 }
 
 function codexSearchText(entry){
@@ -5320,13 +5319,13 @@ function codexArticleHTML(entry){
 
 function codexPanelHTML(entry){
   const tags = (entry.tags || []).map(tag=>`<span class="affil-tag">${escHtml(tag)}</span>`).join('');
-  const image = codexHeroImage(entry);
+  const flag = codexFlagImage(entry);
   const nativeScript = entry.nativeScriptImage || '';
   const metaRows = (entry.meta || []).map(row=>`
     <tr><td>${escHtml(row[0])}</td><td>${escHtml(row[1])}</td></tr>
   `).join('');
   return `
-    ${image ? `<img class="codex-infobox-image" src="${escHtml(image)}" alt="${escHtml(entry.heroAlt || entry.t)}" onerror="this.remove();" />` : ''}
+    ${flag ? `<img class="codex-infobox-image" src="${escHtml(flag)}" alt="${escHtml(entry.t)} flag" onerror="this.remove();" />` : ''}
     ${nativeScript ? `<img class="codex-infobox-image" src="${escHtml(nativeScript)}" alt="${escHtml(entry.t)} native script" onerror="this.remove();" />` : ''}
     <div class="codex-infobox-title">${escHtml(entry.t)}</div>
     <div class="codex-infobox-cat">${escHtml(entry.cat || 'Codex Entry')}</div>
@@ -5441,7 +5440,7 @@ function openCodexEntryEditor(key=''){
   document.getElementById('codex-edit-kind').value = entry.kind || '';
   document.getElementById('codex-edit-short').value = entry.short || '';
   document.getElementById('codex-edit-hero-image').value = entry.heroImage || '';
-  document.getElementById('codex-edit-map-image').value = entry.mapImage || '';
+  document.getElementById('codex-edit-flag-image').value = codexFlagImage(entry);
   document.getElementById('codex-edit-native-script-image').value = entry.nativeScriptImage || '';
   document.getElementById('codex-edit-hero-alt').value = entry.heroAlt || '';
   document.getElementById('codex-edit-tags').value = (entry.tags || []).join(', ');
@@ -5476,8 +5475,8 @@ async function handleCodexImageUpload(event, targetField){
   if(status) status.textContent = 'Uploading image to Supabase...';
   try{
     const item = await uploadCodexImageToSupabase(file, targetField);
-    const fieldId = targetField === 'mapImage'
-      ? 'codex-edit-map-image'
+    const fieldId = targetField === 'flagImage'
+      ? 'codex-edit-flag-image'
       : targetField === 'nativeScriptImage'
         ? 'codex-edit-native-script-image'
         : 'codex-edit-hero-image';
@@ -5508,7 +5507,8 @@ async function saveCodexEntryEditor(){
     short:document.getElementById('codex-edit-short').value.trim(),
     desc:document.getElementById('codex-edit-desc').value.trim(),
     heroImage:document.getElementById('codex-edit-hero-image').value.trim(),
-    mapImage:document.getElementById('codex-edit-map-image').value.trim(),
+    flagImage:document.getElementById('codex-edit-flag-image').value.trim(),
+    mapImage:E[key] && E[key].mapImage ? E[key].mapImage : '',
     nativeScriptImage:document.getElementById('codex-edit-native-script-image').value.trim(),
     heroAlt:document.getElementById('codex-edit-hero-alt').value.trim(),
     tags:splitTagText(document.getElementById('codex-edit-tags').value),
