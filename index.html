@@ -1609,6 +1609,7 @@ body.links-on .wl:hover{color:var(--red)}
   gap:1rem;
   margin-bottom:1rem;
 }
+.toc-section-label,
 .toc-books-label,
 .toc-books-meta,
 .toc-books-breadcrumb,
@@ -1618,10 +1619,16 @@ body.links-on .wl:hover{color:var(--red)}
   font-family:var(--mono);
   text-transform:uppercase;
 }
+.toc-section-label,
 .toc-books-label{
   font-size:0.58rem;
   letter-spacing:0.2em;
   color:#aaa;
+}
+.toc-section-label{
+  border-top:1.5px solid var(--ink);
+  padding-top:1rem;
+  margin:0 0 1rem;
 }
 .toc-books-meta{
   font-size:0.54rem;
@@ -2580,8 +2587,8 @@ body:not(.admin-on) .admin-only{
   </div>
   <div>
     <div id="toc-list">
-      <div class="toc-heading">Chapters</div>
       <div id="toc-books"></div>
+      <div class="toc-section-label">Chapters</div>
       <div id="toc-dashboard"></div>
       <div class="toc-archive-label">Archive</div>
       <div id="toc-entries"></div>
