@@ -3381,7 +3381,10 @@ function normalizeBookArchitecture(raw){
     const acts = Array.from({length:3}, (_,actIndex)=>{
       const sourceAct = novel.acts && novel.acts[actIndex] ? novel.acts[actIndex] : {};
       const fallbackAct = fallbackNovel.acts && fallbackNovel.acts[actIndex] ? fallbackNovel.acts[actIndex] : {};
-      const volumes = Array.from({length:TOC_BOOK_VOLUME_COUNT}, (_,volumeIndex)=>{
+      const sourceVolumeCount = sourceAct.volumes ? sourceAct.volumes.length : 0;
+      const fallbackVolumeCount = fallbackAct.volumes ? fallbackAct.volumes.length : 0;
+      const volumeCount = Math.max(TOC_BOOK_VOLUME_COUNT, sourceVolumeCount, fallbackVolumeCount);
+      const volumes = Array.from({length:volumeCount}, (_,volumeIndex)=>{
         const sourceVolume = sourceAct.volumes && sourceAct.volumes[volumeIndex] ? sourceAct.volumes[volumeIndex] : {};
         const fallbackVolume = fallbackAct.volumes && fallbackAct.volumes[volumeIndex] ? fallbackAct.volumes[volumeIndex] : {};
         const subvolumes = (sourceVolume.subvolumes || fallbackVolume.subvolumes || []).map(sub=>({
@@ -3439,7 +3442,7 @@ function getBookArchAct(novelTitle, actTitle){
 
 function getBookArchVolume(novelTitle, actTitle, volumeId){
   const act = getBookArchAct(novelTitle, actTitle);
-  const index = Math.max(0, Math.min(TOC_BOOK_VOLUME_COUNT - 1, Number(String(volumeId || '').replace('v','')) - 1 || 0));
+  const index = Math.max(0, Math.min(act.volumes.length - 1, Number(String(volumeId || '').replace('v','')) - 1 || 0));
   return act.volumes[index] || act.volumes[0];
 }
 
@@ -3500,7 +3503,7 @@ function getTOCVolumeSlots(novelName, actName){
   const actChapters = (chapters || []).filter(ch=>
     tocNovelName(ch) === novelName && tocActName(ch) === actName
   );
-  return Array.from({length:TOC_BOOK_VOLUME_COUNT}, (_,i)=>{
+  return Array.from({length:Math.max(TOC_BOOK_VOLUME_COUNT, archAct.volumes.length)}, (_,i)=>{
     const volume = archAct.volumes[i];
     const volumeName = volume.title || defaultVolumeTitle(i);
     let slotChapters = actChapters.filter(ch=>tocVolumeName(ch) === volumeName);
@@ -3669,12 +3672,24 @@ function saveTOCBookActEditor(){
 function saveTOCBookVolumeEditor(){
   if(!requireAdmin()) return;
   const act = getBookArchAct(_tocBooksState.novel, _tocBooksState.act);
-  act.volumes.forEach((volume, index)=>{
+  act.volumes = act.volumes.map((volume, index)=>{
     const title = tocInputValue(`[data-book-volume-title="${index}"]`);
-    volume.title = title || defaultVolumeTitle(index);
-    volume.blurb = title ? tocInputValue(`[data-book-volume-blurb="${index}"]`) : '';
-    if(!title) volume.subvolumes = [];
-  });
+    if(index >= TOC_BOOK_VOLUME_COUNT && !title) return null;
+    return {
+      ...volume,
+      title: title || defaultVolumeTitle(index),
+      blurb: title ? tocInputValue(`[data-book-volume-blurb="${index}"]`) : '',
+      subvolumes: title ? volume.subvolumes : []
+    };
+  }).filter(Boolean);
+  const newTitle = tocInputValue('[data-book-new-volume-title]');
+  if(newTitle){
+    act.volumes.push({
+      title: newTitle,
+      blurb: tocInputValue('[data-book-new-volume-blurb]'),
+      subvolumes: []
+    });
+  }
   bookArchitecture = normalizeBookArchitecture(bookArchitecture);
   saveBookArchitecture();
   _tocBooksState.volume = null;
@@ -3686,9 +3701,13 @@ function deleteTOCBookVolume(index){
   const act = getBookArchAct(_tocBooksState.novel, _tocBooksState.act);
   const volume = act.volumes[index];
   if(!volume) return;
+  if(index >= TOC_BOOK_VOLUME_COUNT){
+    act.volumes.splice(index, 1);
+  } else {
   volume.title = defaultVolumeTitle(index);
   volume.blurb = '';
   volume.subvolumes = [];
+  }
   bookArchitecture = normalizeBookArchitecture(bookArchitecture);
   saveBookArchitecture();
   _tocBooksState.volume = null;
@@ -3794,6 +3813,11 @@ function renderTOCBooksEditor(){
               </div>
             </div>
           `).join('')}
+          <div class="toc-books-edit-row">
+            <div class="toc-books-edit-label">Add Volume</div>
+            <input class="toc-books-edit-input" data-book-new-volume-title placeholder="New volume title">
+            <textarea class="toc-books-edit-textarea" data-book-new-volume-blurb placeholder="New volume blurb"></textarea>
+          </div>
         </div>
         <div class="toc-books-editor-actions">
           <button class="toc-books-editor-btn" type="button" onclick="saveTOCBookVolumeEditor()">Save Volumes</button>
@@ -3836,6 +3860,15 @@ function renderTOCBooksBreadcrumb(){
   }
   if(s.subvolume) crumbs.push(`<span>/</span><span>${escHtml(s.subvolume)}</span>`);
   return `<div class="toc-books-breadcrumb">${crumbs.join('')}</div>`;
+}
+
+function tocBooksMetaText(chapterTotal){
+  const s = _tocBooksState;
+  if(s.novel && s.act){
+    const act = getBookArchAct(s.novel, s.act);
+    return `${chapterTotal} ${chapterTotal===1?'chapter':'chapters'} / ${act.volumes.length} volumes in this act`;
+  }
+  return `${chapterTotal} ${chapterTotal===1?'chapter':'chapters'} / 3 acts / ${TOC_BOOK_VOLUME_COUNT}+ volumes per act`;
 }
 
 function renderTOCBooks(){
@@ -3922,7 +3955,7 @@ function renderTOCBooks(){
     <section class="toc-books" aria-label="Books browser">
       <div class="toc-books-top">
         <div class="toc-books-label">Books</div>
-        <div class="toc-books-meta">${chapterTotal} ${chapterTotal===1?'chapter':'chapters'} / 3 acts / 11 volumes per act</div>
+        <div class="toc-books-meta">${tocBooksMetaText(chapterTotal)}</div>
       </div>
       ${body}
       ${renderTOCBooksEditor()}
