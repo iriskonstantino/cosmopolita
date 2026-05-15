@@ -178,11 +178,33 @@ body{
   background:var(--white);
   border-bottom:1.5px solid var(--ink);
   display:grid;
-  grid-template-columns:1fr 118px;
+  grid-template-columns:1fr;
   min-height:180px;
   overflow:hidden;
 }
-.chdr-left{padding:1.6rem 2.5rem 1.4rem 2.5rem}
+.toc-compact-header{
+  grid-template-columns:1fr;
+  min-height:0;
+}
+.toc-compact-header .chdr-left{
+  padding:1.15rem 2.5rem 1rem;
+}
+.toc-compact-header .chdr-title{
+  font-size:clamp(1.55rem,3vw,2.35rem);
+  margin-bottom:0.28rem;
+}
+.toc-compact-header .chdr-subtitle{
+  margin-bottom:0;
+}
+.toc-compact-header .chdr-deco{
+  display:none;
+}
+.chdr-left{
+  padding:1.6rem 2.5rem 1.4rem 2.5rem;
+  position:relative;
+  overflow:hidden;
+}
+.chdr-left > *{position:relative;z-index:2}
 .chdr-supertitle{
   font-family:var(--mono);
   font-size:0.6rem;
@@ -252,8 +274,8 @@ body{
 .meta-val{font-family:var(--mono);font-size:0.66rem;color:var(--red)}
 .meta-val.g{color:var(--green)}
 
-/* Right decorative geometry */
-.chdr-deco{display:flex;flex-direction:column}
+/* Right decorative geometry removed */
+.chdr-deco{display:none}
 .deco-gold{background:#e8a020;flex:3}
 .deco-red{background:#b83232;height:18px;flex-shrink:0}
 .deco-navy{
@@ -2067,6 +2089,8 @@ body:not(.admin-on) .admin-only{
   .codex-result{grid-template-columns:1fr;}
   .codex-article-wrap{grid-template-columns:1fr;}
   .codex-toc{position:relative;top:auto;margin:1.25rem;}
+  .toc-compact-header{grid-template-columns:1fr;}
+  .toc-compact-header .chdr-left{padding:1rem 1.25rem 0.9rem;}
   .toc-dashboard{grid-template-columns:1fr;}
   .toc-reader-rail{padding:1rem 0;border-top:1.5px solid var(--ink);border-bottom:1px solid var(--border)}
   #toc-list{padding:2rem 1.25rem 4rem;}
@@ -2267,7 +2291,7 @@ body:not(.admin-on) .admin-only{
 
 <!-- ════ TABLE OF CONTENTS ══════════════════════════ -->
 <div id="toc-view" style="display:none">
-  <div class="chapter-header">
+  <div class="chapter-header toc-compact-header">
     <div class="chdr-left">
       <div class="chdr-title">Table of Contents</div>
       <div class="chdr-subtitle">Cosmopolita &nbsp;&middot;&nbsp; Nathan Saint-Yves</div>
