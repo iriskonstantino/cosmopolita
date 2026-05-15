@@ -1665,7 +1665,19 @@ body.links-on .wl:hover{color:var(--red)}
   grid-template-columns:repeat(4,minmax(0,1fr));
 }
 .toc-books-grid.subvolumes{
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.toc-books-grid.subvolumes .toc-books-card{
+  min-height:5.8rem;
+  padding:0.78rem 0.85rem;
+}
+.toc-books-grid.subvolumes .toc-books-card-title{
+  font-size:0.88rem;
+}
+.toc-books-grid.subvolumes .toc-books-card-blurb{
+  font-size:0.72rem;
+  line-height:1.4;
+  margin:0.5rem 0 0.75rem;
 }
 .toc-books-card{
   display:flex;
