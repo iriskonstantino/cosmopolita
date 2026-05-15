@@ -1588,6 +1588,218 @@ body.links-on .wl:hover{color:var(--red)}
   padding-bottom:0.6rem;
   margin-bottom:1.3rem;
 }
+.toc-books{
+  margin:0 0 2.8rem;
+  border-top:1.5px solid var(--ink);
+  border-bottom:1.5px solid var(--ink);
+  padding:1rem 0 1.15rem;
+}
+.toc-books-top{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:1rem;
+  margin-bottom:1rem;
+}
+.toc-books-label,
+.toc-books-meta,
+.toc-books-breadcrumb,
+.toc-books-empty,
+.toc-books-card-meta,
+.toc-books-card-action{
+  font-family:var(--mono);
+  text-transform:uppercase;
+}
+.toc-books-label{
+  font-size:0.58rem;
+  letter-spacing:0.2em;
+  color:#aaa;
+}
+.toc-books-meta{
+  font-size:0.54rem;
+  letter-spacing:0.16em;
+  color:#aaa;
+  text-align:right;
+}
+.toc-books-breadcrumb{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:0.35rem;
+  font-size:0.54rem;
+  letter-spacing:0.12em;
+  color:#aaa;
+  margin:0 0 1rem;
+}
+.toc-books-crumb{
+  border:0;
+  background:transparent;
+  padding:0;
+  font:inherit;
+  color:var(--ink);
+  cursor:pointer;
+  text-transform:uppercase;
+}
+.toc-books-crumb:hover{color:var(--red)}
+.toc-books-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0.85rem;
+}
+.toc-books-grid.volumes{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.toc-books-grid.subvolumes{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.toc-books-card{
+  display:flex;
+  flex-direction:column;
+  min-height:8.5rem;
+  border:1.5px solid var(--ink);
+  background:var(--paper);
+  color:var(--ink);
+  text-align:left;
+  padding:1rem;
+  cursor:pointer;
+  transition:background .16s,color .16s,border-color .16s;
+  width:100%;
+}
+.toc-books-card:hover,
+.toc-books-card:focus-visible{
+  background:var(--ink);
+  color:var(--white);
+  outline:none;
+}
+.toc-books-card:hover .toc-books-card-meta,
+.toc-books-card:hover .toc-books-card-blurb,
+.toc-books-card:hover .toc-books-card-action,
+.toc-books-card:focus-visible .toc-books-card-meta,
+.toc-books-card:focus-visible .toc-books-card-blurb,
+.toc-books-card:focus-visible .toc-books-card-action{color:var(--white)}
+.toc-books-card.empty{
+  border-color:var(--border);
+  color:#aaa;
+  cursor:pointer;
+}
+.toc-books-card.empty:hover,
+.toc-books-card.empty:focus-visible{
+  background:#f4f1ea;
+  color:#777;
+}
+.toc-books-card-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:1.02rem;
+  line-height:1.08;
+  letter-spacing:0.07em;
+  text-transform:uppercase;
+}
+.toc-books-card-meta{
+  font-size:0.54rem;
+  letter-spacing:0.14em;
+  color:#aaa;
+  margin-bottom:0.65rem;
+}
+.toc-books-card-blurb{
+  font-family:var(--serif);
+  font-size:0.78rem;
+  line-height:1.5;
+  color:#4d4942;
+  margin:0.75rem 0 1rem;
+}
+.toc-books-card-action{
+  font-size:0.54rem;
+  letter-spacing:0.18em;
+  color:var(--red);
+  margin-top:auto;
+}
+.toc-books-editor{
+  margin-top:1rem;
+  border-top:1px solid var(--border);
+  padding-top:1rem;
+}
+.toc-books-editor-title{
+  font-family:var(--mono);
+  font-size:0.56rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:0.75rem;
+}
+.toc-books-editor-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.75rem;
+}
+.toc-books-editor-grid.volumes{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.toc-books-edit-row{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.75rem;
+}
+.toc-books-edit-label{
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:#aaa;
+  margin-bottom:0.35rem;
+}
+.toc-books-edit-input,
+.toc-books-edit-textarea{
+  width:100%;
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:0.82rem;
+  padding:0.45rem 0.55rem;
+  outline:none;
+}
+.toc-books-edit-textarea{
+  min-height:4.2rem;
+  resize:vertical;
+  line-height:1.4;
+  margin-top:0.45rem;
+}
+.toc-books-editor-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.55rem;
+  margin-top:0.8rem;
+}
+.toc-books-editor-btn{
+  border:1.5px solid var(--ink);
+  background:transparent;
+  color:var(--ink);
+  cursor:pointer;
+  font-family:var(--display);
+  font-size:0.58rem;
+  font-weight:700;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  padding:0.48rem 0.75rem;
+}
+.toc-books-editor-btn:hover{
+  background:var(--ink);
+  color:var(--white);
+}
+.toc-books-editor-btn.secondary{
+  border-color:var(--border);
+  color:#777;
+}
+.toc-books-chapters{
+  border-top:1px solid var(--border);
+}
+.toc-books-empty{
+  font-size:0.58rem;
+  letter-spacing:0.12em;
+  color:#aaa;
+  padding:1.25rem 0 0.2rem;
+}
 .toc-dashboard{
   display:grid;
   grid-template-columns:minmax(150px,0.48fr) minmax(0,1.35fr) minmax(260px,0.95fr);
@@ -2092,6 +2304,14 @@ body:not(.admin-on) .admin-only{
   .toc-compact-header{grid-template-columns:1fr;}
   .toc-compact-header .chdr-left{padding:1rem 1.25rem 0.9rem;}
   .toc-dashboard{grid-template-columns:1fr;}
+  .toc-books-top{display:block;}
+  .toc-books-meta{text-align:left;margin-top:0.45rem;}
+  .toc-books-grid,
+  .toc-books-grid.volumes,
+  .toc-books-grid.subvolumes{grid-template-columns:1fr;}
+  .toc-books-editor-grid,
+  .toc-books-editor-grid.volumes{grid-template-columns:1fr;}
+  .toc-books-card{min-height:7rem;}
   .toc-reader-rail{padding:1rem 0;border-top:1.5px solid var(--ink);border-bottom:1px solid var(--border)}
   #toc-list{padding:2rem 1.25rem 4rem;}
   .toc-entry{grid-template-columns:2rem 1fr;gap:0 0.8rem;}
@@ -2311,6 +2531,7 @@ body:not(.admin-on) .admin-only{
   <div>
     <div id="toc-list">
       <div class="toc-heading">Chapters</div>
+      <div id="toc-books"></div>
       <div id="toc-dashboard"></div>
       <div class="toc-archive-label">Archive</div>
       <div id="toc-entries"></div>
@@ -2596,16 +2817,24 @@ body:not(.admin-on) .admin-only{
         <input class="cm-input" id="cm-novel" placeholder="e.g. WILL OF AN ARCHITECT">
       </div>
       <div class="cm-field">
+        <label class="cm-label">Act <span style="color:#ccc">(optional)</span></label>
+        <input class="cm-input" id="cm-act" placeholder="e.g. Her Comforting Light">
+      </div>
+      <div class="cm-field">
         <label class="cm-label">Chapter Number / Label</label>
         <input class="cm-input" id="cm-num" placeholder="e.g. I, II, Interlude">
       </div>
       <div class="cm-field full">
-        <label class="cm-label">Book <span style="color:#c00">*</span></label>
+        <label class="cm-label">Volume / Book <span style="color:#c00">*</span></label>
         <input class="cm-input" id="cm-book" placeholder="e.g. Teenage Dreams in Technicolor">
       </div>
       <div class="cm-field">
-        <label class="cm-label">Volume <span style="color:#ccc">(optional)</span></label>
-        <input class="cm-input" id="cm-volume" placeholder="e.g. Her Comforting Light">
+        <label class="cm-label">Archive Volume <span style="color:#ccc">(optional)</span></label>
+        <input class="cm-input" id="cm-volume" placeholder="Only use for legacy/archive grouping">
+      </div>
+      <div class="cm-field">
+        <label class="cm-label">Subvolume <span style="color:#ccc">(optional)</span></label>
+        <input class="cm-input" id="cm-subvolume" placeholder="e.g. Subvolume A">
       </div>
       <div class="cm-field">
         <label class="cm-label">Part <span style="color:#ccc">(optional)</span></label>
@@ -2705,8 +2934,10 @@ const DEFAULT_CHAPTERS = [
     id: 'ch-1',
     num: 'I',
     novel: 'WILL OF AN ARCHITECT',
+    act: 'Her Comforting Light',
     book: 'Teenage Dreams in Technicolor',
-    volume: 'Her Comforting Light',
+    volume: 'Teenage Dreams in Technicolor',
+    subvolume: 'Logic of the Cervix',
     part: 'Logic of the Cervix',
     chapter: 'Overture, or the Cosmic Womb',
     meta: {
@@ -2731,8 +2962,10 @@ function normalizeChapterList(raw){
     id: c.id || ('ch-' + (i + 1)),
     num: c.num || '',
     novel: c.novel || '',
+    act: c.act || '',
     book: c.book || c.title || '',
     volume: c.volume || '',
+    subvolume: c.subvolume || '',
     part: c.part || '',
     chapter: c.chapter || c.name || '',
     meta: {
@@ -2848,7 +3081,7 @@ function importChapters(event){
   reader.readAsText(file);
 }
 
-let chapters = loadChapters();
+let chapters = normalizeChapterList(loadChapters());
 let _editingChapterId = null;
 let _currentChapterId = null;
 let _currentCharacterId = null;
@@ -2993,7 +3226,7 @@ function getLatestChapter(){
 
 function chapterHierarchyLabel(ch){
   if(!ch) return '';
-  return [ch.part, ch.book, ch.volume, ch.novel].filter(Boolean).join(' · ');
+  return [ch.subvolume || ch.part, ch.volume, ch.act, ch.book, ch.novel].filter(Boolean).join(' · ');
 }
 
 function groupChaptersForTOC(list){
@@ -3020,6 +3253,511 @@ function groupChaptersForTOC(list){
     part.chapters.push({chapter:ch, index});
   });
   return groups;
+}
+
+const BOOK_ARCH_STORAGE_KEY = 'cosmopolita_book_architecture';
+const DEFAULT_BOOK_ACT_TITLES = ['Her Comforting Light','Her Maternal City','Her Tropical Dreambath'];
+const TOC_BOOK_VOLUME_COUNT = 11;
+const DEFAULT_BOOK_ARCHITECTURE = {
+  novels: [{
+    title: 'WILL OF AN ARCHITECT',
+    blurb: 'A planned architecture of girlhood, empire, devotion, submission, and synthetic light.',
+    acts: [
+      {
+        title: 'Her Comforting Light',
+        blurb: 'The first chamber of the novel: adolescence, surrender, radiance, and the architecture of becoming.',
+        volumes: [{
+          title: 'Teenage Dreams in Technicolor',
+          blurb: 'Volume 01: the luminous entry sequence.',
+          subvolumes: [{
+            title: 'Logic of the Cervix',
+            blurb: 'The opening subvolume, where chapters gather around birth, passage, and administrative myth.'
+          }]
+        }]
+      },
+      {
+        title: 'Her Maternal City',
+        blurb: 'The second chamber of the novel: city, mother, institution, appetite, and sacred administration.',
+        volumes: []
+      },
+      {
+        title: 'Her Tropical Dreambath',
+        blurb: 'The third chamber of the novel: fever, paradise, liquidity, memory, and hyperreal revelation.',
+        volumes: []
+      }
+    ]
+  }]
+};
+let _tocBooksState = {novel:null, act:null, volume:null, subvolume:null};
+
+function tocJsArg(value){
+  const escaped = String(value || '')
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/\n/g,'\\n')
+    .replace(/\r/g,'');
+  return "'" + escHtml(escaped) + "'";
+}
+
+function cloneBookArchitecture(obj){
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function defaultVolumeTitle(index){
+  return `Volume ${String(index + 1).padStart(2,'0')}`;
+}
+
+function normalizeBookArchitecture(raw){
+  const source = raw && Array.isArray(raw.novels) ? raw : DEFAULT_BOOK_ARCHITECTURE;
+  const novels = source.novels.map((novel, novelIndex)=>{
+    const fallbackNovel = DEFAULT_BOOK_ARCHITECTURE.novels[novelIndex] || DEFAULT_BOOK_ARCHITECTURE.novels[0];
+    const title = (novel.title || novel.name || fallbackNovel.title || 'UNTITLED NOVEL').trim();
+    const acts = Array.from({length:3}, (_,actIndex)=>{
+      const sourceAct = novel.acts && novel.acts[actIndex] ? novel.acts[actIndex] : {};
+      const fallbackAct = fallbackNovel.acts && fallbackNovel.acts[actIndex] ? fallbackNovel.acts[actIndex] : {};
+      const volumes = Array.from({length:TOC_BOOK_VOLUME_COUNT}, (_,volumeIndex)=>{
+        const sourceVolume = sourceAct.volumes && sourceAct.volumes[volumeIndex] ? sourceAct.volumes[volumeIndex] : {};
+        const fallbackVolume = fallbackAct.volumes && fallbackAct.volumes[volumeIndex] ? fallbackAct.volumes[volumeIndex] : {};
+        const subvolumes = (sourceVolume.subvolumes || fallbackVolume.subvolumes || []).map(sub=>({
+          title: (sub.title || sub.name || '').trim(),
+          blurb: sub.blurb || ''
+        })).filter(sub=>sub.title);
+        return {
+          title: (sourceVolume.title || sourceVolume.name || fallbackVolume.title || defaultVolumeTitle(volumeIndex)).trim(),
+          blurb: sourceVolume.blurb || fallbackVolume.blurb || '',
+          subvolumes
+        };
+      });
+      return {
+        title: (sourceAct.title || sourceAct.name || fallbackAct.title || DEFAULT_BOOK_ACT_TITLES[actIndex]).trim(),
+        blurb: sourceAct.blurb || fallbackAct.blurb || '',
+        volumes
+      };
+    });
+    return {
+      title,
+      blurb: novel.blurb || fallbackNovel.blurb || '',
+      acts
+    };
+  });
+  if(!novels.find(novel=>novel.title === 'WILL OF AN ARCHITECT')){
+    novels.unshift(cloneBookArchitecture(DEFAULT_BOOK_ARCHITECTURE).novels[0]);
+  }
+  return {novels};
+}
+
+function loadBookArchitecture(){
+  try{
+    const saved = localStorage.getItem(BOOK_ARCH_STORAGE_KEY);
+    if(saved) return normalizeBookArchitecture(JSON.parse(saved));
+  }catch(e){}
+  return normalizeBookArchitecture(DEFAULT_BOOK_ARCHITECTURE);
+}
+
+function saveBookArchitecture(){
+  try{
+    localStorage.setItem(BOOK_ARCH_STORAGE_KEY, JSON.stringify(bookArchitecture));
+  }catch(e){}
+}
+
+let bookArchitecture = loadBookArchitecture();
+
+function getBookArchNovel(title){
+  return bookArchitecture.novels.find(novel=>novel.title === title) || bookArchitecture.novels[0];
+}
+
+function getBookArchAct(novelTitle, actTitle){
+  const novel = getBookArchNovel(novelTitle);
+  return novel.acts.find(act=>act.title === actTitle) || novel.acts[0];
+}
+
+function getBookArchVolume(novelTitle, actTitle, volumeId){
+  const act = getBookArchAct(novelTitle, actTitle);
+  const index = Math.max(0, Math.min(TOC_BOOK_VOLUME_COUNT - 1, Number(String(volumeId || '').replace('v','')) - 1 || 0));
+  return act.volumes[index] || act.volumes[0];
+}
+
+function legacyActLabel(ch){
+  if(!ch) return '';
+  const raw = (ch.act || '').trim();
+  if(raw && !/^Act\s+(I|II|III|1|2|3)$/i.test(raw)) return raw;
+  const legacyVolume = (ch.volume || '').trim();
+  if(DEFAULT_BOOK_ACT_TITLES.includes(legacyVolume)) return legacyVolume;
+  const index = raw.match(/II\b|2/) ? 1 : raw.match(/III\b|3/) ? 2 : 0;
+  return DEFAULT_BOOK_ACT_TITLES[index];
+}
+
+function tocNovelName(ch){
+  return ch && ch.novel ? ch.novel : 'WILL OF AN ARCHITECT';
+}
+
+function tocActName(ch){
+  const novel = getBookArchNovel(tocNovelName(ch));
+  const label = legacyActLabel(ch);
+  const matched = novel.acts.find(act=>act.title.toLowerCase() === label.toLowerCase());
+  return matched ? matched.title : label || novel.acts[0].title;
+}
+
+function tocVolumeName(ch){
+  if(!ch) return 'Uncollected Volume';
+  const actName = tocActName(ch);
+  const volume = ch.volume || '';
+  if(ch.book && (!volume || volume === actName || DEFAULT_BOOK_ACT_TITLES.includes(volume))){
+    return ch.book;
+  }
+  return volume || ch.book || 'Uncollected Volume';
+}
+
+function tocSubvolumeName(ch){
+  return ch && (ch.subvolume || ch.part) ? (ch.subvolume || ch.part) : 'Main Sequence';
+}
+
+function groupChaptersForBooks(){
+  const names = bookArchitecture.novels.map(novel=>novel.title);
+  (chapters || []).forEach(ch=>{
+    const name = tocNovelName(ch);
+    if(!names.includes(name)) names.push(name);
+  });
+  return names.map(name=>{
+    const arch = getBookArchNovel(name) || {title:name, blurb:''};
+    const novelChapters = (chapters || []).filter(ch=>tocNovelName(ch) === name);
+    return {
+      name,
+      blurb: arch.blurb || 'A planned novel architecture awaiting its formal abstract.',
+      chapters: novelChapters
+    };
+  });
+}
+
+function getTOCVolumeSlots(novelName, actName){
+  const archAct = getBookArchAct(novelName, actName);
+  const actChapters = (chapters || []).filter(ch=>
+    tocNovelName(ch) === novelName && tocActName(ch) === actName
+  );
+  return Array.from({length:TOC_BOOK_VOLUME_COUNT}, (_,i)=>{
+    const volume = archAct.volumes[i];
+    const volumeName = volume.title || defaultVolumeTitle(i);
+    let slotChapters = actChapters.filter(ch=>tocVolumeName(ch) === volumeName);
+    if(!slotChapters.length && i === 0){
+      const knownTitles = archAct.volumes.map(v=>v.title);
+      slotChapters = actChapters.filter(ch=>!knownTitles.includes(tocVolumeName(ch)));
+    }
+    return {
+      id: `v${String(i + 1).padStart(2,'0')}`,
+      label: volumeName,
+      blurb: volume.blurb || '',
+      index: i + 1,
+      chapters: slotChapters,
+      subvolumes: volume.subvolumes || []
+    };
+  });
+}
+
+function getTOCBookSubvolumes(volumeSlot){
+  const groups = (volumeSlot && volumeSlot.subvolumes || []).map(sub=>({
+    name: sub.title,
+    blurb: sub.blurb || '',
+    chapters: []
+  }));
+  const volumeChapters = volumeSlot ? volumeSlot.chapters : [];
+  (volumeChapters || []).forEach((ch, index)=>{
+    const name = tocSubvolumeName(ch);
+    let group = groups.find(g=>g.name === name);
+    if(!group){
+      group = {name, blurb:'', chapters:[]};
+      groups.push(group);
+    }
+    group.chapters.push({chapter:ch, index:chapters.indexOf(ch) >= 0 ? chapters.indexOf(ch) : index});
+  });
+  return groups;
+}
+
+function setTOCBooksRoot(){
+  _tocBooksState = {novel:null, act:null, volume:null, subvolume:null};
+  renderTOCBooks();
+}
+
+function setTOCBooksNovel(novel){
+  _tocBooksState = {novel, act:null, volume:null, subvolume:null};
+  renderTOCBooks();
+}
+
+function setTOCBooksAct(act){
+  _tocBooksState = {..._tocBooksState, act, volume:null, subvolume:null};
+  renderTOCBooks();
+}
+
+function setTOCBooksVolume(volume){
+  _tocBooksState = {..._tocBooksState, volume, subvolume:null};
+  renderTOCBooks();
+}
+
+function setTOCBooksSubvolume(subvolume){
+  _tocBooksState = {..._tocBooksState, subvolume};
+  renderTOCBooks();
+}
+
+function tocInputValue(selector){
+  const el = document.querySelector(selector);
+  return el ? el.value.trim() : '';
+}
+
+function saveTOCBookRootEditor(){
+  if(!requireAdmin()) return;
+  bookArchitecture.novels.forEach((novel, index)=>{
+    const title = tocInputValue(`[data-book-novel-title="${index}"]`);
+    if(title) novel.title = title;
+    novel.blurb = tocInputValue(`[data-book-novel-blurb="${index}"]`);
+  });
+  const newTitle = tocInputValue('[data-book-new-novel-title]');
+  if(newTitle){
+    const fresh = cloneBookArchitecture(DEFAULT_BOOK_ARCHITECTURE).novels[0];
+    fresh.title = newTitle;
+    fresh.blurb = tocInputValue('[data-book-new-novel-blurb]');
+    bookArchitecture.novels.push(fresh);
+  }
+  bookArchitecture = normalizeBookArchitecture(bookArchitecture);
+  saveBookArchitecture();
+  setTOCBooksRoot();
+}
+
+function saveTOCBookActEditor(){
+  if(!requireAdmin()) return;
+  const novel = getBookArchNovel(_tocBooksState.novel);
+  novel.acts.forEach((act, index)=>{
+    const title = tocInputValue(`[data-book-act-title="${index}"]`);
+    if(title) act.title = title;
+    act.blurb = tocInputValue(`[data-book-act-blurb="${index}"]`);
+  });
+  bookArchitecture = normalizeBookArchitecture(bookArchitecture);
+  saveBookArchitecture();
+  _tocBooksState.act = null;
+  renderTOCBooks();
+}
+
+function saveTOCBookVolumeEditor(){
+  if(!requireAdmin()) return;
+  const act = getBookArchAct(_tocBooksState.novel, _tocBooksState.act);
+  act.volumes.forEach((volume, index)=>{
+    const title = tocInputValue(`[data-book-volume-title="${index}"]`);
+    if(title) volume.title = title;
+    volume.blurb = tocInputValue(`[data-book-volume-blurb="${index}"]`);
+  });
+  bookArchitecture = normalizeBookArchitecture(bookArchitecture);
+  saveBookArchitecture();
+  _tocBooksState.volume = null;
+  renderTOCBooks();
+}
+
+function saveTOCBookSubvolumeEditor(){
+  if(!requireAdmin()) return;
+  const volume = getBookArchVolume(_tocBooksState.novel, _tocBooksState.act, _tocBooksState.volume);
+  volume.subvolumes = (volume.subvolumes || []).map((sub, index)=>({
+    title: tocInputValue(`[data-book-subvolume-title="${index}"]`) || sub.title,
+    blurb: tocInputValue(`[data-book-subvolume-blurb="${index}"]`)
+  })).filter(sub=>sub.title);
+  const newTitle = tocInputValue('[data-book-new-subvolume-title]');
+  if(newTitle){
+    volume.subvolumes.push({
+      title: newTitle,
+      blurb: tocInputValue('[data-book-new-subvolume-blurb]')
+    });
+  }
+  bookArchitecture = normalizeBookArchitecture(bookArchitecture);
+  saveBookArchitecture();
+  _tocBooksState.subvolume = null;
+  renderTOCBooks();
+}
+
+function renderTOCBooksEditor(){
+  const s = _tocBooksState;
+  if(!s.novel){
+    return `
+      <div class="toc-books-editor admin-only">
+        <div class="toc-books-editor-title">Edit Books</div>
+        <div class="toc-books-editor-grid">
+          ${bookArchitecture.novels.map((novel,index)=>`
+            <div class="toc-books-edit-row">
+              <div class="toc-books-edit-label">Novel ${String(index + 1).padStart(2,'0')}</div>
+              <input class="toc-books-edit-input" data-book-novel-title="${index}" value="${escHtml(novel.title)}" placeholder="Novel title">
+              <textarea class="toc-books-edit-textarea" data-book-novel-blurb="${index}" placeholder="Novel blurb">${escHtml(novel.blurb)}</textarea>
+            </div>
+          `).join('')}
+          <div class="toc-books-edit-row">
+            <div class="toc-books-edit-label">Add Novel</div>
+            <input class="toc-books-edit-input" data-book-new-novel-title placeholder="New novel title">
+            <textarea class="toc-books-edit-textarea" data-book-new-novel-blurb placeholder="New novel blurb"></textarea>
+          </div>
+        </div>
+        <div class="toc-books-editor-actions">
+          <button class="toc-books-editor-btn" type="button" onclick="saveTOCBookRootEditor()">Save Books</button>
+        </div>
+      </div>`;
+  }
+  if(!s.act){
+    const novel = getBookArchNovel(s.novel);
+    return `
+      <div class="toc-books-editor admin-only">
+        <div class="toc-books-editor-title">Edit Acts</div>
+        <div class="toc-books-editor-grid">
+          ${novel.acts.map((act,index)=>`
+            <div class="toc-books-edit-row">
+              <div class="toc-books-edit-label">Act ${String(index + 1).padStart(2,'0')}</div>
+              <input class="toc-books-edit-input" data-book-act-title="${index}" value="${escHtml(act.title)}" placeholder="Act title">
+              <textarea class="toc-books-edit-textarea" data-book-act-blurb="${index}" placeholder="Act blurb">${escHtml(act.blurb)}</textarea>
+            </div>
+          `).join('')}
+        </div>
+        <div class="toc-books-editor-actions">
+          <button class="toc-books-editor-btn" type="button" onclick="saveTOCBookActEditor()">Save Acts</button>
+        </div>
+      </div>`;
+  }
+  if(!s.volume){
+    const act = getBookArchAct(s.novel, s.act);
+    return `
+      <div class="toc-books-editor admin-only">
+        <div class="toc-books-editor-title">Edit Volumes</div>
+        <div class="toc-books-editor-grid volumes">
+          ${act.volumes.map((volume,index)=>`
+            <div class="toc-books-edit-row">
+              <div class="toc-books-edit-label">Volume ${String(index + 1).padStart(2,'0')}</div>
+              <input class="toc-books-edit-input" data-book-volume-title="${index}" value="${escHtml(volume.title)}" placeholder="Volume title">
+              <textarea class="toc-books-edit-textarea" data-book-volume-blurb="${index}" placeholder="Volume blurb">${escHtml(volume.blurb)}</textarea>
+            </div>
+          `).join('')}
+        </div>
+        <div class="toc-books-editor-actions">
+          <button class="toc-books-editor-btn" type="button" onclick="saveTOCBookVolumeEditor()">Save Volumes</button>
+        </div>
+      </div>`;
+  }
+  const volume = getBookArchVolume(s.novel, s.act, s.volume);
+  return `
+    <div class="toc-books-editor admin-only">
+      <div class="toc-books-editor-title">Edit Subvolumes</div>
+      <div class="toc-books-editor-grid">
+        ${(volume.subvolumes || []).map((sub,index)=>`
+          <div class="toc-books-edit-row">
+            <div class="toc-books-edit-label">Subvolume ${String(index + 1).padStart(2,'0')}</div>
+            <input class="toc-books-edit-input" data-book-subvolume-title="${index}" value="${escHtml(sub.title)}" placeholder="Subvolume title">
+            <textarea class="toc-books-edit-textarea" data-book-subvolume-blurb="${index}" placeholder="Subvolume blurb">${escHtml(sub.blurb)}</textarea>
+          </div>
+        `).join('')}
+        <div class="toc-books-edit-row">
+          <div class="toc-books-edit-label">Add Subvolume</div>
+          <input class="toc-books-edit-input" data-book-new-subvolume-title placeholder="New subvolume title">
+          <textarea class="toc-books-edit-textarea" data-book-new-subvolume-blurb placeholder="New subvolume blurb"></textarea>
+        </div>
+      </div>
+      <div class="toc-books-editor-actions">
+        <button class="toc-books-editor-btn" type="button" onclick="saveTOCBookSubvolumeEditor()">Save Subvolumes</button>
+      </div>
+    </div>`;
+}
+
+function renderTOCBooksBreadcrumb(){
+  const s = _tocBooksState;
+  const crumbs = [`<button class="toc-books-crumb" type="button" onclick="setTOCBooksRoot()">Books</button>`];
+  if(s.novel) crumbs.push(`<span>/</span><button class="toc-books-crumb" type="button" onclick="setTOCBooksNovel(${tocJsArg(s.novel)})">${escHtml(s.novel)}</button>`);
+  if(s.act) crumbs.push(`<span>/</span><button class="toc-books-crumb" type="button" onclick="setTOCBooksAct(${tocJsArg(s.act)})">${escHtml(s.act)}</button>`);
+  if(s.volume){
+    const slot = getTOCVolumeSlots(s.novel, s.act).find(item=>item.id === s.volume);
+    crumbs.push(`<span>/</span><button class="toc-books-crumb" type="button" onclick="setTOCBooksVolume(${tocJsArg(s.volume)})">${escHtml(slot ? slot.label : s.volume.toUpperCase())}</button>`);
+  }
+  if(s.subvolume) crumbs.push(`<span>/</span><span>${escHtml(s.subvolume)}</span>`);
+  return `<div class="toc-books-breadcrumb">${crumbs.join('')}</div>`;
+}
+
+function renderTOCBooks(){
+  const root = document.getElementById('toc-books');
+  if(!root) return;
+  const s = _tocBooksState;
+  const books = groupChaptersForBooks();
+  const selectedBook = s.novel ? books.find(book=>book.name === s.novel) : null;
+  const chapterTotal = selectedBook ? selectedBook.chapters.length : (chapters || []).length;
+  let body = '';
+
+  if(!s.novel){
+    body = `
+      <div class="toc-books-grid">
+        ${books.map(book=>`
+          <button class="toc-books-card" type="button" onclick="setTOCBooksNovel(${tocJsArg(book.name)})">
+            <div class="toc-books-card-meta">${book.chapters.length} ${book.chapters.length===1?'chapter':'chapters'}</div>
+            <div class="toc-books-card-title">${escHtml(book.name)}</div>
+            <p class="toc-books-card-blurb">${escHtml(book.blurb)}</p>
+            <div class="toc-books-card-action">Open Book</div>
+          </button>
+        `).join('')}
+      </div>`;
+  } else if(!s.act){
+    const novel = getBookArchNovel(s.novel);
+    body = `
+      ${renderTOCBooksBreadcrumb()}
+      <div class="toc-books-grid">
+        ${novel.acts.map((act,index)=>{
+          const count = selectedBook ? selectedBook.chapters.filter(ch=>tocActName(ch) === act.title).length : 0;
+          return `
+            <button class="toc-books-card ${count ? '' : 'empty'}" type="button" onclick="setTOCBooksAct(${tocJsArg(act.title)})">
+              <div class="toc-books-card-meta">Act ${String(index + 1).padStart(2,'0')} / ${count ? `${count} ${count===1?'chapter':'chapters'}` : 'planned slot'}</div>
+              <div class="toc-books-card-title">${escHtml(act.title)}</div>
+              <p class="toc-books-card-blurb">${escHtml(act.blurb || (count ? 'A populated arc within the novel architecture.' : 'No chapters assigned here yet.'))}</p>
+              <div class="toc-books-card-action">Open Act</div>
+            </button>`;
+        }).join('')}
+      </div>`;
+  } else if(!s.volume){
+    const slots = getTOCVolumeSlots(s.novel, s.act);
+    body = `
+      ${renderTOCBooksBreadcrumb()}
+      <div class="toc-books-grid volumes">
+        ${slots.map(slot=>`
+          <button class="toc-books-card ${slot.chapters.length ? '' : 'empty'}" type="button" onclick="setTOCBooksVolume(${tocJsArg(slot.id)})">
+            <div class="toc-books-card-meta">Volume ${String(slot.index).padStart(2,'0')} / ${slot.chapters.length ? `${slot.chapters.length} ${slot.chapters.length===1?'chapter':'chapters'}` : 'empty'}</div>
+            <div class="toc-books-card-title">${escHtml(slot.label)}</div>
+            ${slot.blurb ? `<p class="toc-books-card-blurb">${escHtml(slot.blurb)}</p>` : ''}
+            <div class="toc-books-card-action">Open Volume</div>
+          </button>
+        `).join('')}
+      </div>`;
+  } else {
+    const slots = getTOCVolumeSlots(s.novel, s.act);
+    const slot = slots.find(item=>item.id === s.volume) || slots[0];
+    const subvolumes = getTOCBookSubvolumes(slot);
+    if(!s.subvolume){
+      body = `
+        ${renderTOCBooksBreadcrumb()}
+        ${subvolumes.length ? `
+          <div class="toc-books-grid subvolumes">
+            ${subvolumes.map(group=>`
+              <button class="toc-books-card" type="button" onclick="setTOCBooksSubvolume(${tocJsArg(group.name)})">
+                <div class="toc-books-card-meta">${group.chapters.length} ${group.chapters.length===1?'chapter':'chapters'}</div>
+                <div class="toc-books-card-title">${escHtml(group.name)}</div>
+                ${group.blurb ? `<p class="toc-books-card-blurb">${escHtml(group.blurb)}</p>` : ''}
+                <div class="toc-books-card-action">Open Subvolume</div>
+              </button>
+            `).join('')}
+          </div>` : `<div class="toc-books-empty">No subvolumes assigned to ${escHtml(slot ? slot.label : 'this volume')} yet.</div>`}`;
+    } else {
+      const group = subvolumes.find(item=>item.name === s.subvolume);
+      body = `
+        ${renderTOCBooksBreadcrumb()}
+        ${group && group.chapters.length ? `
+          <div class="toc-books-chapters">
+            ${group.chapters.map(({chapter,index})=>tocChapterEntry(chapter,index)).join('')}
+          </div>` : `<div class="toc-books-empty">No chapters assigned to this subvolume yet.</div>`}`;
+    }
+  }
+
+  root.innerHTML = `
+    <section class="toc-books" aria-label="Books browser">
+      <div class="toc-books-top">
+        <div class="toc-books-label">Books</div>
+        <div class="toc-books-meta">${chapterTotal} ${chapterTotal===1?'chapter':'chapters'} / 3 acts / 11 volumes per act</div>
+      </div>
+      ${body}
+      ${renderTOCBooksEditor()}
+    </section>`;
 }
 
 function tocChapterEntry(ch, i){
@@ -3087,6 +3825,7 @@ function renderTOCDashboard(){
 }
 
 function renderTOC(){
+  renderTOCBooks();
   renderTOCDashboard();
   const container = document.getElementById('toc-entries');
   if(!container) return;
@@ -4092,7 +4831,7 @@ function openNewChapterModal(){
   _editingChapterId = null;
   document.getElementById('cm-modal-title').textContent = 'New Chapter';
   // clear fields
-  ['cm-novel','cm-num','cm-book','cm-volume','cm-part','cm-chapter',
+  ['cm-novel','cm-act','cm-num','cm-book','cm-volume','cm-subvolume','cm-part','cm-chapter',
    'cm-meta-narrator','cm-meta-setting',
    'cm-meta-year','cm-meta-aesthetic','cm-meta-mode','cm-body'].forEach(id=>{
     document.getElementById(id).value = '';
@@ -4103,8 +4842,10 @@ function openNewChapterModal(){
   if(chapters.length > 0){
     const last = chapters[chapters.length - 1];
     if(last.novel) document.getElementById('cm-novel').value = last.novel;
+    if(last.act) document.getElementById('cm-act').value = last.act;
     if(last.book)  document.getElementById('cm-book').value  = last.book;
     if(last.volume) document.getElementById('cm-volume').value = last.volume;
+    if(last.subvolume) document.getElementById('cm-subvolume').value = last.subvolume;
     if(last.part)  document.getElementById('cm-part').value  = last.part;
   }
   document.getElementById('chapter-modal-overlay').classList.add('open');
@@ -4117,9 +4858,11 @@ function openEditChapterModal(id){
   _editingChapterId = id;
   document.getElementById('cm-modal-title').textContent = 'Edit Chapter';
   document.getElementById('cm-novel').value = ch.novel||'';
+  document.getElementById('cm-act').value = ch.act||'';
   document.getElementById('cm-num').value = ch.num||'';
   document.getElementById('cm-book').value = ch.book||'';
   document.getElementById('cm-volume').value = ch.volume||'';
+  document.getElementById('cm-subvolume').value = ch.subvolume||'';
   document.getElementById('cm-part').value = ch.part||'';
   document.getElementById('cm-chapter').value = ch.chapter||'';
   document.getElementById('cm-meta-narrator').value = ch.meta.narrator||'';
@@ -4153,8 +4896,10 @@ async function saveChapter(){
     id: _editingChapterId || ('ch-' + Date.now()),
     num:     document.getElementById('cm-num').value.trim(),
     novel:   document.getElementById('cm-novel').value.trim(),
+    act:     document.getElementById('cm-act').value.trim(),
     book,
     volume:  document.getElementById('cm-volume').value.trim(),
+    subvolume: document.getElementById('cm-subvolume').value.trim(),
     part:    document.getElementById('cm-part').value.trim(),
     chapter,
     meta: {
