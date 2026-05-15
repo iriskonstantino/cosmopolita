@@ -1719,13 +1719,37 @@ body.links-on .wl:hover{color:var(--red)}
   border-top:1px solid var(--border);
   padding-top:1rem;
 }
+.toc-books-editor-toggle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  width:100%;
+  border:1.5px solid var(--ink);
+  background:var(--white);
+  padding:0.62rem 0.75rem;
+  color:var(--ink);
+  cursor:pointer;
+  text-align:left;
+}
+.toc-books-editor-toggle::after{
+  content:'+';
+  font-family:var(--mono);
+  font-size:0.72rem;
+  color:#aaa;
+}
+.toc-books-editor.open .toc-books-editor-toggle::after{
+  content:'-';
+}
 .toc-books-editor-title{
   font-family:var(--mono);
   font-size:0.56rem;
   letter-spacing:0.18em;
   text-transform:uppercase;
   color:var(--ink);
-  margin-bottom:0.75rem;
+}
+.toc-books-editor-body{
+  padding-top:0.9rem;
 }
 .toc-books-editor-grid{
   display:grid;
@@ -3138,9 +3162,13 @@ function renderChapter(ch){
 
   // Header
   const headerLeft = document.getElementById('cv-header-left');
+  const readingContext = getChapterReadingContext(ch);
   let metaHtml = '';
   const metaMap = [
     ['Chapter', ch.chapter],
+    ['Act', readingContext.act],
+    ['Volume', readingContext.volume],
+    ['Subvolume', readingContext.subvolume],
     ['Narrator', ch.meta.narrator],
     ['Setting', ch.meta.setting],
     ['Year', ch.meta.year],
@@ -3150,14 +3178,14 @@ function renderChapter(ch){
   metaMap.forEach(([k,v])=>{
     if(v) metaHtml += `<div class="meta-item"><span class="meta-key">${k}</span><span class="meta-val">${v}</span></div>`;
   });
-  // Build subtitle: Volume · Book N · Part (shown under the main title)
-  const _vol  = (ch.volume||'').trim();
+  // Build subtitle: Act · Book N · Subvolume (shown under the main volume title)
+  const _act  = readingContext.act;
   const _bk   = ch.num ? `Book ${ch.num}` : '';
-  const _part = (ch.part||'').trim();
-  const subtitleParts = [_vol, _bk, _part].filter(Boolean).join(' \u00b7 ');
+  const _subvolume = readingContext.subvolume;
+  const subtitleParts = [_act, _bk, _subvolume].filter(Boolean).join(' \u00b7 ');
   headerLeft.innerHTML = `
-    ${ch.novel ? `<div class="chdr-architect">${ch.novel}</div>` : ''}
-    <div class="chdr-title">${ch.book||''}</div>
+    ${readingContext.novel ? `<div class="chdr-architect">${readingContext.novel}</div>` : ''}
+    <div class="chdr-title">${readingContext.volume||ch.book||''}</div>
     ${subtitleParts ? `<div class="chdr-subtitle">${subtitleParts}</div>` : ''}
     <div class="chdr-meta">${metaHtml}</div>
   `;
@@ -3226,15 +3254,16 @@ function getLatestChapter(){
 
 function chapterHierarchyLabel(ch){
   if(!ch) return '';
-  return [ch.subvolume || ch.part, ch.volume, ch.act, ch.book, ch.novel].filter(Boolean).join(' · ');
+  const ctx = getChapterReadingContext(ch);
+  return [ctx.subvolume, ctx.volume, ctx.act, ctx.novel].filter(Boolean).join(' · ');
 }
 
 function groupChaptersForTOC(list){
   const groups = [];
   (list || []).forEach((ch, index)=>{
-    const volumeName = ch.volume || 'Uncollected Volume';
-    const bookName = ch.book || 'Untitled Book';
-    const partName = ch.part || 'Unparted';
+    const volumeName = tocVolumeName(ch);
+    const bookName = tocActName(ch) || 'Untitled Act';
+    const partName = tocSubvolumeName(ch);
     let volume = groups.find(g=>g.name===volumeName);
     if(!volume){
       volume = {name:volumeName, books:[]};
@@ -3289,6 +3318,7 @@ const DEFAULT_BOOK_ARCHITECTURE = {
   }]
 };
 let _tocBooksState = {novel:null, act:null, volume:null, subvolume:null};
+let _tocBooksEditorOpen = false;
 
 function tocJsArg(value){
   const escaped = String(value || '')
@@ -3472,28 +3502,81 @@ function getTOCBookSubvolumes(volumeSlot){
   return groups;
 }
 
+function getChapterVolumeSlot(ch){
+  if(!ch) return null;
+  const slots = getTOCVolumeSlots(tocNovelName(ch), tocActName(ch));
+  return slots.find(slot=>slot.label === tocVolumeName(ch)) || slots.find(slot=>slot.chapters.includes(ch)) || slots[0] || null;
+}
+
+function getChapterSubvolumeGroup(ch){
+  if(!ch) return null;
+  const slot = getChapterVolumeSlot(ch);
+  const groups = getTOCBookSubvolumes(slot);
+  const name = tocSubvolumeName(ch);
+  return groups.find(group=>group.name === name) || groups[0] || null;
+}
+
+function getChapterReadingContext(ch){
+  if(!ch){
+    return {
+      novel:'Cosmopolita',
+      act:'',
+      volume:'Untitled Volume',
+      volumeIndex:1,
+      subvolume:'Main Sequence',
+      subvolumeIndex:1,
+      subvolumeBlurb:''
+    };
+  }
+  const slot = getChapterVolumeSlot(ch);
+  const groups = getTOCBookSubvolumes(slot);
+  const subvolume = tocSubvolumeName(ch);
+  const groupIndex = Math.max(0, groups.findIndex(group=>group.name === subvolume));
+  const group = groupIndex >= 0 ? groups[groupIndex] : getChapterSubvolumeGroup(ch);
+  return {
+    novel: tocNovelName(ch),
+    act: tocActName(ch),
+    volume: slot ? slot.label : tocVolumeName(ch),
+    volumeIndex: slot ? slot.index : 1,
+    volumeBlurb: slot ? slot.blurb : '',
+    subvolume,
+    subvolumeIndex: groupIndex >= 0 ? groupIndex + 1 : 1,
+    subvolumeBlurb: group && group.blurb ? group.blurb : ''
+  };
+}
+
 function setTOCBooksRoot(){
   _tocBooksState = {novel:null, act:null, volume:null, subvolume:null};
+  _tocBooksEditorOpen = false;
   renderTOCBooks();
 }
 
 function setTOCBooksNovel(novel){
   _tocBooksState = {novel, act:null, volume:null, subvolume:null};
+  _tocBooksEditorOpen = false;
   renderTOCBooks();
 }
 
 function setTOCBooksAct(act){
   _tocBooksState = {..._tocBooksState, act, volume:null, subvolume:null};
+  _tocBooksEditorOpen = false;
   renderTOCBooks();
 }
 
 function setTOCBooksVolume(volume){
   _tocBooksState = {..._tocBooksState, volume, subvolume:null};
+  _tocBooksEditorOpen = false;
   renderTOCBooks();
 }
 
 function setTOCBooksSubvolume(subvolume){
   _tocBooksState = {..._tocBooksState, subvolume};
+  _tocBooksEditorOpen = false;
+  renderTOCBooks();
+}
+
+function toggleTOCBooksEditor(){
+  _tocBooksEditorOpen = !_tocBooksEditorOpen;
   renderTOCBooks();
 }
 
@@ -3569,12 +3652,22 @@ function saveTOCBookSubvolumeEditor(){
   renderTOCBooks();
 }
 
+function wrapTOCBooksEditor(title, body){
+  return `
+    <div class="toc-books-editor admin-only ${_tocBooksEditorOpen ? 'open' : ''}">
+      <button class="toc-books-editor-toggle" type="button" onclick="toggleTOCBooksEditor()">
+        <span class="toc-books-editor-title">${escHtml(title)}</span>
+      </button>
+      ${_tocBooksEditorOpen ? `<div class="toc-books-editor-body">
+        ${body}
+      </div>` : ''}
+    </div>`;
+}
+
 function renderTOCBooksEditor(){
   const s = _tocBooksState;
   if(!s.novel){
-    return `
-      <div class="toc-books-editor admin-only">
-        <div class="toc-books-editor-title">Edit Books</div>
+    return wrapTOCBooksEditor('Edit Books', `
         <div class="toc-books-editor-grid">
           ${bookArchitecture.novels.map((novel,index)=>`
             <div class="toc-books-edit-row">
@@ -3592,13 +3685,11 @@ function renderTOCBooksEditor(){
         <div class="toc-books-editor-actions">
           <button class="toc-books-editor-btn" type="button" onclick="saveTOCBookRootEditor()">Save Books</button>
         </div>
-      </div>`;
+      `);
   }
   if(!s.act){
     const novel = getBookArchNovel(s.novel);
-    return `
-      <div class="toc-books-editor admin-only">
-        <div class="toc-books-editor-title">Edit Acts</div>
+    return wrapTOCBooksEditor('Edit Acts', `
         <div class="toc-books-editor-grid">
           ${novel.acts.map((act,index)=>`
             <div class="toc-books-edit-row">
@@ -3611,13 +3702,11 @@ function renderTOCBooksEditor(){
         <div class="toc-books-editor-actions">
           <button class="toc-books-editor-btn" type="button" onclick="saveTOCBookActEditor()">Save Acts</button>
         </div>
-      </div>`;
+      `);
   }
   if(!s.volume){
     const act = getBookArchAct(s.novel, s.act);
-    return `
-      <div class="toc-books-editor admin-only">
-        <div class="toc-books-editor-title">Edit Volumes</div>
+    return wrapTOCBooksEditor('Edit Volumes', `
         <div class="toc-books-editor-grid volumes">
           ${act.volumes.map((volume,index)=>`
             <div class="toc-books-edit-row">
@@ -3630,12 +3719,10 @@ function renderTOCBooksEditor(){
         <div class="toc-books-editor-actions">
           <button class="toc-books-editor-btn" type="button" onclick="saveTOCBookVolumeEditor()">Save Volumes</button>
         </div>
-      </div>`;
+      `);
   }
   const volume = getBookArchVolume(s.novel, s.act, s.volume);
-  return `
-    <div class="toc-books-editor admin-only">
-      <div class="toc-books-editor-title">Edit Subvolumes</div>
+  return wrapTOCBooksEditor('Edit Subvolumes', `
       <div class="toc-books-editor-grid">
         ${(volume.subvolumes || []).map((sub,index)=>`
           <div class="toc-books-edit-row">
@@ -3653,7 +3740,7 @@ function renderTOCBooksEditor(){
       <div class="toc-books-editor-actions">
         <button class="toc-books-editor-btn" type="button" onclick="saveTOCBookSubvolumeEditor()">Save Subvolumes</button>
       </div>
-    </div>`;
+    `);
 }
 
 function renderTOCBooksBreadcrumb(){
@@ -3788,13 +3875,17 @@ function renderTOCDashboard(){
   const firstMeta = chapterHierarchyLabel(first);
   const latestTitle = latest.chapter || latest.book || 'Latest Chapter';
   const firstTitle = first.chapter || first.book || 'Chapter I';
-  const archiveContext = latest.volume || latest.book || latest.novel || 'Cosmopolita';
+  const latestContext = getChapterReadingContext(latest);
+  const railKicker = `Book ${toRoman(latestContext.subvolumeIndex || 1)}`;
+  const railTitle = latestContext.subvolume || 'Main Sequence';
+  const railBlurb = latestContext.subvolumeBlurb || latestContext.volumeBlurb || 'A live reading chamber drawn from the current chapter architecture.';
+  const archiveContext = latestContext.volume || latest.book || latest.novel || 'Cosmopolita';
   dashboard.innerHTML = `
     <div class="toc-dashboard">
       <aside class="toc-reader-rail" aria-label="Reader information">
-        <div class="toc-rail-kicker">Book I</div>
-        <div class="toc-rail-title">Logic of the Cervix</div>
-        <p class="toc-rail-blurb">A hypermodern imperial girlhood written through devotion, malls, sleep-pods, theology, and synthetic light.</p>
+        <div class="toc-rail-kicker">${escHtml(railKicker)}</div>
+        <div class="toc-rail-title">${escHtml(railTitle)}</div>
+        <p class="toc-rail-blurb">${escHtml(railBlurb)}</p>
         <div class="toc-rail-rule"></div>
         <div class="toc-rail-section">Reading Order</div>
         <ol class="toc-rail-order">
