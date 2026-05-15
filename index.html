@@ -3671,9 +3671,24 @@ function saveTOCBookVolumeEditor(){
   const act = getBookArchAct(_tocBooksState.novel, _tocBooksState.act);
   act.volumes.forEach((volume, index)=>{
     const title = tocInputValue(`[data-book-volume-title="${index}"]`);
-    if(title) volume.title = title;
-    volume.blurb = tocInputValue(`[data-book-volume-blurb="${index}"]`);
+    volume.title = title || defaultVolumeTitle(index);
+    volume.blurb = title ? tocInputValue(`[data-book-volume-blurb="${index}"]`) : '';
+    if(!title) volume.subvolumes = [];
   });
+  bookArchitecture = normalizeBookArchitecture(bookArchitecture);
+  saveBookArchitecture();
+  _tocBooksState.volume = null;
+  renderTOCBooks();
+}
+
+function deleteTOCBookVolume(index){
+  if(!requireAdmin()) return;
+  const act = getBookArchAct(_tocBooksState.novel, _tocBooksState.act);
+  const volume = act.volumes[index];
+  if(!volume) return;
+  volume.title = defaultVolumeTitle(index);
+  volume.blurb = '';
+  volume.subvolumes = [];
   bookArchitecture = normalizeBookArchitecture(bookArchitecture);
   saveBookArchitecture();
   _tocBooksState.volume = null;
@@ -3774,6 +3789,9 @@ function renderTOCBooksEditor(){
               <div class="toc-books-edit-label">Volume ${String(index + 1).padStart(2,'0')}</div>
               <input class="toc-books-edit-input" data-book-volume-title="${index}" value="${escHtml(volume.title)}" placeholder="Volume title">
               <textarea class="toc-books-edit-textarea" data-book-volume-blurb="${index}" placeholder="Volume blurb">${escHtml(volume.blurb)}</textarea>
+              <div class="toc-books-row-actions">
+                <button class="toc-books-delete-btn" type="button" onclick="deleteTOCBookVolume(${index})">Delete Volume</button>
+              </div>
             </div>
           `).join('')}
         </div>
