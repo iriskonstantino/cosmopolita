@@ -1803,6 +1803,9 @@ body.links-on .wl:hover{color:var(--red)}
   gap:0.55rem;
   margin-top:0.8rem;
 }
+.toc-books-row-actions{
+  margin-top:0.55rem;
+}
 .toc-books-editor-btn{
   border:1.5px solid var(--ink);
   background:transparent;
@@ -1822,6 +1825,21 @@ body.links-on .wl:hover{color:var(--red)}
 .toc-books-editor-btn.secondary{
   border-color:var(--border);
   color:#777;
+}
+.toc-books-delete-btn{
+  border:1px solid var(--border);
+  background:transparent;
+  color:#999;
+  cursor:pointer;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  padding:0.32rem 0.5rem;
+}
+.toc-books-delete-btn:hover{
+  border-color:var(--red);
+  color:var(--red);
 }
 .toc-books-chapters{
   border-top:1px solid var(--border);
@@ -3598,11 +3616,15 @@ function tocInputValue(selector){
 
 function saveTOCBookRootEditor(){
   if(!requireAdmin()) return;
-  bookArchitecture.novels.forEach((novel, index)=>{
+  bookArchitecture.novels = bookArchitecture.novels.map((novel, index)=>{
     const title = tocInputValue(`[data-book-novel-title="${index}"]`);
-    if(title) novel.title = title;
-    novel.blurb = tocInputValue(`[data-book-novel-blurb="${index}"]`);
-  });
+    if(!title) return null;
+    return {
+      ...novel,
+      title,
+      blurb: tocInputValue(`[data-book-novel-blurb="${index}"]`)
+    };
+  }).filter(Boolean);
   const newTitle = tocInputValue('[data-book-new-novel-title]');
   if(newTitle){
     const fresh = cloneBookArchitecture(DEFAULT_BOOK_ARCHITECTURE).novels[0];
@@ -3610,6 +3632,14 @@ function saveTOCBookRootEditor(){
     fresh.blurb = tocInputValue('[data-book-new-novel-blurb]');
     bookArchitecture.novels.push(fresh);
   }
+  bookArchitecture = normalizeBookArchitecture(bookArchitecture);
+  saveBookArchitecture();
+  setTOCBooksRoot();
+}
+
+function deleteTOCBookNovel(index){
+  if(!requireAdmin()) return;
+  bookArchitecture.novels.splice(index, 1);
   bookArchitecture = normalizeBookArchitecture(bookArchitecture);
   saveBookArchitecture();
   setTOCBooksRoot();
@@ -3647,7 +3677,7 @@ function saveTOCBookSubvolumeEditor(){
   if(!requireAdmin()) return;
   const volume = getBookArchVolume(_tocBooksState.novel, _tocBooksState.act, _tocBooksState.volume);
   volume.subvolumes = (volume.subvolumes || []).map((sub, index)=>({
-    title: tocInputValue(`[data-book-subvolume-title="${index}"]`) || sub.title,
+    title: tocInputValue(`[data-book-subvolume-title="${index}"]`),
     blurb: tocInputValue(`[data-book-subvolume-blurb="${index}"]`)
   })).filter(sub=>sub.title);
   const newTitle = tocInputValue('[data-book-new-subvolume-title]');
@@ -3657,6 +3687,16 @@ function saveTOCBookSubvolumeEditor(){
       blurb: tocInputValue('[data-book-new-subvolume-blurb]')
     });
   }
+  bookArchitecture = normalizeBookArchitecture(bookArchitecture);
+  saveBookArchitecture();
+  _tocBooksState.subvolume = null;
+  renderTOCBooks();
+}
+
+function deleteTOCBookSubvolume(index){
+  if(!requireAdmin()) return;
+  const volume = getBookArchVolume(_tocBooksState.novel, _tocBooksState.act, _tocBooksState.volume);
+  volume.subvolumes.splice(index, 1);
   bookArchitecture = normalizeBookArchitecture(bookArchitecture);
   saveBookArchitecture();
   _tocBooksState.subvolume = null;
@@ -3685,6 +3725,9 @@ function renderTOCBooksEditor(){
               <div class="toc-books-edit-label">Novel ${String(index + 1).padStart(2,'0')}</div>
               <input class="toc-books-edit-input" data-book-novel-title="${index}" value="${escHtml(novel.title)}" placeholder="Novel title">
               <textarea class="toc-books-edit-textarea" data-book-novel-blurb="${index}" placeholder="Novel blurb">${escHtml(novel.blurb)}</textarea>
+              <div class="toc-books-row-actions">
+                <button class="toc-books-delete-btn" type="button" onclick="deleteTOCBookNovel(${index})">Delete Book</button>
+              </div>
             </div>
           `).join('')}
           <div class="toc-books-edit-row">
@@ -3740,6 +3783,9 @@ function renderTOCBooksEditor(){
             <div class="toc-books-edit-label">Subvolume ${String(index + 1).padStart(2,'0')}</div>
             <input class="toc-books-edit-input" data-book-subvolume-title="${index}" value="${escHtml(sub.title)}" placeholder="Subvolume title">
             <textarea class="toc-books-edit-textarea" data-book-subvolume-blurb="${index}" placeholder="Subvolume blurb">${escHtml(sub.blurb)}</textarea>
+            <div class="toc-books-row-actions">
+              <button class="toc-books-delete-btn" type="button" onclick="deleteTOCBookSubvolume(${index})">Delete Subvolume</button>
+            </div>
           </div>
         `).join('')}
         <div class="toc-books-edit-row">
