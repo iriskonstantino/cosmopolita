@@ -228,12 +228,12 @@ body{
   vertical-align:middle;
 }
 .chdr-architect{
-  font-family:var(--mono);
-  font-size:0.8rem;
-  letter-spacing:0.34em;
+  font-family:var(--sans);
+  font-size:0.72rem;
+  letter-spacing:0.22em;
   color:var(--ink);
   margin-bottom:0.34rem;
-  font-weight:700;
+  font-weight:600;
   text-transform:uppercase;
 }
 .chdr-title{
@@ -247,11 +247,19 @@ body{
 .chdr-subtitle{
   font-family:var(--display);
   font-weight:300;
-  font-size:0.78rem;
-  letter-spacing:0.32em;
+  font-size:0.82rem;
+  letter-spacing:0.22em;
   text-transform:uppercase;
   color:#777;
   margin-bottom:1.2rem;
+}
+.chdr-subvolume{
+  display:block;
+  font-family:var(--mono);
+  font-size:0.58rem;
+  letter-spacing:0.18em;
+  color:#aaa;
+  margin-top:0.34rem;
 }
 .chdr-chapter{
   font-family:var(--serif);
@@ -3178,15 +3186,18 @@ function renderChapter(ch){
   metaMap.forEach(([k,v])=>{
     if(v) metaHtml += `<div class="meta-item"><span class="meta-key">${k}</span><span class="meta-val">${v}</span></div>`;
   });
-  // Build subtitle: Act · Book N · Subvolume (shown under the main volume title)
+  // Build subtitle: Act, then the smaller subvolume label under it.
   const _act  = readingContext.act;
-  const _bk   = ch.num ? `Book ${ch.num}` : '';
   const _subvolume = readingContext.subvolume;
-  const subtitleParts = [_act, _bk, _subvolume].filter(Boolean).join(' \u00b7 ');
+  const subtitleHtml = [_act, _subvolume].filter(Boolean).length ? `
+    <div class="chdr-subtitle">
+      ${_act ? `<span>${escHtml(_act)}</span>` : ''}
+      ${_subvolume ? `<span class="chdr-subvolume">${escHtml(_subvolume)}</span>` : ''}
+    </div>` : '';
   headerLeft.innerHTML = `
-    ${readingContext.novel ? `<div class="chdr-architect">${readingContext.novel}</div>` : ''}
-    <div class="chdr-title">${readingContext.volume||ch.book||''}</div>
-    ${subtitleParts ? `<div class="chdr-subtitle">${subtitleParts}</div>` : ''}
+    ${readingContext.novel ? `<div class="chdr-architect">${escHtml(readingContext.novel)}</div>` : ''}
+    <div class="chdr-title">${escHtml(readingContext.volume||ch.book||'')}</div>
+    ${subtitleHtml}
     <div class="chdr-meta">${metaHtml}</div>
   `;
 
