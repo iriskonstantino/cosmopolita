@@ -375,7 +375,7 @@ body{
 /* ─── CHAPTER TEXT ───────────────────── */
 .chapter-text{
   padding:3rem 2.5rem 5rem 2.5rem;
-  max-width:740px;
+  max-width:var(--chapter-text-width,740px);
   margin:0 auto;
 }
 .chapter-text.align-left{
@@ -2245,6 +2245,21 @@ body:not(.admin-on) .admin-only{
 .layout-option.primary{border-color:var(--ink);background:var(--ink);color:var(--white);}
 .layout-option.secondary{background:transparent;color:var(--ink);border:1.5px solid var(--ink);}
 .layout-option.secondary:hover{background:var(--panel);}
+.width-controls{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0.4rem;
+  margin-top:0.5rem;
+}
+.width-option{
+  padding:0.45rem 0.35rem;
+  font-size:0.64rem;
+  min-width:0;
+  white-space:nowrap;
+}
+.width-option.primary{border-color:var(--ink);background:var(--ink);color:var(--white);}
+.width-option.secondary{background:transparent;color:var(--ink);border:1.5px solid var(--ink);}
+.width-option.secondary:hover{background:var(--panel);}
 .cm-section-label{
   font-family:var(--mono);font-size:0.54rem;
   letter-spacing:0.18em;text-transform:uppercase;
@@ -2973,6 +2988,15 @@ body:not(.admin-on) .admin-only{
           <button class="cm-btn secondary layout-option" type="button" data-layout="left" onclick="setTextLayout('left')">Left</button>
           <button class="cm-btn secondary layout-option" type="button" data-layout="center" onclick="setTextLayout('center')">Center</button>
           <button class="cm-btn secondary layout-option" type="button" data-layout="right" onclick="setTextLayout('right')">Right</button>
+        </div>
+      </div>
+
+      <div class="panel-sec">
+        <div class="panel-hd">Text width</div>
+        <div class="width-controls">
+          <button class="cm-btn secondary width-option" type="button" data-width="narrow" onclick="setTextWidth('narrow')">Narrow</button>
+          <button class="cm-btn secondary width-option" type="button" data-width="standard" onclick="setTextWidth('standard')">Standard</button>
+          <button class="cm-btn secondary width-option" type="button" data-width="wide" onclick="setTextWidth('wide')">Wide</button>
         </div>
       </div>
 
@@ -4691,6 +4715,7 @@ function _pushNav(viewId){
 }
 // set initial active state once DOM is ready
 let _chapterTextAlignment = 'left';
+let _chapterTextWidth = 'standard';
 
 function loadTextAlignment(){
   try{
@@ -4701,10 +4726,26 @@ function loadTextAlignment(){
   }
 }
 
+function loadTextWidth(){
+  try{
+    const stored = localStorage.getItem('cosmopolita_text_width');
+    return stored === 'narrow' ? 'narrow' : stored === 'wide' ? 'wide' : 'standard';
+  }catch(e){
+    return 'standard';
+  }
+}
+
 function updateTextLayoutButtons(){
   document.querySelectorAll('.layout-option').forEach(btn=>{
     btn.classList.toggle('primary', btn.dataset.layout === _chapterTextAlignment);
     btn.classList.toggle('secondary', btn.dataset.layout !== _chapterTextAlignment);
+  });
+}
+
+function updateTextWidthButtons(){
+  document.querySelectorAll('.width-option').forEach(btn=>{
+    btn.classList.toggle('primary', btn.dataset.width === _chapterTextWidth);
+    btn.classList.toggle('secondary', btn.dataset.width !== _chapterTextWidth);
   });
 }
 
@@ -4719,6 +4760,19 @@ function setTextLayout(mode){
   updateTextLayoutButtons();
 }
 
+function setTextWidth(mode){
+  _chapterTextWidth = mode === 'narrow' ? 'narrow' : mode === 'wide' ? 'wide' : 'standard';
+  const widthMap = {
+    narrow:'620px',
+    standard:'740px',
+    wide:'920px'
+  };
+  const textEl = document.getElementById('cv-text');
+  if(textEl) textEl.style.setProperty('--chapter-text-width', widthMap[_chapterTextWidth]);
+  try{ localStorage.setItem('cosmopolita_text_width', _chapterTextWidth); }catch(e){}
+  updateTextWidthButtons();
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   updateAdminUI();
   _updateNavUI();
@@ -4726,6 +4780,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadPublishedChapters();
   initCharacterFeature();
   setTextLayout(loadTextAlignment());
+  setTextWidth(loadTextWidth());
   initFileVaultUI();
   initNotesAuth();
   loadUniversalContent();
