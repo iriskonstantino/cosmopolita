@@ -2268,6 +2268,215 @@ body:not(.admin-on) .admin-only{
 .ch-ctrl-btn:hover{color:var(--ink);border-color:var(--ink)}
 .ch-ctrl-btn.danger:hover{color:var(--red);border-color:var(--red)}
 
+/* ─── IN-PAGE CHAPTER EDITOR ─────────────── */
+#chapter-view.chapter-editing #cv-reading-wrap{display:none}
+#chapter-editor{
+  display:none;
+  background:var(--paper);
+  border-top:1.5px solid var(--ink);
+}
+#chapter-view.chapter-editing #chapter-editor{
+  display:block;
+}
+.chapter-editor-shell{
+  display:grid;
+  grid-template-columns:280px minmax(0,1fr);
+  min-height:calc(100vh - 260px);
+}
+.chapter-editor-side{
+  border-right:1px solid var(--border);
+  background:var(--panel);
+  padding:1.25rem;
+}
+.chapter-editor-main{
+  min-width:0;
+  padding:1.25rem 1.5rem 2rem;
+}
+.ce-panel{
+  border-bottom:1px solid var(--border);
+  padding-bottom:1rem;
+  margin-bottom:1rem;
+}
+.ce-panel:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.ce-title-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1rem;
+}
+.ce-kicker{
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:#aaa;
+  margin-bottom:0.35rem;
+}
+.ce-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:1.35rem;
+  letter-spacing:0.08em;
+  line-height:1.12;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+.ce-actions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:0.55rem;
+}
+.ce-form-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:0.72rem;
+}
+.ce-toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.45rem;
+  align-items:center;
+  padding:0.7rem;
+  border:1px solid var(--border);
+  background:var(--white);
+  margin-bottom:0.8rem;
+}
+.ce-tool-btn{
+  min-height:32px;
+  min-width:34px;
+  padding:0.35rem 0.58rem;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:0.56rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+.ce-tool-btn:hover{border-color:var(--ink);background:var(--paper)}
+.ce-tool-spacer{
+  width:1px;
+  height:24px;
+  background:var(--border);
+  margin:0 0.15rem;
+}
+.chapter-editor-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(320px,0.86fr);
+  gap:1rem;
+  align-items:start;
+}
+.ce-source-wrap,
+.ce-preview-wrap,
+.ce-link-helper{
+  min-width:0;
+  border:1px solid var(--border);
+  background:var(--white);
+}
+.ce-source-head,
+.ce-preview-head,
+.ce-link-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  border-bottom:1px solid var(--border);
+  padding:0.55rem 0.7rem;
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:#aaa;
+}
+#ce-body{
+  width:100%;
+  min-height:62vh;
+  box-sizing:border-box;
+  border:none;
+  background:var(--white);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:1rem;
+  line-height:1.75;
+  resize:vertical;
+  padding:1rem;
+  outline:none;
+}
+.ce-preview{
+  min-height:62vh;
+  max-height:72vh;
+  overflow:auto;
+  padding:1rem;
+}
+.ce-preview .chapter-text{
+  padding:0;
+  max-width:none;
+}
+.ce-preview .chapter-text p{
+  font-size:1rem;
+}
+.ce-preview .wl{
+  color:var(--link);
+  border-bottom-color:currentColor;
+  cursor:pointer;
+}
+.ce-preview .wl:hover{color:var(--red)}
+.ce-link-helper{
+  margin-top:1rem;
+}
+.ce-link-controls{
+  display:grid;
+  grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) auto;
+  gap:0.55rem;
+  padding:0.7rem;
+}
+.ce-link-results{
+  display:grid;
+  gap:0.35rem;
+  max-height:170px;
+  overflow:auto;
+  padding:0 0.7rem 0.7rem;
+}
+.ce-link-result{
+  text-align:left;
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.48rem 0.6rem;
+  cursor:pointer;
+}
+.ce-link-result:hover{border-color:var(--ink)}
+.ce-link-result-title{
+  display:block;
+  font-family:var(--display);
+  font-weight:600;
+  font-size:0.72rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+.ce-link-result-key{
+  display:block;
+  margin-top:0.18rem;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#aaa;
+}
+.ce-status{
+  min-height:1.2rem;
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:#999;
+}
+.ce-status.good{color:var(--green)}
+.ce-status.warn{color:var(--red)}
+
 
 
 /* ─── OFFLINE FILE VAULT / LARGE ASSET STORAGE ───── */
@@ -2435,6 +2644,14 @@ body:not(.admin-on) .admin-only{
   #toc-list{padding:2rem 1.25rem 4rem;}
   .toc-entry{grid-template-columns:2rem 1fr;gap:0 0.8rem;}
   .toc-meta-tag{grid-column:2;color:#aaa;margin-top:0.35rem;}
+  .chapter-editor-shell{grid-template-columns:1fr;}
+  .chapter-editor-side{border-right:none;border-bottom:1px solid var(--border);}
+  .chapter-editor-main{padding:1rem 1.25rem 1.5rem;}
+  .ce-title-row{display:block;}
+  .ce-actions{justify-content:flex-start;margin-top:0.75rem;}
+  .chapter-editor-grid{grid-template-columns:1fr;}
+  .ce-link-controls{grid-template-columns:1fr;}
+  #ce-body,.ce-preview{min-height:48vh;max-height:none;}
 }
 @media(min-width:721px) and (max-width:1100px){
   .toc-dashboard{
@@ -2776,6 +2993,131 @@ body:not(.admin-on) .admin-only{
 
     </aside>
   </div>
+
+  <section id="chapter-editor" class="chapter-editor admin-only">
+    <div class="chapter-editor-shell">
+      <aside class="chapter-editor-side">
+        <div class="ce-panel">
+          <div class="ce-kicker">Structure</div>
+          <div class="ce-form-grid">
+            <div class="cm-field">
+              <label class="cm-label">Novel</label>
+              <input class="cm-input ce-field" id="ce-novel" placeholder="e.g. WILL OF AN ARCHITECT">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Act</label>
+              <input class="cm-input ce-field" id="ce-act" placeholder="e.g. Her Comforting Light">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Chapter Number / Label</label>
+              <input class="cm-input ce-field" id="ce-num" placeholder="e.g. I, II, Interlude">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Volume / Book <span style="color:#c00">*</span></label>
+              <input class="cm-input ce-field" id="ce-book" placeholder="e.g. Teenage Dreams in Technicolor">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Archive Volume</label>
+              <input class="cm-input ce-field" id="ce-volume" placeholder="Legacy/archive grouping">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Subvolume</label>
+              <input class="cm-input ce-field" id="ce-subvolume" placeholder="e.g. Subvolume A">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Part</label>
+              <input class="cm-input ce-field" id="ce-part" placeholder="e.g. Logic of the Cervix">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Chapter Name <span style="color:#c00">*</span></label>
+              <input class="cm-input ce-field" id="ce-chapter" placeholder="e.g. Overture">
+            </div>
+          </div>
+        </div>
+        <div class="ce-panel">
+          <div class="ce-kicker">Metadata</div>
+          <div class="ce-form-grid">
+            <div class="cm-field">
+              <label class="cm-label">Narrator</label>
+              <input class="cm-input ce-field" id="ce-meta-narrator">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Setting</label>
+              <input class="cm-input ce-field" id="ce-meta-setting">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Year</label>
+              <input class="cm-input ce-field" id="ce-meta-year">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Dominant Aesthetic</label>
+              <input class="cm-input ce-field" id="ce-meta-aesthetic">
+            </div>
+            <div class="cm-field">
+              <label class="cm-label">Mode</label>
+              <input class="cm-input ce-field" id="ce-meta-mode">
+            </div>
+          </div>
+        </div>
+        <div class="ce-panel">
+          <div class="ce-kicker">Draft</div>
+          <div id="ce-draft-status" class="ce-status">No local draft yet.</div>
+        </div>
+      </aside>
+      <main class="chapter-editor-main">
+        <div class="ce-title-row">
+          <div>
+            <div class="ce-kicker" id="ce-mode-label">Chapter Editor</div>
+            <div class="ce-title" id="ce-title">Untitled Chapter</div>
+          </div>
+          <div class="ce-actions">
+            <button class="cm-btn secondary" type="button" onclick="closeChapterEditor()">Cancel</button>
+            <button class="cm-btn primary" type="button" onclick="saveChapter()">Save Chapter</button>
+          </div>
+        </div>
+        <div class="ce-toolbar" aria-label="Chapter formatting tools">
+          <button class="ce-tool-btn" type="button" title="Bold" onclick="chapterEditorWrapSelection('**','**','bold text')">B</button>
+          <button class="ce-tool-btn" type="button" title="Italic" onclick="chapterEditorWrapSelection('*','*','italic text')">I</button>
+          <button class="ce-tool-btn" type="button" title="Bold italic" onclick="chapterEditorWrapSelection('***','***','bold italic text')">B/I</button>
+          <span class="ce-tool-spacer" aria-hidden="true"></span>
+          <button class="ce-tool-btn" type="button" title="Heading" onclick="chapterEditorPrefixLine('## ')">H2</button>
+          <button class="ce-tool-btn" type="button" title="Section break" onclick="chapterEditorInsertSection()">Section</button>
+          <button class="ce-tool-btn" type="button" title="Quote" onclick="chapterEditorPrefixLine('> ')">Quote</button>
+          <span class="ce-tool-spacer" aria-hidden="true"></span>
+          <button class="ce-tool-btn" type="button" title="External link" onclick="chapterEditorInsertExternalLink()">Link</button>
+          <button class="ce-tool-btn" type="button" title="Wiki link" onclick="chapterEditorFocusWikiSearch()">Wiki</button>
+        </div>
+        <div class="chapter-editor-grid">
+          <div class="ce-source-wrap">
+            <div class="ce-source-head">
+              <span>Source</span>
+              <span id="ce-word-count">0 words</span>
+            </div>
+            <textarea id="ce-body" class="ce-field" placeholder="Write your chapter text here in Markdown."></textarea>
+          </div>
+          <div class="ce-preview-wrap">
+            <div class="ce-preview-head">
+              <span>Live Preview</span>
+              <span id="ce-preview-status">Ready</span>
+            </div>
+            <div id="ce-preview" class="ce-preview"></div>
+          </div>
+        </div>
+        <div class="ce-link-helper">
+          <div class="ce-link-head">
+            <span>Wiki Link Helper</span>
+            <span>Inserts [[key|Text]]</span>
+          </div>
+          <div class="ce-link-controls">
+            <input id="ce-wiki-search" class="cm-input" placeholder="Search Codex entries" oninput="renderChapterEditorWikiResults(this.value)">
+            <input id="ce-wiki-label" class="cm-input" placeholder="Display text">
+            <button class="cm-btn secondary" type="button" onclick="insertChapterEditorWikiFromSearch()">Insert</button>
+          </div>
+          <div id="ce-wiki-results" class="ce-link-results"></div>
+        </div>
+      </main>
+    </div>
+  </section>
 </div>
 
 
@@ -3029,6 +3371,7 @@ Start a new section with: ===Section Title==="></textarea>
 // ════════════════════════════════════════════════════════
 const CHAPTERS_STORAGE_KEY = 'cosmopolita_chapters';
 const CHAPTERS_DATA_URL = 'data/chapters.json';
+const CHAPTER_EDITOR_DRAFTS_KEY = 'cosmopolita_chapter_editor_drafts';
 
 const CH1_BODY = `The [[port-actual|Port of Port-Actual]] was not, in any meaningful sense, a single port. By the time [[elzbieta|Elzbieta Vorn]] arrived on the 14th of Drymonth aboard the *Catechism of Tides*—a mid-displacement packet vessel flagged alternately to four jurisdictions depending on which was least inconvenient at any given moment—the port had achieved the administrative character of a small nation-state operating inside the body of a larger one, its [[compact|Compact authorities]] maintaining seventeen separate arrival counters and an unknown number of informal ones, staffed by officials whose authority derived from documents no one had verified in living memory.
 
@@ -3202,6 +3545,10 @@ function importChapters(event){
 
 let chapters = normalizeChapterList(loadChapters());
 let _editingChapterId = null;
+let _chapterEditorBaseId = null;
+let _chapterEditorDraftTimer = null;
+let _chapterEditorSnapshot = '';
+let _chapterEditorSelectedWikiKey = '';
 let _currentChapterId = null;
 let _currentCharacterId = null;
 
@@ -5154,93 +5501,419 @@ function formatCharacterBio(text){
 }
 
 // ════════════════════════════════════════════════════════
-// NEW / EDIT CHAPTER MODAL
+// IN-PAGE CHAPTER EDITOR
 // ════════════════════════════════════════════════════════
-function openNewChapterModal(){
-  if(!requireAdmin()) return;
-  _editingChapterId = null;
-  document.getElementById('cm-modal-title').textContent = 'New Chapter';
-  // clear fields
-  ['cm-novel','cm-act','cm-num','cm-book','cm-volume','cm-subvolume','cm-part','cm-chapter',
-   'cm-meta-narrator','cm-meta-setting',
-   'cm-meta-year','cm-meta-aesthetic','cm-meta-mode','cm-body'].forEach(id=>{
-    document.getElementById(id).value = '';
-  });
-  // pre-fill number
-  document.getElementById('cm-num').value = toRoman(chapters.length + 1);
-  // pre-fill structural fields from last chapter (book/novel/volume/part stay the same)
-  if(chapters.length > 0){
-    const last = chapters[chapters.length - 1];
-    if(last.novel) document.getElementById('cm-novel').value = last.novel;
-    if(last.act) document.getElementById('cm-act').value = last.act;
-    if(last.book)  document.getElementById('cm-book').value  = last.book;
-    if(last.volume) document.getElementById('cm-volume').value = last.volume;
-    if(last.subvolume) document.getElementById('cm-subvolume').value = last.subvolume;
-    if(last.part)  document.getElementById('cm-part').value  = last.part;
+function chapterEditorDraftKey(id){
+  return id ? String(id) : '__new__';
+}
+
+function loadChapterEditorDrafts(){
+  try{
+    const raw = localStorage.getItem(CHAPTER_EDITOR_DRAFTS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){
+    return {};
   }
-  document.getElementById('chapter-modal-overlay').classList.add('open');
+}
+
+function saveChapterEditorDrafts(drafts){
+  try{ localStorage.setItem(CHAPTER_EDITOR_DRAFTS_KEY, JSON.stringify(drafts)); }catch(e){}
+}
+
+function getChapterEditorDraft(id){
+  return loadChapterEditorDrafts()[chapterEditorDraftKey(id)] || null;
+}
+
+function setChapterEditorDraft(id, data){
+  const drafts = loadChapterEditorDrafts();
+  drafts[chapterEditorDraftKey(id)] = {updatedAt:Date.now(), data};
+  saveChapterEditorDrafts(drafts);
+}
+
+function clearChapterEditorDraft(id){
+  const drafts = loadChapterEditorDrafts();
+  delete drafts[chapterEditorDraftKey(id)];
+  saveChapterEditorDrafts(drafts);
+}
+
+function blankChapterEditorData(){
+  const last = chapters.length ? chapters[chapters.length - 1] : {};
+  return {
+    id:'',
+    num:toRoman(chapters.length + 1),
+    novel:last.novel || '',
+    act:last.act || '',
+    book:last.book || '',
+    volume:last.volume || '',
+    subvolume:last.subvolume || '',
+    part:last.part || '',
+    chapter:'',
+    meta:{
+      narrator:'',
+      setting:'',
+      year:'',
+      aesthetic:'',
+      mode:''
+    },
+    body:''
+  };
+}
+
+function normalizeChapterEditorData(ch){
+  ch = ch || blankChapterEditorData();
+  return {
+    id:ch.id || '',
+    num:ch.num || '',
+    novel:ch.novel || '',
+    act:ch.act || '',
+    book:ch.book || '',
+    volume:ch.volume || '',
+    subvolume:ch.subvolume || '',
+    part:ch.part || '',
+    chapter:ch.chapter || '',
+    meta:{
+      narrator:(ch.meta && ch.meta.narrator) || '',
+      setting:(ch.meta && ch.meta.setting) || '',
+      year:(ch.meta && ch.meta.year) || '',
+      aesthetic:(ch.meta && ch.meta.aesthetic) || '',
+      mode:(ch.meta && ch.meta.mode) || ''
+    },
+    body:ch.body || ''
+  };
+}
+
+function setChapterEditorValue(id, value){
+  const el = document.getElementById(id);
+  if(el) el.value = value || '';
+}
+
+function getChapterEditorValue(id){
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function populateChapterEditor(data){
+  setChapterEditorValue('ce-novel', data.novel);
+  setChapterEditorValue('ce-act', data.act);
+  setChapterEditorValue('ce-num', data.num);
+  setChapterEditorValue('ce-book', data.book);
+  setChapterEditorValue('ce-volume', data.volume);
+  setChapterEditorValue('ce-subvolume', data.subvolume);
+  setChapterEditorValue('ce-part', data.part);
+  setChapterEditorValue('ce-chapter', data.chapter);
+  setChapterEditorValue('ce-meta-narrator', data.meta.narrator);
+  setChapterEditorValue('ce-meta-setting', data.meta.setting);
+  setChapterEditorValue('ce-meta-year', data.meta.year);
+  setChapterEditorValue('ce-meta-aesthetic', data.meta.aesthetic);
+  setChapterEditorValue('ce-meta-mode', data.meta.mode);
+  setChapterEditorValue('ce-body', data.body);
+}
+
+function readChapterEditorData(){
+  return {
+    id:_editingChapterId || '',
+    num:getChapterEditorValue('ce-num'),
+    novel:getChapterEditorValue('ce-novel'),
+    act:getChapterEditorValue('ce-act'),
+    book:getChapterEditorValue('ce-book'),
+    volume:getChapterEditorValue('ce-volume'),
+    subvolume:getChapterEditorValue('ce-subvolume'),
+    part:getChapterEditorValue('ce-part'),
+    chapter:getChapterEditorValue('ce-chapter'),
+    meta:{
+      narrator:getChapterEditorValue('ce-meta-narrator'),
+      setting:getChapterEditorValue('ce-meta-setting'),
+      year:getChapterEditorValue('ce-meta-year'),
+      aesthetic:getChapterEditorValue('ce-meta-aesthetic'),
+      mode:getChapterEditorValue('ce-meta-mode')
+    },
+    body:(document.getElementById('ce-body') ? document.getElementById('ce-body').value : '').trim()
+  };
+}
+
+function chapterEditorSnapshot(){
+  return JSON.stringify(readChapterEditorData());
+}
+
+function updateChapterEditorTitle(data){
+  data = data || readChapterEditorData();
+  const title = document.getElementById('ce-title');
+  const mode = document.getElementById('ce-mode-label');
+  if(title) title.textContent = data.chapter || 'Untitled Chapter';
+  if(mode) mode.textContent = _editingChapterId ? 'Edit Chapter' : 'New Chapter';
+}
+
+function updateChapterEditorPreview(){
+  const data = readChapterEditorData();
+  updateChapterEditorTitle(data);
+  renderChapterEditorHeader(data);
+  const preview = document.getElementById('ce-preview');
+  const status = document.getElementById('ce-preview-status');
+  const wordCount = document.getElementById('ce-word-count');
+  if(preview){
+    const html = data.body ? parseBody(data.body) : '<p class="ed-note">Start typing to preview the chapter.</p>';
+    preview.innerHTML = `<article class="chapter-text">${html}</article>`;
+    attachWlListeners(preview);
+  }
+  if(status) status.textContent = data.body ? 'Live' : 'Empty';
+  if(wordCount){
+    const words = data.body ? data.body.trim().split(/\s+/).filter(Boolean).length : 0;
+    wordCount.textContent = `${words} word${words === 1 ? '' : 's'}`;
+  }
+}
+
+function scheduleChapterEditorDraftSave(){
+  clearTimeout(_chapterEditorDraftTimer);
+  _chapterEditorDraftTimer = setTimeout(()=>{
+    const data = readChapterEditorData();
+    setChapterEditorDraft(_chapterEditorBaseId, data);
+    const status = document.getElementById('ce-draft-status');
+    if(status){
+      status.textContent = `Draft autosaved ${new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}.`;
+      status.className = 'ce-status good';
+    }
+  }, 350);
+}
+
+function handleChapterEditorInput(){
+  updateChapterEditorPreview();
+  scheduleChapterEditorDraftSave();
+}
+
+function attachChapterEditorListeners(){
+  document.querySelectorAll('.ce-field').forEach(el=>{
+    if(el._ceInputAttached) return;
+    el.addEventListener('input', handleChapterEditorInput);
+    el._ceInputAttached = true;
+  });
+}
+
+function renderChapterEditorHeader(data){
+  const headerLeft = document.getElementById('cv-header-left');
+  if(!headerLeft) return;
+  const readingContext = getChapterReadingContext(data);
+  const metaHtml = [
+    ['Chapter', data.chapter],
+    ['Act', readingContext.act],
+    ['Volume', readingContext.volume],
+    ['Subvolume', readingContext.subvolume]
+  ].filter(([,v])=>v).map(([k,v])=>`<div class="meta-item"><span class="meta-key">${k}</span><span class="meta-val">${escHtml(v)}</span></div>`).join('');
+  headerLeft.innerHTML = `
+    ${renderSubvolumeBanner(readingContext)}
+    ${readingContext.novel ? `<div class="chdr-architect">${escHtml(readingContext.novel)}</div>` : ''}
+    <div class="chdr-title">${escHtml(readingContext.volume || data.book || 'Chapter Studio')}</div>
+    <div class="chdr-subtitle">${escHtml(data.chapter || (_editingChapterId ? 'Edit Chapter' : 'New Chapter'))}</div>
+    <div class="chdr-meta">${metaHtml}</div>
+  `;
+}
+
+function openChapterEditor(id=null){
+  if(!requireAdmin()) return;
+  const existing = id ? chapters.find(c=>c.id===id) : null;
+  if(id && !existing) return;
+  _editingChapterId = id || null;
+  _chapterEditorBaseId = id || null;
+  _chapterEditorSelectedWikiKey = '';
+  const baseData = normalizeChapterEditorData(existing || blankChapterEditorData());
+  const draft = getChapterEditorDraft(_chapterEditorBaseId);
+  const data = draft && draft.data ? normalizeChapterEditorData(Object.assign({}, baseData, draft.data)) : baseData;
+  document.getElementById('chapter-modal-overlay').classList.remove('open');
+  document.getElementById('chapter-view').style.display = 'block';
+  hideOthers('chapter-view');
+  _pushNav('chapter-view');
+  document.getElementById('chapter-view').classList.add('chapter-editing');
+  renderChapterEditorHeader(data);
+  populateChapterEditor(data);
+  attachChapterEditorListeners();
+  renderChapterEditorWikiResults('');
+  updateChapterEditorPreview();
+  _chapterEditorSnapshot = chapterEditorSnapshot();
+  const status = document.getElementById('ce-draft-status');
+  if(status){
+    status.textContent = draft ? 'Local draft restored.' : 'Autosave will keep a local draft while you work.';
+    status.className = draft ? 'ce-status good' : 'ce-status';
+  }
+  setTimeout(()=>{
+    const target = document.getElementById(data.chapter ? 'ce-body' : 'ce-chapter');
+    if(target) target.focus();
+  }, 60);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function openNewChapterModal(){
+  openChapterEditor(null);
 }
 
 function openEditChapterModal(id){
-  if(!requireAdmin()) return;
-  const ch = chapters.find(c=>c.id===id);
-  if(!ch) return;
-  _editingChapterId = id;
-  document.getElementById('cm-modal-title').textContent = 'Edit Chapter';
-  document.getElementById('cm-novel').value = ch.novel||'';
-  document.getElementById('cm-act').value = ch.act||'';
-  document.getElementById('cm-num').value = ch.num||'';
-  document.getElementById('cm-book').value = ch.book||'';
-  document.getElementById('cm-volume').value = ch.volume||'';
-  document.getElementById('cm-subvolume').value = ch.subvolume||'';
-  document.getElementById('cm-part').value = ch.part||'';
-  document.getElementById('cm-chapter').value = ch.chapter||'';
-  document.getElementById('cm-meta-narrator').value = ch.meta.narrator||'';
-  document.getElementById('cm-meta-setting').value = ch.meta.setting||'';
-  document.getElementById('cm-meta-year').value = ch.meta.year||'';
-  document.getElementById('cm-meta-aesthetic').value = ch.meta.aesthetic||'';
-  document.getElementById('cm-meta-mode').value = ch.meta.mode||'';
-  document.getElementById('cm-body').value = ch.body||'';
-  document.getElementById('chapter-modal-overlay').classList.add('open');
+  openChapterEditor(id);
+}
+
+function closeChapterEditor(force=false){
+  const view = document.getElementById('chapter-view');
+  if(!view || !view.classList.contains('chapter-editing')) return;
+  if(!force && _chapterEditorSnapshot && _chapterEditorSnapshot !== chapterEditorSnapshot()){
+    if(!confirm('Leave the chapter editor? Your local draft will remain available, but unsaved changes will not be published.')) return;
+    setChapterEditorDraft(_chapterEditorBaseId, readChapterEditorData());
+  }
+  view.classList.remove('chapter-editing');
+  const returnId = _editingChapterId;
+  _editingChapterId = null;
+  _chapterEditorBaseId = null;
+  if(returnId && chapters.some(c=>c.id===returnId)){
+    showChapter(returnId);
+  } else {
+    showLanding();
+  }
 }
 
 function closeNewChapterModal(){
   document.getElementById('chapter-modal-overlay').classList.remove('open');
-  _editingChapterId = null;
+  closeChapterEditor();
 }
 
 function handleModalOverlayClick(e){
   if(e.target === document.getElementById('chapter-modal-overlay')) closeNewChapterModal();
 }
 
-async function saveChapter(){
-  if(!requireAdmin()) return;
-  const book    = document.getElementById('cm-book').value.trim();
-  const chapter = document.getElementById('cm-chapter').value.trim();
-  const body    = document.getElementById('cm-body').value.trim();
-  if(!book){    alert('A book title is required.'); return; }
-  if(!chapter){ alert('A chapter name is required.'); return; }
-  if(!body){    alert('Chapter text is required.'); return; }
+function chapterEditorTextArea(){
+  return document.getElementById('ce-body');
+}
 
-  const chData = {
-    id: _editingChapterId || ('ch-' + Date.now()),
-    num:     document.getElementById('cm-num').value.trim(),
-    novel:   document.getElementById('cm-novel').value.trim(),
-    act:     document.getElementById('cm-act').value.trim(),
+function chapterEditorReplaceSelection(text, selectStart=null, selectEnd=null){
+  const area = chapterEditorTextArea();
+  if(!area) return;
+  const start = area.selectionStart || 0;
+  const end = area.selectionEnd || 0;
+  area.setRangeText(text, start, end, 'end');
+  if(selectStart !== null && selectEnd !== null){
+    area.setSelectionRange(start + selectStart, start + selectEnd);
+  }
+  area.focus();
+  handleChapterEditorInput();
+}
+
+function chapterEditorWrapSelection(prefix, suffix, fallback){
+  const area = chapterEditorTextArea();
+  if(!area) return;
+  const start = area.selectionStart || 0;
+  const end = area.selectionEnd || 0;
+  const selected = area.value.slice(start, end) || fallback;
+  const text = `${prefix}${selected}${suffix}`;
+  area.setRangeText(text, start, end, 'end');
+  area.setSelectionRange(start + prefix.length, start + prefix.length + selected.length);
+  area.focus();
+  handleChapterEditorInput();
+}
+
+function chapterEditorPrefixLine(prefix){
+  const area = chapterEditorTextArea();
+  if(!area) return;
+  const start = area.selectionStart || 0;
+  const lineStart = area.value.lastIndexOf('\n', Math.max(0, start - 1)) + 1;
+  area.setRangeText(prefix, lineStart, lineStart, 'end');
+  area.focus();
+  handleChapterEditorInput();
+}
+
+function chapterEditorInsertSection(){
+  const title = prompt('Section title');
+  if(!title) return;
+  chapterEditorReplaceSelection(`\n\n===${title.trim()}===\n\n`);
+}
+
+function chapterEditorInsertExternalLink(){
+  const area = chapterEditorTextArea();
+  if(!area) return;
+  const selected = area.value.slice(area.selectionStart || 0, area.selectionEnd || 0) || 'link text';
+  const url = prompt('URL for this link', 'https://');
+  if(!url) return;
+  chapterEditorReplaceSelection(`[${selected}](${url.trim()})`, 1, 1 + selected.length);
+}
+
+function chapterEditorFocusWikiSearch(){
+  const search = document.getElementById('ce-wiki-search');
+  if(search){
+    search.focus();
+    search.select();
+  }
+}
+
+function renderChapterEditorWikiResults(query=''){
+  const box = document.getElementById('ce-wiki-results');
+  if(!box) return;
+  const entries = String(query || '').trim() ? codexSearch(query).slice(0, 8) : codexEntries().slice(0, 8);
+  if(!entries.length){
+    box.innerHTML = '<div class="empty-state">No Codex entries found.</div>';
+    return;
+  }
+  box.innerHTML = entries.map(entry=>`
+    <button class="ce-link-result" type="button" data-key="${escHtml(entry.key)}" onclick="selectChapterEditorWiki(this.dataset.key)">
+      <span class="ce-link-result-title">${escHtml(entry.t || entry.key)}</span>
+      <span class="ce-link-result-key">${escHtml(entry.key)}</span>
+    </button>
+  `).join('');
+}
+
+function selectChapterEditorWiki(key){
+  const entry = E[key];
+  _chapterEditorSelectedWikiKey = key || '';
+  const label = document.getElementById('ce-wiki-label');
+  if(label && entry && !label.value.trim()) label.value = entry.t || key;
+  insertChapterEditorWikiFromSearch();
+}
+
+function insertChapterEditorWikiFromSearch(){
+  const search = document.getElementById('ce-wiki-search');
+  const label = document.getElementById('ce-wiki-label');
+  const query = search ? search.value : '';
+  let key = _chapterEditorSelectedWikiKey;
+  if(!key){
+    const match = (String(query || '').trim() ? codexSearch(query)[0] : null);
+    key = match ? match.key : String(query || '').trim();
+  }
+  if(!key) return;
+  const entry = E[key];
+  const display = (label && label.value.trim()) || (entry && entry.t) || key;
+  chapterEditorReplaceSelection(`[[${key}|${display}]]`);
+  if(label) label.value = '';
+  _chapterEditorSelectedWikiKey = '';
+}
+
+function collectLegacyModalChapterData(){
+  const book = document.getElementById('cm-book').value.trim();
+  const chapter = document.getElementById('cm-chapter').value.trim();
+  const body = document.getElementById('cm-body').value.trim();
+  return {
+    id:_editingChapterId || ('ch-' + Date.now()),
+    num:document.getElementById('cm-num').value.trim(),
+    novel:document.getElementById('cm-novel').value.trim(),
+    act:document.getElementById('cm-act').value.trim(),
     book,
-    volume:  document.getElementById('cm-volume').value.trim(),
-    subvolume: document.getElementById('cm-subvolume').value.trim(),
-    part:    document.getElementById('cm-part').value.trim(),
+    volume:document.getElementById('cm-volume').value.trim(),
+    subvolume:document.getElementById('cm-subvolume').value.trim(),
+    part:document.getElementById('cm-part').value.trim(),
     chapter,
-    meta: {
-      narrator:  document.getElementById('cm-meta-narrator').value.trim(),
-      setting:   document.getElementById('cm-meta-setting').value.trim(),
-      year:      document.getElementById('cm-meta-year').value.trim(),
-      aesthetic: document.getElementById('cm-meta-aesthetic').value.trim(),
-      mode:      document.getElementById('cm-meta-mode').value.trim(),
+    meta:{
+      narrator:document.getElementById('cm-meta-narrator').value.trim(),
+      setting:document.getElementById('cm-meta-setting').value.trim(),
+      year:document.getElementById('cm-meta-year').value.trim(),
+      aesthetic:document.getElementById('cm-meta-aesthetic').value.trim(),
+      mode:document.getElementById('cm-meta-mode').value.trim()
     },
     body
   };
+}
+
+async function saveChapter(){
+  if(!requireAdmin()) return;
+  const inEditor = document.getElementById('chapter-view') && document.getElementById('chapter-view').classList.contains('chapter-editing');
+  const editorData = inEditor ? readChapterEditorData() : collectLegacyModalChapterData();
+  const chData = Object.assign({}, editorData, {
+    id:editorData.id || ('ch-' + Date.now())
+  });
+  if(!chData.book){ alert('A book title is required.'); return; }
+  if(!chData.chapter){ alert('A chapter name is required.'); return; }
+  if(!chData.body){ alert('Chapter text is required.'); return; }
 
   if(_editingChapterId){
     const idx = chapters.findIndex(c=>c.id===_editingChapterId);
@@ -5257,11 +5930,14 @@ async function saveChapter(){
     console.error('Chapter sync failed:', err);
     alert('Chapter saved in this browser, but Supabase sync failed. Run supabase-chapters-schema.sql, confirm you are logged in as the admin, then try saving again.');
   }
-  closeNewChapterModal();
+  clearChapterEditorDraft(_chapterEditorBaseId);
+  document.getElementById('chapter-modal-overlay').classList.remove('open');
+  const savedId = chData.id;
+  _editingChapterId = null;
+  _chapterEditorBaseId = null;
   renderTOC();
-
-  // Navigate to the saved chapter
-  showChapter(chData.id);
+  document.getElementById('chapter-view').classList.remove('chapter-editing');
+  showChapter(savedId);
 }
 
 async function deleteChapter(id){
