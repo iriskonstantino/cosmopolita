@@ -2523,6 +2523,144 @@ body:not(.logged-in) #tnav-assets{
 }
 .ce-status.good{color:var(--green)}
 .ce-status.warn{color:var(--red)}
+.ce-author-summary{
+  font-family:var(--mono);
+  font-size:0.54rem;
+  line-height:1.55;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#999;
+  margin-top:0.55rem;
+}
+.author-notes-workspace{
+  margin-top:1rem;
+  border:1px solid var(--border);
+  background:var(--white);
+}
+.author-notes-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  border-bottom:1px solid var(--border);
+  padding:0.6rem 0.75rem;
+}
+.author-notes-title{
+  font-family:var(--mono);
+  font-size:0.56rem;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:#aaa;
+}
+.author-notes-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0;
+}
+.author-notes-col{
+  min-width:0;
+  padding:0.75rem;
+  border-right:1px solid var(--border);
+}
+.author-notes-col:last-child{border-right:none}
+.author-notes-section-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.74rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:0.6rem;
+}
+.author-note-list{
+  display:grid;
+  gap:0.55rem;
+}
+.author-note-card{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.55rem;
+}
+.author-note-card.unmatched{
+  border-style:dashed;
+  border-color:var(--red);
+}
+.author-note-meta{
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:#aaa;
+  margin-bottom:0.35rem;
+}
+.author-note-row{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:0.45rem;
+  align-items:start;
+}
+.author-note-text,
+.author-note-quote{
+  font-family:var(--serif);
+  font-size:0.82rem;
+  line-height:1.45;
+  color:#2a2825;
+}
+.author-note-quote{
+  margin-bottom:0.4rem;
+  color:#555;
+  font-style:italic;
+}
+.author-note-input{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid var(--border);
+  background:var(--white);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:0.82rem;
+  line-height:1.45;
+  padding:0.45rem;
+  resize:vertical;
+  min-height:4.2rem;
+  outline:none;
+}
+.author-note-input:focus{border-color:var(--ink)}
+.author-note-actions{
+  display:flex;
+  gap:0.35rem;
+  flex-wrap:wrap;
+  margin-top:0.45rem;
+}
+.author-note-btn{
+  border:1px solid var(--border);
+  background:transparent;
+  color:#777;
+  cursor:pointer;
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  padding:0.28rem 0.45rem;
+}
+.author-note-btn:hover{
+  border-color:var(--ink);
+  color:var(--ink);
+}
+.author-note-btn.danger:hover{
+  border-color:var(--red);
+  color:var(--red);
+}
+.author-empty{
+  font-family:var(--mono);
+  font-size:0.52rem;
+  letter-spacing:0.08em;
+  line-height:1.5;
+  text-transform:uppercase;
+  color:#aaa;
+  border:1px solid var(--border);
+  padding:0.55rem;
+}
 
 
 
@@ -2699,6 +2837,9 @@ body:not(.logged-in) #tnav-assets{
   .chapter-editor-grid{grid-template-columns:1fr;}
   .ce-link-controls{grid-template-columns:1fr;}
   #ce-body,.ce-preview{min-height:48vh;max-height:none;}
+  .author-notes-grid{grid-template-columns:1fr;}
+  .author-notes-col{border-right:none;border-bottom:1px solid var(--border);}
+  .author-notes-col:last-child{border-bottom:none}
 }
 @media(min-width:721px) and (max-width:1100px){
   .toc-dashboard{
@@ -3119,6 +3260,24 @@ body:not(.logged-in) #tnav-assets{
           <div class="ce-kicker">Draft</div>
           <div id="ce-draft-status" class="ce-status">No local draft yet.</div>
         </div>
+        <div class="ce-panel">
+          <div class="ce-kicker">Author Notes</div>
+          <div class="cm-field">
+            <label class="cm-label">Chapter Status</label>
+            <select class="cm-input ce-field" id="ce-author-status" onchange="handleChapterEditorInput()">
+              <option value="draft">Draft</option>
+              <option value="revising">Revising</option>
+              <option value="ready">Ready</option>
+              <option value="canonical">Canonical</option>
+              <option value="needs-work">Needs Work</option>
+            </select>
+          </div>
+          <div id="ce-author-summary" class="ce-author-summary">No author notes yet.</div>
+          <div class="author-note-actions">
+            <button class="author-note-btn" type="button" onclick="addAuthorChecklistItem()">Add Task</button>
+            <button class="author-note-btn" type="button" onclick="addAuthorThreadNote()">Add Note</button>
+          </div>
+        </div>
       </aside>
       <main class="chapter-editor-main">
         <div class="ce-title-row">
@@ -3173,6 +3332,26 @@ body:not(.logged-in) #tnav-assets{
           </div>
           <div id="ce-wiki-results" class="ce-link-results"></div>
         </div>
+        <section class="author-notes-workspace" id="ce-author-workspace">
+          <div class="author-notes-head">
+            <div class="author-notes-title">Author Notes</div>
+            <button class="author-note-btn" type="button" onclick="addAuthorInlineNoteFromSelection()">Add Inline Note From Selection</button>
+          </div>
+          <div class="author-notes-grid">
+            <div class="author-notes-col">
+              <div class="author-notes-section-title">Checklist</div>
+              <div id="ce-author-checklist" class="author-note-list"></div>
+            </div>
+            <div class="author-notes-col">
+              <div class="author-notes-section-title">Private Notes</div>
+              <div id="ce-author-thread" class="author-note-list"></div>
+            </div>
+            <div class="author-notes-col">
+              <div class="author-notes-section-title">Inline</div>
+              <div id="ce-author-inline" class="author-note-list"></div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   </section>
@@ -3475,6 +3654,39 @@ function cloneDefaultChapters(){
   return DEFAULT_CHAPTERS.map(c=>JSON.parse(JSON.stringify(c)));
 }
 
+function authorNoteId(prefix='an'){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+}
+
+function normalizeAuthorNotes(value={}){
+  const statusOptions = ['draft','revising','ready','canonical','needs-work'];
+  const status = statusOptions.includes(value.status) ? value.status : 'draft';
+  const checklist = Array.isArray(value.checklist) ? value.checklist.map(item=>({
+    id:item.id || authorNoteId('task'),
+    done:!!item.done,
+    text:String(item.text || ''),
+    createdAt:item.createdAt || Date.now(),
+    updatedAt:item.updatedAt || item.createdAt || Date.now()
+  })) : [];
+  const notes = Array.isArray(value.notes) ? value.notes.map(note=>({
+    id:note.id || authorNoteId('note'),
+    body:String(note.body || ''),
+    createdAt:note.createdAt || Date.now(),
+    updatedAt:note.updatedAt || note.createdAt || Date.now()
+  })) : [];
+  const inline = Array.isArray(value.inline) ? value.inline.map(note=>({
+    id:note.id || authorNoteId('inline'),
+    quote:String(note.quote || ''),
+    before:String(note.before || ''),
+    after:String(note.after || ''),
+    body:String(note.body || ''),
+    createdAt:note.createdAt || Date.now(),
+    updatedAt:note.updatedAt || note.createdAt || Date.now()
+  })) : [];
+  return {status, checklist, notes, inline};
+}
+
 function normalizeChapterList(raw){
   const list = Array.isArray(raw) ? raw : raw && Array.isArray(raw.chapters) ? raw.chapters : null;
   if(!list) throw new Error('Chapter JSON must be an array or an object with a chapters array.');
@@ -3495,7 +3707,8 @@ function normalizeChapterList(raw){
       aesthetic: c.meta && c.meta.aesthetic || '',
       mode: c.meta && c.meta.mode || ''
     },
-    body: c.body || ''
+    body: c.body || '',
+    authorNotes: normalizeAuthorNotes(c.authorNotes || {})
   }));
 }
 
@@ -3617,6 +3830,7 @@ let _chapterEditorBaseId = null;
 let _chapterEditorDraftTimer = null;
 let _chapterEditorSnapshot = '';
 let _chapterEditorSelectedWikiKey = '';
+let _chapterEditorAuthorNotes = normalizeAuthorNotes();
 let _currentChapterId = null;
 let _currentCharacterId = null;
 
@@ -5786,7 +6000,8 @@ function blankChapterEditorData(){
       aesthetic:'',
       mode:''
     },
-    body:''
+    body:'',
+    authorNotes:normalizeAuthorNotes()
   };
 }
 
@@ -5809,7 +6024,8 @@ function normalizeChapterEditorData(ch){
       aesthetic:(ch.meta && ch.meta.aesthetic) || '',
       mode:(ch.meta && ch.meta.mode) || ''
     },
-    body:ch.body || ''
+    body:ch.body || '',
+    authorNotes:normalizeAuthorNotes(ch.authorNotes || {})
   };
 }
 
@@ -5821,6 +6037,178 @@ function setChapterEditorValue(id, value){
 function getChapterEditorValue(id){
   const el = document.getElementById(id);
   return el ? el.value.trim() : '';
+}
+
+function readAuthorNotesEditor(){
+  const status = document.getElementById('ce-author-status');
+  _chapterEditorAuthorNotes.status = status ? status.value : _chapterEditorAuthorNotes.status;
+  _chapterEditorAuthorNotes = normalizeAuthorNotes(_chapterEditorAuthorNotes);
+  return _chapterEditorAuthorNotes;
+}
+
+function authorNoteDate(ts){
+  if(!ts) return 'Just now';
+  return new Date(ts).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+}
+
+function authorNotesSummaryText(notes=readAuthorNotesEditor()){
+  const openTasks = notes.checklist.filter(item=>!item.done).length;
+  const totalTasks = notes.checklist.length;
+  const noteCount = notes.notes.length;
+  const inlineCount = notes.inline.length;
+  return `${openTasks}/${totalTasks} open tasks · ${noteCount} notes · ${inlineCount} inline`;
+}
+
+function updateAuthorNotesSummary(){
+  const el = document.getElementById('ce-author-summary');
+  if(el) el.textContent = authorNotesSummaryText();
+}
+
+function renderAuthorNotesEditor(){
+  const notes = readAuthorNotesEditor();
+  const checklist = document.getElementById('ce-author-checklist');
+  const thread = document.getElementById('ce-author-thread');
+  const inline = document.getElementById('ce-author-inline');
+  updateAuthorNotesSummary();
+  if(checklist){
+    checklist.innerHTML = notes.checklist.length ? notes.checklist.map(item=>`
+      <div class="author-note-card">
+        <div class="author-note-row">
+          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleAuthorChecklistItem('${escHtml(item.id)}', this.checked)">
+          <textarea class="author-note-input" rows="2" oninput="updateAuthorChecklistText('${escHtml(item.id)}', this.value)">${escHtml(item.text)}</textarea>
+        </div>
+        <div class="author-note-meta">${item.done ? 'Done' : 'Open'} · Updated ${escHtml(authorNoteDate(item.updatedAt))}</div>
+        <div class="author-note-actions">
+          <button class="author-note-btn danger" type="button" onclick="deleteAuthorChecklistItem('${escHtml(item.id)}')">Delete</button>
+        </div>
+      </div>
+    `).join('') : '<div class="author-empty">No tasks yet.</div>';
+  }
+  if(thread){
+    thread.innerHTML = notes.notes.length ? notes.notes.map(note=>`
+      <div class="author-note-card">
+        <div class="author-note-meta">Updated ${escHtml(authorNoteDate(note.updatedAt))}</div>
+        <textarea class="author-note-input" rows="4" oninput="updateAuthorThreadNote('${escHtml(note.id)}', this.value)">${escHtml(note.body)}</textarea>
+        <div class="author-note-actions">
+          <button class="author-note-btn danger" type="button" onclick="deleteAuthorThreadNote('${escHtml(note.id)}')">Delete</button>
+        </div>
+      </div>
+    `).join('') : '<div class="author-empty">No private notes yet.</div>';
+  }
+  if(inline){
+    const body = document.getElementById('ce-body') ? document.getElementById('ce-body').value : '';
+    inline.innerHTML = notes.inline.length ? notes.inline.map(note=>{
+      const matched = note.quote && body.includes(note.quote);
+      return `
+        <div class="author-note-card ${matched ? '' : 'unmatched'}" data-inline-id="${escHtml(note.id)}">
+          <div class="author-note-meta inline-match-meta">${matched ? 'Matched' : 'Unmatched'} · Updated ${escHtml(authorNoteDate(note.updatedAt))}</div>
+          <div class="author-note-quote">${escHtml(note.quote || 'No selected quote')}</div>
+          <textarea class="author-note-input" rows="3" oninput="updateAuthorInlineNote('${escHtml(note.id)}', this.value)">${escHtml(note.body)}</textarea>
+          <div class="author-note-actions">
+            <button class="author-note-btn" type="button" onclick="scrollToAuthorInlineQuote('${escHtml(note.id)}')">Find Quote</button>
+            <button class="author-note-btn danger" type="button" onclick="deleteAuthorInlineNote('${escHtml(note.id)}')">Delete</button>
+          </div>
+        </div>`;
+    }).join('') : '<div class="author-empty">Select source text, then add an inline note.</div>';
+  }
+}
+
+function updateAuthorInlineMatches(){
+  const body = document.getElementById('ce-body') ? document.getElementById('ce-body').value : '';
+  _chapterEditorAuthorNotes.inline.forEach(note=>{
+    const card = Array.from(document.querySelectorAll('.author-note-card[data-inline-id]')).find(el=>el.dataset.inlineId === note.id);
+    if(!card) return;
+    const matched = note.quote && body.includes(note.quote);
+    card.classList.toggle('unmatched', !matched);
+    const meta = card.querySelector('.inline-match-meta');
+    if(meta) meta.textContent = `${matched ? 'Matched' : 'Unmatched'} · Updated ${authorNoteDate(note.updatedAt)}`;
+  });
+}
+
+function touchAuthorNote(note){
+  note.updatedAt = Date.now();
+  handleChapterEditorInput();
+  updateAuthorNotesSummary();
+}
+
+function addAuthorChecklistItem(){
+  _chapterEditorAuthorNotes.checklist.push({id:authorNoteId('task'), done:false, text:'', createdAt:Date.now(), updatedAt:Date.now()});
+  renderAuthorNotesEditor();
+  handleChapterEditorInput();
+}
+
+function updateAuthorChecklistText(id, text){
+  const item = _chapterEditorAuthorNotes.checklist.find(task=>task.id===id);
+  if(item){ item.text = text; touchAuthorNote(item); }
+}
+
+function toggleAuthorChecklistItem(id, done){
+  const item = _chapterEditorAuthorNotes.checklist.find(task=>task.id===id);
+  if(item){ item.done = !!done; touchAuthorNote(item); renderAuthorNotesEditor(); }
+}
+
+function deleteAuthorChecklistItem(id){
+  _chapterEditorAuthorNotes.checklist = _chapterEditorAuthorNotes.checklist.filter(task=>task.id!==id);
+  renderAuthorNotesEditor();
+  handleChapterEditorInput();
+}
+
+function addAuthorThreadNote(){
+  _chapterEditorAuthorNotes.notes.unshift({id:authorNoteId('note'), body:'', createdAt:Date.now(), updatedAt:Date.now()});
+  renderAuthorNotesEditor();
+  handleChapterEditorInput();
+}
+
+function updateAuthorThreadNote(id, body){
+  const note = _chapterEditorAuthorNotes.notes.find(item=>item.id===id);
+  if(note){ note.body = body; touchAuthorNote(note); }
+}
+
+function deleteAuthorThreadNote(id){
+  _chapterEditorAuthorNotes.notes = _chapterEditorAuthorNotes.notes.filter(note=>note.id!==id);
+  renderAuthorNotesEditor();
+  handleChapterEditorInput();
+}
+
+function addAuthorInlineNoteFromSelection(){
+  const area = chapterEditorTextArea();
+  if(!area) return;
+  const start = area.selectionStart || 0;
+  const end = area.selectionEnd || 0;
+  const quote = area.value.slice(start, end).trim();
+  if(!quote){ alert('Select source text first, then add an inline note.'); return; }
+  _chapterEditorAuthorNotes.inline.unshift({
+    id:authorNoteId('inline'),
+    quote,
+    before:area.value.slice(Math.max(0, start - 80), start),
+    after:area.value.slice(end, Math.min(area.value.length, end + 80)),
+    body:'',
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  });
+  renderAuthorNotesEditor();
+  handleChapterEditorInput();
+}
+
+function updateAuthorInlineNote(id, body){
+  const note = _chapterEditorAuthorNotes.inline.find(item=>item.id===id);
+  if(note){ note.body = body; touchAuthorNote(note); }
+}
+
+function deleteAuthorInlineNote(id){
+  _chapterEditorAuthorNotes.inline = _chapterEditorAuthorNotes.inline.filter(note=>note.id!==id);
+  renderAuthorNotesEditor();
+  handleChapterEditorInput();
+}
+
+function scrollToAuthorInlineQuote(id){
+  const area = chapterEditorTextArea();
+  const note = _chapterEditorAuthorNotes.inline.find(item=>item.id===id);
+  if(!area || !note || !note.quote) return;
+  const index = area.value.indexOf(note.quote);
+  if(index < 0){ alert('That quote is no longer present in the source text.'); return; }
+  area.focus();
+  area.setSelectionRange(index, index + note.quote.length);
 }
 
 function populateChapterEditor(data){
@@ -5838,6 +6226,10 @@ function populateChapterEditor(data){
   setChapterEditorValue('ce-meta-aesthetic', data.meta.aesthetic);
   setChapterEditorValue('ce-meta-mode', data.meta.mode);
   setChapterEditorValue('ce-body', data.body);
+  _chapterEditorAuthorNotes = normalizeAuthorNotes(data.authorNotes || {});
+  const status = document.getElementById('ce-author-status');
+  if(status) status.value = _chapterEditorAuthorNotes.status;
+  renderAuthorNotesEditor();
 }
 
 function readChapterEditorData(){
@@ -5858,7 +6250,8 @@ function readChapterEditorData(){
       aesthetic:getChapterEditorValue('ce-meta-aesthetic'),
       mode:getChapterEditorValue('ce-meta-mode')
     },
-    body:(document.getElementById('ce-body') ? document.getElementById('ce-body').value : '').trim()
+    body:(document.getElementById('ce-body') ? document.getElementById('ce-body').value : '').trim(),
+    authorNotes:readAuthorNotesEditor()
   };
 }
 
@@ -5941,6 +6334,8 @@ function scheduleChapterEditorDraftSave(){
 
 function handleChapterEditorInput(){
   updateChapterEditorPreview();
+  updateAuthorNotesSummary();
+  updateAuthorInlineMatches();
   scheduleChapterEditorDraftSave();
 }
 
@@ -6157,6 +6552,7 @@ function collectLegacyModalChapterData(){
   const book = document.getElementById('cm-book').value.trim();
   const chapter = document.getElementById('cm-chapter').value.trim();
   const body = document.getElementById('cm-body').value.trim();
+  const existingChapter = _editingChapterId ? chapters.find(c=>c.id===_editingChapterId) : null;
   return {
     id:_editingChapterId || ('ch-' + Date.now()),
     num:document.getElementById('cm-num').value.trim(),
@@ -6174,7 +6570,8 @@ function collectLegacyModalChapterData(){
       aesthetic:document.getElementById('cm-meta-aesthetic').value.trim(),
       mode:document.getElementById('cm-meta-mode').value.trim()
     },
-    body
+    body,
+    authorNotes:normalizeAuthorNotes(existingChapter && existingChapter.authorNotes || {})
   };
 }
 
