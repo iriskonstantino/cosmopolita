@@ -2315,6 +2315,9 @@ body:not(.logged-in) #tnav-assets{
 #chapter-view.chapter-editing #chapter-editor{
   display:block;
 }
+#chapter-view.author-workspace-open #chapter-editor{
+  display:none;
+}
 .chapter-editor-shell{
   display:grid;
   grid-template-columns:280px minmax(0,1fr);
@@ -2531,6 +2534,281 @@ body:not(.logged-in) #tnav-assets{
   text-transform:uppercase;
   color:#999;
   margin-top:0.55rem;
+}
+#author-workspace{
+  display:none;
+  background:var(--paper);
+  border-top:1.5px solid var(--ink);
+}
+#chapter-view.chapter-editing.author-workspace-open #author-workspace{
+  display:block;
+}
+.author-workspace-shell{
+  min-height:calc(100vh - 260px);
+}
+.author-workspace-top{
+  position:sticky;
+  top:48px;
+  z-index:7;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:1rem;
+  align-items:center;
+  border-bottom:1px solid var(--border);
+  background:var(--panel);
+  padding:1rem 1.25rem;
+}
+.author-workspace-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:1.08rem;
+  line-height:1.16;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+.author-workspace-sub{
+  margin-top:0.25rem;
+  font-family:var(--mono);
+  font-size:0.52rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#999;
+}
+.author-workspace-actions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+  gap:0.55rem;
+}
+.author-progress{
+  min-width:180px;
+}
+.author-progress-track{
+  height:4px;
+  background:rgba(31,28,24,0.12);
+  overflow:hidden;
+}
+.author-progress-fill{
+  height:100%;
+  width:0;
+  background:var(--ink);
+  transition:width .18s ease;
+}
+.author-progress-text{
+  margin-top:0.28rem;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#888;
+}
+.author-workspace-grid{
+  display:grid;
+  grid-template-columns:minmax(320px,0.78fr) minmax(0,1.22fr);
+  gap:1rem;
+  padding:1.25rem;
+}
+.author-read-panel,
+.author-review-panel{
+  min-width:0;
+  border:1px solid var(--border);
+  background:var(--white);
+}
+.author-read-head,
+.author-review-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  border-bottom:1px solid var(--border);
+  padding:0.65rem 0.8rem;
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:#aaa;
+}
+.author-read-body{
+  max-height:calc(100vh - 235px);
+  overflow:auto;
+  padding:1rem;
+}
+.author-read-body .chapter-text{
+  max-width:none;
+  padding:0;
+}
+.author-source-drawer{
+  border-top:1px solid var(--border);
+  background:var(--paper);
+}
+.author-source-drawer summary{
+  cursor:pointer;
+  padding:0.65rem 0.8rem;
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:#888;
+}
+#aw-source{
+  width:100%;
+  min-height:180px;
+  border:none;
+  border-top:1px solid var(--border);
+  background:var(--white);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:0.92rem;
+  line-height:1.65;
+  resize:vertical;
+  padding:0.85rem;
+  outline:none;
+}
+.author-source-tools{
+  display:flex;
+  justify-content:flex-end;
+  gap:0.5rem;
+  padding:0 0.8rem 0.8rem;
+}
+.author-review-list{
+  display:grid;
+  gap:0.9rem;
+  padding:0.9rem;
+}
+.author-review-section{
+  border:1px solid var(--border);
+  background:var(--paper);
+}
+.author-review-section-head{
+  display:grid;
+  grid-template-columns:auto 1fr auto auto;
+  align-items:center;
+  gap:0.75rem;
+  width:100%;
+  border:none;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+  color:var(--ink);
+  cursor:pointer;
+  text-align:left;
+  padding:0.75rem 0.85rem;
+}
+.author-section-stripe{
+  width:4px;
+  height:1.45rem;
+  background:var(--ink);
+}
+.author-section-name{
+  font-family:var(--display);
+  font-size:0.88rem;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+}
+.author-section-count,
+.author-section-toggle{
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#999;
+}
+.author-review-section.closed .author-review-section-body{
+  display:none;
+}
+.author-review-group-label{
+  border-top:1px solid var(--border);
+  padding:0.6rem 0.85rem 0.25rem;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:#aaa;
+}
+.author-review-item{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:0.75rem;
+  align-items:start;
+  border-top:1px solid var(--border);
+  background:var(--white);
+  padding:0.7rem 0.85rem;
+}
+.author-review-item.done .author-review-text{
+  color:#777;
+  text-decoration:line-through;
+  text-decoration-color:#aaa;
+}
+.author-review-check{
+  width:17px;
+  height:17px;
+  margin-top:0.2rem;
+  accent-color:var(--ink);
+}
+.author-review-text{
+  font-family:var(--serif);
+  font-size:0.98rem;
+  line-height:1.48;
+  color:var(--ink);
+}
+.author-review-tag{
+  display:inline-block;
+  margin-top:0.32rem;
+  border:1px solid var(--border);
+  padding:0.12rem 0.38rem;
+  font-family:var(--mono);
+  font-size:0.46rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:#888;
+}
+.author-review-note-wrap{
+  grid-column:2 / 4;
+  display:none;
+}
+.author-review-item.note-open .author-review-note-wrap{
+  display:block;
+}
+.author-review-note{
+  width:100%;
+  min-height:86px;
+  box-sizing:border-box;
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:0.92rem;
+  line-height:1.55;
+  padding:0.55rem 0.65rem;
+  resize:vertical;
+  outline:none;
+}
+.author-review-note:focus{border-color:var(--ink)}
+.author-review-flags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.45rem;
+  border-top:1px solid var(--border);
+  background:var(--white);
+  padding:0.8rem 0.85rem;
+}
+.author-flag-btn{
+  border:1px solid var(--border);
+  background:transparent;
+  color:#777;
+  cursor:pointer;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:0.28rem 0.55rem;
+}
+.author-flag-btn.active{
+  border-color:var(--ink);
+  background:var(--ink);
+  color:var(--white);
 }
 .author-notes-workspace{
   margin-top:1rem;
@@ -2837,6 +3115,16 @@ body:not(.logged-in) #tnav-assets{
   .chapter-editor-grid{grid-template-columns:1fr;}
   .ce-link-controls{grid-template-columns:1fr;}
   #ce-body,.ce-preview{min-height:48vh;max-height:none;}
+  .author-workspace-top{position:relative;top:auto;grid-template-columns:1fr;}
+  .author-workspace-actions{justify-content:flex-start;}
+  .author-progress{width:100%;min-width:0;}
+  .author-workspace-grid{grid-template-columns:1fr;padding:1rem 1.25rem 1.5rem;}
+  .author-read-body{max-height:none;}
+  .author-review-section-head{grid-template-columns:auto 1fr auto;}
+  .author-section-toggle{display:none;}
+  .author-review-item{grid-template-columns:auto minmax(0,1fr);}
+  .author-review-item .author-note-btn{grid-column:2;}
+  .author-review-note-wrap{grid-column:2;}
   .author-notes-grid{grid-template-columns:1fr;}
   .author-notes-col{border-right:none;border-bottom:1px solid var(--border);}
   .author-notes-col:last-child{border-bottom:none}
@@ -3274,8 +3562,7 @@ body:not(.logged-in) #tnav-assets{
           </div>
           <div id="ce-author-summary" class="ce-author-summary">No author notes yet.</div>
           <div class="author-note-actions">
-            <button class="author-note-btn" type="button" onclick="addAuthorChecklistItem()">Add Task</button>
-            <button class="author-note-btn" type="button" onclick="addAuthorThreadNote()">Add Note</button>
+            <button class="author-note-btn" type="button" onclick="openAuthorWorkspace()">Open Author Workspace</button>
           </div>
         </div>
       </aside>
@@ -3332,27 +3619,79 @@ body:not(.logged-in) #tnav-assets{
           </div>
           <div id="ce-wiki-results" class="ce-link-results"></div>
         </div>
-        <section class="author-notes-workspace" id="ce-author-workspace">
-          <div class="author-notes-head">
-            <div class="author-notes-title">Author Notes</div>
-            <button class="author-note-btn" type="button" onclick="addAuthorInlineNoteFromSelection()">Add Inline Note From Selection</button>
-          </div>
-          <div class="author-notes-grid">
-            <div class="author-notes-col">
-              <div class="author-notes-section-title">Checklist</div>
-              <div id="ce-author-checklist" class="author-note-list"></div>
-            </div>
-            <div class="author-notes-col">
-              <div class="author-notes-section-title">Private Notes</div>
-              <div id="ce-author-thread" class="author-note-list"></div>
-            </div>
-            <div class="author-notes-col">
-              <div class="author-notes-section-title">Inline</div>
-              <div id="ce-author-inline" class="author-note-list"></div>
-            </div>
-          </div>
-        </section>
       </main>
+    </div>
+  </section>
+  <section id="author-workspace" class="admin-only">
+    <div class="author-workspace-shell">
+      <div class="author-workspace-top">
+        <div>
+          <div class="ce-kicker">Author Notes Workspace</div>
+          <div class="author-workspace-title" id="aw-title">Untitled Chapter</div>
+          <div class="author-workspace-sub" id="aw-subtitle">Revision checklist</div>
+        </div>
+        <div class="author-workspace-actions">
+          <select class="cm-input" id="aw-author-status" onchange="updateAuthorStatusFromWorkspace(this.value)">
+            <option value="draft">Draft</option>
+            <option value="revising">Revising</option>
+            <option value="ready">Ready</option>
+            <option value="canonical">Canonical</option>
+            <option value="needs-work">Needs Work</option>
+          </select>
+          <div class="author-progress">
+            <div class="author-progress-track"><div class="author-progress-fill" id="aw-progress-fill"></div></div>
+            <div class="author-progress-text" id="aw-progress-text">0% complete</div>
+          </div>
+          <button class="cm-btn secondary" type="button" onclick="closeAuthorWorkspace()">Back to Editor</button>
+          <button class="cm-btn primary" type="button" onclick="saveChapter()">Save Chapter</button>
+        </div>
+      </div>
+      <div class="author-workspace-grid">
+        <section class="author-read-panel">
+          <div class="author-read-head">
+            <span>Chapter Text</span>
+            <span id="aw-word-count">0 words</span>
+          </div>
+          <div class="author-read-body" id="aw-rendered-text"></div>
+          <details class="author-source-drawer" id="aw-source-drawer">
+            <summary>Source selection for inline notes</summary>
+            <textarea id="aw-source" readonly></textarea>
+            <div class="author-source-tools">
+              <button class="author-note-btn" type="button" onclick="addAuthorInlineNoteFromWorkspaceSelection()">Add Inline Note From Selection</button>
+            </div>
+          </details>
+        </section>
+        <section class="author-review-panel">
+          <div class="author-review-head">
+            <span>Revision Checklist</span>
+            <span id="aw-open-count">0 open</span>
+          </div>
+          <div class="author-review-list" id="aw-review-list"></div>
+          <section class="author-notes-workspace">
+            <div class="author-notes-head">
+              <div class="author-notes-title">Custom Author Notes</div>
+              <div class="author-note-actions">
+                <button class="author-note-btn" type="button" onclick="addAuthorChecklistItem()">Add Custom Task</button>
+                <button class="author-note-btn" type="button" onclick="addAuthorThreadNote()">Add Private Note</button>
+              </div>
+            </div>
+            <div class="author-notes-grid">
+              <div class="author-notes-col">
+                <div class="author-notes-section-title">Custom Tasks</div>
+                <div id="ce-author-checklist" class="author-note-list"></div>
+              </div>
+              <div class="author-notes-col">
+                <div class="author-notes-section-title">Private Notes</div>
+                <div id="ce-author-thread" class="author-note-list"></div>
+              </div>
+              <div class="author-notes-col">
+                <div class="author-notes-section-title">Inline</div>
+                <div id="ce-author-inline" class="author-note-list"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </div>
     </div>
   </section>
 </div>
@@ -3659,6 +3998,162 @@ function authorNoteId(prefix='an'){
   return prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2);
 }
 
+const AUTHOR_REVIEW_TEMPLATE = [
+  {id:'narrative', name:'Narrative Function', color:'#8b3a1e', items:[
+    ['narrative-theme','The chapter carries a clear overarching idea, emotion, or moral.', 'theme'],
+    ['narrative-reflects-theme','The content visibly reflects or reinforces this primary theme.', 'theme'],
+    ['narrative-earns-place','The chapter contributes meaningfully to the novel overall arc.', 'structure'],
+    ['narrative-tone','The emotional register is consistent with the chapter purpose.', 'craft'],
+    ['narrative-opening-revised','If the function shifted mid-draft, the opening reflects it.', 'craft']
+  ]},
+  {id:'structure', name:'Structure & Opening', color:'#2a4a3e', items:[
+    ['structure-immediate','The chapter opens with immediate setting, character, or conflict.', 'structure'],
+    ['structure-grounding','The reader is grounded in the scene within the first page.', 'world'],
+    ['structure-shape','The chapter has beginning, escalation, and purposeful ending.', 'structure'],
+    ['structure-sequence','Events or arguments unfold in a coherent sequence.', 'structure'],
+    ['structure-transitions','Paragraph and section transitions are smooth.', 'craft'],
+    ['structure-ending','The ending resolves, hooks, or leads into the next chapter.', 'structure'],
+    ['structure-pacing','The pacing suits the chapter content.', 'craft']
+  ]},
+  {id:'character', name:'Character', color:'#3a3a8b', groups:[
+    {label:'Introduction', items:[
+      ['character-new-vivid','New characters are introduced with vivid, memorable description.', 'character'],
+      ['character-purpose','Each new character purpose is established promptly.', 'character'],
+      ['character-distinct','The reader can distinguish new characters without confusion.', 'character']
+    ]},
+    {label:'Consistency & Growth', items:[
+      ['character-consistent','Existing characters act consistently with established traits and motivations.', 'character'],
+      ['character-inconsistency-intentional','Any inconsistency is intentional and accounted for.', 'character'],
+      ['character-shift','At least one character experiences a shift or revelation.', 'character'],
+      ['character-deepens','New motivations or conflicts deepen a character.', 'character']
+    ]},
+    {label:'Interiority', items:[
+      ['character-specific-interior','The POV character inner state is specific, not generic.', 'craft'],
+      ['character-reasoning','The reader understands why the POV character acts.', 'character'],
+      ['character-monologue','Internal monologue is purposeful, not filler.', 'craft']
+    ]}
+  ]},
+  {id:'dialogue', name:'Dialogue', color:'#7a4a1e', items:[
+    ['dialogue-voice','Each character has a distinct voice.', 'character'],
+    ['dialogue-purpose','Dialogue moves plot or reveals character information.', 'structure'],
+    ['dialogue-concise','Dialogue is concise and authentic.', 'craft'],
+    ['dialogue-subtext','Subtext is present where appropriate.', 'craft'],
+    ['dialogue-tags','Dialogue tags and beats are used with restraint.', 'craft'],
+    ['dialogue-patterns','Speech patterns, vocabulary, and rhythm are individuated.', 'character'],
+    ['dialogue-exposition','Exposition in dialogue feels earned and natural.', 'craft']
+  ]},
+  {id:'world', name:'World & Setting', color:'#1e5a5a', items:[
+    ['world-sensory','Environment descriptions are vivid and sensory.', 'world'],
+    ['world-mood','Descriptions serve mood, tone, or theme.', 'world'],
+    ['world-influence','The setting actively influences events.', 'world'],
+    ['world-specificity','Cultural, historical, or world-specific details matter.', 'world'],
+    ['world-woven','World-building details are woven in naturally.', 'craft'],
+    ['world-time','The passage of time is clear.', 'structure']
+  ]},
+  {id:'tension', name:'Tension & Pacing', color:'#5a1e5a', items:[
+    ['tension-rise-fall','There are clear rises and falls in tension.', 'structure'],
+    ['tension-suspense','Suspense is created or maintained.', 'craft'],
+    ['tension-resolve-seed','One tension resolves and one new tension appears.', 'structure'],
+    ['tension-page-turn','Each scene break gives a reason to continue.', 'craft'],
+    ['tension-urgent','Urgent scenes are not slowed by excess introspection.', 'craft'],
+    ['tension-reflective','Reflective scenes are allowed to breathe.', 'craft']
+  ]},
+  {id:'motivation', name:'Motivation & Stakes', color:'#3a5a1e', items:[
+    ['motivation-want-need','Major characters wants and needs are clear.', 'character'],
+    ['motivation-shown','Motivations are shown through action, dialogue, or interiority.', 'character'],
+    ['motivation-tested','Events challenge the characters goals.', 'structure'],
+    ['motivation-stakes','Personal stakes connect to the central conflict.', 'theme'],
+    ['motivation-shift','Any motivation shift is rendered clearly.', 'character'],
+    ['motivation-loss','The reader understands what can be lost.', 'craft']
+  ]},
+  {id:'theme', name:'Thematic Expression', color:'#8b1e4a', groups:[
+    {label:'Active Themes', items:[
+      ['theme-dramatised','Abstract ideas are dramatised, not lectured.', 'theme'],
+      ['theme-devices','Symbolism, foreshadowing, motif, or irony reinforce theme.', 'craft'],
+      ['theme-scenes','Scenes or actions illuminate the message without didacticism.', 'theme']
+    ]},
+    {label:'Symbolism & Motif', items:[
+      ['theme-symbols-purpose','Key symbols are identified and purposeful.', 'theme'],
+      ['theme-motifs-continued','Motifs from earlier chapters continue or develop.', 'theme'],
+      ['theme-new-symbols','New symbolic elements are clear enough to resonate.', 'theme'],
+      ['theme-inversion','Prior symbols transform or invert meaningfully.', 'theme'],
+      ['theme-micro-macro','Micro-level details echo the larger structure.', 'theme']
+    ]},
+    {label:'Mode of Expression', items:[
+      ['theme-mode','Thematic expression mode is clear.', 'theme'],
+      ['theme-mode-suits','The chosen mode suits the tone and POV.', 'craft']
+    ]}
+  ]},
+  {id:'prose', name:'Prose & Style', color:'#1e3a8b', items:[
+    ['prose-mode','The dominant narrative mode suits the chapter purpose.', 'craft'],
+    ['prose-rhythm','Sentence rhythm is varied.', 'craft'],
+    ['prose-lexical','Vocabulary cluster fits world and tone.', 'craft'],
+    ['prose-density','Prose density is appropriate.', 'craft'],
+    ['prose-cut','Excess passages are absent or flagged.', 'craft'],
+    ['prose-expand','Thin passages are absent or flagged.', 'craft'],
+    ['prose-voice','Active and passive voice are deliberate.', 'craft'],
+    ['prose-metaphor','Metaphors and similes are fresh.', 'craft']
+  ]},
+  {id:'subtext', name:'Subtext & Psychological Depth', color:'#5a3a1e', items:[
+    ['subtext-desire','Surface desires mask deeper needs or fears.', 'character'],
+    ['subtext-projection','Displacement or projection is present where useful.', 'character'],
+    ['subtext-gap','The gap between speech and action reveals character.', 'character'],
+    ['subtext-body','The body externalises internal states.', 'craft'],
+    ['subtext-silence','Silences and omissions carry weight.', 'craft'],
+    ['subtext-power','Power dynamics are legible through behavior.', 'character']
+  ]},
+  {id:'continuity', name:'Continuity & Architecture', color:'#1e5a3a', items:[
+    ['continuity-previous','The chapter links coherently to the previous chapter.', 'structure'],
+    ['continuity-next','Setup for the next chapter is planted without telegraphing.', 'structure'],
+    ['continuity-payoff','Earlier images, phrases, or promises echo or pay off.', 'theme'],
+    ['continuity-errors','Timeline, location, object, and description continuity are sound.', 'structure'],
+    ['continuity-arc','The chapter position in the novel arc affects tone.', 'structure'],
+    ['continuity-knowledge','Character knowledge remains consistent.', 'character']
+  ]},
+  {id:'cliches', name:'Cliches & Originality', color:'#6b2a6b', items:[
+    ['cliches-phrases','Overused phrases are absent or flagged.', 'craft'],
+    ['cliches-devices','Cliched plot devices are absent or subverted.', 'structure'],
+    ['cliches-stock','Stock character types are complicated or inverted.', 'character'],
+    ['cliches-specific','Descriptions and conflicts feel specific.', 'craft'],
+    ['cliches-intentional','Any deliberate cliche is motivated.', 'theme']
+  ]},
+  {id:'flags', name:'Flags & Editorial Notes', color:'#444', flags:[
+    ['flag-continuity-error','Continuity error'],
+    ['flag-character-inconsistency','Character inconsistency'],
+    ['flag-thematic-redundancy','Thematic redundancy'],
+    ['flag-stylistic-excess','Stylistic excess'],
+    ['flag-clarity-breakdown','Clarity breakdown'],
+    ['flag-weak-image','Weak image / symbol'],
+    ['flag-pacing-issue','Pacing issue'],
+    ['flag-dialogue-flat','Flat dialogue'],
+    ['flag-motivation-unclear','Motivation unclear'],
+    ['flag-world-info-dump','World-building info-dump'],
+    ['flag-overwriting','Overwriting'],
+    ['flag-underwriting','Underwriting'],
+    ['flag-needs-cut','Needs cutting'],
+    ['flag-needs-expansion','Needs expansion']
+  ]}
+];
+
+function authorReviewItems(section){
+  if(section.flags) return section.flags.map(([id,label])=>({id,label,flag:true}));
+  if(section.groups) return section.groups.flatMap(group=>group.items.map(([id,text,tag])=>({id,text,tag,group:group.label})));
+  return (section.items || []).map(([id,text,tag])=>({id,text,tag}));
+}
+
+function normalizeReviewChecklist(value={}){
+  const normalized = {};
+  Object.keys(value || {}).forEach(id=>{
+    const item = typeof value[id] === 'boolean' ? {done:value[id]} : (value[id] || {});
+    normalized[id] = {
+      done:!!item.done,
+      note:String(item.note || ''),
+      updatedAt:item.updatedAt || Date.now()
+    };
+  });
+  return normalized;
+}
+
 function normalizeAuthorNotes(value={}){
   const statusOptions = ['draft','revising','ready','canonical','needs-work'];
   const status = statusOptions.includes(value.status) ? value.status : 'draft';
@@ -3684,7 +4179,8 @@ function normalizeAuthorNotes(value={}){
     createdAt:note.createdAt || Date.now(),
     updatedAt:note.updatedAt || note.createdAt || Date.now()
   })) : [];
-  return {status, checklist, notes, inline};
+  const reviewChecklist = normalizeReviewChecklist(value.reviewChecklist || {});
+  return {status, checklist, notes, inline, reviewChecklist};
 }
 
 function normalizeChapterList(raw){
@@ -5971,7 +6467,22 @@ function getChapterEditorDraft(id){
 
 function setChapterEditorDraft(id, data){
   const drafts = loadChapterEditorDrafts();
-  drafts[chapterEditorDraftKey(id)] = {updatedAt:Date.now(), data};
+  const key = chapterEditorDraftKey(id);
+  const existing = drafts[key] || {};
+  drafts[key] = {updatedAt:Date.now(), data, ui:existing.ui || {}};
+  saveChapterEditorDrafts(drafts);
+}
+
+function getChapterEditorDraftUi(id){
+  const entry = getChapterEditorDraft(id);
+  return entry && entry.ui ? entry.ui : {};
+}
+
+function setChapterEditorDraftUi(id, ui){
+  const drafts = loadChapterEditorDrafts();
+  const key = chapterEditorDraftKey(id);
+  const existing = drafts[key] || {};
+  drafts[key] = {updatedAt:Date.now(), data:existing.data || readChapterEditorData(), ui:Object.assign({}, existing.ui || {}, ui || {})};
   saveChapterEditorDrafts(drafts);
 }
 
@@ -6056,7 +6567,8 @@ function authorNotesSummaryText(notes=readAuthorNotesEditor()){
   const totalTasks = notes.checklist.length;
   const noteCount = notes.notes.length;
   const inlineCount = notes.inline.length;
-  return `${openTasks}/${totalTasks} open tasks · ${noteCount} notes · ${inlineCount} inline`;
+  const review = authorReviewStats(notes);
+  return `${review.done}/${review.total} review · ${openTasks}/${totalTasks} custom · ${noteCount} notes · ${inlineCount} inline`;
 }
 
 function updateAuthorNotesSummary(){
@@ -6111,6 +6623,207 @@ function renderAuthorNotesEditor(){
         </div>`;
     }).join('') : '<div class="author-empty">Select source text, then add an inline note.</div>';
   }
+}
+
+function authorReviewAllItems(){
+  return AUTHOR_REVIEW_TEMPLATE.filter(section=>!section.flags).flatMap(authorReviewItems);
+}
+
+function authorReviewStats(notes=readAuthorNotesEditor()){
+  const items = authorReviewAllItems();
+  const total = items.length;
+  const done = items.filter(item=>notes.reviewChecklist[item.id] && notes.reviewChecklist[item.id].done).length;
+  const open = Math.max(0, total - done);
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  return {total, done, open, pct};
+}
+
+function authorReviewEntry(id){
+  _chapterEditorAuthorNotes.reviewChecklist = _chapterEditorAuthorNotes.reviewChecklist || {};
+  if(!_chapterEditorAuthorNotes.reviewChecklist[id]){
+    _chapterEditorAuthorNotes.reviewChecklist[id] = {done:false, note:'', updatedAt:Date.now()};
+  }
+  return _chapterEditorAuthorNotes.reviewChecklist[id];
+}
+
+function authorWorkspaceUi(){
+  return getChapterEditorDraftUi(_chapterEditorBaseId);
+}
+
+function authorWorkspaceOpenSections(){
+  const ui = authorWorkspaceUi();
+  return ui.authorReviewOpen || {};
+}
+
+function setAuthorWorkspaceOpenSections(openSections){
+  setChapterEditorDraftUi(_chapterEditorBaseId, {authorReviewOpen:openSections});
+}
+
+function authorReviewSectionStats(section, notes=readAuthorNotesEditor()){
+  const items = authorReviewItems(section).filter(item=>!item.flag);
+  const total = items.length;
+  const done = items.filter(item=>notes.reviewChecklist[item.id] && notes.reviewChecklist[item.id].done).length;
+  return {total, done};
+}
+
+function renderAuthorReviewItem(item, notes){
+  const entry = notes.reviewChecklist[item.id] || {done:false,note:''};
+  const noteOpen = !!entry.note;
+  return `<div class="author-review-item ${entry.done ? 'done' : ''} ${noteOpen ? 'note-open' : ''}" data-review-id="${escHtml(item.id)}">
+    <input class="author-review-check" type="checkbox" ${entry.done ? 'checked' : ''} onchange="updateAuthorReviewItem('${escHtml(item.id)}','done',this.checked)">
+    <div>
+      <div class="author-review-text">${escHtml(item.text)}</div>
+      ${item.tag ? `<span class="author-review-tag">${escHtml(item.tag)}</span>` : ''}
+    </div>
+    <button class="author-note-btn" type="button" onclick="toggleAuthorReviewNote('${escHtml(item.id)}')">Notes</button>
+    <div class="author-review-note-wrap">
+      <textarea class="author-review-note" rows="3" placeholder="Checklist note..." oninput="updateAuthorReviewItem('${escHtml(item.id)}','note',this.value)">${escHtml(entry.note || '')}</textarea>
+    </div>
+  </div>`;
+}
+
+function renderAuthorReviewSection(section, index, notes, openSections){
+  const isOpen = openSections[section.id] !== false;
+  if(section.flags){
+    const flags = section.flags.map(([id,label])=>{
+      const entry = notes.reviewChecklist[id] || {done:false,note:''};
+      return `<button class="author-flag-btn ${entry.done ? 'active' : ''}" type="button" onclick="toggleAuthorFlag('${escHtml(id)}')">${escHtml(label)}</button>`;
+    }).join('');
+    return `<section class="author-review-section ${isOpen ? '' : 'closed'}">
+      <button class="author-review-section-head" type="button" onclick="toggleAuthorReviewSection('${escHtml(section.id)}')">
+        <span class="author-section-stripe" style="background:${escHtml(section.color)}"></span>
+        <span class="author-section-name">${String(index + 1).padStart(2,'0')} · ${escHtml(section.name)}</span>
+        <span class="author-section-count">${section.flags.length} flags</span>
+        <span class="author-section-toggle">${isOpen ? 'Close' : 'Open'}</span>
+      </button>
+      <div class="author-review-section-body">
+        <div class="author-review-flags">${flags}</div>
+      </div>
+    </section>`;
+  }
+  let body = '';
+  if(section.groups){
+    body = section.groups.map(group=>`
+      <div class="author-review-group-label">${escHtml(group.label)}</div>
+      ${group.items.map(([id,text,tag])=>renderAuthorReviewItem({id,text,tag,group:group.label}, notes)).join('')}
+    `).join('');
+  } else {
+    body = (section.items || []).map(([id,text,tag])=>renderAuthorReviewItem({id,text,tag}, notes)).join('');
+  }
+  const stats = authorReviewSectionStats(section, notes);
+  return `<section class="author-review-section ${isOpen ? '' : 'closed'}">
+    <button class="author-review-section-head" type="button" onclick="toggleAuthorReviewSection('${escHtml(section.id)}')">
+      <span class="author-section-stripe" style="background:${escHtml(section.color)}"></span>
+      <span class="author-section-name">${String(index + 1).padStart(2,'0')} · ${escHtml(section.name)}</span>
+      <span class="author-section-count">${stats.done}/${stats.total}</span>
+      <span class="author-section-toggle">${isOpen ? 'Close' : 'Open'}</span>
+    </button>
+    <div class="author-review-section-body">${body}</div>
+  </section>`;
+}
+
+function renderAuthorWorkspace(){
+  const data = readChapterEditorData();
+  const notes = readAuthorNotesEditor();
+  const title = document.getElementById('aw-title');
+  const subtitle = document.getElementById('aw-subtitle');
+  const status = document.getElementById('aw-author-status');
+  const rendered = document.getElementById('aw-rendered-text');
+  const source = document.getElementById('aw-source');
+  const words = document.getElementById('aw-word-count');
+  const reviewList = document.getElementById('aw-review-list');
+  const progressFill = document.getElementById('aw-progress-fill');
+  const progressText = document.getElementById('aw-progress-text');
+  const openCount = document.getElementById('aw-open-count');
+  const stats = authorReviewStats(notes);
+  if(title) title.textContent = data.chapter || 'Untitled Chapter';
+  if(subtitle) subtitle.textContent = [data.book, data.subvolume, data.part].filter(Boolean).join(' · ') || 'Revision checklist';
+  if(status) status.value = notes.status;
+  if(rendered){
+    const html = data.body ? parseBody(data.body) : '<p class="ed-note">Start typing in the editor to preview the chapter here.</p>';
+    rendered.innerHTML = `<article class="chapter-text">${html}</article>`;
+    attachWlListeners(rendered);
+  }
+  if(source) source.value = data.body || '';
+  if(words){
+    const wordCount = data.body ? data.body.trim().split(/\s+/).filter(Boolean).length : 0;
+    words.textContent = `${wordCount} word${wordCount === 1 ? '' : 's'}`;
+  }
+  if(progressFill) progressFill.style.width = `${stats.pct}%`;
+  if(progressText) progressText.textContent = `${stats.pct}% complete · ${stats.done}/${stats.total} checked`;
+  if(openCount) openCount.textContent = `${stats.open} open`;
+  if(reviewList){
+    const openSections = authorWorkspaceOpenSections();
+    reviewList.innerHTML = AUTHOR_REVIEW_TEMPLATE.map((section,index)=>renderAuthorReviewSection(section,index,notes,openSections)).join('');
+  }
+  renderAuthorNotesEditor();
+}
+
+function openAuthorWorkspace(){
+  if(!requireAdmin()) return;
+  handleChapterEditorInput();
+  const view = document.getElementById('chapter-view');
+  if(view) view.classList.add('author-workspace-open');
+  renderAuthorWorkspace();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function closeAuthorWorkspace(){
+  const view = document.getElementById('chapter-view');
+  if(view) view.classList.remove('author-workspace-open');
+  handleChapterEditorInput();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateAuthorStatusFromWorkspace(value){
+  const editorStatus = document.getElementById('ce-author-status');
+  if(editorStatus) editorStatus.value = value;
+  _chapterEditorAuthorNotes.status = value;
+  handleChapterEditorInput();
+  renderAuthorWorkspace();
+}
+
+function toggleAuthorReviewSection(id){
+  const openSections = authorWorkspaceOpenSections();
+  openSections[id] = openSections[id] === false;
+  setAuthorWorkspaceOpenSections(openSections);
+  renderAuthorWorkspace();
+}
+
+function updateAuthorReviewItem(id, field, value){
+  const entry = authorReviewEntry(id);
+  if(field === 'done') entry.done = !!value;
+  if(field === 'note') entry.note = String(value || '');
+  entry.updatedAt = Date.now();
+  handleChapterEditorInput();
+  if(field === 'done') renderAuthorWorkspace();
+  else updateAuthorWorkspaceStatsOnly();
+}
+
+function updateAuthorWorkspaceStatsOnly(){
+  const stats = authorReviewStats(readAuthorNotesEditor());
+  const progressFill = document.getElementById('aw-progress-fill');
+  const progressText = document.getElementById('aw-progress-text');
+  const openCount = document.getElementById('aw-open-count');
+  if(progressFill) progressFill.style.width = `${stats.pct}%`;
+  if(progressText) progressText.textContent = `${stats.pct}% complete · ${stats.done}/${stats.total} checked`;
+  if(openCount) openCount.textContent = `${stats.open} open`;
+}
+
+function toggleAuthorReviewNote(id){
+  const card = Array.from(document.querySelectorAll('.author-review-item[data-review-id]')).find(el=>el.dataset.reviewId === id);
+  if(!card) return;
+  card.classList.toggle('note-open');
+  const input = card.querySelector('.author-review-note');
+  if(input && card.classList.contains('note-open')) input.focus();
+}
+
+function toggleAuthorFlag(id){
+  const entry = authorReviewEntry(id);
+  entry.done = !entry.done;
+  entry.updatedAt = Date.now();
+  handleChapterEditorInput();
+  renderAuthorWorkspace();
 }
 
 function updateAuthorInlineMatches(){
@@ -6172,6 +6885,15 @@ function deleteAuthorThreadNote(id){
 
 function addAuthorInlineNoteFromSelection(){
   const area = chapterEditorTextArea();
+  addAuthorInlineNoteFromArea(area);
+}
+
+function addAuthorInlineNoteFromWorkspaceSelection(){
+  const area = document.getElementById('aw-source');
+  addAuthorInlineNoteFromArea(area);
+}
+
+function addAuthorInlineNoteFromArea(area){
   if(!area) return;
   const start = area.selectionStart || 0;
   const end = area.selectionEnd || 0;
@@ -6188,6 +6910,7 @@ function addAuthorInlineNoteFromSelection(){
   });
   renderAuthorNotesEditor();
   handleChapterEditorInput();
+  if(document.getElementById('chapter-view').classList.contains('author-workspace-open')) renderAuthorWorkspace();
 }
 
 function updateAuthorInlineNote(id, body){
@@ -6424,7 +7147,7 @@ function closeChapterEditor(force=false){
     if(!confirm('Leave the chapter editor? Your local draft will remain available, but unsaved changes will not be published.')) return;
     setChapterEditorDraft(_chapterEditorBaseId, readChapterEditorData());
   }
-  view.classList.remove('chapter-editing');
+  view.classList.remove('chapter-editing','author-workspace-open');
   const returnId = _editingChapterId;
   _editingChapterId = null;
   _chapterEditorBaseId = null;
@@ -6607,7 +7330,7 @@ async function saveChapter(){
   _editingChapterId = null;
   _chapterEditorBaseId = null;
   renderTOC();
-  document.getElementById('chapter-view').classList.remove('chapter-editing');
+  document.getElementById('chapter-view').classList.remove('chapter-editing','author-workspace-open');
   showChapter(savedId);
 }
 
