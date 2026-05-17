@@ -319,6 +319,12 @@ body{
   font-weight:400;
 }
 .chdr-meta{display:flex;flex-wrap:wrap;gap:1rem 2rem}
+.chdr-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.55rem;
+  margin:0.2rem 0 1rem;
+}
 .meta-item{display:flex;flex-direction:column;gap:0.08rem}
 .meta-key{
   font-family:var(--mono);
@@ -2152,6 +2158,9 @@ body.links-on .wl:hover{color:var(--red)}
 body:not(.admin-on) .admin-only{
   display:none!important;
 }
+body:not(.logged-in) #tnav-assets{
+  display:none!important;
+}
 .content-status{
   font-family:var(--mono);
   font-size:0.56rem;
@@ -3450,7 +3459,7 @@ const DEFAULT_CHAPTERS = [
     volume: 'Teenage Dreams in Technicolor',
     subvolume: 'Logic of the Cervix',
     part: 'Logic of the Cervix',
-    chapter: 'Overture, or the Cosmic Womb',
+    chapter: 'Hypermodernism or; a history in how one slacker became imperial magistrate',
     meta: {
       narrator: 'Elzbieta Vorn',
       setting: 'Port-Actual, Estuarial Quarter',
@@ -3466,20 +3475,6 @@ function cloneDefaultChapters(){
   return DEFAULT_CHAPTERS.map(c=>JSON.parse(JSON.stringify(c)));
 }
 
-function firstSectionTitleFromBody(body){
-  const match = String(body || '').match(/^\s*===\s*(.+?)\s*===/m);
-  return match ? match[1].trim() : '';
-}
-
-function normalizeChapterTitle(c){
-  const title = c.chapter || c.name || '';
-  const firstSection = firstSectionTitleFromBody(c.body);
-  if(firstSection && (!title || title === 'Overture, or the Cosmic Womb')){
-    return firstSection;
-  }
-  return title;
-}
-
 function normalizeChapterList(raw){
   const list = Array.isArray(raw) ? raw : raw && Array.isArray(raw.chapters) ? raw.chapters : null;
   if(!list) throw new Error('Chapter JSON must be an array or an object with a chapters array.');
@@ -3492,7 +3487,7 @@ function normalizeChapterList(raw){
     volume: c.volume || '',
     subvolume: c.subvolume || '',
     part: c.part || '',
-    chapter: normalizeChapterTitle(c),
+    chapter: c.chapter || c.name || '',
     meta: {
       narrator: c.meta && c.meta.narrator || '',
       setting: c.meta && c.meta.setting || '',
@@ -3706,6 +3701,9 @@ function renderChapter(ch){
     ${readingContext.novel ? `<div class="chdr-architect">${escHtml(readingContext.novel)}</div>` : ''}
     <div class="chdr-title">${escHtml(readingContext.volume||ch.book||'')}</div>
     ${subtitleHtml}
+    <div class="chdr-actions admin-only">
+      <button class="ch-ctrl-btn" type="button" onclick="openEditChapterModal('${escHtml(ch.id)}')">Edit Chapter</button>
+    </div>
     <div class="chdr-meta">${metaHtml}</div>
   `;
 
@@ -4502,11 +4500,41 @@ function renderTOCBooksBreadcrumb(){
 
 function tocBooksMetaText(chapterTotal){
   const s = _tocBooksState;
+  const scopeChapters = s.novel
+    ? (chapters || []).filter(ch=>tocNovelName(ch) === s.novel && (!s.act || tocActName(ch) === s.act))
+    : (chapters || []);
+  const words = formatWordCount(chapterWordCountTotal(scopeChapters));
   if(s.novel && s.act){
     const act = getBookArchAct(s.novel, s.act);
-    return `${chapterTotal} ${chapterTotal===1?'chapter':'chapters'} / ${act.volumes.length} volumes in this act`;
+    return `${chapterTotal} ${chapterTotal===1?'chapter':'chapters'} / ${words} / ${act.volumes.length} volumes in this act`;
   }
-  return `${chapterTotal} ${chapterTotal===1?'chapter':'chapters'} / 3 acts / ${TOC_BOOK_VOLUME_COUNT}+ volumes per act`;
+  return `${chapterTotal} ${chapterTotal===1?'chapter':'chapters'} / ${words} / 3 acts / ${TOC_BOOK_VOLUME_COUNT}+ volumes per act`;
+}
+
+function chapterWordCount(chapter){
+  let text = String(chapter && chapter.body || '');
+  text = text.replace(/^===.+===$/gm, ' ');
+  text = text.replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, ' $2 ');
+  text = text.replace(/\[\[([^\]]+)\]\]/g, ' $1 ');
+  text = text.replace(/<[^>]+>/g, ' ');
+  text = text.replace(/&[a-z0-9#]+;/gi, ' ');
+  const words = text.match(/[A-Za-z0-9À-ÖØ-öø-ÿ]+(?:['’\-][A-Za-z0-9À-ÖØ-öø-ÿ]+)*/g);
+  return words ? words.length : 0;
+}
+
+function chapterWordCountTotal(items){
+  return (items || []).reduce((total, item)=>{
+    const chapter = item && item.chapter ? item.chapter : item;
+    return total + chapterWordCount(chapter);
+  }, 0);
+}
+
+function formatWordCount(count){
+  return `${Number(count || 0).toLocaleString()} ${count === 1 ? 'word' : 'words'}`;
+}
+
+function chapterCountText(count, emptyLabel='planned slot'){
+  return count ? `${count} ${count===1?'chapter':'chapters'}` : emptyLabel;
 }
 
 function renderTOCBooks(){
@@ -4523,7 +4551,7 @@ function renderTOCBooks(){
       <div class="toc-books-grid">
         ${books.map(book=>`
           <button class="toc-books-card" type="button" onclick="setTOCBooksNovel(${tocJsArg(book.name)})">
-            <div class="toc-books-card-meta">${book.chapters.length} ${book.chapters.length===1?'chapter':'chapters'}</div>
+            <div class="toc-books-card-meta">${chapterCountText(book.chapters.length, '0 chapters')} / ${formatWordCount(chapterWordCountTotal(book.chapters))}</div>
             <div class="toc-books-card-title">${escHtml(book.name)}</div>
             <p class="toc-books-card-blurb">${escHtml(book.blurb)}</p>
             <div class="toc-books-card-action">Open Book</div>
@@ -4536,10 +4564,11 @@ function renderTOCBooks(){
       ${renderTOCBooksBreadcrumb()}
       <div class="toc-books-grid">
         ${novel.acts.map((act,index)=>{
-          const count = selectedBook ? selectedBook.chapters.filter(ch=>tocActName(ch) === act.title).length : 0;
+          const actChapters = selectedBook ? selectedBook.chapters.filter(ch=>tocActName(ch) === act.title) : [];
+          const count = actChapters.length;
           return `
             <button class="toc-books-card ${count ? '' : 'empty'}" type="button" onclick="setTOCBooksAct(${tocJsArg(act.title)})">
-              <div class="toc-books-card-meta">Act ${String(index + 1).padStart(2,'0')} / ${count ? `${count} ${count===1?'chapter':'chapters'}` : 'planned slot'}</div>
+              <div class="toc-books-card-meta">Act ${String(index + 1).padStart(2,'0')} / ${chapterCountText(count)} / ${formatWordCount(chapterWordCountTotal(actChapters))}</div>
               <div class="toc-books-card-title">${escHtml(act.title)}</div>
               <p class="toc-books-card-blurb">${escHtml(act.blurb || (count ? 'A populated arc within the novel architecture.' : 'No chapters assigned here yet.'))}</p>
               <div class="toc-books-card-action">Open Act</div>
@@ -4553,7 +4582,7 @@ function renderTOCBooks(){
       <div class="toc-books-grid volumes">
         ${slots.map(slot=>`
           <button class="toc-books-card ${slot.chapters.length ? '' : 'empty'}" type="button" onclick="setTOCBooksVolume(${tocJsArg(slot.id)})">
-            <div class="toc-books-card-meta">Volume ${String(slot.index).padStart(2,'0')} / ${slot.chapters.length ? `${slot.chapters.length} ${slot.chapters.length===1?'chapter':'chapters'}` : 'empty'}</div>
+            <div class="toc-books-card-meta">Volume ${String(slot.index).padStart(2,'0')} / ${chapterCountText(slot.chapters.length, 'empty')} / ${formatWordCount(chapterWordCountTotal(slot.chapters))}</div>
             <div class="toc-books-card-title">${escHtml(slot.label)}</div>
             ${slot.blurb ? `<p class="toc-books-card-blurb">${escHtml(slot.blurb)}</p>` : ''}
             <div class="toc-books-card-action">Open Volume</div>
@@ -4571,7 +4600,7 @@ function renderTOCBooks(){
           <div class="toc-books-grid subvolumes">
             ${subvolumes.map(group=>`
               <button class="toc-books-card" type="button" onclick="setTOCBooksSubvolume(${tocJsArg(group.name)})">
-                <div class="toc-books-card-meta">${group.chapters.length} ${group.chapters.length===1?'chapter':'chapters'}</div>
+                <div class="toc-books-card-meta">${chapterCountText(group.chapters.length, '0 chapters')} / ${formatWordCount(chapterWordCountTotal(group.chapters))}</div>
                 <div class="toc-books-card-title">${escHtml(group.name)}</div>
                 ${group.blurb ? `<p class="toc-books-card-blurb">${escHtml(group.blurb)}</p>` : ''}
                 <div class="toc-books-card-action">Open Subvolume</div>
@@ -5860,9 +5889,10 @@ function updateChapterEditorNavButtons(){
     prev.title = prevCh ? `Edit ${prevCh.chapter || prevCh.book || 'previous chapter'}` : 'No previous chapter';
   }
   if(next){
-    next.disabled = idx < 0 || idx >= chapters.length - 1;
     const nextCh = idx >= 0 && idx < chapters.length - 1 ? chapters[idx + 1] : null;
-    next.title = nextCh ? `Edit ${nextCh.chapter || nextCh.book || 'next chapter'}` : 'No next chapter';
+    next.disabled = false;
+    next.textContent = nextCh ? 'Edit Next' : 'Start New Chapter';
+    next.title = nextCh ? `Edit ${nextCh.chapter || nextCh.book || 'next chapter'}` : 'Start a new chapter from here';
   }
 }
 
@@ -5985,11 +6015,11 @@ function openEditChapterModal(id){
 function openAdjacentChapterEditor(direction){
   if(!requireAdmin()) return;
   const idx = chapterEditorCurrentIndex();
-  if(idx < 0) return;
+  if(idx < 0 && direction < 0) return;
   const next = chapters[idx + (direction < 0 ? -1 : 1)];
-  if(!next) return;
   persistCurrentChapterEditorDraft();
-  openChapterEditor(next.id);
+  if(next) openChapterEditor(next.id);
+  else openChapterEditor(null);
 }
 
 function closeChapterEditor(force=false){
@@ -6504,6 +6534,7 @@ function isAdmin(){
 
 function updateAdminUI(){
   document.body.classList.toggle('admin-on', isAdmin());
+  document.body.classList.toggle('logged-in', !!_notesUser);
 }
 
 function requireAdmin(){
@@ -7384,6 +7415,11 @@ function initFileVaultUI(){
 }
 
 async function showAssets(){
+  if(!_notesUser){
+    alert('Log in to view Files.');
+    showLanding();
+    return;
+  }
   updateAdminUI();
   _pushNav('assets-view');
   const av = document.getElementById('assets-view');
