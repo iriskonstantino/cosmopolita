@@ -3595,7 +3595,11 @@ function loadBookArchitecture(){
 function saveBookArchitecture(){
   try{
     localStorage.setItem(BOOK_ARCH_STORAGE_KEY, JSON.stringify(bookArchitecture));
-  }catch(e){}
+    return true;
+  }catch(e){
+    console.warn('Book architecture could not be saved in this browser:', e);
+    return false;
+  }
 }
 
 let bookArchitecture = loadBookArchitecture();
@@ -3839,13 +3843,41 @@ function subvolumeEditorFields(index, prefix='book-subvolume'){
   };
 }
 
+function currentSubvolumeEditorTheme(index, prefix='book-subvolume'){
+  const fields = subvolumeEditorFields(index, prefix);
+  return normalizeSubvolumeBanner(fields);
+}
+
+function updateSubvolumeBannerPreview(index, prefix='book-subvolume'){
+  const preview = document.querySelector(`[data-${prefix}-banner-preview="${index}"]`);
+  if(preview) preview.innerHTML = renderSubvolumeBanner(currentSubvolumeEditorTheme(index, prefix), 'editor');
+}
+
+function commitSubvolumeBannerUpload(index, prefix, url){
+  const field = document.querySelector(`[data-${prefix}-banner-image="${index}"]`);
+  if(field) field.value = url;
+  updateSubvolumeBannerPreview(index, prefix);
+  if(prefix !== 'book-subvolume') return false;
+  const numericIndex = Number(index);
+  if(!Number.isInteger(numericIndex) || numericIndex < 0) return false;
+  const volume = getBookArchVolume(_tocBooksState.novel, _tocBooksState.act, _tocBooksState.volume);
+  if(!volume || !volume.subvolumes || !volume.subvolumes[numericIndex]) return false;
+  volume.subvolumes[numericIndex] = {
+    ...volume.subvolumes[numericIndex],
+    ...subvolumeEditorFields(index, prefix),
+    bannerImage: url
+  };
+  bookArchitecture = normalizeBookArchitecture(bookArchitecture);
+  return saveBookArchitecture();
+}
+
 function renderSubvolumeEditorFields(sub, index, prefix='book-subvolume'){
   const theme = normalizeSubvolumeBanner(sub || {});
   const palette = normalizeBannerPalette(theme.bannerPalette);
   return `
     <div class="toc-books-edit-field">
       <div class="toc-books-edit-label">Banner Image URL</div>
-      <input class="toc-books-edit-input" data-${prefix}-banner-image="${index}" value="${escHtml(theme.bannerImage)}" placeholder="https://...">
+      <input class="toc-books-edit-input" data-${prefix}-banner-image="${index}" value="${escHtml(theme.bannerImage)}" placeholder="https://..." oninput="updateSubvolumeBannerPreview(${tocJsArg(index)},'${prefix}')">
     </div>
     <div class="toc-books-edit-field">
       <div class="toc-books-edit-label">Upload Banner Image</div>
@@ -3854,25 +3886,25 @@ function renderSubvolumeEditorFields(sub, index, prefix='book-subvolume'){
     </div>
     <div class="toc-books-edit-field">
       <div class="toc-books-edit-label">Banner Alt</div>
-      <input class="toc-books-edit-input" data-${prefix}-banner-alt="${index}" value="${escHtml(theme.bannerAlt)}" placeholder="Brief image description">
+      <input class="toc-books-edit-input" data-${prefix}-banner-alt="${index}" value="${escHtml(theme.bannerAlt)}" placeholder="Brief image description" oninput="updateSubvolumeBannerPreview(${tocJsArg(index)},'${prefix}')">
     </div>
     <div class="toc-books-edit-field">
       <div class="toc-books-edit-label">Motif</div>
-      <input class="toc-books-edit-input" data-${prefix}-banner-motif="${index}" value="${escHtml(theme.bannerMotif)}" placeholder="undersea technicolor womb">
+      <input class="toc-books-edit-input" data-${prefix}-banner-motif="${index}" value="${escHtml(theme.bannerMotif)}" placeholder="undersea technicolor womb" oninput="updateSubvolumeBannerPreview(${tocJsArg(index)},'${prefix}')">
     </div>
     <div class="toc-books-edit-field">
       <div class="toc-books-edit-label">Palette</div>
       <div class="toc-books-palette-row">
-        <input class="toc-books-edit-input" data-${prefix}-banner-palette-a="${index}" value="${escHtml(palette[0])}" placeholder="#f04b9b">
-        <input class="toc-books-edit-input" data-${prefix}-banner-palette-b="${index}" value="${escHtml(palette[1])}" placeholder="#14b8c8">
-        <input class="toc-books-edit-input" data-${prefix}-banner-palette-c="${index}" value="${escHtml(palette[2])}" placeholder="#f3b544">
+        <input class="toc-books-edit-input" data-${prefix}-banner-palette-a="${index}" value="${escHtml(palette[0])}" placeholder="#f04b9b" oninput="updateSubvolumeBannerPreview(${tocJsArg(index)},'${prefix}')">
+        <input class="toc-books-edit-input" data-${prefix}-banner-palette-b="${index}" value="${escHtml(palette[1])}" placeholder="#14b8c8" oninput="updateSubvolumeBannerPreview(${tocJsArg(index)},'${prefix}')">
+        <input class="toc-books-edit-input" data-${prefix}-banner-palette-c="${index}" value="${escHtml(palette[2])}" placeholder="#f3b544" oninput="updateSubvolumeBannerPreview(${tocJsArg(index)},'${prefix}')">
       </div>
     </div>
     <div class="toc-books-edit-field">
       <div class="toc-books-edit-label">Image Position</div>
-      <input class="toc-books-edit-input" data-${prefix}-banner-position="${index}" value="${escHtml(theme.bannerPosition)}" placeholder="center">
+      <input class="toc-books-edit-input" data-${prefix}-banner-position="${index}" value="${escHtml(theme.bannerPosition)}" placeholder="center" oninput="updateSubvolumeBannerPreview(${tocJsArg(index)},'${prefix}')">
     </div>
-    <div class="toc-books-banner-preview">${renderSubvolumeBanner(theme,'editor')}</div>`;
+    <div class="toc-books-banner-preview" data-${prefix}-banner-preview="${index}">${renderSubvolumeBanner(theme,'editor')}</div>`;
 }
 
 function saveTOCBookRootEditor(){
@@ -3977,9 +4009,10 @@ function saveTOCBookSubvolumeEditor(){
     });
   }
   bookArchitecture = normalizeBookArchitecture(bookArchitecture);
-  saveBookArchitecture();
+  const saved = saveBookArchitecture();
   _tocBooksState.subvolume = null;
   renderTOCBooks();
+  if(!saved) alert('Subvolume banner updated for this session, but this browser blocked local storage. Open the site through http://localhost or GitHub Pages to keep edits after reload.');
 }
 
 function deleteTOCBookSubvolume(index){
@@ -5743,9 +5776,11 @@ async function handleSubvolumeBannerUpload(event, index, prefix='book-subvolume'
   if(status) status.textContent = 'Uploading banner image...';
   try{
     const item = await uploadSubvolumeBannerToSupabase(file);
-    const field = document.querySelector(`[data-${prefix}-banner-image="${index}"]`);
-    if(field) field.value = item.url;
-    if(status) status.textContent = `Uploaded ${item.name}. Save subvolumes to keep it.`;
+    const saved = commitSubvolumeBannerUpload(index, prefix, item.url);
+    if(status) status.textContent = saved
+      ? `Uploaded and saved ${item.name}.`
+      : `Uploaded ${item.name}. Click Save Subvolumes to keep it.`;
+    if(saved && prefix === 'book-subvolume') renderTOCBooks();
   }catch(err){
     console.error('Subvolume banner upload failed:', err);
     if(status) status.textContent = 'Upload failed.';
