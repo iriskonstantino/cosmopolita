@@ -2385,6 +2385,16 @@ body:not(.admin-on) .admin-only{
   cursor:pointer;
 }
 .ce-tool-btn:hover{border-color:var(--ink);background:var(--paper)}
+.ce-actions .cm-btn:disabled,
+.ce-tool-btn:disabled{
+  opacity:0.38;
+  cursor:not-allowed;
+}
+.ce-actions .cm-btn:disabled:hover,
+.ce-tool-btn:disabled:hover{
+  background:transparent;
+  color:var(--ink);
+}
 .ce-tool-spacer{
   width:1px;
   height:24px;
@@ -3108,6 +3118,8 @@ body:not(.admin-on) .admin-only{
             <div class="ce-title" id="ce-title">Untitled Chapter</div>
           </div>
           <div class="ce-actions">
+            <button class="cm-btn secondary" id="ce-prev-chapter-btn" type="button" onclick="openAdjacentChapterEditor(-1)">Edit Previous</button>
+            <button class="cm-btn secondary" id="ce-next-chapter-btn" type="button" onclick="openAdjacentChapterEditor(1)">Edit Next</button>
             <button class="cm-btn secondary" type="button" onclick="closeChapterEditor()">Cancel</button>
             <button class="cm-btn primary" type="button" onclick="saveChapter()">Save Chapter</button>
           </div>
@@ -3454,19 +3466,33 @@ function cloneDefaultChapters(){
   return DEFAULT_CHAPTERS.map(c=>JSON.parse(JSON.stringify(c)));
 }
 
+function firstSectionTitleFromBody(body){
+  const match = String(body || '').match(/^\s*===\s*(.+?)\s*===/m);
+  return match ? match[1].trim() : '';
+}
+
+function normalizeChapterTitle(c){
+  const title = c.chapter || c.name || '';
+  const firstSection = firstSectionTitleFromBody(c.body);
+  if(firstSection && (!title || title === 'Overture, or the Cosmic Womb')){
+    return firstSection;
+  }
+  return title;
+}
+
 function normalizeChapterList(raw){
   const list = Array.isArray(raw) ? raw : raw && Array.isArray(raw.chapters) ? raw.chapters : null;
   if(!list) throw new Error('Chapter JSON must be an array or an object with a chapters array.');
   return list.map((c,i)=>({
     id: c.id || ('ch-' + (i + 1)),
     num: c.num || '',
-    novel: c.novel || '',
+    novel: canonicalNovelTitle(c.novel || ''),
     act: c.act || '',
     book: c.book || c.title || '',
     volume: c.volume || '',
     subvolume: c.subvolume || '',
     part: c.part || '',
-    chapter: c.chapter || c.name || '',
+    chapter: normalizeChapterTitle(c),
     meta: {
       narrator: c.meta && c.meta.narrator || '',
       setting: c.meta && c.meta.setting || '',
@@ -3481,6 +3507,10 @@ function normalizeChapterList(raw){
 function setContentStatus(message){
   const el = document.getElementById('content-status');
   if(el) el.textContent = message || '';
+}
+
+function hasChapterDraft(){
+  try{ return !!localStorage.getItem(CHAPTERS_STORAGE_KEY); }catch(e){ return false; }
 }
 
 function loadChapters(){
@@ -3528,6 +3558,12 @@ function saveChapters(chs, options={}){
 }
 
 async function loadPublishedChapters(force=false){
+  if(!force && hasChapterDraft()){
+    chapters = normalizeChapterList(loadChapters());
+    renderTOC();
+    setContentStatus('Using browser draft chapters. Click Reload Published only when you want to replace this draft.');
+    return;
+  }
   try{
     const res = await fetch(CHAPTERS_DATA_URL, {cache:'no-store'});
     if(!res.ok) throw new Error('Could not load ' + CHAPTERS_DATA_URL);
@@ -3830,6 +3866,13 @@ function normalizeBookTitleKey(value){
   return String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
+function canonicalNovelTitle(value){
+  const raw = String(value || '').trim();
+  const key = normalizeBookTitleKey(raw);
+  if(key === normalizeBookTitleKey('WILL OF AN ARCHITECT')) return 'WILL OF AN ARCHITECT';
+  return raw;
+}
+
 function normalizeHexColor(value, fallback){
   const raw = String(value || '').trim();
   const hex = raw.match(/^#?([0-9a-fA-F]{6})$/);
@@ -3871,7 +3914,7 @@ function normalizeBookArchitecture(raw){
   });
   const novels = sourceNovels.map((novel, novelIndex)=>{
     const fallbackNovel = DEFAULT_BOOK_ARCHITECTURE.novels[novelIndex] || DEFAULT_BOOK_ARCHITECTURE.novels[0];
-    const title = (novel.title || novel.name || fallbackNovel.title || 'UNTITLED NOVEL').trim();
+    const title = canonicalNovelTitle(novel.title || novel.name || fallbackNovel.title || 'UNTITLED NOVEL');
     const acts = Array.from({length:3}, (_,actIndex)=>{
       const sourceAct = novel.acts && novel.acts[actIndex] ? novel.acts[actIndex] : {};
       const fallbackAct = fallbackNovel.acts && fallbackNovel.acts[actIndex] ? fallbackNovel.acts[actIndex] : {};
@@ -3936,6 +3979,7 @@ function saveBookArchitecture(){
 }
 
 let bookArchitecture = loadBookArchitecture();
+saveBookArchitecture();
 
 function getBookArchNovel(title){
   const key = normalizeBookTitleKey(title);
@@ -5799,6 +5843,38 @@ function updateChapterEditorTitle(data){
   const mode = document.getElementById('ce-mode-label');
   if(title) title.textContent = data.chapter || 'Untitled Chapter';
   if(mode) mode.textContent = _editingChapterId ? 'Edit Chapter' : 'New Chapter';
+  updateChapterEditorNavButtons();
+}
+
+function chapterEditorCurrentIndex(){
+  return _editingChapterId ? chapters.findIndex(ch=>ch.id === _editingChapterId) : -1;
+}
+
+function updateChapterEditorNavButtons(){
+  const idx = chapterEditorCurrentIndex();
+  const prev = document.getElementById('ce-prev-chapter-btn');
+  const next = document.getElementById('ce-next-chapter-btn');
+  if(prev){
+    prev.disabled = idx <= 0;
+    const prevCh = idx > 0 ? chapters[idx - 1] : null;
+    prev.title = prevCh ? `Edit ${prevCh.chapter || prevCh.book || 'previous chapter'}` : 'No previous chapter';
+  }
+  if(next){
+    next.disabled = idx < 0 || idx >= chapters.length - 1;
+    const nextCh = idx >= 0 && idx < chapters.length - 1 ? chapters[idx + 1] : null;
+    next.title = nextCh ? `Edit ${nextCh.chapter || nextCh.book || 'next chapter'}` : 'No next chapter';
+  }
+}
+
+function persistCurrentChapterEditorDraft(){
+  if(!_editingChapterId) return;
+  clearTimeout(_chapterEditorDraftTimer);
+  setChapterEditorDraft(_chapterEditorBaseId, readChapterEditorData());
+  const status = document.getElementById('ce-draft-status');
+  if(status){
+    status.textContent = 'Draft saved before switching chapters.';
+    status.className = 'ce-status good';
+  }
 }
 
 function updateChapterEditorPreview(){
@@ -5904,6 +5980,16 @@ function openNewChapterModal(){
 
 function openEditChapterModal(id){
   openChapterEditor(id);
+}
+
+function openAdjacentChapterEditor(direction){
+  if(!requireAdmin()) return;
+  const idx = chapterEditorCurrentIndex();
+  if(idx < 0) return;
+  const next = chapters[idx + (direction < 0 ? -1 : 1)];
+  if(!next) return;
+  persistCurrentChapterEditorDraft();
+  openChapterEditor(next.id);
 }
 
 function closeChapterEditor(force=false){
@@ -6461,6 +6547,10 @@ async function loadUniversalContent(){
         .order('position', {ascending:true});
       if(chapterError) throw chapterError;
       if(Array.isArray(chapterRows) && chapterRows.length){
+        if(hasChapterDraft()){
+          setContentStatus('Keeping browser draft chapters. Shared Supabase chapters were not applied over your local edits.');
+          return;
+        }
         chapters = normalizeChapterList(chapterRows.map(row=>row.data).filter(Boolean));
         saveChapters(chapters, {localOnly:true});
         renderTOC();
