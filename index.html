@@ -2903,9 +2903,85 @@ body:not(.logged-in) #tnav-assets{
   gap:1rem;
   padding:0.9rem;
 }
+.author-research-frame-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.5rem;
+  padding:0 0.8rem 0.8rem;
+}
+.author-subject-board{
+  border:1px solid var(--border);
+  background:var(--paper);
+}
+.author-subject-head{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:0.75rem;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+  padding:0.7rem 0.8rem;
+}
+.author-subject-color{
+  width:5px;
+  align-self:stretch;
+  min-height:2.2rem;
+  background:var(--ink);
+}
+.author-subject-title{
+  font-family:var(--display);
+  font-size:0.92rem;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+.author-subject-meta{
+  margin-top:0.18rem;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  color:#999;
+}
+.author-subject-controls{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:0.4rem;
+}
+.author-subject-body{
+  display:grid;
+  gap:0.85rem;
+  padding:0.85rem;
+}
+.author-subject-board.closed .author-subject-body{display:none}
+.author-research-synthesis{
+  min-height:220px;
+}
+.author-research-subhead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:0.75rem;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:#999;
+}
+.author-research-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.75rem;
+}
 .author-research-card{
   border:1px solid var(--border);
   background:var(--white);
+}
+.author-research-card.unmatched{
+  border-style:dashed;
+  border-color:var(--red);
 }
 .author-research-card-head{
   display:flex;
@@ -2951,6 +3027,28 @@ body:not(.logged-in) #tnav-assets{
   line-height:1.55;
   text-transform:uppercase;
   padding:0.75rem;
+}
+.author-passage-quote{
+  border-left:3px solid var(--ink);
+  background:var(--paper);
+  padding:0.6rem 0.75rem;
+  font-style:italic;
+  color:#4f4840;
+}
+.works-cited-list{
+  display:grid;
+  gap:0.45rem;
+  padding:0.8rem;
+  background:var(--white);
+  border-top:1px solid var(--border);
+}
+.works-cited-item{
+  padding-left:1.5rem;
+  text-indent:-1.5rem;
+  font-family:var(--serif);
+  font-size:0.92rem;
+  line-height:1.55;
+  color:var(--ink);
 }
 .author-notes-workspace{
   margin-top:1rem;
@@ -3080,6 +3178,38 @@ body:not(.logged-in) #tnav-assets{
   color:#aaa;
   border:1px solid var(--border);
   padding:0.55rem;
+}
+
+@media(min-width:721px){
+  .author-workspace-grid{
+    height:calc(100vh - 315px);
+    min-height:520px;
+  }
+  .author-read-panel,
+  .author-review-panel{
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    overflow:hidden;
+  }
+  .author-read-body{
+    flex:1 1 auto;
+    max-height:none;
+    min-height:0;
+    overflow:auto;
+    overscroll-behavior:contain;
+  }
+  .author-source-drawer{
+    flex:0 0 auto;
+    max-height:42%;
+    overflow:auto;
+  }
+  .author-tab-panel.active{
+    flex:1 1 auto;
+    min-height:0;
+    overflow:auto;
+    overscroll-behavior:contain;
+  }
 }
 
 
@@ -3261,7 +3391,7 @@ body:not(.logged-in) #tnav-assets{
   .author-workspace-actions{justify-content:flex-start;}
   .author-progress{width:100%;min-width:0;}
   .author-thesis-brief{margin:1rem 1.25rem 0;}
-  .author-thesis-grid,.author-research-grid{grid-template-columns:1fr;}
+  .author-thesis-grid,.author-research-grid,.author-research-row{grid-template-columns:1fr;}
   .author-thesis-field.wide,.author-research-field.wide{grid-column:auto;}
   .author-workspace-grid{grid-template-columns:1fr;padding:1rem 1.25rem 1.5rem;}
   .author-read-body{max-height:none;}
@@ -4342,14 +4472,44 @@ function normalizeThesisBrief(value={}){
   };
 }
 
+const DEFAULT_RESEARCH_SUBJECT_ID = 'research-general';
+
+function normalizeResearchSubject(subject={}, index=0){
+  return {
+    id:subject.id || (index === 0 ? DEFAULT_RESEARCH_SUBJECT_ID : authorNoteId('subject')),
+    title:String(subject.title || (index === 0 ? 'General Research' : 'Untitled Subject')),
+    color:String(subject.color || '#8b3a1e'),
+    description:String(subject.description || ''),
+    synthesis:String(subject.synthesis || ''),
+    tags:String(subject.tags || ''),
+    createdAt:subject.createdAt || Date.now(),
+    updatedAt:subject.updatedAt || subject.createdAt || Date.now()
+  };
+}
+
 function normalizeResearch(value={}){
+  let subjects = Array.isArray(value.subjects) ? value.subjects.map(normalizeResearchSubject) : [];
+  if(!subjects.length) subjects = [normalizeResearchSubject({id:DEFAULT_RESEARCH_SUBJECT_ID,title:'General Research'}, 0)];
+  if(!subjects.some(subject=>subject.id===DEFAULT_RESEARCH_SUBJECT_ID)){
+    subjects.unshift(normalizeResearchSubject({id:DEFAULT_RESEARCH_SUBJECT_ID,title:'General Research'}, 0));
+  }
+  const fallbackSubjectId = subjects[0].id;
+  const subjectIds = new Set(subjects.map(subject=>subject.id));
   const sources = Array.isArray(value.sources) ? value.sources.map(source=>({
     id:source.id || authorNoteId('source'),
+    subjectId:subjectIds.has(String(source.subjectId || '')) ? String(source.subjectId) : fallbackSubjectId,
+    tags:String(source.tags || ''),
     title:String(source.title || ''),
     author:String(source.author || ''),
     type:String(source.type || ''),
+    container:String(source.container || ''),
+    publisher:String(source.publisher || ''),
     url:String(source.url || ''),
+    doi:String(source.doi || ''),
+    accessDate:String(source.accessDate || ''),
     year:String(source.year || ''),
+    citationOverride:String(source.citationOverride || ''),
+    citationNotes:String(source.citationNotes || ''),
     summary:String(source.summary || ''),
     relevance:String(source.relevance || ''),
     method:String(source.method || ''),
@@ -4360,6 +4520,8 @@ function normalizeResearch(value={}){
   })) : [];
   const evidence = Array.isArray(value.evidence) ? value.evidence.map(item=>({
     id:item.id || authorNoteId('evidence'),
+    subjectId:subjectIds.has(String(item.subjectId || '')) ? String(item.subjectId) : fallbackSubjectId,
+    tags:String(item.tags || ''),
     claim:String(item.claim || ''),
     sourceId:String(item.sourceId || ''),
     quote:String(item.quote || ''),
@@ -4370,18 +4532,36 @@ function normalizeResearch(value={}){
   })) : [];
   const gaps = Array.isArray(value.gaps) ? value.gaps.map(gap=>({
     id:gap.id || authorNoteId('gap'),
+    subjectId:subjectIds.has(String(gap.subjectId || '')) ? String(gap.subjectId) : fallbackSubjectId,
+    tags:String(gap.tags || ''),
     question:String(gap.question || ''),
     nextStep:String(gap.nextStep || ''),
     status:String(gap.status || 'open'),
     createdAt:gap.createdAt || Date.now(),
     updatedAt:gap.updatedAt || gap.createdAt || Date.now()
   })) : [];
+  const passages = Array.isArray(value.passages) ? value.passages.map(passage=>({
+    id:passage.id || authorNoteId('passage'),
+    subjectId:subjectIds.has(String(passage.subjectId || '')) ? String(passage.subjectId) : fallbackSubjectId,
+    quote:String(passage.quote || ''),
+    before:String(passage.before || ''),
+    after:String(passage.after || ''),
+    tags:String(passage.tags || ''),
+    elaboration:String(passage.elaboration || ''),
+    sourceId:String(passage.sourceId || ''),
+    confidence:String(passage.confidence || 'medium'),
+    application:String(passage.application || ''),
+    createdAt:passage.createdAt || Date.now(),
+    updatedAt:passage.updatedAt || passage.createdAt || Date.now()
+  })) : [];
   return {
     question:String(value.question || ''),
     workingThesis:String(value.workingThesis || ''),
+    subjects,
     sources,
     evidence,
-    gaps
+    gaps,
+    passages
   };
 }
 
@@ -4621,7 +4801,7 @@ async function backupVaultFiles(){
 
 async function buildFullBackupPayload(){
   const now = new Date();
-  const readerNotes = await notesGetAll().catch(()=>[]);
+  const readerNotes = await (typeof notesGetAllLocal === 'function' ? notesGetAllLocal() : Promise.resolve([])).catch(()=>[]);
   const vaultFiles = await backupVaultFiles();
   const normalizedChapters = normalizeChapterList(chapters || []);
   return {
@@ -4692,8 +4872,11 @@ function backupAuthorNotesHtml(notes){
   const sources = research.sources.length ? research.sources.map(source=>`
     <article class="source">
       <h5>${backupEscapeHtml(source.title || 'Untitled Source')}</h5>
+      <p><b>Works Cited:</b> ${backupEscapeHtml(worksCitedText(source))}</p>
+      <p><b>Subject:</b> ${backupEscapeHtml(source.subjectId)} · <b>Tags:</b> ${backupEscapeHtml(source.tags)}</p>
       <p><b>Author/Institution:</b> ${backupEscapeHtml(source.author)} · <b>Type:</b> ${backupEscapeHtml(source.type)} · <b>Year:</b> ${backupEscapeHtml(source.year)}</p>
-      <p><b>URL/Citation:</b> ${backupEscapeHtml(source.url)}</p>
+      <p><b>Container:</b> ${backupEscapeHtml(source.container)} · <b>Publisher:</b> ${backupEscapeHtml(source.publisher)}</p>
+      <p><b>URL:</b> ${backupEscapeHtml(source.url)} · <b>DOI:</b> ${backupEscapeHtml(source.doi)} · <b>Accessed:</b> ${backupEscapeHtml(source.accessDate)}</p>
       <p><b>Summary:</b> ${backupEscapeHtml(source.summary)}</p>
       <p><b>Relevance:</b> ${backupEscapeHtml(source.relevance)}</p>
       <p><b>Method/Discipline:</b> ${backupEscapeHtml(source.method)}</p>
@@ -4703,11 +4886,21 @@ function backupAuthorNotesHtml(notes){
   const evidence = research.evidence.length ? research.evidence.map(item=>`
     <article class="source">
       <h5>${backupEscapeHtml(item.claim || 'Evidence Card')}</h5>
+      <p><b>Subject:</b> ${backupEscapeHtml(item.subjectId)} · <b>Tags:</b> ${backupEscapeHtml(item.tags)}</p>
       <p><b>Confidence:</b> ${backupEscapeHtml(item.confidence)}</p>
       <p><b>Quote/Paraphrase:</b> ${backupEscapeHtml(item.quote)}</p>
       <p><b>Chapter Application:</b> ${backupEscapeHtml(item.application)}</p>
     </article>`).join('') : '<p class="muted">No evidence cards</p>';
-  const gaps = research.gaps.length ? research.gaps.map(gap=>`<li><b>${backupEscapeHtml(gap.status)}</b> · ${backupEscapeHtml(gap.question)} <span class="muted">${backupEscapeHtml(gap.nextStep)}</span></li>`).join('') : '<li class="muted">No gaps</li>';
+  const passages = research.passages.length ? research.passages.map(passage=>`
+    <article class="source">
+      <h5>Linked Passage</h5>
+      <p><b>Subject:</b> ${backupEscapeHtml(passage.subjectId)} · <b>Tags:</b> ${backupEscapeHtml(passage.tags)} · <b>Confidence:</b> ${backupEscapeHtml(passage.confidence)}</p>
+      <p><b>Quote:</b> ${backupEscapeHtml(passage.quote)}</p>
+      <p><b>Elaboration:</b> ${backupEscapeHtml(passage.elaboration)}</p>
+      <p><b>Application:</b> ${backupEscapeHtml(passage.application)}</p>
+    </article>`).join('') : '<p class="muted">No linked passages</p>';
+  const gaps = research.gaps.length ? research.gaps.map(gap=>`<li><b>${backupEscapeHtml(gap.status)}</b> · ${backupEscapeHtml(gap.question)} <span class="muted">${backupEscapeHtml(gap.nextStep)} ${backupEscapeHtml(gap.tags)}</span></li>`).join('') : '<li class="muted">No gaps</li>';
+  const subjects = research.subjects.length ? research.subjects.map(subject=>`<li><b>${backupEscapeHtml(subject.title)}</b> · ${backupEscapeHtml(subject.tags)}<br>${backupEscapeHtml(subject.description)}<br>${backupEscapeHtml(subject.synthesis)}</li>`).join('') : '<li class="muted">No subjects</li>';
   return `
     <section class="author-box">
       <h4>Thesis / Core Question</h4>
@@ -4718,6 +4911,8 @@ function backupAuthorNotesHtml(notes){
       <h4>Research</h4>
       <p><b>Research Question:</b> ${backupEscapeHtml(research.question)}</p>
       <p><b>Working Thesis:</b> ${backupEscapeHtml(research.workingThesis)}</p>
+      <h5>Subjects</h5><ul>${subjects}</ul>
+      <h5>Linked Passages</h5>${passages}
       <h5>Sources</h5>${sources}
       <h5>Evidence / Claims</h5>${evidence}
       <h5>Gaps / Next Questions</h5><ul>${gaps}</ul>
@@ -4858,6 +5053,7 @@ let _chapterEditorDraftTimer = null;
 let _chapterEditorSnapshot = '';
 let _chapterEditorSelectedWikiKey = '';
 let _chapterEditorAuthorNotes = normalizeAuthorNotes();
+let _authorResearchFilter = '';
 let _currentChapterId = null;
 let _currentCharacterId = null;
 
@@ -7099,7 +7295,7 @@ function authorNotesSummaryText(notes=readAuthorNotesEditor()){
   const noteCount = notes.notes.length;
   const inlineCount = notes.inline.length;
   const review = authorReviewStats(notes);
-  const researchCount = notes.research.sources.length + notes.research.evidence.length + notes.research.gaps.length;
+  const researchCount = notes.research.sources.length + notes.research.evidence.length + notes.research.gaps.length + notes.research.passages.length;
   return `${review.done}/${review.total} review · ${researchCount} research · ${openTasks}/${totalTasks} custom · ${noteCount} notes · ${inlineCount} inline`;
 }
 
@@ -7318,103 +7514,218 @@ function researchSourceLabel(id){
   return source ? (source.title || source.author || source.url || 'Untitled source') : 'No source selected';
 }
 
+function researchSubjectOptions(selected=''){
+  const research = ensureAuthorResearch();
+  return research.subjects.map(subject=>`<option value="${escHtml(subject.id)}" ${subject.id===selected?'selected':''}>${escHtml(subject.title || 'Untitled Subject')}</option>`).join('');
+}
+
+function authorResearchOpenSubjects(){
+  const ui = authorWorkspaceUi();
+  return ui.authorResearchOpen || {};
+}
+
+function setAuthorResearchOpenSubjects(openSubjects){
+  setChapterEditorDraftUi(_chapterEditorBaseId, {authorResearchOpen:openSubjects});
+}
+
+function researchMatchesFilter(item, extra=''){
+  const filter = String(_authorResearchFilter || '').trim().toLowerCase();
+  if(!filter) return true;
+  return (JSON.stringify(item || {}) + ' ' + extra).toLowerCase().includes(filter);
+}
+
+function worksCitedText(source){
+  if(source.citationOverride) return source.citationOverride;
+  const parts = [];
+  if(source.author) parts.push(`${source.author}.`);
+  if(source.title) parts.push(`"${source.title}."`);
+  if(source.container) parts.push(`${source.container},`);
+  if(source.publisher) parts.push(`${source.publisher},`);
+  if(source.year) parts.push(`${source.year}.`);
+  if(source.doi) parts.push(`doi:${source.doi}.`);
+  else if(source.url) parts.push(`${source.url}.`);
+  if(source.accessDate) parts.push(`Accessed ${source.accessDate}.`);
+  return parts.join(' ').replace(/\s+/g,' ').trim() || 'Untitled source.';
+}
+
+function authorResearchSubjectStats(subjectId, research=ensureAuthorResearch()){
+  return {
+    sources:research.sources.filter(item=>item.subjectId===subjectId).length,
+    evidence:research.evidence.filter(item=>item.subjectId===subjectId).length,
+    passages:research.passages.filter(item=>item.subjectId===subjectId).length,
+    gaps:research.gaps.filter(item=>item.subjectId===subjectId).length
+  };
+}
+
+function renderResearchSourceCard(source){
+  return `<section class="author-research-card">
+    <div class="author-research-card-head">
+      <div>
+        <div class="author-research-title">${escHtml(source.title || 'Untitled Source')}</div>
+        <div class="author-note-meta">${escHtml(worksCitedText(source))}</div>
+      </div>
+      <button class="author-note-btn danger" type="button" onclick="deleteAuthorResearchSource('${escHtml(source.id)}')">Delete</button>
+    </div>
+    <div class="author-research-grid">
+      <div class="author-research-field"><label>Subject</label><select class="author-research-input" onchange="updateAuthorResearchSource('${escHtml(source.id)}','subjectId',this.value)">${researchSubjectOptions(source.subjectId)}</select></div>
+      <div class="author-research-field"><label>Tags</label><input class="author-research-input" value="${escHtml(source.tags)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','tags',this.value)"></div>
+      <div class="author-research-field"><label>Source Type</label><select class="author-research-input" onchange="updateAuthorResearchSource('${escHtml(source.id)}','type',this.value)">
+        ${['','Book','Journal Article','Archive','Website','Interview','Primary Text','Lecture','Documentary','Other'].map(type=>`<option value="${escHtml(type)}" ${source.type===type?'selected':''}>${type || 'Choose type'}</option>`).join('')}
+      </select></div>
+      <div class="author-research-field"><label>Year</label><input class="author-research-input" value="${escHtml(source.year)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','year',this.value)"></div>
+      <div class="author-research-field"><label>Author / Institution</label><input class="author-research-input" value="${escHtml(source.author)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','author',this.value)"></div>
+      <div class="author-research-field"><label>Title</label><input class="author-research-input" value="${escHtml(source.title)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','title',this.value)"></div>
+      <div class="author-research-field"><label>Container</label><input class="author-research-input" value="${escHtml(source.container)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','container',this.value)"></div>
+      <div class="author-research-field"><label>Publisher</label><input class="author-research-input" value="${escHtml(source.publisher)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','publisher',this.value)"></div>
+      <div class="author-research-field"><label>URL</label><input class="author-research-input" value="${escHtml(source.url)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','url',this.value)"></div>
+      <div class="author-research-field"><label>DOI</label><input class="author-research-input" value="${escHtml(source.doi)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','doi',this.value)"></div>
+      <div class="author-research-field"><label>Access Date</label><input class="author-research-input" value="${escHtml(source.accessDate)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','accessDate',this.value)"></div>
+      <div class="author-research-field"><label>Citation Override</label><textarea class="author-research-input" rows="2" oninput="updateAuthorResearchSource('${escHtml(source.id)}','citationOverride',this.value)">${escHtml(source.citationOverride)}</textarea></div>
+      <div class="author-research-field wide"><label>Summary</label><textarea class="author-research-input" rows="4" oninput="updateAuthorResearchSource('${escHtml(source.id)}','summary',this.value)">${escHtml(source.summary)}</textarea></div>
+      <div class="author-research-field"><label>Relevance</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSource('${escHtml(source.id)}','relevance',this.value)">${escHtml(source.relevance)}</textarea></div>
+      <div class="author-research-field"><label>Method / Discipline</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSource('${escHtml(source.id)}','method',this.value)">${escHtml(source.method)}</textarea></div>
+      <div class="author-research-field"><label>Reliability Notes</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSource('${escHtml(source.id)}','reliability',this.value)">${escHtml(source.reliability)}</textarea></div>
+      <div class="author-research-field"><label>Use In Chapter</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSource('${escHtml(source.id)}','chapterUse',this.value)">${escHtml(source.chapterUse)}</textarea></div>
+      <div class="author-research-field wide"><label>Citation Notes</label><textarea class="author-research-input" rows="2" oninput="updateAuthorResearchSource('${escHtml(source.id)}','citationNotes',this.value)">${escHtml(source.citationNotes)}</textarea></div>
+    </div>
+  </section>`;
+}
+
+function renderResearchEvidenceCard(item){
+  return `<section class="author-research-card">
+    <div class="author-research-card-head">
+      <div>
+        <div class="author-research-title">${escHtml(item.claim || 'Evidence Card')}</div>
+        <div class="author-note-meta">${escHtml(researchSourceLabel(item.sourceId))}</div>
+      </div>
+      <button class="author-note-btn danger" type="button" onclick="deleteAuthorEvidence('${escHtml(item.id)}')">Delete</button>
+    </div>
+    <div class="author-research-grid">
+      <div class="author-research-field"><label>Subject</label><select class="author-research-input" onchange="updateAuthorEvidence('${escHtml(item.id)}','subjectId',this.value)">${researchSubjectOptions(item.subjectId)}</select></div>
+      <div class="author-research-field"><label>Tags</label><input class="author-research-input" value="${escHtml(item.tags)}" oninput="updateAuthorEvidence('${escHtml(item.id)}','tags',this.value)"></div>
+      <div class="author-research-field wide"><label>Claim / Use</label><textarea class="author-research-input" rows="3" oninput="updateAuthorEvidence('${escHtml(item.id)}','claim',this.value)">${escHtml(item.claim)}</textarea></div>
+      <div class="author-research-field"><label>Source</label><select class="author-research-input" onchange="updateAuthorEvidence('${escHtml(item.id)}','sourceId',this.value)">${researchSourcesOptions(item.sourceId)}</select></div>
+      <div class="author-research-field"><label>Confidence</label><select class="author-research-input" onchange="updateAuthorEvidence('${escHtml(item.id)}','confidence',this.value)">${['low','medium','high'].map(level=>`<option value="${level}" ${item.confidence===level?'selected':''}>${level}</option>`).join('')}</select></div>
+      <div class="author-research-field wide"><label>Quote / Paraphrase</label><textarea class="author-research-input" rows="4" oninput="updateAuthorEvidence('${escHtml(item.id)}','quote',this.value)">${escHtml(item.quote)}</textarea></div>
+      <div class="author-research-field wide"><label>Chapter Application</label><textarea class="author-research-input" rows="4" oninput="updateAuthorEvidence('${escHtml(item.id)}','application',this.value)">${escHtml(item.application)}</textarea></div>
+    </div>
+  </section>`;
+}
+
+function renderResearchPassageCard(passage){
+  const body = document.getElementById('ce-body') ? document.getElementById('ce-body').value : '';
+  const matched = passage.quote && body.includes(passage.quote);
+  return `<section class="author-research-card ${matched ? '' : 'unmatched'}">
+    <div class="author-research-card-head">
+      <div>
+        <div class="author-research-title">${matched ? 'Linked Passage' : 'Unmatched Passage'}</div>
+        <div class="author-note-meta">${escHtml(passage.tags || 'No tags')}</div>
+      </div>
+      <button class="author-note-btn danger" type="button" onclick="deleteAuthorResearchPassage('${escHtml(passage.id)}')">Delete</button>
+    </div>
+    <div class="author-research-grid">
+      <div class="author-research-field wide"><label>Selected Chapter Segment</label><div class="author-passage-quote">${escHtml(passage.quote || 'No quote')}</div></div>
+      <div class="author-research-field"><label>Subject</label><select class="author-research-input" onchange="updateAuthorResearchPassage('${escHtml(passage.id)}','subjectId',this.value)">${researchSubjectOptions(passage.subjectId)}</select></div>
+      <div class="author-research-field"><label>Tags</label><input class="author-research-input" value="${escHtml(passage.tags)}" oninput="updateAuthorResearchPassage('${escHtml(passage.id)}','tags',this.value)"></div>
+      <div class="author-research-field"><label>Source</label><select class="author-research-input" onchange="updateAuthorResearchPassage('${escHtml(passage.id)}','sourceId',this.value)">${researchSourcesOptions(passage.sourceId)}</select></div>
+      <div class="author-research-field"><label>Confidence</label><select class="author-research-input" onchange="updateAuthorResearchPassage('${escHtml(passage.id)}','confidence',this.value)">${['low','medium','high'].map(level=>`<option value="${level}" ${passage.confidence===level?'selected':''}>${level}</option>`).join('')}</select></div>
+      <div class="author-research-field wide"><label>Research Elaboration</label><textarea class="author-research-input" rows="5" oninput="updateAuthorResearchPassage('${escHtml(passage.id)}','elaboration',this.value)">${escHtml(passage.elaboration)}</textarea></div>
+      <div class="author-research-field wide"><label>Chapter Application</label><textarea class="author-research-input" rows="4" oninput="updateAuthorResearchPassage('${escHtml(passage.id)}','application',this.value)">${escHtml(passage.application)}</textarea></div>
+    </div>
+  </section>`;
+}
+
+function renderResearchGapCard(gap){
+  return `<section class="author-research-card">
+    <div class="author-research-card-head">
+      <div>
+        <div class="author-research-title">${escHtml(gap.question || 'Research Gap')}</div>
+        <div class="author-note-meta">${escHtml(gap.status || 'open')}</div>
+      </div>
+      <button class="author-note-btn danger" type="button" onclick="deleteAuthorResearchGap('${escHtml(gap.id)}')">Delete</button>
+    </div>
+    <div class="author-research-grid">
+      <div class="author-research-field"><label>Subject</label><select class="author-research-input" onchange="updateAuthorResearchGap('${escHtml(gap.id)}','subjectId',this.value)">${researchSubjectOptions(gap.subjectId)}</select></div>
+      <div class="author-research-field"><label>Tags</label><input class="author-research-input" value="${escHtml(gap.tags)}" oninput="updateAuthorResearchGap('${escHtml(gap.id)}','tags',this.value)"></div>
+      <div class="author-research-field wide"><label>Unanswered Question</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchGap('${escHtml(gap.id)}','question',this.value)">${escHtml(gap.question)}</textarea></div>
+      <div class="author-research-field"><label>Next Step</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchGap('${escHtml(gap.id)}','nextStep',this.value)">${escHtml(gap.nextStep)}</textarea></div>
+      <div class="author-research-field"><label>Status</label><select class="author-research-input" onchange="updateAuthorResearchGap('${escHtml(gap.id)}','status',this.value)">${['open','investigating','resolved'].map(status=>`<option value="${status}" ${gap.status===status?'selected':''}>${status}</option>`).join('')}</select></div>
+    </div>
+  </section>`;
+}
+
+function renderResearchSubjectBoard(subject, research, openSubjects){
+  const isOpen = openSubjects[subject.id] !== false;
+  const stats = authorResearchSubjectStats(subject.id, research);
+  const sources = research.sources.filter(item=>item.subjectId===subject.id && researchMatchesFilter(item, worksCitedText(item))).map(renderResearchSourceCard).join('');
+  const passages = research.passages.filter(item=>item.subjectId===subject.id && researchMatchesFilter(item)).map(renderResearchPassageCard).join('');
+  const evidence = research.evidence.filter(item=>item.subjectId===subject.id && researchMatchesFilter(item, researchSourceLabel(item.sourceId))).map(renderResearchEvidenceCard).join('');
+  const gaps = research.gaps.filter(item=>item.subjectId===subject.id && researchMatchesFilter(item)).map(renderResearchGapCard).join('');
+  return `<section class="author-subject-board ${isOpen ? '' : 'closed'}">
+    <div class="author-subject-head">
+      <span class="author-subject-color" style="background:${escHtml(subject.color)}"></span>
+      <div>
+        <div class="author-subject-title">${escHtml(subject.title || 'Untitled Subject')}</div>
+        <div class="author-subject-meta">${stats.sources} sources · ${stats.passages} passages · ${stats.evidence} evidence · ${stats.gaps} gaps</div>
+      </div>
+      <div class="author-subject-controls">
+        <button class="author-note-btn" type="button" onclick="toggleAuthorResearchSubject('${escHtml(subject.id)}')">${isOpen ? 'Close' : 'Open'}</button>
+        <button class="author-note-btn" type="button" onclick="addAuthorResearchSource('${escHtml(subject.id)}')">Add Source</button>
+        <button class="author-note-btn" type="button" onclick="addAuthorEvidence('${escHtml(subject.id)}')">Add Evidence</button>
+        <button class="author-note-btn" type="button" onclick="addAuthorResearchGap('${escHtml(subject.id)}')">Add Gap</button>
+        ${subject.id!==DEFAULT_RESEARCH_SUBJECT_ID ? `<button class="author-note-btn danger" type="button" onclick="deleteAuthorResearchSubject('${escHtml(subject.id)}')">Delete</button>` : ''}
+      </div>
+    </div>
+    <div class="author-subject-body">
+      <div class="author-research-row">
+        <div class="author-research-field"><label>Subject Title</label><input class="author-research-input" value="${escHtml(subject.title)}" oninput="updateAuthorResearchSubject('${escHtml(subject.id)}','title',this.value)"></div>
+        <div class="author-research-field"><label>Subject Color</label><input class="author-research-input" type="color" value="${/^#[0-9a-f]{6}$/i.test(subject.color) ? escHtml(subject.color) : '#8b3a1e'}" oninput="updateAuthorResearchSubject('${escHtml(subject.id)}','color',this.value)"></div>
+      </div>
+      <div class="author-research-row">
+        <div class="author-research-field"><label>Description</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSubject('${escHtml(subject.id)}','description',this.value)">${escHtml(subject.description)}</textarea></div>
+        <div class="author-research-field"><label>Subject Tags</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSubject('${escHtml(subject.id)}','tags',this.value)">${escHtml(subject.tags)}</textarea></div>
+      </div>
+      <div class="author-research-field wide"><label>Research Notes / Synthesis</label><textarea class="author-research-input author-research-synthesis" rows="9" oninput="updateAuthorResearchSubject('${escHtml(subject.id)}','synthesis',this.value)">${escHtml(subject.synthesis)}</textarea></div>
+      <div class="author-research-subhead"><span>Linked Passages</span><button class="author-note-btn" type="button" onclick="createAuthorResearchPassageFromSelection('${escHtml(subject.id)}')">Create From Selection</button></div>
+      ${passages || '<div class="author-research-empty">No linked passages for this subject.</div>'}
+      <div class="author-research-subhead"><span>Sources</span></div>
+      ${sources || '<div class="author-research-empty">No sources match this subject/filter.</div>'}
+      <div class="author-research-subhead"><span>Evidence / Claims</span></div>
+      ${evidence || '<div class="author-research-empty">No evidence cards match this subject/filter.</div>'}
+      <div class="author-research-subhead"><span>Gaps / Next Questions</span></div>
+      ${gaps || '<div class="author-research-empty">No gaps match this subject/filter.</div>'}
+    </div>
+  </section>`;
+}
+
 function renderAuthorResearchBoard(){
   const board = document.getElementById('aw-research-board');
   if(!board) return;
-  const research = _chapterEditorAuthorNotes.research || normalizeResearch();
-  const sourceCards = research.sources.length ? research.sources.map(source=>`
-    <section class="author-research-card">
-      <div class="author-research-card-head">
-        <div>
-          <div class="author-research-title">${escHtml(source.title || 'Untitled Source')}</div>
-          <div class="author-note-meta">Updated ${escHtml(authorNoteDate(source.updatedAt))}</div>
-        </div>
-        <button class="author-note-btn danger" type="button" onclick="deleteAuthorResearchSource('${escHtml(source.id)}')">Delete</button>
-      </div>
-      <div class="author-research-grid">
-        <div class="author-research-field"><label>Title</label><input class="author-research-input" value="${escHtml(source.title)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','title',this.value)"></div>
-        <div class="author-research-field"><label>Author / Institution</label><input class="author-research-input" value="${escHtml(source.author)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','author',this.value)"></div>
-        <div class="author-research-field"><label>Type</label><select class="author-research-input" onchange="updateAuthorResearchSource('${escHtml(source.id)}','type',this.value)">
-          ${['','Book','Journal Article','Archive','Website','Interview','Primary Text','Lecture','Other'].map(type=>`<option value="${escHtml(type)}" ${source.type===type?'selected':''}>${type || 'Choose type'}</option>`).join('')}
-        </select></div>
-        <div class="author-research-field"><label>Year</label><input class="author-research-input" value="${escHtml(source.year)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','year',this.value)"></div>
-        <div class="author-research-field wide"><label>URL / Citation</label><input class="author-research-input" value="${escHtml(source.url)}" oninput="updateAuthorResearchSource('${escHtml(source.id)}','url',this.value)"></div>
-        <div class="author-research-field wide"><label>Summary</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSource('${escHtml(source.id)}','summary',this.value)">${escHtml(source.summary)}</textarea></div>
-        <div class="author-research-field"><label>Relevance</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSource('${escHtml(source.id)}','relevance',this.value)">${escHtml(source.relevance)}</textarea></div>
-        <div class="author-research-field"><label>Method / Discipline</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSource('${escHtml(source.id)}','method',this.value)">${escHtml(source.method)}</textarea></div>
-        <div class="author-research-field"><label>Reliability Notes</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSource('${escHtml(source.id)}','reliability',this.value)">${escHtml(source.reliability)}</textarea></div>
-        <div class="author-research-field"><label>Use In Chapter</label><textarea class="author-research-input" rows="3" oninput="updateAuthorResearchSource('${escHtml(source.id)}','chapterUse',this.value)">${escHtml(source.chapterUse)}</textarea></div>
-      </div>
-    </section>
-  `).join('') : '<div class="author-research-empty">No sources yet.</div>';
-  const evidenceCards = research.evidence.length ? research.evidence.map(item=>`
-    <section class="author-research-card">
-      <div class="author-research-card-head">
-        <div>
-          <div class="author-research-title">${escHtml(item.claim || 'Evidence Card')}</div>
-          <div class="author-note-meta">${escHtml(researchSourceLabel(item.sourceId))}</div>
-        </div>
-        <button class="author-note-btn danger" type="button" onclick="deleteAuthorEvidence('${escHtml(item.id)}')">Delete</button>
-      </div>
-      <div class="author-research-grid">
-        <div class="author-research-field wide"><label>Claim / Use</label><textarea class="author-research-input" rows="2" oninput="updateAuthorEvidence('${escHtml(item.id)}','claim',this.value)">${escHtml(item.claim)}</textarea></div>
-        <div class="author-research-field"><label>Source</label><select class="author-research-input" onchange="updateAuthorEvidence('${escHtml(item.id)}','sourceId',this.value)">${researchSourcesOptions(item.sourceId)}</select></div>
-        <div class="author-research-field"><label>Confidence</label><select class="author-research-input" onchange="updateAuthorEvidence('${escHtml(item.id)}','confidence',this.value)">
-          ${['low','medium','high'].map(level=>`<option value="${level}" ${item.confidence===level?'selected':''}>${level}</option>`).join('')}
-        </select></div>
-        <div class="author-research-field wide"><label>Quote / Paraphrase</label><textarea class="author-research-input" rows="3" oninput="updateAuthorEvidence('${escHtml(item.id)}','quote',this.value)">${escHtml(item.quote)}</textarea></div>
-        <div class="author-research-field wide"><label>Chapter Application</label><textarea class="author-research-input" rows="3" oninput="updateAuthorEvidence('${escHtml(item.id)}','application',this.value)">${escHtml(item.application)}</textarea></div>
-      </div>
-    </section>
-  `).join('') : '<div class="author-research-empty">No evidence cards yet.</div>';
-  const gapCards = research.gaps.length ? research.gaps.map(gap=>`
-    <section class="author-research-card">
-      <div class="author-research-card-head">
-        <div>
-          <div class="author-research-title">${escHtml(gap.question || 'Research Gap')}</div>
-          <div class="author-note-meta">${escHtml(gap.status || 'open')}</div>
-        </div>
-        <button class="author-note-btn danger" type="button" onclick="deleteAuthorResearchGap('${escHtml(gap.id)}')">Delete</button>
-      </div>
-      <div class="author-research-grid">
-        <div class="author-research-field wide"><label>Unanswered Question</label><textarea class="author-research-input" rows="2" oninput="updateAuthorResearchGap('${escHtml(gap.id)}','question',this.value)">${escHtml(gap.question)}</textarea></div>
-        <div class="author-research-field"><label>Next Step</label><textarea class="author-research-input" rows="2" oninput="updateAuthorResearchGap('${escHtml(gap.id)}','nextStep',this.value)">${escHtml(gap.nextStep)}</textarea></div>
-        <div class="author-research-field"><label>Status</label><select class="author-research-input" onchange="updateAuthorResearchGap('${escHtml(gap.id)}','status',this.value)">
-          ${['open','investigating','resolved'].map(status=>`<option value="${status}" ${gap.status===status?'selected':''}>${status}</option>`).join('')}
-        </select></div>
-      </div>
-    </section>
-  `).join('') : '<div class="author-research-empty">No research gaps yet.</div>';
+  const research = ensureAuthorResearch();
+  const openSubjects = authorResearchOpenSubjects();
+  const subjects = research.subjects.map(subject=>renderResearchSubjectBoard(subject,research,openSubjects)).join('');
+  const works = research.sources.length ? research.sources.map(source=>`<div class="works-cited-item">${escHtml(worksCitedText(source))}</div>`).join('') : '<div class="author-research-empty">No works cited yet.</div>';
   board.innerHTML = `
     <section class="author-research-card">
       <div class="author-research-card-head">
         <div class="author-research-title">Research Frame</div>
+        <div class="author-research-actions">
+          <button class="author-note-btn" type="button" onclick="addAuthorResearchSubject()">Add Subject</button>
+          <button class="author-note-btn" type="button" onclick="createAuthorResearchPassageFromSelection()">Create Research Note From Selection</button>
+        </div>
       </div>
       <div class="author-research-grid">
         <div class="author-research-field wide"><label>Research Question</label><textarea class="author-research-input" rows="3" placeholder="What must be known, verified, or complicated?" oninput="updateAuthorResearchRoot('question',this.value)">${escHtml(research.question)}</textarea></div>
         <div class="author-research-field wide"><label>Working Thesis</label><textarea class="author-research-input" rows="3" placeholder="What provisional claim is emerging from the sources?" oninput="updateAuthorResearchRoot('workingThesis',this.value)">${escHtml(research.workingThesis)}</textarea></div>
+        <div class="author-research-field wide"><label>Filter Subjects / Tags / Cards</label><input class="author-research-input" value="${escHtml(_authorResearchFilter)}" placeholder="Filter by tag, source, claim, passage..." oninput="updateAuthorResearchFilter(this.value)"></div>
       </div>
     </section>
+    ${subjects}
     <section class="author-research-card">
       <div class="author-research-card-head">
-        <div class="author-research-title">Sources</div>
-        <button class="author-note-btn" type="button" onclick="addAuthorResearchSource()">Add Source</button>
+        <div class="author-research-title">Works Cited</div>
       </div>
-      <div class="author-research-wrap">${sourceCards}</div>
-    </section>
-    <section class="author-research-card">
-      <div class="author-research-card-head">
-        <div class="author-research-title">Evidence / Claims</div>
-        <button class="author-note-btn" type="button" onclick="addAuthorEvidence()">Add Evidence</button>
-      </div>
-      <div class="author-research-wrap">${evidenceCards}</div>
-    </section>
-    <section class="author-research-card">
-      <div class="author-research-card-head">
-        <div class="author-research-title">Gaps / Next Questions</div>
-        <button class="author-note-btn" type="button" onclick="addAuthorResearchGap()">Add Gap</button>
-      </div>
-      <div class="author-research-wrap">${gapCards}</div>
+      <div class="works-cited-list">${works}</div>
     </section>
   `;
 }
@@ -7511,7 +7822,7 @@ function updateAuthorWorkspaceStatsOnly(){
   if(openCount){
     if(active === 'research'){
       const research = _chapterEditorAuthorNotes.research || normalizeResearch();
-      openCount.textContent = `${research.sources.length} sources · ${research.evidence.length} evidence · ${research.gaps.length} gaps`;
+      openCount.textContent = `${research.subjects.length} subjects · ${research.sources.length} sources · ${research.passages.length} passages`;
     } else {
       openCount.textContent = `${stats.open} open`;
     }
@@ -7529,6 +7840,11 @@ function touchAuthorResearchItem(item){
   updateAuthorWorkspaceStatsOnly();
 }
 
+function firstResearchSubjectId(){
+  const research = ensureAuthorResearch();
+  return (research.subjects[0] && research.subjects[0].id) || DEFAULT_RESEARCH_SUBJECT_ID;
+}
+
 function updateAuthorResearchRoot(field, value){
   const research = ensureAuthorResearch();
   if(field === 'question' || field === 'workingThesis'){
@@ -7537,15 +7853,74 @@ function updateAuthorResearchRoot(field, value){
   }
 }
 
-function addAuthorResearchSource(){
+function updateAuthorResearchFilter(value){
+  _authorResearchFilter = value || '';
+  renderAuthorResearchBoard();
+  renderAuthorWorkspaceTabs('research');
+}
+
+function toggleAuthorResearchSubject(id){
+  const openSubjects = authorResearchOpenSubjects();
+  openSubjects[id] = openSubjects[id] === false;
+  setChapterEditorDraftUi(_chapterEditorBaseId, {authorResearchOpen:openSubjects});
+  renderAuthorResearchBoard();
+  renderAuthorWorkspaceTabs('research');
+}
+
+function addAuthorResearchSubject(){
+  const research = ensureAuthorResearch();
+  const colors = ['#8b3a1e','#2a4a3e','#3a3a8b','#7a4a1e','#1e5a5a','#8b1e4a'];
+  research.subjects.push({
+    id:authorNoteId('subject'),
+    title:'New Research Subject',
+    color:colors[research.subjects.length % colors.length],
+    description:'',
+    synthesis:'',
+    tags:'',
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  });
+  handleChapterEditorInput();
+  renderAuthorWorkspace();
+}
+
+function updateAuthorResearchSubject(id, field, value){
+  const subject = ensureAuthorResearch().subjects.find(item=>item.id===id);
+  if(!subject) return;
+  if(['title','color','description','synthesis','tags'].includes(field)){
+    subject[field] = value;
+    touchAuthorResearchItem(subject);
+  }
+}
+
+function deleteAuthorResearchSubject(id){
+  if(id === DEFAULT_RESEARCH_SUBJECT_ID) return;
+  const research = ensureAuthorResearch();
+  research.subjects = research.subjects.filter(subject=>subject.id!==id);
+  ['sources','evidence','gaps','passages'].forEach(key=>{
+    research[key].forEach(item=>{ if(item.subjectId === id) item.subjectId = DEFAULT_RESEARCH_SUBJECT_ID; });
+  });
+  handleChapterEditorInput();
+  renderAuthorWorkspace();
+}
+
+function addAuthorResearchSource(subjectId=firstResearchSubjectId()){
   const research = ensureAuthorResearch();
   research.sources.unshift({
     id:authorNoteId('source'),
+    subjectId,
+    tags:'',
     title:'',
     author:'',
     type:'',
+    container:'',
+    publisher:'',
     url:'',
+    doi:'',
+    accessDate:'',
     year:'',
+    citationOverride:'',
+    citationNotes:'',
     summary:'',
     relevance:'',
     method:'',
@@ -7561,9 +7936,10 @@ function addAuthorResearchSource(){
 function updateAuthorResearchSource(id, field, value){
   const source = ensureAuthorResearch().sources.find(item=>item.id===id);
   if(!source) return;
-  if(['title','author','type','url','year','summary','relevance','method','reliability','chapterUse'].includes(field)){
+  if(['subjectId','tags','title','author','type','container','publisher','url','doi','accessDate','year','citationOverride','citationNotes','summary','relevance','method','reliability','chapterUse'].includes(field)){
     source[field] = value;
     touchAuthorResearchItem(source);
+    if(field === 'subjectId') renderAuthorWorkspace();
   }
 }
 
@@ -7575,10 +7951,12 @@ function deleteAuthorResearchSource(id){
   renderAuthorWorkspace();
 }
 
-function addAuthorEvidence(){
+function addAuthorEvidence(subjectId=firstResearchSubjectId()){
   const research = ensureAuthorResearch();
   research.evidence.unshift({
     id:authorNoteId('evidence'),
+    subjectId,
+    tags:'',
     claim:'',
     sourceId:'',
     quote:'',
@@ -7594,9 +7972,10 @@ function addAuthorEvidence(){
 function updateAuthorEvidence(id, field, value){
   const item = ensureAuthorResearch().evidence.find(entry=>entry.id===id);
   if(!item) return;
-  if(['claim','sourceId','quote','application','confidence'].includes(field)){
+  if(['subjectId','tags','claim','sourceId','quote','application','confidence'].includes(field)){
     item[field] = value;
     touchAuthorResearchItem(item);
+    if(field === 'subjectId') renderAuthorWorkspace();
   }
 }
 
@@ -7607,10 +7986,12 @@ function deleteAuthorEvidence(id){
   renderAuthorWorkspace();
 }
 
-function addAuthorResearchGap(){
+function addAuthorResearchGap(subjectId=firstResearchSubjectId()){
   const research = ensureAuthorResearch();
   research.gaps.unshift({
     id:authorNoteId('gap'),
+    subjectId,
+    tags:'',
     question:'',
     nextStep:'',
     status:'open',
@@ -7624,15 +8005,75 @@ function addAuthorResearchGap(){
 function updateAuthorResearchGap(id, field, value){
   const gap = ensureAuthorResearch().gaps.find(item=>item.id===id);
   if(!gap) return;
-  if(['question','nextStep','status'].includes(field)){
+  if(['subjectId','tags','question','nextStep','status'].includes(field)){
     gap[field] = value;
     touchAuthorResearchItem(gap);
+    if(field === 'subjectId') renderAuthorWorkspace();
   }
 }
 
 function deleteAuthorResearchGap(id){
   const research = ensureAuthorResearch();
   research.gaps = research.gaps.filter(gap=>gap.id!==id);
+  handleChapterEditorInput();
+  renderAuthorWorkspace();
+}
+
+function selectedAuthorWorkspaceText(){
+  const selection = window.getSelection ? window.getSelection() : null;
+  const rendered = document.getElementById('aw-rendered-text');
+  if(selection && rendered && selection.rangeCount){
+    const range = selection.getRangeAt(0);
+    if(rendered.contains(range.commonAncestorContainer)){
+      const text = selection.toString().trim();
+      if(text) return text;
+    }
+  }
+  const source = document.getElementById('aw-source');
+  if(source){
+    const text = source.value.slice(source.selectionStart || 0, source.selectionEnd || 0).trim();
+    if(text) return text;
+  }
+  return '';
+}
+
+function createAuthorResearchPassageFromSelection(subjectId=firstResearchSubjectId()){
+  const quote = selectedAuthorWorkspaceText();
+  if(!quote){ alert('Select a segment of the chapter text first.'); return; }
+  const body = document.getElementById('ce-body') ? document.getElementById('ce-body').value : '';
+  const index = body.indexOf(quote);
+  ensureAuthorResearch().passages.unshift({
+    id:authorNoteId('passage'),
+    subjectId,
+    quote,
+    before:index >= 0 ? body.slice(Math.max(0, index - 120), index) : '',
+    after:index >= 0 ? body.slice(index + quote.length, Math.min(body.length, index + quote.length + 120)) : '',
+    tags:'',
+    elaboration:'',
+    sourceId:'',
+    confidence:'medium',
+    application:'',
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  });
+  setAuthorWorkspaceTab('research');
+  handleChapterEditorInput();
+  renderAuthorWorkspace();
+}
+
+function updateAuthorResearchPassage(id, field, value){
+  const passage = ensureAuthorResearch().passages.find(item=>item.id===id);
+  if(!passage) return;
+  if(['subjectId','tags','elaboration','sourceId','confidence','application'].includes(field)){
+    passage[field] = value;
+    touchAuthorResearchItem(passage);
+    if(field === 'subjectId') renderAuthorWorkspace();
+  }
+}
+
+function deleteAuthorResearchPassage(id){
+  const research = ensureAuthorResearch();
+  research.passages = research.passages.filter(item=>item.id!==id);
   handleChapterEditorInput();
   renderAuthorWorkspace();
 }
