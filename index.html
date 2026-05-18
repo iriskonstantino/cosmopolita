@@ -3627,7 +3627,9 @@ body:not(.admin-on) #tnav-drafts{
   background:var(--white);
   padding:0.75rem;
   cursor:pointer;
+  position:relative;
 }
+.drafts-select-check{position:absolute;top:0.55rem;right:0.55rem;accent-color:var(--red);}
 .drafts-card.active{border-color:var(--ink);box-shadow:3px 3px 0 var(--ink);}
 .drafts-card.archived{opacity:0.62;}
 .drafts-card-title{
@@ -3738,6 +3740,84 @@ body:not(.admin-on) #tnav-drafts{
   font-size:0.9rem;
   line-height:1.45;
 }
+.drafts-ai-panel{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.75rem;
+  margin:0.85rem 0;
+}
+.drafts-ai-actions,.drafts-ai-card-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.45rem;
+  margin-top:0.55rem;
+}
+.drafts-ai-warning{
+  font-family:var(--mono);
+  font-size:0.52rem;
+  line-height:1.55;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#8b3a1e;
+  background:var(--paper);
+  border:1px solid var(--border);
+  padding:0.55rem;
+  margin-top:0.55rem;
+}
+.drafts-ai-group{
+  border-top:1px solid var(--border);
+  padding-top:0.65rem;
+  margin-top:0.75rem;
+}
+.drafts-ai-group-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:0.5rem;
+  margin-bottom:0.45rem;
+}
+.drafts-ai-group-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.78rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.drafts-ai-card{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.6rem;
+  margin-bottom:0.5rem;
+}
+.drafts-ai-card.accepted{border-color:var(--green)}
+.drafts-ai-card.rejected{opacity:0.58;border-style:dashed}
+.drafts-ai-card-title{
+  font-family:var(--display);
+  font-weight:600;
+  font-size:0.76rem;
+  line-height:1.25;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+.drafts-ai-card-body{
+  font-size:0.82rem;
+  line-height:1.45;
+  color:#4f4840;
+  margin-top:0.32rem;
+}
+.tiny-btn{
+  border:1px solid var(--border);
+  background:var(--white);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:0.25rem 0.4rem;
+  cursor:pointer;
+}
+.tiny-btn:hover{border-color:var(--ink)}
+.tiny-btn.danger:hover{border-color:var(--red);color:var(--red)}
 .drafts-empty{
   border:1px solid var(--border);
   background:var(--white);
@@ -5552,12 +5632,15 @@ function backupDraftFragmentsHtml(fragments=[]){
       <p><b>Locations:</b> ${backupEscapeHtml((fragment.locations || []).join(', '))}</p>
       <p><b>POV:</b> ${backupEscapeHtml(fragment.pov)} · <b>Timeline:</b> ${backupEscapeHtml(fragment.timeline)}</p>
       <p><b>Narrative Devices:</b> ${backupEscapeHtml((fragment.narrativeDevices || []).join(', '))}</p>
+      <p><b>Accepted Dialogue:</b> ${backupEscapeHtml((fragment.dialogue || []).length)} · <b>Accepted Entities:</b> ${backupEscapeHtml((fragment.entities || []).length)} · <b>AI Suggestions:</b> ${backupEscapeHtml((fragment.aiSuggestions || []).length)}</p>
       <p><b>Linked Chapter:</b> ${backupEscapeHtml(protoChapterLabel(fragment.linkedChapterId))} · <b>Linked Proto Line:</b> ${backupEscapeHtml(fragment.linkedProtoLineId)}</p>
       <p><b>Source:</b> ${backupEscapeHtml(fragment.sourceFilename)}</p>
       ${fragment.notes ? `<div class="author-box"><h4>Notes</h4>${backupParagraphs(fragment.notes)}</div>` : ''}
       <div class="chapter-body">${backupChapterBodyHtml(fragment.body)}</div>
       ${(fragment.conversionHistory || []).length ? `<h4>Conversion History</h4><ul>${fragment.conversionHistory.map(item=>`<li>${backupEscapeHtml(item.target)} · ${backupEscapeHtml(item.targetId)} · ${backupEscapeHtml(draftDate(item.at))}</li>`).join('')}</ul>` : ''}
       ${fragment.suggestions && Object.keys(fragment.suggestions).length ? `<h4>Suggestions</h4><pre>${backupEscapeHtml(JSON.stringify(fragment.suggestions, null, 2))}</pre>` : ''}
+      ${(fragment.aiAnalyses || []).length ? `<h4>AI Analyses</h4><pre>${backupEscapeHtml(JSON.stringify(fragment.aiAnalyses, null, 2))}</pre>` : ''}
+      ${(fragment.aiSuggestions || []).length ? `<h4>AI Suggestion History</h4><pre>${backupEscapeHtml(JSON.stringify(fragment.aiSuggestions, null, 2))}</pre>` : ''}
     </article>
   `).join('');
 }
@@ -11214,11 +11297,14 @@ const DRAFTS_DB_VERSION = 1;
 const DRAFTS_STORE = 'draftFragments';
 const DRAFT_TYPES = ['scene','dialogue','poem','research','outline','worldbuilding','character','discard'];
 const DRAFT_STATUSES = ['inbox','sorting','developing','ready','converted','archived'];
+const DRAFT_AI_GROUPS = ['dialogue','entities','layers','literary','conversions'];
+const DRAFT_CODEX_ENTITY_TYPES = new Set(['faction','organization','institution','religion','government','place','object','technology','metaphysical system','motif']);
 let _draftsDBPromise = null;
 let _draftFragments = [];
 let _activeDraftId = '';
 let _draftFilter = loadDraftsUi();
 let _draftSaveTimer = null;
+let _draftSelectedIds = new Set();
 
 function loadDraftsUi(){
   try{
@@ -11261,6 +11347,18 @@ function normalizeDraftFragment(value={}){
   const now = Date.now();
   const type = DRAFT_TYPES.includes(value.type) ? value.type : 'scene';
   const status = DRAFT_STATUSES.includes(value.status) ? value.status : 'inbox';
+  const normalizeSuggestion = suggestion => ({
+    id:String(suggestion.id || draftId()),
+    group:DRAFT_AI_GROUPS.includes(suggestion.group) ? suggestion.group : 'layers',
+    kind:String(suggestion.kind || ''),
+    title:String(suggestion.title || suggestion.name || 'AI Suggestion'),
+    summary:String(suggestion.summary || suggestion.rationale || ''),
+    confidence:Number(suggestion.confidence || 0),
+    payload:suggestion.payload && typeof suggestion.payload === 'object' ? suggestion.payload : {},
+    status:['pending','accepted','rejected'].includes(suggestion.status) ? suggestion.status : 'pending',
+    createdAt:suggestion.createdAt || now,
+    decidedAt:suggestion.decidedAt || null
+  });
   return {
     id:String(value.id || draftId()),
     title:String(value.title || '').trim() || 'Untitled Fragment',
@@ -11280,6 +11378,10 @@ function normalizeDraftFragment(value={}){
     notes:String(value.notes || ''),
     sourceFilename:String(value.sourceFilename || ''),
     suggestions:value.suggestions && typeof value.suggestions === 'object' ? value.suggestions : {},
+    aiAnalyses:Array.isArray(value.aiAnalyses) ? value.aiAnalyses : [],
+    aiSuggestions:Array.isArray(value.aiSuggestions) ? value.aiSuggestions.map(normalizeSuggestion) : [],
+    dialogue:Array.isArray(value.dialogue) ? value.dialogue.map(item=>Object.assign({}, item)) : [],
+    entities:Array.isArray(value.entities) ? value.entities.map(item=>Object.assign({}, item)) : [],
     conversionHistory:Array.isArray(value.conversionHistory) ? value.conversionHistory : [],
     createdAt:value.createdAt || now,
     updatedAt:value.updatedAt || value.createdAt || now
@@ -11404,11 +11506,29 @@ function draftStatus(message){
 
 function draftFragmentCard(fragment){
   const chips = [fragment.type, fragment.status, ...fragment.tags.slice(0,3), ...fragment.motifs.slice(0,2)].filter(Boolean);
+  const pendingAi = (fragment.aiSuggestions || []).filter(item=>item.status === 'pending').length;
   return `<article class="drafts-card ${fragment.id===_activeDraftId?'active':''} ${fragment.status==='archived'?'archived':''}" onclick="selectDraftFragment('${escHtml(fragment.id)}')">
+    <input class="drafts-select-check" type="checkbox" ${_draftSelectedIds.has(fragment.id)?'checked':''} onclick="event.stopPropagation()" onchange="toggleDraftSelection('${escHtml(fragment.id)}',this.checked)">
     <div class="drafts-card-title">${escHtml(fragment.title)}</div>
-    <div class="drafts-card-meta">${draftWordCount(fragment).toLocaleString()} words · ${escHtml(draftDate(fragment.updatedAt))}</div>
+    <div class="drafts-card-meta">${draftWordCount(fragment).toLocaleString()} words · ${escHtml(draftDate(fragment.updatedAt))}${pendingAi ? ` · ${pendingAi} AI pending` : ''}</div>
     <div class="drafts-chip-row">${chips.map(chip=>`<span class="drafts-chip">${escHtml(chip)}</span>`).join('')}</div>
   </article>`;
+}
+
+function toggleDraftSelection(id, checked){
+  if(checked) _draftSelectedIds.add(id);
+  else _draftSelectedIds.delete(id);
+  renderDraftsView({keepCache:true, keepEditor:true});
+}
+
+function selectVisibleDrafts(){
+  filteredDrafts().forEach(fragment=>_draftSelectedIds.add(fragment.id));
+  renderDraftsView({keepCache:true, keepEditor:true});
+}
+
+function clearDraftSelection(){
+  _draftSelectedIds.clear();
+  renderDraftsView({keepCache:true, keepEditor:true});
 }
 
 async function selectDraftFragment(id){
@@ -11469,6 +11589,168 @@ function renderDraftSuggestions(fragment){
     <button class="cm-btn secondary" type="button" onclick="runDraftSuggestions()">Refresh Suggestions</button>`;
 }
 
+function draftAiGroupLabel(group){
+  return {
+    dialogue:'Dialogue',
+    entities:'Entities',
+    layers:'Layers',
+    literary:'Literary Function',
+    conversions:'Conversion Targets'
+  }[group] || 'AI Suggestions';
+}
+
+function draftAiPayload(fragment){
+  const body = String(fragment.body || '');
+  const maxChars = 24000;
+  return {
+    fragment:{
+      id:fragment.id,
+      title:fragment.title,
+      type:fragment.type,
+      status:fragment.status,
+      body:body.length > maxChars ? body.slice(0, maxChars) + '\n\n[TRUNCATED FOR ANALYSIS]' : body,
+      bodyWasTruncated:body.length > maxChars,
+      tags:fragment.tags,
+      characters:fragment.characters,
+      motifs:fragment.motifs,
+      locations:fragment.locations,
+      pov:fragment.pov,
+      timeline:fragment.timeline,
+      narrativeDevices:fragment.narrativeDevices
+    },
+    context:{
+      characters:characters.map(char=>({id:char.id, name:char.name, role:char.role})).slice(0, 250),
+      codexEntries:Object.entries(E || {}).map(([key,entry])=>({key, title:entry.t || key, category:entry.cat || '', kind:entry.kind || ''})).slice(0, 400),
+      protoLines:(protoevangelium.lines || []).map(line=>({id:line.id, number:line.number, text:line.text, motifs:line.motifIds || []})).slice(0, 120),
+      protoMotifs:(protoevangelium.motifs || []).map(motif=>({id:motif.id, label:motif.label, layer:motif.layer}))
+    }
+  };
+}
+
+function draftAiSuggestionFromReport(report){
+  const now = Date.now();
+  const out = [];
+  (report.dialogue || []).forEach(item=>out.push({
+    id:draftId(), group:'dialogue', kind:'speaker', title:item.speakerGuess || 'Dialogue Line',
+    summary:item.quote || item.subtext || '', confidence:item.confidence || 0, payload:item, status:'pending', createdAt:now
+  }));
+  (report.entities || []).forEach(item=>out.push({
+    id:draftId(), group:'entities', kind:item.type || 'entity', title:item.name || 'Entity',
+    summary:item.description || item.firstMentionQuote || '', confidence:item.confidence || 0, payload:item, status:'pending', createdAt:now
+  }));
+  const layers = report.layers || {};
+  ['themes','motifs','narrativeDevices','locations','researchSubjects','timelineClues'].forEach(key=>{
+    const value = layers[key];
+    if(Array.isArray(value) && value.length){
+      out.push({id:draftId(), group:'layers', kind:key, title:key.replace(/([A-Z])/g,' $1'), summary:value.join(', '), confidence:layers.confidence || 0.7, payload:{field:key, values:value}, status:'pending', createdAt:now});
+    }
+  });
+  ['pov','tone','chapterFit','protoevangeliumResonance'].forEach(key=>{
+    if(layers[key]) out.push({id:draftId(), group:'layers', kind:key, title:key.replace(/([A-Z])/g,' $1'), summary:String(layers[key]), confidence:layers.confidence || 0.7, payload:{field:key, value:layers[key]}, status:'pending', createdAt:now});
+  });
+  if(report.literaryFunction){
+    out.push({id:draftId(), group:'literary', kind:'literaryFunction', title:'Literary Function', summary:report.literaryFunction.summary || '', confidence:report.literaryFunction.confidence || 0.7, payload:report.literaryFunction, status:'pending', createdAt:now});
+  }
+  (report.conversionTargets || []).forEach(item=>out.push({
+    id:draftId(), group:'conversions', kind:item.target || 'conversion', title:item.target || 'Conversion Target',
+    summary:item.rationale || '', confidence:item.confidence || 0, payload:item, status:'pending', createdAt:now
+  }));
+  return out;
+}
+
+async function callDraftAiFunction(fragment){
+  const client = notesClient();
+  if(!client) throw new Error('Supabase is not configured. AI analysis needs the draft-ai-analyze Edge Function.');
+  const {data, error} = await client.functions.invoke('draft-ai-analyze', {body:draftAiPayload(fragment)});
+  if(error) throw error;
+  if(!data || !data.report) throw new Error('AI function returned no structured report.');
+  return data.report;
+}
+
+async function analyzeDraftWithAi(id){
+  if(!requireAdmin()) return;
+  await persistActiveDraftFromEditor({silent:true});
+  const fragment = _draftFragments.find(item=>item.id===id) || activeDraft();
+  if(!fragment) return;
+  draftStatus(`Analyzing "${fragment.title}"...`);
+  try{
+    const report = await callDraftAiFunction(fragment);
+    const suggestions = draftAiSuggestionFromReport(report);
+    fragment.aiAnalyses = fragment.aiAnalyses || [];
+    fragment.aiSuggestions = fragment.aiSuggestions || [];
+    fragment.aiAnalyses.unshift({id:draftId(), createdAt:Date.now(), report});
+    fragment.aiSuggestions.unshift(...suggestions);
+    fragment.updatedAt = Date.now();
+    await draftPut(fragment);
+    draftStatus(`AI analysis complete: ${suggestions.length} suggestion${suggestions.length === 1 ? '' : 's'} awaiting review.`);
+  }catch(err){
+    console.error('Draft AI analysis failed:', err);
+    draftStatus('AI analysis unavailable: ' + (err.message || err) + '. Deterministic suggestions still work.');
+  }
+  await renderDraftsView();
+}
+
+async function analyzeActiveDraftWithAi(){
+  const fragment = activeDraft();
+  if(fragment) await analyzeDraftWithAi(fragment.id);
+}
+
+async function analyzeSelectedDraftsWithAi(){
+  if(!requireAdmin()) return;
+  const ids = Array.from(_draftSelectedIds).filter(id=>_draftFragments.some(fragment=>fragment.id===id));
+  if(!ids.length){ draftStatus('Select visible draft fragments first.'); return; }
+  for(let i=0;i<ids.length;i++){
+    draftStatus(`Analyzing selected ${i + 1} of ${ids.length}...`);
+    await analyzeDraftWithAi(ids[i]);
+  }
+  draftStatus(`Selected batch complete: ${ids.length} fragment${ids.length === 1 ? '' : 's'} processed.`);
+}
+
+function renderDraftAiPanel(fragment){
+  const selectedCount = _draftSelectedIds.size;
+  const last = fragment && fragment.aiAnalyses && fragment.aiAnalyses[0] ? draftDate(fragment.aiAnalyses[0].createdAt) : 'Never';
+  const words = fragment ? draftWordCount(fragment) : 0;
+  return `<section class="drafts-ai-panel">
+    <div class="drafts-pane-title">AI Analysis</div>
+    <div class="drafts-ai-warning">${words.toLocaleString()} active-fragment words · selected batch ${selectedCount}. Results are suggestions only.</div>
+    <div class="drafts-ai-actions">
+      <button class="cm-btn secondary" type="button" onclick="analyzeActiveDraftWithAi()">Analyze Fragment</button>
+      <button class="cm-btn secondary" type="button" onclick="analyzeSelectedDraftsWithAi()">Analyze Selected Visible</button>
+      <button class="tiny-btn" type="button" onclick="selectVisibleDrafts()">Select Visible</button>
+      <button class="tiny-btn" type="button" onclick="clearDraftSelection()">Clear</button>
+    </div>
+    <div class="file-vault-status">Last analyzed: ${escHtml(last)}</div>
+  </section>`;
+}
+
+function renderDraftAiQueue(fragment){
+  if(!fragment) return '<div class="drafts-empty">Select a fragment for the AI approval queue.</div>';
+  const suggestions = fragment.aiSuggestions || [];
+  if(!suggestions.length) return '<div class="drafts-empty">No AI suggestions yet.</div>';
+  return DRAFT_AI_GROUPS.map(group=>{
+    const items = suggestions.filter(item=>item.group === group && item.status === 'pending');
+    if(!items.length) return '';
+    return `<section class="drafts-ai-group">
+      <div class="drafts-ai-group-head">
+        <div class="drafts-ai-group-title">${escHtml(draftAiGroupLabel(group))} · ${items.length}</div>
+        <button class="tiny-btn" type="button" onclick="acceptDraftAiGroup('${group}')">Accept Group</button>
+      </div>
+      ${items.map(renderDraftAiSuggestionCard).join('')}
+    </section>`;
+  }).join('') || '<div class="drafts-empty">All AI suggestions have been reviewed.</div>';
+}
+
+function renderDraftAiSuggestionCard(item){
+  return `<article class="drafts-ai-card ${escHtml(item.status)}">
+    <div class="drafts-ai-card-title">${escHtml(item.title)}</div>
+    <div class="drafts-ai-card-body">${escHtml(item.summary || 'No summary.')} ${item.confidence ? `· confidence ${Math.round(item.confidence * 100)}%` : ''}</div>
+    <div class="drafts-ai-card-actions">
+      <button class="tiny-btn" type="button" onclick="acceptDraftAiSuggestion('${escHtml(item.id)}')">Accept</button>
+      <button class="tiny-btn danger" type="button" onclick="rejectDraftAiSuggestion('${escHtml(item.id)}')">Reject</button>
+    </div>
+  </article>`;
+}
+
 async function runDraftSuggestions(){
   const fragment = activeDraft();
   if(!fragment) return;
@@ -11487,6 +11769,126 @@ async function applyDraftSuggestion(kind){
   if(kind === 'characters') fragment.characters = Array.from(new Set([...fragment.characters, ...(suggestions.characters || [])]));
   if(kind === 'motifs') fragment.motifs = Array.from(new Set([...fragment.motifs, ...(suggestions.motifs || [])]));
   if(kind === 'tagsFromCodex') fragment.tags = Array.from(new Set([...fragment.tags, ...(suggestions.codex || [])]));
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+}
+
+function mergeUniqueValues(existing=[], values=[]){
+  const seen = new Set(existing.map(v=>String(v).toLowerCase()));
+  const out = [...existing];
+  values.filter(Boolean).forEach(value=>{
+    const text = String(value).trim();
+    const key = text.toLowerCase();
+    if(text && !seen.has(key)){
+      seen.add(key);
+      out.push(text);
+    }
+  });
+  return out;
+}
+
+function codexKeyFromName(name){
+  let base = String(name || 'entity').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'entity';
+  let key = base;
+  let i = 2;
+  while(E[key]) key = `${base}-${i++}`;
+  return key;
+}
+
+function createCodexEntityFromAi(entity){
+  const key = codexKeyFromName(entity.name);
+  E[key] = {
+    t:entity.name || key,
+    cat:entity.suggestedCodexCategory || entity.type || 'Codex Entity',
+    kind:entity.type || 'entity',
+    short:(entity.aliases || []).join(', '),
+    desc:backupParagraphs(entity.description || entity.firstMentionQuote || ''),
+    meta:[
+      ['Type', entity.type || 'entity'],
+      ['Confidence', entity.confidence ? `${Math.round(entity.confidence * 100)}%` : ''],
+      ['Relationships', Array.isArray(entity.relationships) ? entity.relationships.join(', ') : '']
+    ],
+    tags:[entity.type || 'entity']
+  };
+  saveEntities();
+  syncCodexEntryToSupabase(key, E[key]).catch(err=>console.warn('AI Codex entity sync failed:', err));
+  return key;
+}
+
+function applyDraftAiSuggestionToFragment(fragment, suggestion){
+  const payload = suggestion.payload || {};
+  if(suggestion.group === 'dialogue'){
+    fragment.dialogue = fragment.dialogue || [];
+    fragment.dialogue.unshift(Object.assign({acceptedAt:Date.now()}, payload));
+    if(payload.speakerGuess) fragment.characters = mergeUniqueValues(fragment.characters, [payload.speakerGuess]);
+    if(payload.addressedToGuess) fragment.characters = mergeUniqueValues(fragment.characters, [payload.addressedToGuess]);
+  }
+  if(suggestion.group === 'entities'){
+    fragment.entities = fragment.entities || [];
+    fragment.entities.unshift(Object.assign({acceptedAt:Date.now()}, payload));
+    const type = String(payload.type || '').toLowerCase();
+    if(type === 'character') fragment.characters = mergeUniqueValues(fragment.characters, [payload.name]);
+    else if(type === 'place') fragment.locations = mergeUniqueValues(fragment.locations, [payload.name]);
+    else if(type === 'motif') fragment.motifs = mergeUniqueValues(fragment.motifs, [payload.name]);
+    else fragment.tags = mergeUniqueValues(fragment.tags, [payload.name, payload.type].filter(Boolean));
+    if(DRAFT_CODEX_ENTITY_TYPES.has(type)){
+      const key = createCodexEntityFromAi(payload);
+      fragment.conversionHistory.unshift({target:'ai-codex-entity', targetId:key, at:Date.now()});
+    }
+  }
+  if(suggestion.group === 'layers'){
+    if(payload.field === 'themes') fragment.tags = mergeUniqueValues(fragment.tags, payload.values || []);
+    if(payload.field === 'motifs') fragment.motifs = mergeUniqueValues(fragment.motifs, payload.values || []);
+    if(payload.field === 'narrativeDevices') fragment.narrativeDevices = mergeUniqueValues(fragment.narrativeDevices, payload.values || []);
+    if(payload.field === 'locations') fragment.locations = mergeUniqueValues(fragment.locations, payload.values || []);
+    if(payload.field === 'researchSubjects') fragment.researchSubject = fragment.researchSubject || (payload.values || [])[0] || '';
+    if(payload.field === 'timelineClues') fragment.timeline = fragment.timeline || (payload.values || [])[0] || '';
+    if(payload.field === 'pov') fragment.pov = fragment.pov || payload.value || '';
+    if(payload.field === 'tone') fragment.tags = mergeUniqueValues(fragment.tags, [payload.value]);
+    if(payload.field === 'chapterFit' || payload.field === 'protoevangeliumResonance') fragment.notes = `${fragment.notes || ''}\n\nAI ${payload.field}: ${payload.value || ''}`.trim();
+  }
+  if(suggestion.group === 'literary'){
+    fragment.notes = `${fragment.notes || ''}\n\nAI Literary Function: ${payload.summary || suggestion.summary || ''}`.trim();
+  }
+  if(suggestion.group === 'conversions'){
+    fragment.conversionHistory.unshift({target:'ai-recommended-' + (payload.target || suggestion.kind), targetId:payload.rationale || suggestion.summary || '', at:Date.now()});
+  }
+}
+
+async function acceptDraftAiSuggestion(id){
+  const fragment = activeDraft();
+  if(!fragment) return;
+  const suggestion = (fragment.aiSuggestions || []).find(item=>item.id===id);
+  if(!suggestion) return;
+  applyDraftAiSuggestionToFragment(fragment, suggestion);
+  suggestion.status = 'accepted';
+  suggestion.decidedAt = Date.now();
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+}
+
+async function rejectDraftAiSuggestion(id){
+  const fragment = activeDraft();
+  if(!fragment) return;
+  const suggestion = (fragment.aiSuggestions || []).find(item=>item.id===id);
+  if(!suggestion) return;
+  suggestion.status = 'rejected';
+  suggestion.decidedAt = Date.now();
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+}
+
+async function acceptDraftAiGroup(group){
+  const fragment = activeDraft();
+  if(!fragment) return;
+  (fragment.aiSuggestions || []).filter(item=>item.group===group && item.status==='pending').forEach(suggestion=>{
+    applyDraftAiSuggestionToFragment(fragment, suggestion);
+    suggestion.status = 'accepted';
+    suggestion.decidedAt = Date.now();
+  });
   fragment.updatedAt = Date.now();
   await draftPut(fragment);
   await renderDraftsView();
@@ -11618,7 +12020,7 @@ async function renderDraftsView(options={}){
   if(list) list.innerHTML = visible.length ? visible.map(draftFragmentCard).join('') : '<div class="drafts-empty">No fragments match this view.</div>';
   if(stats) stats.innerHTML = renderDraftStats();
   if(editor && !options.keepEditor) editor.innerHTML = renderDraftEditor(active);
-  if(suggestions) suggestions.innerHTML = renderDraftSuggestions(active);
+  if(suggestions) suggestions.innerHTML = renderDraftAiPanel(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
   if(conversions) conversions.innerHTML = renderDraftConversions(active);
 }
 
