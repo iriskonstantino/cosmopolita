@@ -3868,6 +3868,26 @@ body:not(.admin-on) #tnav-drafts{
   line-height:1.45;
   margin-top:0.28rem;
 }
+.drafts-intel-linker{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.6rem;
+  margin:0.65rem 0;
+}
+.drafts-transfer-status{
+  display:inline-block;
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:#777;
+  font-family:var(--mono);
+  font-size:0.46rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:0.16rem 0.34rem;
+  margin-top:0.35rem;
+}
+.drafts-transfer-status.sent{border-color:var(--green);color:var(--green);background:#edf5ef}
+.drafts-transfer-status.needs-link{border-color:var(--red);color:var(--red);background:#fff4f1}
 .tiny-btn{
   border:1px solid var(--border);
   background:var(--white);
@@ -4177,7 +4197,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.7</div>
+<div id="site-version-stamp">v2026.05.18.8</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -11441,7 +11461,8 @@ function normalizeDraftFragment(value={}){
     payload:suggestion.payload && typeof suggestion.payload === 'object' ? suggestion.payload : {},
     status:['pending','accepted','rejected'].includes(suggestion.status) ? suggestion.status : 'pending',
     createdAt:suggestion.createdAt || now,
-    decidedAt:suggestion.decidedAt || null
+    decidedAt:suggestion.decidedAt || null,
+    transfer:suggestion.transfer && typeof suggestion.transfer === 'object' ? suggestion.transfer : null
   });
   return {
     id:String(value.id || draftId()),
@@ -12020,10 +12041,13 @@ function renderDraftAcceptedIntelligence(fragment){
   const accepted = (fragment.aiSuggestions || []).filter(item=>item.status === 'accepted');
   const rejected = (fragment.aiSuggestions || []).filter(item=>item.status === 'rejected');
   const conversions = (fragment.conversionHistory || []).filter(item=>String(item.target || '').startsWith('ai-'));
+  const linkedChapter = draftLinkedChapter(fragment);
+  const linkedLabel = linkedChapter ? (linkedChapter.chapter || linkedChapter.book || linkedChapter.id) : 'No chapter linked';
   const dialogueCards = dialogue.slice(0,8).map((item,index)=>`
     <article class="drafts-intel-card">
       <div class="drafts-intel-title">${escHtml(item.speakerGuess || 'Unknown Speaker')}</div>
       <div class="drafts-intel-meta">to ${escHtml(item.addressedToGuess || 'unknown')} · ${escHtml(item.emotionalTone || 'tone unknown')} · ${escHtml(draftConfidenceText(item.confidence))}</div>
+      ${draftTransferStatusHtml(draftAcceptedSuggestionBySource(fragment, item) || item)}
       <div class="drafts-intel-body">${escHtml(item.quote || item.subtext || 'No quote captured.')}</div>
       ${item.subtext ? `<div class="drafts-intel-body"><b>Subtext:</b> ${escHtml(item.subtext)}</div>` : ''}
       <div class="drafts-ai-card-actions">
@@ -12036,6 +12060,7 @@ function renderDraftAcceptedIntelligence(fragment){
     return `<article class="drafts-intel-card">
       <div class="drafts-intel-title">${escHtml(item.name || 'Unnamed Entity')}</div>
       <div class="drafts-intel-meta">${escHtml(item.type || 'entity')} · ${escHtml(item.suggestedCodexCategory || 'no category')} · ${escHtml(draftConfidenceText(item.confidence))}</div>
+      ${draftTransferStatusHtml(draftAcceptedSuggestionBySource(fragment, item) || item)}
       <div class="drafts-intel-body">${escHtml(item.description || item.firstMentionQuote || 'No description captured.')}</div>
       ${(item.aliases || []).length ? `<div class="drafts-chip-row">${item.aliases.map(alias=>`<span class="drafts-chip">${escHtml(alias)}</span>`).join('')}</div>` : ''}
       <div class="drafts-ai-card-actions">
@@ -12053,6 +12078,12 @@ function renderDraftAcceptedIntelligence(fragment){
     </article>`).join('');
   return `<section class="drafts-ai-panel">
     <div class="drafts-pane-title">Accepted Intelligence</div>
+    <div class="drafts-intel-linker">
+      <div class="drafts-intel-label">Author Workspace Link</div>
+      <select class="drafts-select" onchange="setDraftLinkedChapterFromIntel(this.value)">${draftChapterOptions(fragment.linkedChapterId)}</select>
+      <div class="drafts-intel-meta">Current target: ${escHtml(linkedLabel)}</div>
+      ${linkedChapter ? `<div class="drafts-ai-card-actions"><button class="tiny-btn" type="button" onclick="openLinkedDraftAuthorWorkspace()">Open Linked Author Workspace</button></div>` : '<div class="drafts-transfer-status needs-link">Needs linked chapter</div>'}
+    </div>
     <div class="drafts-intel-summary">
       <div class="drafts-intel-stat"><b>${dialogue.length}</b><div class="drafts-intel-label">Dialogue</div></div>
       <div class="drafts-intel-stat"><b>${entities.length}</b><div class="drafts-intel-label">Entities</div></div>
@@ -12061,7 +12092,8 @@ function renderDraftAcceptedIntelligence(fragment){
     ${dialogue.length ? `<div class="drafts-intel-section"><div class="drafts-ai-group-title">Dialogue & Speakers</div>${dialogueCards}${dialogue.length > 8 ? `<div class="drafts-intel-meta">${dialogue.length - 8} more saved in this fragment.</div>` : ''}</div>` : ''}
     ${entities.length ? `<div class="drafts-intel-section"><div class="drafts-ai-group-title">Entities & Factions</div>${entityCards}${entities.length > 10 ? `<div class="drafts-intel-meta">${entities.length - 10} more saved in this fragment.</div>` : ''}</div>` : ''}
     ${conversions.length ? `<div class="drafts-intel-section"><div class="drafts-ai-group-title">AI Conversion Recommendations</div>${conversionCards}</div>` : ''}
-    ${!dialogue.length && !entities.length && !conversions.length ? '<div class="drafts-empty">Accepted AI suggestions will appear here as usable fragment intelligence.</div>' : ''}
+    ${accepted.length ? `<div class="drafts-intel-section"><div class="drafts-ai-group-title">Transfer Status</div>${accepted.map(item=>`<article class="drafts-intel-card"><div class="drafts-intel-title">${escHtml(item.title)}</div>${draftTransferStatusHtml(item)}<div class="drafts-intel-body">${escHtml(item.summary || '')}</div></article>`).join('')}</div>` : ''}
+    ${!dialogue.length && !entities.length && !conversions.length && !accepted.length ? '<div class="drafts-empty">Accepted AI suggestions will appear here as usable fragment intelligence.</div>' : ''}
     ${rejected.length ? `<div class="drafts-intel-meta">${rejected.length} rejected suggestion${rejected.length === 1 ? '' : 's'} kept in history/backup.</div>` : ''}
   </section>`;
 }
@@ -12131,26 +12163,232 @@ function createCodexEntityFromAi(entity){
   return key;
 }
 
+function draftLinkedChapter(fragment){
+  return fragment && fragment.linkedChapterId ? chapters.find(ch=>ch.id===fragment.linkedChapterId) : null;
+}
+
+function draftTransferStatusHtml(suggestionOrRecord){
+  const transfer = suggestionOrRecord && suggestionOrRecord.transfer;
+  if(!transfer) return '<span class="drafts-transfer-status">Not sent yet</span>';
+  const status = transfer.status === 'sent' ? 'sent' : transfer.status === 'needs-link' ? 'needs-link' : '';
+  return `<span class="drafts-transfer-status ${status}">${escHtml(transfer.label || transfer.status || 'Transfer pending')}</span>`;
+}
+
+function draftAcceptedSuggestionBySource(fragment, record){
+  const id = record && record.sourceSuggestionId;
+  return id ? (fragment.aiSuggestions || []).find(item=>item.id===id) : null;
+}
+
+function aiWorkshopNoteTitle(fragment, suggestion){
+  return `Draft AI · ${fragment.title || 'Draft Fragment'} · ${draftAiGroupLabel(suggestion.group)}`;
+}
+
+function appendWorkshopPrivateNote(notes, body){
+  notes.notes = Array.isArray(notes.notes) ? notes.notes : [];
+  notes.notes.unshift({id:authorNoteId('note'), body, createdAt:Date.now(), updatedAt:Date.now()});
+}
+
+function appendWorkshopChecklistNote(notes, id, text){
+  notes.reviewChecklist = normalizeReviewChecklist(notes.reviewChecklist || {});
+  const entry = notes.reviewChecklist[id] || {done:false,note:'',updatedAt:Date.now()};
+  entry.note = `${entry.note || ''}\n\n${text}`.trim();
+  entry.updatedAt = Date.now();
+  notes.reviewChecklist[id] = entry;
+}
+
+function ensureWorkshopResearchSubject(research, title, tags=''){
+  const wanted = String(title || 'General Research').trim() || 'General Research';
+  const existing = research.subjects.find(subject=>String(subject.title || '').toLowerCase() === wanted.toLowerCase());
+  if(existing){
+    if(tags) existing.tags = mergeUniqueValues(splitTagText(existing.tags), splitTagText(tags)).join(', ');
+    existing.updatedAt = Date.now();
+    return existing.id;
+  }
+  const colors = ['#8b3a1e','#2a4a3e','#3a3a8b','#7a4a1e','#1e5a5a','#8b1e4a'];
+  const subject = {
+    id:authorNoteId('subject'),
+    title:wanted,
+    color:colors[research.subjects.length % colors.length],
+    description:'Imported from accepted Draft Inbox AI.',
+    synthesis:'',
+    tags,
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  };
+  research.subjects.push(subject);
+  return subject.id;
+}
+
+function addWorkshopResearchGap(notes, subjectTitle, question, nextStep, tags=''){
+  notes.research = normalizeResearch(notes.research || {});
+  const subjectId = ensureWorkshopResearchSubject(notes.research, subjectTitle, tags);
+  notes.research.gaps.unshift({
+    id:authorNoteId('gap'),
+    subjectId,
+    tags,
+    question,
+    nextStep,
+    status:'open',
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  });
+}
+
+function draftWorkshopNoteBody(fragment, suggestion){
+  const payload = suggestion.payload || {};
+  if(suggestion.group === 'dialogue'){
+    return [
+      `${aiWorkshopNoteTitle(fragment, suggestion)}`,
+      payload.speakerGuess ? `Speaker: ${payload.speakerGuess}` : '',
+      payload.addressedToGuess ? `Addressed to: ${payload.addressedToGuess}` : '',
+      payload.quote ? `Quote: ${payload.quote}` : '',
+      payload.emotionalTone ? `Tone: ${payload.emotionalTone}` : '',
+      payload.subtext ? `Subtext: ${payload.subtext}` : '',
+      payload.sceneFunction ? `Scene function: ${payload.sceneFunction}` : '',
+      payload.evidence ? `Evidence: ${payload.evidence}` : ''
+    ].filter(Boolean).join('\n');
+  }
+  if(suggestion.group === 'entities'){
+    return [
+      `${aiWorkshopNoteTitle(fragment, suggestion)}`,
+      payload.name ? `Entity: ${payload.name}` : '',
+      payload.type ? `Type: ${payload.type}` : '',
+      payload.description ? `Description: ${payload.description}` : '',
+      payload.firstMentionQuote ? `First mention: ${payload.firstMentionQuote}` : '',
+      Array.isArray(payload.relationships) && payload.relationships.length ? `Relationships: ${payload.relationships.join(', ')}` : ''
+    ].filter(Boolean).join('\n');
+  }
+  if(suggestion.group === 'layers'){
+    return `${aiWorkshopNoteTitle(fragment, suggestion)}\n${suggestion.title}: ${suggestion.summary || ''}`;
+  }
+  if(suggestion.group === 'literary'){
+    return [
+      `${aiWorkshopNoteTitle(fragment, suggestion)}`,
+      payload.summary || suggestion.summary || '',
+      payload.narrativePurpose ? `Purpose: ${payload.narrativePurpose}` : '',
+      payload.stakes ? `Stakes: ${payload.stakes}` : '',
+      payload.tension ? `Tension: ${payload.tension}` : '',
+      payload.continuityNotes ? `Continuity: ${payload.continuityNotes}` : ''
+    ].filter(Boolean).join('\n');
+  }
+  return `${aiWorkshopNoteTitle(fragment, suggestion)}\n${suggestion.summary || payload.rationale || ''}`;
+}
+
+function autoSendDraftAiSuggestionToWorkshop(fragment, suggestion){
+  const chapter = draftLinkedChapter(fragment);
+  if(!chapter){
+    suggestion.transfer = {status:'needs-link', label:'Needs linked chapter', at:Date.now(), targets:[]};
+    fragment.conversionHistory.unshift({target:'ai-workshop-needs-link', targetId:suggestion.id, at:Date.now()});
+    return false;
+  }
+  chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
+  const notes = chapter.authorNotes;
+  const payload = suggestion.payload || {};
+  const targets = [];
+  const noteBody = draftWorkshopNoteBody(fragment, suggestion);
+  appendWorkshopPrivateNote(notes, noteBody);
+  targets.push('author-note');
+
+  if(suggestion.group === 'dialogue'){
+    appendWorkshopChecklistNote(notes, 'dialogue-voice', noteBody);
+    appendWorkshopChecklistNote(notes, 'dialogue-subtext', noteBody);
+    appendWorkshopChecklistNote(notes, 'dialogue-purpose', noteBody);
+    targets.push('dialogue-checklist');
+  }else if(suggestion.group === 'entities'){
+    const type = String(payload.type || '').toLowerCase();
+    if(type === 'character'){
+      appendWorkshopChecklistNote(notes, 'character-purpose', noteBody);
+      appendWorkshopChecklistNote(notes, 'character-distinct', noteBody);
+      targets.push('character-checklist');
+    }else if(type === 'place'){
+      appendWorkshopChecklistNote(notes, 'world-specificity', noteBody);
+      appendWorkshopChecklistNote(notes, 'world-sensory', noteBody);
+      targets.push('world-checklist');
+    }else if(type === 'motif'){
+      appendWorkshopChecklistNote(notes, 'theme-symbols-purpose', noteBody);
+      appendWorkshopChecklistNote(notes, 'theme-motifs-continued', noteBody);
+      targets.push('theme-checklist');
+    }else{
+      addWorkshopResearchGap(
+        notes,
+        payload.type || 'Imported Entities',
+        payload.name ? `Clarify ${payload.name} in this chapter.` : suggestion.title,
+        payload.description || payload.firstMentionQuote || suggestion.summary || 'Investigate this AI-identified entity before canonizing it.',
+        [payload.type, payload.name, 'draft-ai'].filter(Boolean).join(', ')
+      );
+      targets.push('research-lead');
+    }
+  }else if(suggestion.group === 'layers'){
+    const field = payload.field || suggestion.kind;
+    const values = payload.values || (payload.value ? [payload.value] : []);
+    if(field === 'themes'){
+      appendWorkshopChecklistNote(notes, 'narrative-theme', noteBody);
+      appendWorkshopChecklistNote(notes, 'theme-dramatised', noteBody);
+      targets.push('theme-checklist');
+    }else if(field === 'motifs'){
+      appendWorkshopChecklistNote(notes, 'theme-symbols-purpose', noteBody);
+      appendWorkshopChecklistNote(notes, 'theme-motifs-continued', noteBody);
+      targets.push('motif-checklist');
+    }else if(field === 'narrativeDevices'){
+      appendWorkshopChecklistNote(notes, 'theme-devices', noteBody);
+      appendWorkshopChecklistNote(notes, 'prose-mode', noteBody);
+      targets.push('device-checklist');
+    }else if(field === 'locations'){
+      appendWorkshopChecklistNote(notes, 'world-specificity', noteBody);
+      appendWorkshopChecklistNote(notes, 'continuity-errors', noteBody);
+      targets.push('world-continuity-checklist');
+    }else if(field === 'timelineClues'){
+      appendWorkshopChecklistNote(notes, 'world-time', noteBody);
+      appendWorkshopChecklistNote(notes, 'continuity-errors', noteBody);
+      targets.push('continuity-checklist');
+    }else if(field === 'researchSubjects'){
+      values.forEach(value=>addWorkshopResearchGap(notes, value, `Research ${value} for this chapter.`, suggestion.summary || 'AI identified this as a research subject.', [value, 'draft-ai'].join(', ')));
+      targets.push('research-lead');
+    }else{
+      appendWorkshopChecklistNote(notes, field === 'chapterFit' ? 'narrative-earns-place' : 'narrative-tone', noteBody);
+      targets.push('checklist-note');
+    }
+  }else if(suggestion.group === 'literary'){
+    appendWorkshopChecklistNote(notes, 'narrative-earns-place', noteBody);
+    appendWorkshopChecklistNote(notes, 'structure-shape', noteBody);
+    appendWorkshopChecklistNote(notes, 'tension-rise-fall', noteBody);
+    targets.push('literary-checklist');
+  }else if(suggestion.group === 'conversions'){
+    targets.push('conversion-note');
+  }
+
+  saveChapters(chapters);
+  syncChaptersToSupabase().catch(err=>console.warn('Draft AI workshop sync failed:', err));
+  suggestion.transfer = {status:'sent', label:targets.includes('research-lead') ? 'Sent as research lead' : 'Sent as checklist note', chapterId:chapter.id, targets, at:Date.now()};
+  fragment.conversionHistory.unshift({target:'ai-workshop-transfer', targetId:`${chapter.id}:${targets.join(',')}`, at:Date.now(), suggestionId:suggestion.id});
+  return true;
+}
+
+function syncAcceptedRecordTransfer(fragment, suggestion){
+  const transfer = suggestion.transfer || null;
+  const update = item => {
+    if(item && item.sourceSuggestionId === suggestion.id) item.transfer = transfer;
+  };
+  (fragment.dialogue || []).forEach(update);
+  (fragment.entities || []).forEach(update);
+}
+
 function applyDraftAiSuggestionToFragment(fragment, suggestion){
   const payload = suggestion.payload || {};
   if(suggestion.group === 'dialogue'){
     fragment.dialogue = fragment.dialogue || [];
-    fragment.dialogue.unshift(Object.assign({acceptedAt:Date.now()}, payload));
+    fragment.dialogue.unshift(Object.assign({acceptedAt:Date.now(), sourceSuggestionId:suggestion.id, transfer:suggestion.transfer || null}, payload));
     if(payload.speakerGuess) fragment.characters = mergeUniqueValues(fragment.characters, [payload.speakerGuess]);
     if(payload.addressedToGuess) fragment.characters = mergeUniqueValues(fragment.characters, [payload.addressedToGuess]);
   }
   if(suggestion.group === 'entities'){
     fragment.entities = fragment.entities || [];
-    fragment.entities.unshift(Object.assign({acceptedAt:Date.now()}, payload));
+    fragment.entities.unshift(Object.assign({acceptedAt:Date.now(), sourceSuggestionId:suggestion.id, transfer:suggestion.transfer || null}, payload));
     const type = String(payload.type || '').toLowerCase();
     if(type === 'character') fragment.characters = mergeUniqueValues(fragment.characters, [payload.name]);
     else if(type === 'place') fragment.locations = mergeUniqueValues(fragment.locations, [payload.name]);
     else if(type === 'motif') fragment.motifs = mergeUniqueValues(fragment.motifs, [payload.name]);
     else fragment.tags = mergeUniqueValues(fragment.tags, [payload.name, payload.type].filter(Boolean));
-    if(DRAFT_CODEX_ENTITY_TYPES.has(type)){
-      const key = createCodexEntityFromAi(payload);
-      fragment.conversionHistory.unshift({target:'ai-codex-entity', targetId:key, at:Date.now()});
-    }
   }
   if(suggestion.group === 'layers'){
     if(payload.field === 'themes') fragment.tags = mergeUniqueValues(fragment.tags, payload.values || []);
@@ -12218,6 +12456,36 @@ async function createCodexFromAcceptedEntity(index){
   draftStatus(`Codex entry created from accepted entity: ${key}`);
 }
 
+async function setDraftLinkedChapterFromIntel(chapterId){
+  const fragment = activeDraft();
+  if(!fragment) return;
+  fragment.linkedChapterId = chapterId || '';
+  const editorSelect = document.getElementById('draft-linked-chapter');
+  if(editorSelect) editorSelect.value = fragment.linkedChapterId;
+  let sent = 0;
+  if(fragment.linkedChapterId){
+    (fragment.aiSuggestions || [])
+      .filter(item=>item.status === 'accepted' && (!item.transfer || item.transfer.status === 'needs-link'))
+      .forEach(suggestion=>{
+        if(autoSendDraftAiSuggestionToWorkshop(fragment, suggestion)){
+          syncAcceptedRecordTransfer(fragment, suggestion);
+          sent++;
+        }
+      });
+  }
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView({keepEditor:true});
+  draftStatus(fragment.linkedChapterId ? `Linked chapter set.${sent ? ` Sent ${sent} accepted AI item${sent === 1 ? '' : 's'} to the Author Workspace.` : ' Future accepted AI will auto-send to that Author Workspace.'}` : 'Linked chapter cleared. Accepted AI will stay in Drafts until a chapter is linked.');
+}
+
+function openLinkedDraftAuthorWorkspace(){
+  const fragment = activeDraft();
+  const chapter = draftLinkedChapter(fragment);
+  if(!chapter){ draftStatus('Link this fragment to a chapter first.'); return; }
+  openEditorialAuthorWorkspace(chapter.id);
+}
+
 async function removeAcceptedDialogue(index){
   const fragment = activeDraft();
   if(!fragment || !fragment.dialogue || !fragment.dialogue[index]) return;
@@ -12246,9 +12514,12 @@ async function acceptDraftAiSuggestion(id){
   applyDraftAiSuggestionToFragment(fragment, suggestion);
   suggestion.status = 'accepted';
   suggestion.decidedAt = Date.now();
+  autoSendDraftAiSuggestionToWorkshop(fragment, suggestion);
+  syncAcceptedRecordTransfer(fragment, suggestion);
   fragment.updatedAt = Date.now();
   await draftPut(fragment);
   await renderDraftsView();
+  draftStatus(suggestion.transfer && suggestion.transfer.status === 'sent' ? 'Accepted AI sent to the linked Author Workspace.' : 'Accepted AI saved. Link this fragment to a chapter to send it to the Author Workspace.');
 }
 
 async function rejectDraftAiSuggestion(id){
@@ -12270,10 +12541,14 @@ async function acceptDraftAiGroup(group){
     applyDraftAiSuggestionToFragment(fragment, suggestion);
     suggestion.status = 'accepted';
     suggestion.decidedAt = Date.now();
+    autoSendDraftAiSuggestionToWorkshop(fragment, suggestion);
+    syncAcceptedRecordTransfer(fragment, suggestion);
   });
   fragment.updatedAt = Date.now();
   await draftPut(fragment);
   await renderDraftsView();
+  const sent = (fragment.aiSuggestions || []).filter(item=>item.group===group && item.status==='accepted' && item.transfer && item.transfer.status==='sent').length;
+  draftStatus(sent ? `Accepted ${draftAiGroupLabel(group)} and sent workshop material.` : `Accepted ${draftAiGroupLabel(group)}. Link this fragment to a chapter to send it to the Author Workspace.`);
 }
 
 function renderDraftConversions(fragment){
@@ -13443,6 +13718,8 @@ Object.assign(window, {
   appendAcceptedDialogueToNotes,
   appendAcceptedEntityToNotes,
   createCodexFromAcceptedEntity,
+  setDraftLinkedChapterFromIntel,
+  openLinkedDraftAuthorWorkspace,
   removeAcceptedDialogue,
   removeAcceptedEntity,
   runDraftSuggestions,
