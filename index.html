@@ -4129,7 +4129,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.5</div>
+<div id="site-version-stamp">v2026.05.18.6</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -4923,6 +4923,7 @@ const CHAPTERS_DATA_URL = 'data/chapters.json';
 const CHAPTER_EDITOR_DRAFTS_KEY = 'cosmopolita_chapter_editor_drafts';
 const PROTOEVANGELIUM_STORAGE_KEY = 'cosmopolita_protoevangelium';
 const DRAFTS_UI_STORAGE_KEY = 'cosmopolita_drafts_ui';
+const DRAFTS_AI_SETTINGS_KEY = 'cosmopolita_drafts_ai_settings';
 
 const CH1_BODY = `The [[port-actual|Port of Port-Actual]] was not, in any meaningful sense, a single port. By the time [[elzbieta|Elzbieta Vorn]] arrived on the 14th of Drymonth aboard the *Catechism of Tides*—a mid-displacement packet vessel flagged alternately to four jurisdictions depending on which was least inconvenient at any given moment—the port had achieved the administrative character of a small nation-state operating inside the body of a larger one, its [[compact|Compact authorities]] maintaining seventeen separate arrival counters and an unknown number of informal ones, staffed by officials whose authority derived from documents no one had verified in living memory.
 
@@ -11322,6 +11323,7 @@ let _draftFilter = loadDraftsUi();
 let _draftSaveTimer = null;
 let _draftSelectedIds = new Set();
 let _draftStatusMessage = '';
+let _draftAiSettings = loadDraftAiSettings();
 
 function loadDraftsUi(){
   try{
@@ -11333,6 +11335,23 @@ function loadDraftsUi(){
 
 function saveDraftsUi(){
   try{ localStorage.setItem(DRAFTS_UI_STORAGE_KEY, JSON.stringify(_draftFilter)); }catch(e){}
+}
+
+function loadDraftAiSettings(){
+  try{
+    return Object.assign({provider:'gemini-browser', geminiKey:'', geminiModel:'gemini-2.5-flash'}, JSON.parse(localStorage.getItem(DRAFTS_AI_SETTINGS_KEY) || '{}'));
+  }catch(e){
+    return {provider:'gemini-browser', geminiKey:'', geminiModel:'gemini-2.5-flash'};
+  }
+}
+
+function saveDraftAiSettings(){
+  const key = document.getElementById('draft-ai-key')?.value || _draftAiSettings.geminiKey || '';
+  const model = document.getElementById('draft-ai-model')?.value || _draftAiSettings.geminiModel || 'gemini-2.5-flash';
+  _draftAiSettings = {provider:'gemini-browser', geminiKey:key.trim(), geminiModel:model.trim() || 'gemini-2.5-flash'};
+  try{ localStorage.setItem(DRAFTS_AI_SETTINGS_KEY, JSON.stringify(_draftAiSettings)); }catch(e){}
+  draftStatus(_draftAiSettings.geminiKey ? `Gemini browser key saved for ${_draftAiSettings.geminiModel}.` : 'Gemini key cleared.');
+  renderDraftsView({keepCache:true, keepEditor:true});
 }
 
 function draftId(){
@@ -11621,7 +11640,7 @@ function draftAiGroupLabel(group){
 
 function draftAiPayload(fragment){
   const body = String(fragment.body || '');
-  const maxChars = 24000;
+  const maxChars = 12000;
   return {
     fragment:{
       id:fragment.id,
@@ -11645,6 +11664,75 @@ function draftAiPayload(fragment){
       protoMotifs:(protoevangelium.motifs || []).map(motif=>({id:motif.id, label:motif.label, layer:motif.layer}))
     }
   };
+}
+
+function draftGeminiSchema(){
+  return {
+    type:'object',
+    required:['dialogue','entities','layers','literaryFunction','conversionTargets','uncertainties'],
+    properties:{
+      dialogue:{type:'array',items:{type:'object',required:['quote','speakerGuess','addressedToGuess','confidence','evidence','emotionalTone','subtext','sceneFunction'],properties:{
+        quote:{type:'string'}, speakerGuess:{type:'string'}, addressedToGuess:{type:'string'}, confidence:{type:'number'}, evidence:{type:'string'}, emotionalTone:{type:'string'}, subtext:{type:'string'}, sceneFunction:{type:'string'}
+      }}},
+      entities:{type:'array',items:{type:'object',required:['name','type','aliases','confidence','firstMentionQuote','description','relationships','suggestedCodexCategory'],properties:{
+        name:{type:'string'}, type:{type:'string'}, aliases:{type:'array',items:{type:'string'}}, confidence:{type:'number'}, firstMentionQuote:{type:'string'}, description:{type:'string'}, relationships:{type:'array',items:{type:'string'}}, suggestedCodexCategory:{type:'string'}
+      }}},
+      layers:{type:'object',required:['themes','motifs','narrativeDevices','locations','researchSubjects','timelineClues','pov','tone','chapterFit','protoevangeliumResonance','confidence'],properties:{
+        themes:{type:'array',items:{type:'string'}}, motifs:{type:'array',items:{type:'string'}}, narrativeDevices:{type:'array',items:{type:'string'}}, locations:{type:'array',items:{type:'string'}}, researchSubjects:{type:'array',items:{type:'string'}}, timelineClues:{type:'array',items:{type:'string'}}, pov:{type:'string'}, tone:{type:'string'}, chapterFit:{type:'string'}, protoevangeliumResonance:{type:'string'}, confidence:{type:'number'}
+      }},
+      literaryFunction:{type:'object',required:['summary','narrativePurpose','stakes','tension','continuityNotes','confidence'],properties:{
+        summary:{type:'string'}, narrativePurpose:{type:'string'}, stakes:{type:'string'}, tension:{type:'string'}, continuityNotes:{type:'string'}, confidence:{type:'number'}
+      }},
+      conversionTargets:{type:'array',items:{type:'object',required:['target','rationale','confidence'],properties:{
+        target:{type:'string'}, rationale:{type:'string'}, confidence:{type:'number'}
+      }}},
+      uncertainties:{type:'array',items:{type:'string'}}
+    }
+  };
+}
+
+function geminiBrowserOutputText(data){
+  return (data.candidates || [])
+    .flatMap(candidate => (candidate.content && candidate.content.parts) || [])
+    .map(part => part.text || '')
+    .join('\n')
+    .trim();
+}
+
+async function callDraftGeminiFromBrowser(fragment){
+  const key = (_draftAiSettings.geminiKey || '').trim();
+  if(!key) throw new Error('Paste a Gemini API key into the AI panel and click Save Key first.');
+  const model = (_draftAiSettings.geminiModel || 'gemini-2.5-flash').trim();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 120000);
+  const payload = draftAiPayload(fragment);
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    signal:controller.signal,
+    body:JSON.stringify({
+      contents:[{
+        role:'user',
+        parts:[{text:'You are a literary analysis engine for a nonlinear novel draft inbox. Return schema-valid JSON only. Analyze this draft fragment for dialogue speakers, entities, literary layers, and conversion targets. Be conservative and use confidence scores.\n\n' + JSON.stringify(payload)}]
+      }],
+      generationConfig:{
+        responseMimeType:'application/json',
+        responseSchema:draftGeminiSchema()
+      }
+    })
+  }).catch(err=>{
+    if(err && err.name === 'AbortError') throw new Error('Gemini browser request timed out after 120 seconds.');
+    throw err;
+  }).finally(()=>clearTimeout(timer));
+  const text = await res.text();
+  let data = null;
+  try{ data = JSON.parse(text); }catch(e){}
+  if(!res.ok){
+    throw new Error((data && data.error && data.error.message) || text || `Gemini browser request failed with HTTP ${res.status}`);
+  }
+  const output = geminiBrowserOutputText(data);
+  if(!output) throw new Error('Gemini returned no text.');
+  return JSON.parse(output);
 }
 
 function draftAiSuggestionFromReport(report){
@@ -11679,12 +11767,17 @@ function draftAiSuggestionFromReport(report){
 }
 
 async function callDraftAiFunction(fragment){
+  if(_draftAiSettings.geminiKey) return callDraftGeminiFromBrowser(fragment);
   const data = await draftAiDirectFunctionProbe(fragment, {timeoutMs:90000});
   if(!data || !data.report) throw new Error('AI function returned no structured report.');
   return data.report;
 }
 
 async function draftAiDirectFunctionProbe(fragment, options={}){
+  if(_draftAiSettings.geminiKey && fragment){
+    const report = await callDraftGeminiFromBrowser(fragment);
+    return {report, model:_draftAiSettings.geminiModel, provider:'browser-gemini'};
+  }
   const client = notesClient();
   if(!client) throw new Error('Supabase client is not available.');
   const {data:sessionData} = await client.auth.getSession();
@@ -11722,7 +11815,9 @@ async function draftAiDirectFunctionProbe(fragment, options={}){
 async function testDraftAiConnection(){
   draftStatus('Testing AI connection...');
   try{
-    const data = await draftAiDirectFunctionProbe(activeDraft());
+    const data = _draftAiSettings.geminiKey
+      ? await draftAiDirectFunctionProbe(activeDraft() || normalizeDraftFragment({id:'diagnostic', title:'Diagnostic', body:'Elzbieta said, "The city is hiding." The Compact listened.', type:'scene'}))
+      : await draftAiDirectFunctionProbe(activeDraft());
     draftStatus(`AI connection works. Function returned ${data.report ? 'a structured report' : 'a response'} using ${data.model || 'configured model'}.`);
   }catch(err){
     console.error('AI connection test failed:', err);
@@ -11801,18 +11896,28 @@ function renderDraftAiPanel(fragment){
   const warning = fragment
     ? `${words.toLocaleString()} active-fragment words · selected batch ${selectedCount}. Results are suggestions only.`
     : `No active fragment selected · selected batch ${selectedCount}. Create or select a fragment before analysis.`;
+  const keyHint = _draftAiSettings.geminiKey ? 'Saved in this browser' : '';
   return `<section class="drafts-ai-panel">
     <div class="drafts-pane-title">AI Analysis</div>
     <div class="drafts-ai-warning">${escHtml(warning)}</div>
     <div id="draft-ai-status" class="file-vault-status">${escHtml(_draftStatusMessage || 'AI idle.')}</div>
+    <div class="drafts-field">
+      <label>Gemini API Key</label>
+      <input id="draft-ai-key" class="drafts-input" type="password" value="${escHtml(_draftAiSettings.geminiKey)}" placeholder="Paste Gemini API key for in-browser AI">
+    </div>
+    <div class="drafts-field">
+      <label>Gemini Model</label>
+      <input id="draft-ai-model" class="drafts-input" value="${escHtml(_draftAiSettings.geminiModel || 'gemini-2.5-flash')}" placeholder="gemini-2.5-flash">
+    </div>
     <div class="drafts-ai-actions">
+      <button class="cm-btn secondary" type="button" onclick="saveDraftAiSettings()">Save Key</button>
       <button class="cm-btn secondary" type="button" onclick="handleAnalyzeFragmentClick()">Analyze Fragment</button>
       <button class="cm-btn secondary" type="button" onclick="analyzeSelectedDraftsWithAi()">Analyze Selected Visible</button>
       <button class="cm-btn secondary" type="button" onclick="testDraftAiConnection()">Test AI Connection</button>
       <button class="tiny-btn" type="button" onclick="selectVisibleDrafts()">Select Visible</button>
       <button class="tiny-btn" type="button" onclick="clearDraftSelection()">Clear</button>
     </div>
-    <div class="file-vault-status">Last analyzed: ${escHtml(last)} · ${supabaseConfigured() ? 'Supabase configured' : 'Supabase missing'} · ${_notesUser ? `logged in as ${escHtml(_notesUser.email || 'user')}` : 'not logged in'}</div>
+    <div class="file-vault-status">Last analyzed: ${escHtml(last)} · Browser Gemini ${escHtml(keyHint || 'not configured')} · Supabase fallback ${supabaseConfigured() ? 'configured' : 'missing'} · ${_notesUser ? `logged in as ${escHtml(_notesUser.email || 'user')}` : 'not logged in'}</div>
   </section>`;
 }
 
@@ -13143,6 +13248,7 @@ Object.assign(window, {
   handleAnalyzeFragmentClick,
   analyzeActiveDraftWithAi,
   analyzeSelectedDraftsWithAi,
+  saveDraftAiSettings,
   testDraftAiConnection,
   selectVisibleDrafts,
   clearDraftSelection,
