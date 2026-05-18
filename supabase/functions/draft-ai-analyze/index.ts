@@ -37,14 +37,12 @@ async function requireAdmin(req: Request) {
 
 const analysisSchema = {
   type: "object",
-  additionalProperties: false,
   required: ["dialogue", "entities", "layers", "literaryFunction", "conversionTargets", "uncertainties"],
   properties: {
     dialogue: {
       type: "array",
       items: {
         type: "object",
-        additionalProperties: false,
         required: ["quote", "speakerGuess", "addressedToGuess", "confidence", "evidence", "emotionalTone", "subtext", "sceneFunction"],
         properties: {
           quote: { type: "string" },
@@ -62,7 +60,6 @@ const analysisSchema = {
       type: "array",
       items: {
         type: "object",
-        additionalProperties: false,
         required: ["name", "type", "aliases", "confidence", "firstMentionQuote", "description", "relationships", "suggestedCodexCategory"],
         properties: {
           name: { type: "string" },
@@ -78,7 +75,6 @@ const analysisSchema = {
     },
     layers: {
       type: "object",
-      additionalProperties: false,
       required: ["themes", "motifs", "narrativeDevices", "locations", "researchSubjects", "timelineClues", "pov", "tone", "chapterFit", "protoevangeliumResonance", "confidence"],
       properties: {
         themes: { type: "array", items: { type: "string" } },
@@ -96,7 +92,6 @@ const analysisSchema = {
     },
     literaryFunction: {
       type: "object",
-      additionalProperties: false,
       required: ["summary", "narrativePurpose", "stakes", "tension", "continuityNotes", "confidence"],
       properties: {
         summary: { type: "string" },
@@ -111,7 +106,6 @@ const analysisSchema = {
       type: "array",
       items: {
         type: "object",
-        additionalProperties: false,
         required: ["target", "rationale", "confidence"],
         properties: {
           target: { type: "string" },
@@ -169,7 +163,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const message = await response.text();
-      throw new Error(`OpenAI request failed: ${message}`);
+      throw new Error(`Gemini request failed: ${message}`);
     }
     const data = await response.json();
     const text = geminiOutputText(data);
