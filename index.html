@@ -4129,7 +4129,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.4</div>
+<div id="site-version-stamp">v2026.05.18.5</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -11321,6 +11321,7 @@ let _activeDraftId = '';
 let _draftFilter = loadDraftsUi();
 let _draftSaveTimer = null;
 let _draftSelectedIds = new Set();
+let _draftStatusMessage = '';
 
 function loadDraftsUi(){
   try{
@@ -11516,8 +11517,11 @@ function updateDraftFilter(key, value){
 }
 
 function draftStatus(message){
+  _draftStatusMessage = message || '';
   const el = document.getElementById('draft-status');
   if(el) el.textContent = message || '';
+  const aiEl = document.getElementById('draft-ai-status');
+  if(aiEl) aiEl.textContent = message || 'AI idle.';
 }
 
 function draftFragmentCard(fragment){
@@ -11675,23 +11679,21 @@ function draftAiSuggestionFromReport(report){
 }
 
 async function callDraftAiFunction(fragment){
-  const client = notesClient();
-  if(!client) throw new Error('Supabase is not configured. AI analysis needs the draft-ai-analyze Edge Function.');
-  const payload = draftAiPayload(fragment);
-  const {data, error} = await client.functions.invoke('draft-ai-analyze', {body:payload});
-  if(error) throw error;
-  if(data && data.error) throw new Error(data.error);
+  const data = await draftAiDirectFunctionProbe(fragment, {timeoutMs:90000});
   if(!data || !data.report) throw new Error('AI function returned no structured report.');
   return data.report;
 }
 
-async function draftAiDirectFunctionProbe(fragment){
+async function draftAiDirectFunctionProbe(fragment, options={}){
   const client = notesClient();
   if(!client) throw new Error('Supabase client is not available.');
   const {data:sessionData} = await client.auth.getSession();
   const token = sessionData && sessionData.session && sessionData.session.access_token;
   if(!token) throw new Error('You are not logged in. Log in as admin before using AI analysis.');
   const url = `${SUPABASE_URL}/functions/v1/draft-ai-analyze`;
+  const controller = new AbortController();
+  const timeoutMs = options.timeoutMs || 45000;
+  const timer = setTimeout(()=>controller.abort(), timeoutMs);
   const res = await fetch(url, {
     method:'POST',
     headers:{
@@ -11699,11 +11701,15 @@ async function draftAiDirectFunctionProbe(fragment){
       'Authorization':`Bearer ${token}`,
       'apikey':SUPABASE_ANON_KEY
     },
+    signal:controller.signal,
     body:JSON.stringify(fragment ? draftAiPayload(fragment) : {
       fragment:{id:'diagnostic', title:'Diagnostic', body:'Diagnostic request.', type:'scene', status:'inbox'},
       context:{characters:[], codexEntries:[], protoLines:[], protoMotifs:[]}
     })
-  });
+  }).catch(err=>{
+    if(err && err.name === 'AbortError') throw new Error(`AI request timed out after ${Math.round(timeoutMs/1000)} seconds.`);
+    throw err;
+  }).finally(()=>clearTimeout(timer));
   const text = await res.text();
   let data = null;
   try{ data = JSON.parse(text); }catch(e){}
@@ -11727,6 +11733,7 @@ async function testDraftAiConnection(){
 
 async function analyzeDraftWithAi(id){
   if(!requireAdmin()) return;
+  draftStatus('Analyze request received. Saving active draft before sending...');
   await persistActiveDraftFromEditor({silent:true});
   const fragment = _draftFragments.find(item=>item.id===id) || activeDraft();
   if(!fragment){
@@ -11735,7 +11742,9 @@ async function analyzeDraftWithAi(id){
   }
   draftStatus(`Analyzing "${fragment.title}"...`);
   try{
+    draftStatus(`Sending "${fragment.title}" to Gemini through Supabase...`);
     const report = await callDraftAiFunction(fragment);
+    draftStatus('Gemini returned a report. Building approval cards...');
     const suggestions = draftAiSuggestionFromReport(report);
     fragment.aiAnalyses = fragment.aiAnalyses || [];
     fragment.aiSuggestions = fragment.aiSuggestions || [];
@@ -11743,12 +11752,15 @@ async function analyzeDraftWithAi(id){
     fragment.aiSuggestions.unshift(...suggestions);
     fragment.updatedAt = Date.now();
     await draftPut(fragment);
-    draftStatus(`AI analysis complete: ${suggestions.length} suggestion${suggestions.length === 1 ? '' : 's'} awaiting review.`);
+    draftStatus(suggestions.length
+      ? `AI analysis complete: ${suggestions.length} suggestion${suggestions.length === 1 ? '' : 's'} awaiting review.`
+      : 'AI analysis complete, but Gemini returned no actionable suggestion cards. The raw report is saved in backup/history.');
   }catch(err){
     console.error('Draft AI analysis failed:', err);
     draftStatus('AI analysis unavailable: ' + (err.message || err) + '. Deterministic suggestions still work.');
   }
   await renderDraftsView();
+  draftStatus(_draftStatusMessage);
 }
 
 async function analyzeActiveDraftWithAi(){
@@ -11792,6 +11804,7 @@ function renderDraftAiPanel(fragment){
   return `<section class="drafts-ai-panel">
     <div class="drafts-pane-title">AI Analysis</div>
     <div class="drafts-ai-warning">${escHtml(warning)}</div>
+    <div id="draft-ai-status" class="file-vault-status">${escHtml(_draftStatusMessage || 'AI idle.')}</div>
     <div class="drafts-ai-actions">
       <button class="cm-btn secondary" type="button" onclick="handleAnalyzeFragmentClick()">Analyze Fragment</button>
       <button class="cm-btn secondary" type="button" onclick="analyzeSelectedDraftsWithAi()">Analyze Selected Visible</button>
