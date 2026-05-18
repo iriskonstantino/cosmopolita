@@ -3888,6 +3888,125 @@ body:not(.admin-on) #tnav-drafts{
 }
 .drafts-transfer-status.sent{border-color:var(--green);color:var(--green);background:#edf5ef}
 .drafts-transfer-status.needs-link{border-color:var(--red);color:var(--red);background:#fff4f1}
+.idea-repository{
+  display:grid;
+  gap:1rem;
+}
+.idea-repository-controls{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:0.55rem;
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.75rem;
+}
+.idea-lane-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.85rem;
+}
+.idea-lane{
+  border:1px solid var(--border);
+  background:var(--paper);
+}
+.idea-lane-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:0.75rem;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+  padding:0.65rem 0.75rem;
+}
+.idea-lane-title,.idea-card-title,.idea-card-meta{
+  font-family:var(--mono);
+  text-transform:uppercase;
+}
+.idea-lane-title{
+  font-size:0.58rem;
+  letter-spacing:0.14em;
+  color:var(--ink);
+}
+.idea-lane-count{
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.1em;
+  color:#999;
+}
+.idea-card{
+  border-top:1px solid var(--border);
+  background:var(--white);
+  padding:0.7rem;
+}
+.idea-card-title{
+  font-size:0.66rem;
+  letter-spacing:0.08em;
+  color:var(--ink);
+  line-height:1.3;
+}
+.idea-card-meta{
+  margin-top:0.28rem;
+  font-size:0.48rem;
+  letter-spacing:0.08em;
+  color:#999;
+}
+.idea-card-body{
+  margin-top:0.45rem;
+  font-size:0.84rem;
+  line-height:1.5;
+  color:#4f4840;
+}
+.idea-card-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.4rem;
+  margin-top:0.55rem;
+}
+.idea-status{
+  display:inline-block;
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:#777;
+  font-family:var(--mono);
+  font-size:0.46rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:0.14rem 0.34rem;
+}
+.idea-status.working{border-color:var(--gold);color:#7a4a1e;background:#fff8e8}
+.idea-status.used{border-color:var(--green);color:var(--green);background:#edf5ef}
+.idea-select-check{float:right;accent-color:var(--red)}
+.author-routed-wrap{
+  display:grid;
+  gap:0.9rem;
+  padding:0.9rem;
+}
+.author-routed-lane{
+  border:1px solid var(--border);
+  background:var(--paper);
+}
+.author-routed-head{
+  display:flex;
+  justify-content:space-between;
+  gap:0.75rem;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+  padding:0.65rem 0.8rem;
+}
+.author-routed-card{
+  border-top:1px solid var(--border);
+  background:var(--white);
+  padding:0.75rem 0.85rem;
+}
+.author-routed-card:first-child{border-top:none}
+.author-routed-quote{
+  border-left:3px solid var(--ink);
+  background:var(--paper);
+  padding:0.55rem 0.65rem;
+  margin-top:0.5rem;
+  font-style:italic;
+  color:#4f4840;
+}
 .tiny-btn{
   border:1px solid var(--border);
   background:var(--white);
@@ -3921,6 +4040,7 @@ body:not(.admin-on) #tnav-drafts{
   .drafts-wrap{grid-template-columns:1fr;}
   .drafts-list-pane,.drafts-meta-pane{border-left:none;border-right:none;border-bottom:1px solid var(--border);}
   .drafts-editor-grid{grid-template-columns:1fr;}
+  .idea-repository-controls,.idea-lane-grid{grid-template-columns:1fr;}
   .drafts-field.wide{grid-column:auto;}
   .assets-wrap{grid-template-columns:1fr;}
   #assets-view .side-panel{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
@@ -4197,7 +4317,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.10</div>
+<div id="site-version-stamp">v2026.05.18.11</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -4596,6 +4716,7 @@ body:not(.admin-on) #tnav-drafts{
           </div>
           <div class="author-workspace-tabs">
             <button class="author-tab-btn active" id="aw-tab-checklist" type="button" onclick="setAuthorWorkspaceTab('checklist')">Revision Checklist</button>
+            <button class="author-tab-btn" id="aw-tab-routed" type="button" onclick="setAuthorWorkspaceTab('routed')">Routed Ideas</button>
             <button class="author-tab-btn" id="aw-tab-research" type="button" onclick="setAuthorWorkspaceTab('research')">Research</button>
           </div>
           <div class="author-tab-panel active" id="aw-checklist-panel">
@@ -4623,6 +4744,9 @@ body:not(.admin-on) #tnav-drafts{
                 </div>
               </div>
             </section>
+          </div>
+          <div class="author-tab-panel" id="aw-routed-panel">
+            <div class="author-routed-wrap" id="aw-routed-board"></div>
           </div>
           <div class="author-tab-panel" id="aw-research-panel">
             <div class="author-research-wrap" id="aw-research-board"></div>
@@ -4685,6 +4809,7 @@ body:not(.admin-on) #tnav-drafts{
         <div class="drafts-filter-grid">
           <select id="draft-filter-view" class="drafts-select" onchange="updateDraftFilter('view',this.value)">
             <option value="inbox">Inbox</option>
+            <option value="ideas">Idea Repository</option>
             <option value="layers">Literary Layers</option>
             <option value="orphans">Orphans</option>
             <option value="ready">Ready Queue</option>
@@ -4992,6 +5117,19 @@ const CHAPTER_EDITOR_DRAFTS_KEY = 'cosmopolita_chapter_editor_drafts';
 const PROTOEVANGELIUM_STORAGE_KEY = 'cosmopolita_protoevangelium';
 const DRAFTS_UI_STORAGE_KEY = 'cosmopolita_drafts_ui';
 const DRAFTS_AI_SETTINGS_KEY = 'cosmopolita_drafts_ai_settings';
+const DRAFTS_IDEA_UI_STORAGE_KEY = 'cosmopolita_draft_idea_ui';
+const ROUTED_IDEA_STATUSES = ['open','working','used'];
+const ROUTED_IDEA_SECTIONS = [
+  {id:'dialogue', label:'Dialogue'},
+  {id:'character', label:'Character'},
+  {id:'entities', label:'Entities / Factions'},
+  {id:'theme', label:'Theme / Motif'},
+  {id:'world', label:'World / Setting'},
+  {id:'continuity', label:'Continuity / Timeline'},
+  {id:'research', label:'Research Leads'},
+  {id:'literary', label:'Literary Function'},
+  {id:'conversion', label:'Conversion Ideas'}
+];
 
 const CH1_BODY = `The [[port-actual|Port of Port-Actual]] was not, in any meaningful sense, a single port. By the time [[elzbieta|Elzbieta Vorn]] arrived on the 14th of Drymonth aboard the *Catechism of Tides*—a mid-displacement packet vessel flagged alternately to four jurisdictions depending on which was least inconvenient at any given moment—the port had achieved the administrative character of a small nation-state operating inside the body of a larger one, its [[compact|Compact authorities]] maintaining seventeen separate arrival counters and an unknown number of informal ones, staffed by officials whose authority derived from documents no one had verified in living memory.
 
@@ -5207,6 +5345,36 @@ function normalizeThesisBrief(value={}){
   };
 }
 
+function routedIdeaSectionLabel(id){
+  return (ROUTED_IDEA_SECTIONS.find(section=>section.id===id) || {}).label || 'Idea';
+}
+
+function normalizeRoutedIdea(value={}, fallback={}){
+  const now = Date.now();
+  const section = ROUTED_IDEA_SECTIONS.some(item=>item.id===value.section) ? value.section : (fallback.section || 'literary');
+  const status = ROUTED_IDEA_STATUSES.includes(value.status) ? value.status : (fallback.status || 'open');
+  return {
+    id:String(value.id || fallback.id || authorNoteId('idea')),
+    sourceDraftId:String(value.sourceDraftId || fallback.sourceDraftId || ''),
+    sourceSuggestionId:String(value.sourceSuggestionId || fallback.sourceSuggestionId || ''),
+    sourceFragmentTitle:String(value.sourceFragmentTitle || fallback.sourceFragmentTitle || ''),
+    type:String(value.type || fallback.type || ''),
+    section,
+    title:String(value.title || fallback.title || 'Routed Idea'),
+    summary:String(value.summary || fallback.summary || ''),
+    quote:String(value.quote || fallback.quote || ''),
+    context:String(value.context || fallback.context || ''),
+    confidence:Number(value.confidence || fallback.confidence || 0),
+    status,
+    chapterId:String(value.chapterId || fallback.chapterId || ''),
+    researchId:String(value.researchId || fallback.researchId || ''),
+    notes:String(value.notes || fallback.notes || ''),
+    createdAt:value.createdAt || fallback.createdAt || now,
+    updatedAt:value.updatedAt || fallback.updatedAt || value.createdAt || now,
+    routingHistory:Array.isArray(value.routingHistory) ? value.routingHistory : (Array.isArray(fallback.routingHistory) ? fallback.routingHistory : [])
+  };
+}
+
 const DEFAULT_RESEARCH_SUBJECT_ID = 'research-general';
 
 function normalizeResearchSubject(subject={}, index=0){
@@ -5268,6 +5436,7 @@ function normalizeResearch(value={}){
   const gaps = Array.isArray(value.gaps) ? value.gaps.map(gap=>({
     id:gap.id || authorNoteId('gap'),
     subjectId:subjectIds.has(String(gap.subjectId || '')) ? String(gap.subjectId) : fallbackSubjectId,
+    sourceIdeaId:String(gap.sourceIdeaId || ''),
     tags:String(gap.tags || ''),
     question:String(gap.question || ''),
     nextStep:String(gap.nextStep || ''),
@@ -5328,7 +5497,8 @@ function normalizeAuthorNotes(value={}){
   const reviewChecklist = normalizeReviewChecklist(value.reviewChecklist || {});
   const thesisBrief = normalizeThesisBrief(value.thesisBrief || {});
   const research = normalizeResearch(value.research || {});
-  return {status, checklist, notes, inline, reviewChecklist, thesisBrief, research};
+  const routedIdeas = Array.isArray(value.routedIdeas) ? value.routedIdeas.map(normalizeRoutedIdea) : [];
+  return {status, checklist, notes, inline, reviewChecklist, thesisBrief, research, routedIdeas};
 }
 
 function normalizeChapterList(raw){
@@ -5611,6 +5781,7 @@ function backupAuthorNotesHtml(notes){
   const customTasks = notes.checklist.length ? notes.checklist.map(task=>`<li>${task.done?'[x]':'[ ]'} ${backupEscapeHtml(task.text)}</li>`).join('') : '<li class="muted">No custom tasks</li>';
   const privateNotes = notes.notes.length ? notes.notes.map(note=>`<article class="note">${backupParagraphs(note.body)}<small>${backupEscapeHtml(authorNoteDate(note.updatedAt))}</small></article>`).join('') : '<p class="muted">No private notes</p>';
   const inlineNotes = notes.inline.length ? notes.inline.map(note=>`<article class="note"><strong>${backupEscapeHtml(note.quote || 'No quote')}</strong>${backupParagraphs(note.body)}</article>`).join('') : '<p class="muted">No inline notes</p>';
+  const routedIdeas = notes.routedIdeas.length ? notes.routedIdeas.map(idea=>`<article class="source"><h5>${backupEscapeHtml(routedIdeaSectionLabel(idea.section))} · ${backupEscapeHtml(idea.title)}</h5><p><b>Status:</b> ${backupEscapeHtml(idea.status)} · <b>Source:</b> ${backupEscapeHtml(idea.sourceFragmentTitle || idea.sourceDraftId)} · <b>Confidence:</b> ${backupEscapeHtml(idea.confidence ? Math.round(idea.confidence * 100) + '%' : 'unscored')}</p><p>${backupEscapeHtml(idea.summary)}</p>${idea.quote ? `<p><b>Quote:</b> ${backupEscapeHtml(idea.quote)}</p>` : ''}${idea.notes ? `<p><b>Notes:</b> ${backupEscapeHtml(idea.notes)}</p>` : ''}</article>`).join('') : '<p class="muted">No routed ideas</p>';
   const sources = research.sources.length ? research.sources.map(source=>`
     <article class="source">
       <h5>${backupEscapeHtml(source.title || 'Untitled Source')}</h5>
@@ -5653,6 +5824,8 @@ function backupAuthorNotesHtml(notes){
       <h4>Research</h4>
       <p><b>Research Question:</b> ${backupEscapeHtml(research.question)}</p>
       <p><b>Working Thesis:</b> ${backupEscapeHtml(research.workingThesis)}</p>
+      <h4>Routed Ideas</h4>
+      ${routedIdeas}
       <h5>Subjects</h5><ul>${subjects}</ul>
       <h5>Linked Passages</h5>${passages}
       <h5>Sources</h5>${sources}
@@ -5707,7 +5880,10 @@ function backupProtoevangeliumHtml(proto){
 
 function backupDraftFragmentsHtml(fragments=[]){
   if(!fragments.length) return '<p class="muted">No draft fragments</p>';
-  return fragments.map(fragment=>`
+  return fragments.map(raw=>{
+    const fragment = normalizeDraftFragment(raw);
+    const routedIdeas = (fragment.routedIdeas || []).length ? `<h4>Routed Ideas</h4>${fragment.routedIdeas.map(idea=>`<article class="source"><h5>${backupEscapeHtml(routedIdeaSectionLabel(idea.section))} · ${backupEscapeHtml(idea.title)}</h5><p><b>Status:</b> ${backupEscapeHtml(idea.status)} · <b>Chapter:</b> ${backupEscapeHtml(routedIdeaChapterLabel(idea.chapterId))} · <b>Confidence:</b> ${backupEscapeHtml(idea.confidence ? Math.round(idea.confidence * 100) + '%' : 'unscored')}</p><p>${backupEscapeHtml(idea.summary)}</p>${idea.quote ? `<p><b>Quote:</b> ${backupEscapeHtml(idea.quote)}</p>` : ''}</article>`).join('')}` : '';
+    return `
     <article class="chapter">
       <h3>${backupEscapeHtml(fragment.title || 'Untitled Fragment')}</h3>
       <div class="meta">${backupEscapeHtml(fragment.type)} · ${backupEscapeHtml(fragment.status)} · ${Number(draftWordCount(fragment)).toLocaleString()} words · updated ${backupEscapeHtml(draftDate(fragment.updatedAt))}</div>
@@ -5721,13 +5897,15 @@ function backupDraftFragmentsHtml(fragments=[]){
       <p><b>Linked Chapter:</b> ${backupEscapeHtml(protoChapterLabel(fragment.linkedChapterId))} · <b>Linked Proto Line:</b> ${backupEscapeHtml(fragment.linkedProtoLineId)}</p>
       <p><b>Source:</b> ${backupEscapeHtml(fragment.sourceFilename)}</p>
       ${fragment.notes ? `<div class="author-box"><h4>Notes</h4>${backupParagraphs(fragment.notes)}</div>` : ''}
+      ${routedIdeas}
       <div class="chapter-body">${backupChapterBodyHtml(fragment.body)}</div>
       ${(fragment.conversionHistory || []).length ? `<h4>Conversion History</h4><ul>${fragment.conversionHistory.map(item=>`<li>${backupEscapeHtml(item.target)} · ${backupEscapeHtml(item.targetId)} · ${backupEscapeHtml(draftDate(item.at))}</li>`).join('')}</ul>` : ''}
       ${fragment.suggestions && Object.keys(fragment.suggestions).length ? `<h4>Suggestions</h4><pre>${backupEscapeHtml(JSON.stringify(fragment.suggestions, null, 2))}</pre>` : ''}
       ${(fragment.aiAnalyses || []).length ? `<h4>AI Analyses</h4><pre>${backupEscapeHtml(JSON.stringify(fragment.aiAnalyses, null, 2))}</pre>` : ''}
       ${(fragment.aiSuggestions || []).length ? `<h4>AI Suggestion History</h4><pre>${backupEscapeHtml(JSON.stringify(fragment.aiSuggestions, null, 2))}</pre>` : ''}
     </article>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function backupHtmlDocument(payload){
@@ -9202,20 +9380,23 @@ function setAuthorWorkspaceOpenSections(openSections){
 }
 
 function setAuthorWorkspaceTab(tab){
-  const next = tab === 'research' ? 'research' : 'checklist';
+  const next = ['research','routed'].includes(tab) ? tab : 'checklist';
   setChapterEditorDraftUi(_chapterEditorBaseId, {authorWorkspaceTab:next});
   renderAuthorWorkspaceTabs(next);
 }
 
 function renderAuthorWorkspaceTabs(active=authorWorkspaceActiveTab()){
   const checklistTab = document.getElementById('aw-tab-checklist');
+  const routedTab = document.getElementById('aw-tab-routed');
   const researchTab = document.getElementById('aw-tab-research');
   const checklistPanel = document.getElementById('aw-checklist-panel');
+  const routedPanel = document.getElementById('aw-routed-panel');
   const researchPanel = document.getElementById('aw-research-panel');
   const title = document.getElementById('aw-panel-title');
   [checklistTab, checklistPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'checklist'); });
+  [routedTab, routedPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'routed'); });
   [researchTab, researchPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'research'); });
-  if(title) title.textContent = active === 'research' ? 'Research Board' : 'Revision Checklist';
+  if(title) title.textContent = active === 'research' ? 'Research Board' : active === 'routed' ? 'Routed Ideas' : 'Revision Checklist';
   updateAuthorWorkspaceStatsOnly();
 }
 
@@ -9539,6 +9720,73 @@ function renderAuthorResearchBoard(){
   `;
 }
 
+function authorRoutedIdeaRows(notes=readAuthorNotesEditor()){
+  return (notes.routedIdeas || []).map(normalizeRoutedIdea).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+}
+
+function renderAuthorRoutedIdeaCard(idea){
+  return `<article class="author-routed-card">
+    <div class="author-research-card-head">
+      <div>
+        <div class="author-research-title">${escHtml(idea.title)}</div>
+        <div class="author-note-meta">${routedIdeaStatusHtml(idea.status)} · ${escHtml(idea.type || routedIdeaSectionLabel(idea.section))} · ${idea.confidence ? `confidence ${Math.round(idea.confidence * 100)}%` : 'unscored'}</div>
+      </div>
+      <div class="author-research-actions">
+        <select class="author-research-input" onchange="updateAuthorRoutedIdea('${escHtml(idea.id)}','status',this.value)">
+          ${ROUTED_IDEA_STATUSES.map(status=>`<option value="${status}" ${idea.status===status?'selected':''}>${escHtml(status)}</option>`).join('')}
+        </select>
+        <button class="author-note-btn" type="button" onclick="openDraftFromRoutedIdea('${escHtml(idea.sourceDraftId)}')">Open Source</button>
+      </div>
+    </div>
+    <div class="author-research-grid">
+      <div class="author-research-field wide"><label>Summary</label><textarea class="author-research-input" rows="3" oninput="updateAuthorRoutedIdea('${escHtml(idea.id)}','summary',this.value)">${escHtml(idea.summary)}</textarea></div>
+      ${idea.quote ? `<div class="author-research-field wide"><label>Source Quote</label><div class="author-routed-quote">${escHtml(idea.quote)}</div></div>` : ''}
+      <div class="author-research-field wide"><label>Working Notes</label><textarea class="author-research-input" rows="4" oninput="updateAuthorRoutedIdea('${escHtml(idea.id)}','notes',this.value)">${escHtml(idea.notes)}</textarea></div>
+      <div class="author-research-field"><label>Source Draft</label><input class="author-research-input" value="${escHtml(idea.sourceFragmentTitle || idea.sourceDraftId)}" readonly></div>
+      <div class="author-research-field"><label>Research Link</label><input class="author-research-input" value="${escHtml(idea.researchId || 'No research card')}" readonly></div>
+    </div>
+  </article>`;
+}
+
+function renderAuthorRoutedIdeasBoard(){
+  const board = document.getElementById('aw-routed-board');
+  if(!board) return;
+  const notes = readAuthorNotesEditor();
+  const ideas = authorRoutedIdeaRows(notes);
+  board.innerHTML = ROUTED_IDEA_SECTIONS.map(section=>{
+    const sectionIdeas = ideas.filter(idea=>idea.section === section.id);
+    return `<section class="author-routed-lane">
+      <div class="author-routed-head">
+        <div>
+          <div class="author-research-title">${escHtml(section.label)}</div>
+          <div class="author-note-meta">${sectionIdeas.length} routed idea${sectionIdeas.length === 1 ? '' : 's'}</div>
+        </div>
+      </div>
+      ${sectionIdeas.length ? sectionIdeas.map(renderAuthorRoutedIdeaCard).join('') : '<div class="author-research-empty">No routed ideas in this lane.</div>'}
+    </section>`;
+  }).join('') || '<div class="author-research-empty">No routed ideas yet.</div>';
+}
+
+function updateAuthorRoutedIdea(id, field, value){
+  const idea = (_chapterEditorAuthorNotes.routedIdeas || []).find(item=>item.id===id);
+  if(!idea) return;
+  if(field === 'status' && ROUTED_IDEA_STATUSES.includes(value)) idea.status = value;
+  if(field === 'summary') idea.summary = value;
+  if(field === 'notes') idea.notes = value;
+  idea.updatedAt = Date.now();
+  const draft = _draftFragments.find(fragment=>fragment.id===idea.sourceDraftId);
+  const draftIdea = draft && (draft.routedIdeas || []).find(item=>item.id===idea.id);
+  if(draftIdea){
+    if(field === 'status' && ROUTED_IDEA_STATUSES.includes(value)) draftIdea.status = value;
+    if(field === 'summary') draftIdea.summary = value;
+    if(field === 'notes') draftIdea.notes = value;
+    draftIdea.updatedAt = Date.now();
+  }
+  syncAuthorRoutedIdeaToDraftSource(idea).catch(err=>console.warn('Routed idea source sync failed:', err));
+  handleChapterEditorInput();
+  updateAuthorWorkspaceStatsOnly();
+}
+
 function renderAuthorWorkspace(){
   const data = readChapterEditorData();
   const notes = readAuthorNotesEditor();
@@ -9574,6 +9822,7 @@ function renderAuthorWorkspace(){
     const openSections = authorWorkspaceOpenSections();
     reviewList.innerHTML = AUTHOR_REVIEW_TEMPLATE.map((section,index)=>renderAuthorReviewSection(section,index,notes,openSections)).join('');
   }
+  renderAuthorRoutedIdeasBoard();
   renderAuthorResearchBoard();
   renderAuthorWorkspaceTabs();
   renderAuthorNotesEditor();
@@ -9632,6 +9881,9 @@ function updateAuthorWorkspaceStatsOnly(){
     if(active === 'research'){
       const research = _chapterEditorAuthorNotes.research || normalizeResearch();
       openCount.textContent = `${research.subjects.length} subjects · ${research.sources.length} sources · ${research.passages.length} passages`;
+    } else if(active === 'routed'){
+      const routed = (_chapterEditorAuthorNotes.routedIdeas || []).filter(idea=>idea.status !== 'used');
+      openCount.textContent = `${routed.length} active ideas`;
     } else {
       openCount.textContent = `${stats.open} open`;
     }
@@ -11388,8 +11640,10 @@ let _draftsDBPromise = null;
 let _draftFragments = [];
 let _activeDraftId = '';
 let _draftFilter = loadDraftsUi();
+let _draftIdeaFilter = loadDraftIdeaUi();
 let _draftSaveTimer = null;
 let _draftSelectedIds = new Set();
+let _draftSelectedIdeaKeys = new Set();
 let _draftStatusMessage = '';
 let _draftAiSettings = loadDraftAiSettings();
 
@@ -11403,6 +11657,18 @@ function loadDraftsUi(){
 
 function saveDraftsUi(){
   try{ localStorage.setItem(DRAFTS_UI_STORAGE_KEY, JSON.stringify(_draftFilter)); }catch(e){}
+}
+
+function loadDraftIdeaUi(){
+  try{
+    return Object.assign({section:'all', status:'all', chapter:'all', confidence:'all', bulkChapter:''}, JSON.parse(localStorage.getItem(DRAFTS_IDEA_UI_STORAGE_KEY) || '{}'));
+  }catch(e){
+    return {section:'all', status:'all', chapter:'all', confidence:'all', bulkChapter:''};
+  }
+}
+
+function saveDraftIdeaUi(){
+  try{ localStorage.setItem(DRAFTS_IDEA_UI_STORAGE_KEY, JSON.stringify(_draftIdeaFilter)); }catch(e){}
 }
 
 function loadDraftAiSettings(){
@@ -11464,7 +11730,7 @@ function normalizeDraftFragment(value={}){
     decidedAt:suggestion.decidedAt || null,
     transfer:suggestion.transfer && typeof suggestion.transfer === 'object' ? suggestion.transfer : null
   });
-  return {
+  const normalized = {
     id:String(value.id || draftId()),
     title:String(value.title || '').trim() || 'Untitled Fragment',
     body:String(value.body || ''),
@@ -11487,10 +11753,13 @@ function normalizeDraftFragment(value={}){
     aiSuggestions:Array.isArray(value.aiSuggestions) ? value.aiSuggestions.map(normalizeSuggestion) : [],
     dialogue:Array.isArray(value.dialogue) ? value.dialogue.map(item=>Object.assign({}, item)) : [],
     entities:Array.isArray(value.entities) ? value.entities.map(item=>Object.assign({}, item)) : [],
+    routedIdeas:Array.isArray(value.routedIdeas) ? value.routedIdeas.map(normalizeRoutedIdea) : [],
     conversionHistory:Array.isArray(value.conversionHistory) ? value.conversionHistory : [],
     createdAt:value.createdAt || now,
     updatedAt:value.updatedAt || value.createdAt || now
   };
+  backfillDraftRoutedIdeas(normalized);
+  return normalized;
 }
 
 async function draftPut(fragment){
@@ -11501,6 +11770,30 @@ async function draftPut(fragment){
     tx.objectStore(DRAFTS_STORE).put(item);
     tx.oncomplete = () => resolve(item);
     tx.onerror = () => reject(tx.error || new Error('Could not save draft fragment.'));
+  });
+}
+
+async function syncAuthorRoutedIdeaToDraftSource(idea){
+  if(!idea || !idea.sourceDraftId) return;
+  const db = await openDraftsDB();
+  await new Promise((resolve,reject)=>{
+    const tx = db.transaction(DRAFTS_STORE, 'readwrite');
+    const store = tx.objectStore(DRAFTS_STORE);
+    const req = store.get(idea.sourceDraftId);
+    req.onsuccess = () => {
+      const fragment = req.result ? normalizeDraftFragment(req.result) : null;
+      if(!fragment){ resolve(); return; }
+      const target = (fragment.routedIdeas || []).find(item=>item.id===idea.id);
+      if(target){
+        target.status = idea.status;
+        target.summary = idea.summary;
+        target.notes = idea.notes;
+        target.updatedAt = Date.now();
+        store.put(normalizeDraftFragment(fragment));
+      }
+      resolve();
+    };
+    req.onerror = () => reject(req.error || new Error('Could not read source draft.'));
   });
 }
 
@@ -11598,6 +11891,7 @@ function draftMatchesFilter(fragment){
   }
   if(_draftFilter.view === 'archive') return fragment.status === 'archived';
   if(fragment.status === 'archived') return false;
+  if(_draftFilter.view === 'ideas') return (fragment.routedIdeas || []).length > 0;
   if(_draftFilter.view === 'orphans') return draftIsOrphan(fragment);
   if(_draftFilter.view === 'ready') return fragment.status === 'ready' || fragment.tags.some(tag=>/ready|high-value|priority/i.test(tag));
   return true;
@@ -12051,7 +12345,8 @@ function renderDraftAcceptedIntelligence(fragment){
       <div class="drafts-intel-body">${escHtml(item.quote || item.subtext || 'No quote captured.')}</div>
       ${item.subtext ? `<div class="drafts-intel-body"><b>Subtext:</b> ${escHtml(item.subtext)}</div>` : ''}
       <div class="drafts-ai-card-actions">
-        <button class="tiny-btn" type="button" onclick="appendAcceptedDialogueToNotes(${index})">Add To Fragment Notes</button>
+        <button class="tiny-btn" type="button" onclick="setRoutedIdeaStatusByAcceptedRecord('dialogue',${index},'working')">Mark Working</button>
+        <button class="tiny-btn" type="button" onclick="setRoutedIdeaStatusByAcceptedRecord('dialogue',${index},'used')">Mark Used</button>
         <button class="tiny-btn danger" type="button" onclick="removeAcceptedDialogue(${index})">Remove</button>
       </div>
     </article>`).join('');
@@ -12065,7 +12360,8 @@ function renderDraftAcceptedIntelligence(fragment){
       ${(item.aliases || []).length ? `<div class="drafts-chip-row">${item.aliases.map(alias=>`<span class="drafts-chip">${escHtml(alias)}</span>`).join('')}</div>` : ''}
       <div class="drafts-ai-card-actions">
         ${canCodex ? `<button class="tiny-btn" type="button" onclick="createCodexFromAcceptedEntity(${index})">Create Codex</button>` : ''}
-        <button class="tiny-btn" type="button" onclick="appendAcceptedEntityToNotes(${index})">Add To Fragment Notes</button>
+        <button class="tiny-btn" type="button" onclick="setRoutedIdeaStatusByAcceptedRecord('entity',${index},'working')">Mark Working</button>
+        <button class="tiny-btn" type="button" onclick="setRoutedIdeaStatusByAcceptedRecord('entity',${index},'used')">Mark Used</button>
         <button class="tiny-btn danger" type="button" onclick="removeAcceptedEntity(${index})">Remove</button>
       </div>
     </article>`;
@@ -12165,6 +12461,165 @@ function createCodexEntityFromAi(entity){
 
 function draftLinkedChapter(fragment){
   return fragment && fragment.linkedChapterId ? chapters.find(ch=>ch.id===fragment.linkedChapterId) : null;
+}
+
+function routedIdeaChapterLabel(id){
+  const chapter = chapters.find(ch=>ch.id===id);
+  return chapter ? (chapter.chapter || chapter.book || chapter.id) : 'Unassigned';
+}
+
+function routedIdeaStatusHtml(status){
+  const value = ROUTED_IDEA_STATUSES.includes(status) ? status : 'open';
+  return `<span class="idea-status ${escHtml(value)}">${escHtml(value)}</span>`;
+}
+
+function routedIdeaKey(idea){
+  return `${idea.sourceDraftId || ''}::${idea.id || ''}`;
+}
+
+function routeIdeaSectionFromSuggestion(suggestion){
+  const payload = suggestion.payload || {};
+  if(suggestion.group === 'dialogue') return 'dialogue';
+  if(suggestion.group === 'entities'){
+    const type = String(payload.type || suggestion.kind || '').toLowerCase();
+    if(type === 'character') return 'character';
+    if(type === 'place') return 'world';
+    if(type === 'motif') return 'theme';
+    return 'entities';
+  }
+  if(suggestion.group === 'layers'){
+    const field = payload.field || suggestion.kind;
+    if(field === 'themes' || field === 'motifs' || field === 'tone' || field === 'protoevangeliumResonance') return 'theme';
+    if(field === 'locations') return 'world';
+    if(field === 'timelineClues') return 'continuity';
+    if(field === 'researchSubjects') return 'research';
+    return 'literary';
+  }
+  if(suggestion.group === 'literary') return 'literary';
+  if(suggestion.group === 'conversions'){
+    const target = String((suggestion.payload || {}).target || suggestion.kind || suggestion.title || '').toLowerCase();
+    if(/research|source|evidence|gap|bibliography|citation/.test(target)) return 'research';
+    return 'conversion';
+  }
+  return 'literary';
+}
+
+function routedIdeaTitleFromSuggestion(suggestion){
+  const payload = suggestion.payload || {};
+  if(suggestion.group === 'dialogue') return payload.speakerGuess ? `Dialogue: ${payload.speakerGuess}` : (suggestion.title || 'Dialogue');
+  if(suggestion.group === 'entities') return payload.name || suggestion.title || 'Entity';
+  if(suggestion.group === 'conversions') return payload.target || suggestion.title || 'Conversion Idea';
+  return suggestion.title || routedIdeaSectionLabel(routeIdeaSectionFromSuggestion(suggestion));
+}
+
+function routedIdeaSummaryFromSuggestion(suggestion){
+  const payload = suggestion.payload || {};
+  return suggestion.summary || payload.description || payload.subtext || payload.rationale || payload.summary || '';
+}
+
+function routedIdeaFromSuggestion(fragment, suggestion){
+  const payload = suggestion.payload || {};
+  const section = routeIdeaSectionFromSuggestion(suggestion);
+  return normalizeRoutedIdea({
+    id:`idea-${suggestion.id}`,
+    sourceDraftId:fragment.id,
+    sourceSuggestionId:suggestion.id,
+    sourceFragmentTitle:fragment.title,
+    type:payload.type || suggestion.kind || suggestion.group,
+    section,
+    title:routedIdeaTitleFromSuggestion(suggestion),
+    summary:routedIdeaSummaryFromSuggestion(suggestion),
+    quote:payload.quote || payload.firstMentionQuote || '',
+    context:payload.evidence || payload.sceneFunction || (Array.isArray(payload.relationships) ? payload.relationships.join(', ') : '') || '',
+    confidence:suggestion.confidence || payload.confidence || 0,
+    status:'open',
+    chapterId:fragment.linkedChapterId || '',
+    createdAt:suggestion.decidedAt || suggestion.createdAt || Date.now(),
+    updatedAt:Date.now(),
+    routingHistory:[{action:'created-from-ai', at:Date.now(), sourceSuggestionId:suggestion.id}]
+  });
+}
+
+function ensureDraftRoutedIdea(fragment, suggestion){
+  fragment.routedIdeas = Array.isArray(fragment.routedIdeas) ? fragment.routedIdeas.map(normalizeRoutedIdea) : [];
+  const generated = routedIdeaFromSuggestion(fragment, suggestion);
+  const existing = fragment.routedIdeas.find(idea=>idea.sourceSuggestionId === suggestion.id);
+  if(existing){
+    existing.section = existing.section || generated.section;
+    existing.type = existing.type || generated.type;
+    existing.title = existing.title || generated.title;
+    existing.summary = existing.summary || generated.summary;
+    existing.quote = existing.quote || generated.quote;
+    existing.context = existing.context || generated.context;
+    existing.confidence = existing.confidence || generated.confidence;
+    existing.chapterId = existing.chapterId || generated.chapterId;
+    existing.updatedAt = Date.now();
+    return existing;
+  }
+  fragment.routedIdeas.unshift(generated);
+  return generated;
+}
+
+function backfillDraftRoutedIdeas(fragment){
+  if(!fragment) return fragment;
+  fragment.routedIdeas = Array.isArray(fragment.routedIdeas) ? fragment.routedIdeas.map(normalizeRoutedIdea) : [];
+  (fragment.aiSuggestions || []).filter(item=>item.status === 'accepted').forEach(suggestion=>{
+    ensureDraftRoutedIdea(fragment, suggestion);
+  });
+  return fragment;
+}
+
+function ensureChapterRoutedIdea(chapter, idea){
+  if(!chapter) return null;
+  chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
+  chapter.authorNotes.routedIdeas = Array.isArray(chapter.authorNotes.routedIdeas) ? chapter.authorNotes.routedIdeas.map(normalizeRoutedIdea) : [];
+  const chapterIdea = normalizeRoutedIdea(Object.assign({}, idea, {chapterId:chapter.id}));
+  const existing = chapter.authorNotes.routedIdeas.find(item=>item.sourceDraftId === chapterIdea.sourceDraftId && item.sourceSuggestionId === chapterIdea.sourceSuggestionId);
+  if(existing){
+    existing.section = chapterIdea.section;
+    existing.type = chapterIdea.type;
+    existing.title = chapterIdea.title;
+    existing.summary = chapterIdea.summary;
+    existing.quote = chapterIdea.quote;
+    existing.context = chapterIdea.context;
+    existing.confidence = chapterIdea.confidence;
+    existing.chapterId = chapter.id;
+    existing.updatedAt = Date.now();
+    return existing;
+  }
+  chapter.authorNotes.routedIdeas.unshift(chapterIdea);
+  return chapterIdea;
+}
+
+function routedIdeaNeedsResearch(idea){
+  return idea && (idea.section === 'research' || idea.section === 'entities');
+}
+
+function ensureResearchGapForRoutedIdea(chapter, idea){
+  if(!chapter || !idea || !routedIdeaNeedsResearch(idea)) return '';
+  chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
+  const research = chapter.authorNotes.research = normalizeResearch(chapter.authorNotes.research || {});
+  const existing = research.gaps.find(gap=>gap.sourceIdeaId === idea.id || gap.question === idea.title);
+  if(existing){
+    existing.sourceIdeaId = idea.id;
+    existing.updatedAt = Date.now();
+    return existing.id;
+  }
+  const subjectTitle = idea.section === 'research' ? (idea.title || 'Research Leads') : 'Entities / Factions';
+  const subjectId = ensureWorkshopResearchSubject(research, subjectTitle, [idea.type, 'routed-idea'].filter(Boolean).join(', '));
+  const gap = {
+    id:authorNoteId('gap'),
+    sourceIdeaId:idea.id,
+    subjectId,
+    tags:[idea.type, routedIdeaSectionLabel(idea.section), 'routed-idea'].filter(Boolean).join(', '),
+    question:idea.title || 'Research routed idea',
+    nextStep:idea.summary || idea.context || 'Investigate and decide how this belongs in the chapter.',
+    status:'open',
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  };
+  research.gaps.unshift(gap);
+  return gap.id;
 }
 
 function draftTransferStatusHtml(suggestionOrRecord){
@@ -12275,92 +12730,28 @@ function draftWorkshopNoteBody(fragment, suggestion){
 }
 
 function autoSendDraftAiSuggestionToWorkshop(fragment, suggestion){
+  const idea = ensureDraftRoutedIdea(fragment, suggestion);
   const chapter = draftLinkedChapter(fragment);
   if(!chapter){
     suggestion.transfer = {status:'needs-link', label:'Needs linked chapter', at:Date.now(), targets:[]};
-    fragment.conversionHistory.unshift({target:'ai-workshop-needs-link', targetId:suggestion.id, at:Date.now()});
+    idea.chapterId = '';
+    idea.routingHistory.push({action:'needs-chapter', at:Date.now()});
+    fragment.conversionHistory.unshift({target:'routed-idea-unassigned', targetId:idea.id, at:Date.now()});
     return false;
   }
-  chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
-  const notes = chapter.authorNotes;
-  const payload = suggestion.payload || {};
-  const targets = [];
-  const noteBody = draftWorkshopNoteBody(fragment, suggestion);
-  appendWorkshopPrivateNote(notes, noteBody);
-  targets.push('author-note');
-
-  if(suggestion.group === 'dialogue'){
-    appendWorkshopChecklistNote(notes, 'dialogue-voice', noteBody);
-    appendWorkshopChecklistNote(notes, 'dialogue-subtext', noteBody);
-    appendWorkshopChecklistNote(notes, 'dialogue-purpose', noteBody);
-    targets.push('dialogue-checklist');
-  }else if(suggestion.group === 'entities'){
-    const type = String(payload.type || '').toLowerCase();
-    if(type === 'character'){
-      appendWorkshopChecklistNote(notes, 'character-purpose', noteBody);
-      appendWorkshopChecklistNote(notes, 'character-distinct', noteBody);
-      targets.push('character-checklist');
-    }else if(type === 'place'){
-      appendWorkshopChecklistNote(notes, 'world-specificity', noteBody);
-      appendWorkshopChecklistNote(notes, 'world-sensory', noteBody);
-      targets.push('world-checklist');
-    }else if(type === 'motif'){
-      appendWorkshopChecklistNote(notes, 'theme-symbols-purpose', noteBody);
-      appendWorkshopChecklistNote(notes, 'theme-motifs-continued', noteBody);
-      targets.push('theme-checklist');
-    }else{
-      addWorkshopResearchGap(
-        notes,
-        payload.type || 'Imported Entities',
-        payload.name ? `Clarify ${payload.name} in this chapter.` : suggestion.title,
-        payload.description || payload.firstMentionQuote || suggestion.summary || 'Investigate this AI-identified entity before canonizing it.',
-        [payload.type, payload.name, 'draft-ai'].filter(Boolean).join(', ')
-      );
-      targets.push('research-lead');
-    }
-  }else if(suggestion.group === 'layers'){
-    const field = payload.field || suggestion.kind;
-    const values = payload.values || (payload.value ? [payload.value] : []);
-    if(field === 'themes'){
-      appendWorkshopChecklistNote(notes, 'narrative-theme', noteBody);
-      appendWorkshopChecklistNote(notes, 'theme-dramatised', noteBody);
-      targets.push('theme-checklist');
-    }else if(field === 'motifs'){
-      appendWorkshopChecklistNote(notes, 'theme-symbols-purpose', noteBody);
-      appendWorkshopChecklistNote(notes, 'theme-motifs-continued', noteBody);
-      targets.push('motif-checklist');
-    }else if(field === 'narrativeDevices'){
-      appendWorkshopChecklistNote(notes, 'theme-devices', noteBody);
-      appendWorkshopChecklistNote(notes, 'prose-mode', noteBody);
-      targets.push('device-checklist');
-    }else if(field === 'locations'){
-      appendWorkshopChecklistNote(notes, 'world-specificity', noteBody);
-      appendWorkshopChecklistNote(notes, 'continuity-errors', noteBody);
-      targets.push('world-continuity-checklist');
-    }else if(field === 'timelineClues'){
-      appendWorkshopChecklistNote(notes, 'world-time', noteBody);
-      appendWorkshopChecklistNote(notes, 'continuity-errors', noteBody);
-      targets.push('continuity-checklist');
-    }else if(field === 'researchSubjects'){
-      values.forEach(value=>addWorkshopResearchGap(notes, value, `Research ${value} for this chapter.`, suggestion.summary || 'AI identified this as a research subject.', [value, 'draft-ai'].join(', ')));
-      targets.push('research-lead');
-    }else{
-      appendWorkshopChecklistNote(notes, field === 'chapterFit' ? 'narrative-earns-place' : 'narrative-tone', noteBody);
-      targets.push('checklist-note');
-    }
-  }else if(suggestion.group === 'literary'){
-    appendWorkshopChecklistNote(notes, 'narrative-earns-place', noteBody);
-    appendWorkshopChecklistNote(notes, 'structure-shape', noteBody);
-    appendWorkshopChecklistNote(notes, 'tension-rise-fall', noteBody);
-    targets.push('literary-checklist');
-  }else if(suggestion.group === 'conversions'){
-    targets.push('conversion-note');
+  idea.chapterId = chapter.id;
+  idea.routingHistory.push({action:'sent-to-author-workspace', chapterId:chapter.id, at:Date.now()});
+  const chapterIdea = ensureChapterRoutedIdea(chapter, idea);
+  const researchId = ensureResearchGapForRoutedIdea(chapter, chapterIdea || idea);
+  if(researchId){
+    idea.researchId = researchId;
+    if(chapterIdea) chapterIdea.researchId = researchId;
   }
-
   saveChapters(chapters);
   syncChaptersToSupabase().catch(err=>console.warn('Draft AI workshop sync failed:', err));
-  suggestion.transfer = {status:'sent', label:targets.includes('research-lead') ? 'Sent as research lead' : 'Sent as checklist note', chapterId:chapter.id, targets, at:Date.now()};
-  fragment.conversionHistory.unshift({target:'ai-workshop-transfer', targetId:`${chapter.id}:${targets.join(',')}`, at:Date.now(), suggestionId:suggestion.id});
+  const targets = ['routed-idea'].concat(researchId ? ['research-lead'] : []);
+  suggestion.transfer = {status:'sent', label:researchId ? 'Sent as research lead' : 'Sent as routed idea', chapterId:chapter.id, targets, at:Date.now()};
+  fragment.conversionHistory.unshift({target:'routed-idea-transfer', targetId:`${chapter.id}:${idea.id}`, at:Date.now(), suggestionId:suggestion.id});
   return true;
 }
 
@@ -12579,6 +12970,259 @@ function renderDraftConversions(fragment){
     <button class="cm-btn secondary" type="button" onclick="archiveActiveDraft()">Archive Fragment</button>`;
 }
 
+function draftIdeaChapterOptions(selected=''){
+  return `<option value="all" ${selected==='all'?'selected':''}>All Chapters</option>
+    <option value="unassigned" ${selected==='unassigned'?'selected':''}>Unassigned</option>` +
+    chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${selected===ch.id?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
+}
+
+function draftIdeaAssignmentOptions(selected=''){
+  return `<option value="">Unassigned</option>` + chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${selected===ch.id?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
+}
+
+function updateDraftIdeaFilter(key, value){
+  _draftIdeaFilter[key] = value || (key === 'bulkChapter' ? '' : 'all');
+  saveDraftIdeaUi();
+  renderDraftsView({keepCache:true});
+}
+
+function allRoutedIdeaRows(){
+  return _draftFragments.flatMap(fragment=>(fragment.routedIdeas || []).map(idea=>({fragment, idea:normalizeRoutedIdea(idea)})));
+}
+
+function routedIdeaMatchesFilter(row){
+  const idea = row.idea;
+  const term = String(_draftFilter.search || '').trim().toLowerCase();
+  if(_draftIdeaFilter.section !== 'all' && idea.section !== _draftIdeaFilter.section) return false;
+  if(_draftIdeaFilter.status !== 'all' && idea.status !== _draftIdeaFilter.status) return false;
+  if(_draftIdeaFilter.chapter === 'unassigned' && idea.chapterId) return false;
+  if(_draftIdeaFilter.chapter && _draftIdeaFilter.chapter !== 'all' && _draftIdeaFilter.chapter !== 'unassigned' && idea.chapterId !== _draftIdeaFilter.chapter) return false;
+  if(_draftIdeaFilter.confidence === 'high' && idea.confidence < 0.75) return false;
+  if(_draftIdeaFilter.confidence === 'medium' && (idea.confidence < 0.4 || idea.confidence >= 0.75)) return false;
+  if(_draftIdeaFilter.confidence === 'low' && idea.confidence >= 0.4) return false;
+  if(term){
+    const haystack = [idea.title, idea.summary, idea.quote, idea.context, idea.type, idea.section, row.fragment.title].join(' ').toLowerCase();
+    if(!haystack.includes(term)) return false;
+  }
+  return true;
+}
+
+function visibleRoutedIdeaRows(){
+  return allRoutedIdeaRows().filter(routedIdeaMatchesFilter);
+}
+
+function toggleRoutedIdeaSelection(key, checked){
+  if(checked) _draftSelectedIdeaKeys.add(key);
+  else _draftSelectedIdeaKeys.delete(key);
+  renderDraftsView({keepCache:true, keepEditor:true});
+}
+
+function selectVisibleRoutedIdeas(){
+  visibleRoutedIdeaRows().forEach(row=>_draftSelectedIdeaKeys.add(routedIdeaKey(row.idea)));
+  renderDraftsView({keepCache:true, keepEditor:true});
+}
+
+function clearRoutedIdeaSelection(){
+  _draftSelectedIdeaKeys.clear();
+  renderDraftsView({keepCache:true, keepEditor:true});
+}
+
+function findDraftRoutedIdea(sourceDraftId, ideaId){
+  const fragment = _draftFragments.find(item=>item.id===sourceDraftId);
+  const idea = fragment ? (fragment.routedIdeas || []).find(item=>item.id===ideaId) : null;
+  return {fragment, idea};
+}
+
+function syncSuggestionTransferFromIdea(fragment, idea){
+  const suggestion = (fragment.aiSuggestions || []).find(item=>item.id===idea.sourceSuggestionId);
+  if(!suggestion) return;
+  suggestion.transfer = idea.chapterId
+    ? {status:'sent', label:routedIdeaNeedsResearch(idea) ? 'Sent as research lead' : 'Sent as routed idea', chapterId:idea.chapterId, targets:routedIdeaNeedsResearch(idea) ? ['routed-idea','research-lead'] : ['routed-idea'], at:Date.now()}
+    : {status:'needs-link', label:'Needs linked chapter', at:Date.now(), targets:[]};
+  syncAcceptedRecordTransfer(fragment, suggestion);
+}
+
+function syncRoutedIdeaToChapter(fragment, idea){
+  const chapter = idea.chapterId ? chapters.find(ch=>ch.id===idea.chapterId) : null;
+  if(!chapter) return false;
+  const chapterIdea = ensureChapterRoutedIdea(chapter, idea);
+  if(routedIdeaNeedsResearch(idea)){
+    const researchId = ensureResearchGapForRoutedIdea(chapter, chapterIdea || idea);
+    idea.researchId = researchId;
+    if(chapterIdea) chapterIdea.researchId = researchId;
+  }
+  syncSuggestionTransferFromIdea(fragment, idea);
+  saveChapters(chapters);
+  syncChaptersToSupabase().catch(err=>console.warn('Routed idea chapter sync failed:', err));
+  return true;
+}
+
+async function assignRoutedIdeaChapter(sourceDraftId, ideaId, chapterId){
+  const {fragment, idea} = findDraftRoutedIdea(sourceDraftId, ideaId);
+  if(!fragment || !idea) return;
+  idea.chapterId = chapterId || '';
+  idea.updatedAt = Date.now();
+  idea.routingHistory = idea.routingHistory || [];
+  idea.routingHistory.push({action:chapterId ? 'assigned-chapter' : 'unassigned-chapter', chapterId:chapterId || '', at:Date.now()});
+  if(chapterId) syncRoutedIdeaToChapter(fragment, idea);
+  else syncSuggestionTransferFromIdea(fragment, idea);
+  await draftPut(fragment);
+  await renderDraftsView({keepCache:false, keepEditor:_draftFilter.view !== 'ideas'});
+  draftStatus(chapterId ? 'Routed idea assigned to chapter workspace.' : 'Routed idea moved back to unassigned repository.');
+}
+
+async function setDraftRoutedIdeaStatus(sourceDraftId, ideaId, status){
+  const {fragment, idea} = findDraftRoutedIdea(sourceDraftId, ideaId);
+  if(!fragment || !idea || !ROUTED_IDEA_STATUSES.includes(status)) return;
+  idea.status = status;
+  idea.updatedAt = Date.now();
+  idea.routingHistory = idea.routingHistory || [];
+  idea.routingHistory.push({action:'status', status, at:Date.now()});
+  if(idea.chapterId){
+    const chapter = chapters.find(ch=>ch.id===idea.chapterId);
+    if(chapter){
+      chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
+      const target = chapter.authorNotes.routedIdeas.find(item=>item.id===idea.id) || ensureChapterRoutedIdea(chapter, idea);
+      if(target){ target.status = status; target.updatedAt = Date.now(); }
+      saveChapters(chapters);
+    }
+  }
+  await draftPut(fragment);
+  await renderDraftsView({keepCache:false, keepEditor:_draftFilter.view !== 'ideas'});
+  draftStatus(`Routed idea marked ${status}.`);
+}
+
+async function setRoutedIdeaStatusByAcceptedRecord(kind, index, status){
+  const fragment = activeDraft();
+  if(!fragment) return;
+  const record = kind === 'dialogue' ? (fragment.dialogue || [])[index] : (fragment.entities || [])[index];
+  const suggestion = draftAcceptedSuggestionBySource(fragment, record);
+  const idea = suggestion ? (fragment.routedIdeas || []).find(item=>item.sourceSuggestionId===suggestion.id) : null;
+  if(!idea) return;
+  await setDraftRoutedIdeaStatus(fragment.id, idea.id, status);
+}
+
+async function sendRoutedIdeaToResearch(sourceDraftId, ideaId){
+  const {fragment, idea} = findDraftRoutedIdea(sourceDraftId, ideaId);
+  if(!fragment || !idea) return;
+  if(!idea.chapterId){ draftStatus('Assign this routed idea to a chapter before sending it to Research.'); return; }
+  const chapter = chapters.find(ch=>ch.id===idea.chapterId);
+  if(!chapter) return;
+  const researchId = ensureResearchGapForRoutedIdea(chapter, idea);
+  idea.researchId = researchId;
+  idea.updatedAt = Date.now();
+  idea.routingHistory.push({action:'sent-to-research', researchId, at:Date.now()});
+  await draftPut(fragment);
+  saveChapters(chapters);
+  syncChaptersToSupabase().catch(err=>console.warn('Routed research sync failed:', err));
+  await renderDraftsView({keepCache:false, keepEditor:_draftFilter.view !== 'ideas'});
+  draftStatus('Routed idea sent to the chapter Research tab.');
+}
+
+function selectedOrVisibleIdeaRows(){
+  const visible = visibleRoutedIdeaRows();
+  if(!_draftSelectedIdeaKeys.size) return visible;
+  return visible.filter(row=>_draftSelectedIdeaKeys.has(routedIdeaKey(row.idea)));
+}
+
+async function bulkSetRoutedIdeasStatus(status){
+  const rows = selectedOrVisibleIdeaRows();
+  for(const row of rows) await setDraftRoutedIdeaStatus(row.fragment.id, row.idea.id, status);
+  _draftSelectedIdeaKeys.clear();
+  await renderDraftsView({keepCache:false});
+}
+
+async function bulkAssignRoutedIdeas(){
+  const chapterId = _draftIdeaFilter.bulkChapter || '';
+  if(!chapterId){ draftStatus('Choose a chapter for bulk assignment first.'); return; }
+  const rows = selectedOrVisibleIdeaRows();
+  for(const row of rows) await assignRoutedIdeaChapter(row.fragment.id, row.idea.id, chapterId);
+  _draftSelectedIdeaKeys.clear();
+  await renderDraftsView({keepCache:false});
+}
+
+async function bulkSendRoutedIdeasToResearch(){
+  const rows = selectedOrVisibleIdeaRows();
+  for(const row of rows) await sendRoutedIdeaToResearch(row.fragment.id, row.idea.id);
+  _draftSelectedIdeaKeys.clear();
+  await renderDraftsView({keepCache:false});
+}
+
+async function openDraftFromRoutedIdea(sourceDraftId){
+  await showDrafts();
+  await selectDraftFragment(sourceDraftId);
+}
+
+function renderIdeaCard(row){
+  const idea = row.idea;
+  const key = routedIdeaKey(idea);
+  return `<article class="idea-card">
+    <input class="idea-select-check" type="checkbox" ${_draftSelectedIdeaKeys.has(key)?'checked':''} onchange="toggleRoutedIdeaSelection('${escHtml(key)}',this.checked)">
+    <div class="idea-card-title">${escHtml(idea.title)}</div>
+    <div class="idea-card-meta">${routedIdeaStatusHtml(idea.status)} · ${escHtml(routedIdeaChapterLabel(idea.chapterId))} · ${idea.confidence ? `confidence ${Math.round(idea.confidence * 100)}%` : 'unscored'}</div>
+    <div class="idea-card-body">${escHtml(idea.summary || idea.context || 'No summary captured.')}</div>
+    ${idea.quote ? `<div class="author-routed-quote">${escHtml(idea.quote)}</div>` : ''}
+    <div class="idea-card-meta">Source: ${escHtml(row.fragment.title || idea.sourceFragmentTitle || 'Draft fragment')}</div>
+    <div class="idea-card-actions">
+      <select class="drafts-select" onchange="assignRoutedIdeaChapter('${escHtml(row.fragment.id)}','${escHtml(idea.id)}',this.value)">${draftIdeaAssignmentOptions(idea.chapterId)}</select>
+      <button class="tiny-btn" type="button" onclick="setDraftRoutedIdeaStatus('${escHtml(row.fragment.id)}','${escHtml(idea.id)}','working')">Working</button>
+      <button class="tiny-btn" type="button" onclick="setDraftRoutedIdeaStatus('${escHtml(row.fragment.id)}','${escHtml(idea.id)}','used')">Used</button>
+      ${routedIdeaNeedsResearch(idea) ? `<button class="tiny-btn" type="button" onclick="sendRoutedIdeaToResearch('${escHtml(row.fragment.id)}','${escHtml(idea.id)}')">Send To Research</button>` : ''}
+      <button class="tiny-btn" type="button" onclick="openDraftFromRoutedIdea('${escHtml(row.fragment.id)}')">Open Source Draft</button>
+    </div>
+  </article>`;
+}
+
+function renderDraftIdeaRepository(){
+  const rows = visibleRoutedIdeaRows();
+  const lanes = ROUTED_IDEA_SECTIONS.map(section=>{
+    const laneRows = rows.filter(row=>row.idea.section === section.id);
+    return `<section class="idea-lane">
+      <div class="idea-lane-head">
+        <div class="idea-lane-title">${escHtml(section.label)}</div>
+        <div class="idea-lane-count">${laneRows.length}</div>
+      </div>
+      ${laneRows.length ? laneRows.map(renderIdeaCard).join('') : '<div class="drafts-empty">No ideas in this lane.</div>'}
+    </section>`;
+  }).join('');
+  return `<section class="idea-repository">
+    <div class="drafts-main-head">
+      <div>
+        <div class="drafts-kicker">Idea Repository</div>
+        <div class="drafts-title">Routed Ideas</div>
+      </div>
+      <div class="drafts-actions">
+        <button class="cm-btn secondary" type="button" onclick="selectVisibleRoutedIdeas()">Select Visible</button>
+        <button class="cm-btn secondary" type="button" onclick="clearRoutedIdeaSelection()">Clear</button>
+      </div>
+    </div>
+    <div class="idea-repository-controls">
+      <select class="drafts-select" onchange="updateDraftIdeaFilter('section',this.value)">
+        <option value="all" ${_draftIdeaFilter.section==='all'?'selected':''}>All Lanes</option>
+        ${ROUTED_IDEA_SECTIONS.map(section=>`<option value="${section.id}" ${_draftIdeaFilter.section===section.id?'selected':''}>${escHtml(section.label)}</option>`).join('')}
+      </select>
+      <select class="drafts-select" onchange="updateDraftIdeaFilter('status',this.value)">
+        <option value="all" ${_draftIdeaFilter.status==='all'?'selected':''}>All Statuses</option>
+        ${ROUTED_IDEA_STATUSES.map(status=>`<option value="${status}" ${_draftIdeaFilter.status===status?'selected':''}>${escHtml(status)}</option>`).join('')}
+      </select>
+      <select class="drafts-select" onchange="updateDraftIdeaFilter('chapter',this.value)">${draftIdeaChapterOptions(_draftIdeaFilter.chapter)}</select>
+      <select class="drafts-select" onchange="updateDraftIdeaFilter('confidence',this.value)">
+        ${['all','high','medium','low'].map(value=>`<option value="${value}" ${_draftIdeaFilter.confidence===value?'selected':''}>${value === 'all' ? 'All Confidence' : value + ' confidence'}</option>`).join('')}
+      </select>
+      <select class="drafts-select" onchange="updateDraftIdeaFilter('bulkChapter',this.value)">
+        <option value="">Bulk Assign Chapter</option>
+        ${chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${_draftIdeaFilter.bulkChapter===ch.id?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('')}
+      </select>
+      <button class="cm-btn secondary" type="button" onclick="bulkAssignRoutedIdeas()">Assign Selected</button>
+      <button class="cm-btn secondary" type="button" onclick="bulkSetRoutedIdeasStatus('working')">Mark Working</button>
+      <button class="cm-btn secondary" type="button" onclick="bulkSetRoutedIdeasStatus('used')">Mark Used</button>
+      <button class="cm-btn secondary" type="button" onclick="bulkSendRoutedIdeasToResearch()">Send To Research</button>
+    </div>
+    <div class="drafts-card-meta">${rows.length} routed idea${rows.length === 1 ? '' : 's'} shown · ${_draftSelectedIdeaKeys.size} selected</div>
+    <div class="idea-lane-grid">${lanes}</div>
+  </section>`;
+}
+
 function renderDraftEditor(fragment){
   if(!fragment) return '<div class="drafts-empty">Create or select a fragment. This is the inbox before canon.</div>';
   const preview = fragment.body ? parseBody(fragment.body) : '<p class="ed-note">No draft text yet.</p>';
@@ -12689,7 +13333,7 @@ async function renderDraftsView(options={}){
   if(search) search.value = _draftFilter.search || '';
   if(list) list.innerHTML = visible.length ? visible.map(draftFragmentCard).join('') : '<div class="drafts-empty">No fragments match this view.</div>';
   if(stats) stats.innerHTML = renderDraftStats();
-  if(editor && !options.keepEditor) editor.innerHTML = renderDraftEditor(active);
+  if(editor && (_draftFilter.view === 'ideas' || !options.keepEditor)) editor.innerHTML = _draftFilter.view === 'ideas' ? renderDraftIdeaRepository() : renderDraftEditor(active);
   if(suggestions) suggestions.innerHTML = renderDraftAiPanel(active) + renderDraftAcceptedIntelligence(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
   if(conversions) conversions.innerHTML = renderDraftConversions(active);
 }
@@ -13733,6 +14377,19 @@ Object.assign(window, {
   createCodexFromAcceptedEntity,
   setDraftLinkedChapterFromIntel,
   openLinkedDraftAuthorWorkspace,
+  updateDraftIdeaFilter,
+  toggleRoutedIdeaSelection,
+  selectVisibleRoutedIdeas,
+  clearRoutedIdeaSelection,
+  assignRoutedIdeaChapter,
+  setDraftRoutedIdeaStatus,
+  setRoutedIdeaStatusByAcceptedRecord,
+  sendRoutedIdeaToResearch,
+  bulkAssignRoutedIdeas,
+  bulkSetRoutedIdeasStatus,
+  bulkSendRoutedIdeasToResearch,
+  openDraftFromRoutedIdea,
+  updateAuthorRoutedIdea,
   removeAcceptedDialogue,
   removeAcceptedEntity,
   runDraftSuggestions,
