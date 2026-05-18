@@ -17,9 +17,16 @@ create table if not exists public.chapters (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.poetic_engines (
+  id text primary key,
+  data jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
 alter table public.characters enable row level security;
 alter table public.codex_entries enable row level security;
 alter table public.chapters enable row level security;
+alter table public.poetic_engines enable row level security;
 
 create policy "Anyone can read characters"
   on public.characters
@@ -81,5 +88,26 @@ create policy "Admin can update chapters"
 
 create policy "Admin can delete chapters"
   on public.chapters
+  for delete
+  using ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com');
+
+create policy "Anyone can read poetic engines"
+  on public.poetic_engines
+  for select
+  using (true);
+
+create policy "Admin can create poetic engines"
+  on public.poetic_engines
+  for insert
+  with check ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com');
+
+create policy "Admin can update poetic engines"
+  on public.poetic_engines
+  for update
+  using ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com')
+  with check ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com');
+
+create policy "Admin can delete poetic engines"
+  on public.poetic_engines
   for delete
   using ((auth.jwt() ->> 'email') = 'pcygnus2112@gmail.com');

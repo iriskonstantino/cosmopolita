@@ -2261,6 +2261,60 @@ body.links-on .wl:hover{color:var(--red)}
   height:100%;
   background:var(--ink);
 }
+.proto-wrap{
+  min-height:calc(100vh - 48px);
+  background:linear-gradient(90deg,rgba(184,50,50,0.08) 1px,transparent 1px),linear-gradient(0deg,rgba(200,129,10,0.07) 1px,transparent 1px),var(--paper);
+  background-size:42px 42px;
+  padding:2.2rem 2.5rem 4rem;
+}
+.proto-shell{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:1rem;max-width:1180px;margin:0 auto}
+.proto-poem-panel,.proto-detail-panel,.proto-admin-panel{border:1px solid var(--border);background:rgba(255,255,255,0.9)}
+.proto-poem-panel{position:relative;padding:1.2rem;overflow:hidden}
+.proto-poem-panel::before,.proto-poem-panel::after{content:'';position:absolute;inset:1rem 1.4rem;border:1px solid rgba(184,50,50,0.22);border-radius:50%;pointer-events:none}
+.proto-poem-panel::after{inset:2.1rem 3rem;border-color:rgba(200,129,10,0.2)}
+.proto-meta,.proto-section{position:relative;z-index:1}
+.proto-meta{border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:1rem}
+.proto-kicker,.proto-layer-btn,.proto-line-num,.proto-chip,.proto-panel-label,.proto-admin-label,.proto-empty,.proto-field label{font-family:var(--mono);text-transform:uppercase}
+.proto-kicker{color:#aaa;font-size:0.54rem;letter-spacing:0.22em}
+.proto-title{font-family:var(--display);font-weight:700;font-size:clamp(1.8rem,4vw,3.4rem);line-height:0.96;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);margin-top:0.35rem}
+.proto-subtitle,.proto-description,.proto-invocation{font-family:var(--serif);color:#4f4840;line-height:1.65}
+.proto-subtitle{font-style:italic;margin-top:0.45rem}
+.proto-description{max-width:760px;margin-top:0.8rem}
+.proto-invocation{border-left:3px solid var(--red);margin-top:0.9rem;padding-left:0.85rem}
+.proto-layers{display:flex;flex-wrap:wrap;gap:0.45rem;margin:1rem 0}
+.proto-layer-btn{border:1px solid var(--border);background:var(--white);color:#777;cursor:pointer;font-size:0.5rem;letter-spacing:0.1em;padding:0.35rem 0.55rem}
+.proto-layer-btn.active{background:var(--ink);border-color:var(--ink);color:var(--white)}
+.proto-section{margin-top:1.4rem}
+.proto-section-title{font-family:var(--display);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--border);padding-bottom:0.45rem;margin-bottom:0.55rem}
+.proto-line{display:grid;grid-template-columns:3.2rem minmax(0,1fr);gap:0.75rem;border-bottom:1px solid rgba(31,28,24,0.08);padding:0.65rem 0.25rem;cursor:pointer}
+.proto-line:hover,.proto-line.active{background:rgba(200,129,10,0.1)}
+.proto-line-num{color:#aaa;font-size:0.52rem;letter-spacing:0.12em;padding-top:0.18rem}
+.proto-line-text{font-family:var(--serif);font-size:1.08rem;line-height:1.68;color:var(--ink)}
+.proto-line-layers{display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.45rem}
+.proto-chip{display:none;align-items:center;border:1px solid var(--border);background:var(--paper);color:#777;font-size:0.46rem;letter-spacing:0.09em;padding:0.13rem 0.35rem}
+.proto-show-motifs .proto-chip.motif,.proto-show-events .proto-chip.event,.proto-show-revelation .proto-chip.revelation,.proto-show-math .proto-chip.math,.proto-show-womb .proto-chip.womb,.proto-show-inevitability .proto-chip.inevitability,.proto-show-nestling .proto-chip.nestling,.proto-show-hyper .proto-chip.hyper,.proto-show-links .proto-chip.links{display:inline-flex}
+.proto-scansion{display:none;grid-template-columns:repeat(6,minmax(0,1fr));gap:0.35rem;margin-top:0.5rem}
+.proto-show-meter .proto-scansion{display:grid}
+.proto-foot{border:1px solid var(--border);background:var(--white);color:#6f665b;font-family:var(--mono);font-size:0.5rem;letter-spacing:0.06em;padding:0.28rem 0.35rem}
+.proto-detail-panel{position:sticky;top:64px;max-height:calc(100vh - 82px);overflow:auto}
+.proto-panel-label{border-bottom:1px solid var(--border);background:var(--panel);color:#999;font-size:0.54rem;letter-spacing:0.16em;padding:0.65rem 0.75rem}
+.proto-panel-body{padding:0.85rem}
+.proto-detail-title{font-family:var(--display);font-weight:700;font-size:1.05rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink)}
+.proto-detail-block{border-top:1px solid var(--border);margin-top:0.85rem;padding-top:0.75rem;font-family:var(--serif);font-size:0.9rem;line-height:1.55;color:#4f4840}
+.proto-link-card{border:1px solid var(--border);background:var(--paper);padding:0.55rem;margin-top:0.5rem}
+.proto-link-card.unmatched{border-style:dashed;border-color:var(--red)}
+.proto-admin-panel{max-width:1180px;margin:1rem auto 0;padding:1rem}
+.proto-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.8rem}
+.proto-field{display:grid;gap:0.32rem}
+.proto-field.wide{grid-column:1 / -1}
+.proto-field label{color:#999;font-size:0.5rem;letter-spacing:0.12em}
+.proto-field input,.proto-field textarea,.proto-field select{border:1px solid var(--border);background:var(--white);color:var(--ink);font-family:var(--serif);font-size:0.9rem;line-height:1.45;padding:0.5rem 0.6rem}
+.proto-admin-list{display:grid;gap:0.65rem;margin-top:0.8rem}
+.proto-admin-card{border:1px solid var(--border);background:var(--paper);padding:0.75rem}
+.proto-admin-label{color:#999;font-size:0.52rem;letter-spacing:0.14em;margin-bottom:0.55rem}
+.proto-trace-hit{background:linear-gradient(transparent 42%, rgba(200,129,10,0.28) 42%, rgba(200,129,10,0.28) 82%, transparent 82%)}
+body:not(.poetic-traces-on) .proto-trace-hit{background:transparent}
+.poetic-trace-toggle.on .pill{transform:translateX(15px);background:var(--green)}
 .toc-archive-label{
   font-family:var(--mono);
   font-size:0.58rem;
@@ -3576,6 +3630,10 @@ body:not(.logged-in) #tnav-assets{
   .editorial-filters{grid-template-columns:1fr;}
   .editorial-row{grid-template-columns:1fr;}
   .editorial-actions{justify-content:flex-start;}
+  .proto-wrap{padding:1.4rem 1.25rem 3rem}
+  .proto-shell,.proto-admin-grid{grid-template-columns:1fr}
+  .proto-detail-panel{position:relative;top:auto;max-height:none}
+  .proto-scansion{grid-template-columns:1fr 1fr}
   .toc-books-top{display:block;}
   .toc-books-meta{text-align:left;margin-top:0.45rem;}
   .toc-books-grid,
@@ -3786,10 +3844,11 @@ body:not(.logged-in) #tnav-assets{
   <img id="topnav-logo" src="logo.png" alt="Home" onclick="goHome()">
   <button id="topnav-back" onclick="goBack()">&#8592; Back</button>
   <nav id="topnav-nav">
-    <button class="tnav-link" id="tnav-toc"      onclick="showLanding()">Table of Contents</button>
-    <button class="tnav-link" id="tnav-chars"    onclick="showCharacters()">Characters</button>
-    <button class="tnav-link" id="tnav-codex"    onclick="showWikiEntry()">Codex</button>
-    <button class="tnav-link" id="tnav-assets"   onclick="showAssets()">Files</button>
+	    <button class="tnav-link" id="tnav-toc"      onclick="showLanding()">Table of Contents</button>
+	    <button class="tnav-link" id="tnav-chars"    onclick="showCharacters()">Characters</button>
+	    <button class="tnav-link" id="tnav-codex"    onclick="showWikiEntry()">Codex</button>
+	    <button class="tnav-link" id="tnav-proto"    onclick="showProtoevangelium()">Protoevangelium</button>
+	    <button class="tnav-link" id="tnav-assets"   onclick="showAssets()">Files</button>
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
@@ -3929,13 +3988,22 @@ body:not(.logged-in) #tnav-assets{
         </div>
       </div>
 
-      <div class="panel-sec">
-        <div class="panel-hd">Reader Notes</div>
-        <button class="notes-panel-btn" id="notes-toggle-btn" onclick="toggleNotesPanel()">Open Notes</button>
-        <div class="notes-status" id="notes-summary">Notes loading...</div>
-      </div>
+	      <div class="panel-sec">
+	        <div class="panel-hd">Reader Notes</div>
+	        <button class="notes-panel-btn" id="notes-toggle-btn" onclick="toggleNotesPanel()">Open Notes</button>
+	        <div class="notes-status" id="notes-summary">Notes loading...</div>
+	      </div>
 
-      <div class="panel-sec">
+	      <div class="panel-sec">
+	        <div class="panel-hd">Poetic Traces</div>
+	        <div class="toggle-row poetic-trace-toggle" id="poetic-traces-toggle" onclick="togglePoeticTraces()">
+	          <div class="pill"></div>
+	          <span class="toggle-lbl">Show Traces</span>
+	        </div>
+	        <div id="cv-poetic-traces" class="notes-status">No Protoevangelium links yet.</div>
+	      </div>
+
+	      <div class="panel-sec">
         <div class="panel-hd">Text layout</div>
         <div class="layout-controls">
           <button class="cm-btn secondary layout-option" type="button" data-layout="left" onclick="setTextLayout('left')">Left</button>
@@ -4220,6 +4288,36 @@ body:not(.logged-in) #tnav-assets{
 </div>
 
 
+<!-- ════ PROTOEVANGELIUM POETIC ENGINE ═══════════════ -->
+<div id="proto-view" style="display:none">
+  <div class="chapter-header toc-compact-header">
+    <div class="chdr-left">
+      <div class="chdr-title">Protoevangelium</div>
+      <div class="chdr-subtitle">Dactylic hexameter &nbsp;&middot;&nbsp; poetic engine</div>
+    </div>
+    <div class="chdr-deco">
+      <div class="deco-gold"></div>
+      <div class="deco-red"></div>
+      <div class="deco-navy">
+        <div class="deco-tris">
+          <div class="tri-col"><div class="tri-w"></div><div class="tri-g"></div></div>
+          <div class="tri-col"><div class="tri-w"></div></div>
+          <div class="tri-col"><div class="tri-w"></div><div class="tri-g"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="proto-wrap">
+    <div class="proto-shell">
+      <main id="proto-poem" class="proto-poem-panel"></main>
+      <aside id="proto-detail" class="proto-detail-panel"></aside>
+    </div>
+    <section id="proto-admin" class="proto-admin-panel admin-only"></section>
+    <div id="proto-status" class="content-status"></div>
+  </div>
+</div>
+
+
 <!-- ════ OFFLINE FILE VAULT ═════════════════════════ -->
 <div id="assets-view" style="display:none">
   <div class="chapter-header">
@@ -4471,6 +4569,7 @@ Start a new section with: ===Section Title==="></textarea>
 const CHAPTERS_STORAGE_KEY = 'cosmopolita_chapters';
 const CHAPTERS_DATA_URL = 'data/chapters.json';
 const CHAPTER_EDITOR_DRAFTS_KEY = 'cosmopolita_chapter_editor_drafts';
+const PROTOEVANGELIUM_STORAGE_KEY = 'cosmopolita_protoevangelium';
 
 const CH1_BODY = `The [[port-actual|Port of Port-Actual]] was not, in any meaningful sense, a single port. By the time [[elzbieta|Elzbieta Vorn]] arrived on the 14th of Drymonth aboard the *Catechism of Tides*—a mid-displacement packet vessel flagged alternately to four jurisdictions depending on which was least inconvenient at any given moment—the port had achieved the administrative character of a small nation-state operating inside the body of a larger one, its [[compact|Compact authorities]] maintaining seventeen separate arrival counters and an unknown number of informal ones, staffed by officials whose authority derived from documents no one had verified in living memory.
 
@@ -4964,6 +5063,7 @@ function backupLocalStorageSnapshot(){
   const keys = [
     CHAPTERS_STORAGE_KEY,
     CHAPTER_EDITOR_DRAFTS_KEY,
+    PROTOEVANGELIUM_STORAGE_KEY,
     BOOK_ARCH_STORAGE_KEY,
     'cosmopolita_entities',
     'cosmopolita_characters',
@@ -5033,7 +5133,8 @@ async function buildFullBackupPayload(){
       characters:(characters || []).length,
       codexEntries:Object.keys(E || {}).length,
       readerNotes:readerNotes.length,
-      vaultFiles:vaultFiles.length
+      vaultFiles:vaultFiles.length,
+      protoLines:(protoevangelium.lines || []).length
     },
     content:{
       chapters:normalizedChapters,
@@ -5042,6 +5143,7 @@ async function buildFullBackupPayload(){
       characters,
       readerNotes,
       fileVault:vaultFiles,
+      protoevangelium:normalizeProtoevangelium(protoevangelium),
       chapterEditorDrafts:backupReadLocalStorage(CHAPTER_EDITOR_DRAFTS_KEY) || {}
     },
     browserStorage:{
@@ -5137,6 +5239,46 @@ function backupAuthorNotesHtml(notes){
     </section>`;
 }
 
+function backupProtoevangeliumHtml(proto){
+  proto = normalizeProtoevangelium(proto || {});
+  const motifMap = Object.fromEntries((proto.motifs || []).map(motif=>[motif.id, motif]));
+  const eventMap = Object.fromEntries((proto.events || []).map(event=>[event.id, event]));
+  const sectionHtml = (proto.sections || []).map(section=>{
+    const lines = proto.lines.filter(line=>line.sectionId === section.id);
+    return `<article class="chapter">
+      <h3>${backupEscapeHtml(section.title)}</h3>
+      ${section.description ? `<p class="meta">${backupEscapeHtml(section.description)}</p>` : ''}
+      ${lines.map(line=>`
+        <div class="source">
+          <h5>Line ${backupEscapeHtml(line.number)}</h5>
+          <p>${backupEscapeHtml(line.text)}</p>
+          <p><b>Scansion:</b> ${(line.scansion.feet || []).map(backupEscapeHtml).join(' | ')} ${line.scansion.caesura ? `· ${backupEscapeHtml(line.scansion.caesura)}` : ''}</p>
+          <p><b>Motifs:</b> ${(line.motifIds || []).map(id=>backupEscapeHtml(motifMap[id]?.label || id)).join(', ') || '<span class="muted">None</span>'}</p>
+          <p><b>Events:</b> ${(line.eventIds || []).map(id=>backupEscapeHtml(eventMap[id]?.title || id)).join(', ') || '<span class="muted">None</span>'}</p>
+          ${line.chapterLinks.length ? `<p><b>Chapter Links:</b> ${line.chapterLinks.map(link=>`${backupEscapeHtml(protoChapterLabel(link.chapterId))}: ${backupEscapeHtml(link.quote)}`).join('<br>')}</p>` : ''}
+          ${line.revelation ? `<p><b>Revelation:</b> ${backupEscapeHtml(line.revelation)}</p>` : ''}
+          ${line.mathNote ? `<p><b>Divine Mathematics:</b> ${backupEscapeHtml(line.mathNote)}</p>` : ''}
+          ${line.wombNote ? `<p><b>Womb:</b> ${backupEscapeHtml(line.wombNote)}</p>` : ''}
+          ${line.inevitabilityNote ? `<p><b>Inevitability:</b> ${backupEscapeHtml(line.inevitabilityNote)}</p>` : ''}
+          ${line.nestlingNote ? `<p><b>Nestling:</b> ${backupEscapeHtml(line.nestlingNote)}</p>` : ''}
+          ${line.hyperStructureNote ? `<p><b>Hyper-Structure:</b> ${backupEscapeHtml(line.hyperStructureNote)}</p>` : ''}
+        </div>`).join('') || '<p class="muted">No lines</p>'}
+    </article>`;
+  }).join('');
+  return `
+    <section class="author-box">
+      <h3>${backupEscapeHtml(proto.meta.title || 'Protoevangelium')}</h3>
+      <p><b>${backupEscapeHtml(proto.meta.subtitle || '')}</b></p>
+      ${backupParagraphs(proto.meta.description)}
+      ${proto.meta.invocation ? `<blockquote>${backupEscapeHtml(proto.meta.invocation)}</blockquote>` : ''}
+      <h4>Motifs</h4>
+      <ul>${(proto.motifs || []).map(motif=>`<li><b>${backupEscapeHtml(motif.label)}</b> · ${backupEscapeHtml(motif.layer)} · ${backupEscapeHtml(motif.description)}</li>`).join('') || '<li class="muted">No motifs</li>'}</ul>
+      <h4>Events</h4>
+      <ul>${(proto.events || []).map(event=>`<li><b>${backupEscapeHtml(event.title)}</b> · ${backupEscapeHtml(event.description)}</li>`).join('') || '<li class="muted">No events</li>'}</ul>
+      ${sectionHtml}
+    </section>`;
+}
+
 function backupHtmlDocument(payload){
   const chaptersHtml = payload.content.chapters.map((ch,index)=>`
     <article class="chapter">
@@ -5174,6 +5316,7 @@ function backupHtmlDocument(payload){
       ${file.dataUrl ? `<p><a href="${file.dataUrl}" download="${backupEscapeHtml(file.name)}">Download embedded file</a></p>` : '<p class="muted">File data unavailable</p>'}
     </article>
   `).join('');
+  const protoHtml = backupProtoevangeliumHtml(payload.content.protoevangelium);
   const rawJson = JSON.stringify(payload, null, 2).replace(/</g,'\\u003c');
   return `<!doctype html>
 <html lang="en">
@@ -5209,6 +5352,7 @@ a{color:#8b3a1e}
 </header>
 <nav>
   <a href="#chapters">Chapters</a>
+  <a href="#protoevangelium">Protoevangelium</a>
   <a href="#characters">Characters</a>
   <a href="#codex">Codex</a>
   <a href="#reader-notes">Reader Notes</a>
@@ -5223,8 +5367,10 @@ a{color:#8b3a1e}
     <div class="stat"><b>${payload.counts.codexEntries}</b> Codex Entries</div>
     <div class="stat"><b>${payload.counts.readerNotes}</b> Reader Notes</div>
     <div class="stat"><b>${payload.counts.vaultFiles}</b> Vault Files</div>
+    <div class="stat"><b>${payload.counts.protoLines}</b> Proto Lines</div>
   </section>
   <section id="chapters"><h2>Chapters</h2>${chaptersHtml}</section>
+  <section id="protoevangelium"><h2>Protoevangelium</h2>${protoHtml}</section>
   <section id="characters"><h2>Characters</h2>${charactersHtml || '<p class="muted">No characters</p>'}</section>
   <section id="codex"><h2>Codex</h2>${codexHtml || '<p class="muted">No codex entries</p>'}</section>
   <section id="reader-notes"><h2>Reader Notes</h2>${readerNotesHtml || '<p class="muted">No reader notes</p>'}</section>
@@ -5252,7 +5398,7 @@ async function exportFullBackup(){
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    if(status) status.textContent = `Full backup exported: ${payload.counts.chapters} chapters, ${payload.counts.characters} characters, ${payload.counts.codexEntries} codex entries, ${payload.counts.readerNotes} reader notes, ${payload.counts.vaultFiles} vault files.`;
+    if(status) status.textContent = `Full backup exported: ${payload.counts.chapters} chapters, ${payload.counts.protoLines} Protoevangelium lines, ${payload.counts.characters} characters, ${payload.counts.codexEntries} codex entries, ${payload.counts.readerNotes} reader notes, ${payload.counts.vaultFiles} vault files.`;
   }catch(e){
     console.error('Full backup failed:', e);
     const message = e && e.message ? e.message : String(e || 'Unknown error');
@@ -5271,6 +5417,710 @@ let _chapterEditorAuthorNotes = normalizeAuthorNotes();
 let _authorResearchFilter = '';
 let _currentChapterId = null;
 let _currentCharacterId = null;
+let _protoActiveLineId = '';
+let _protoSelectedChapterId = '';
+let _protoLayers = {
+  motifs:true,
+  meter:false,
+  links:true,
+  events:false,
+  revelation:false,
+  math:false,
+  womb:false,
+  inevitability:false,
+  nestling:false,
+  hyper:false
+};
+let _poeticTracesOn = false;
+
+const PROTO_LAYER_LABELS = {
+  motifs:'Motifs',
+  meter:'Meter',
+  links:'Chapter Links',
+  events:'Events',
+  revelation:'Revelation',
+  math:'Divine Mathematics',
+  womb:'Womb',
+  inevitability:'Inevitability',
+  nestling:'Nestling',
+  hyper:'Hyper-Structure'
+};
+
+const DEFAULT_PROTOEVANGELIUM = {
+  id:'protoevangelium',
+  meta:{
+    title:'Protoevangelium',
+    subtitle:'A dactylic hexameter engine beneath the novel',
+    description:'A public poem of origin, pressure, inevitability, and revelation. Each line can carry meter, motifs, events, and chapter traces.',
+    invocation:'In the chamber before the chapter, the structure remembers what the story has not yet confessed.'
+  },
+  sections:[
+    {id:'sec-womb', title:'I. Womb of Number', order:1, description:'The nested beginning.'}
+  ],
+  motifs:[
+    {id:'womb', label:'Womb', layer:'womb', color:'#b83232', description:'The generative chamber and enclosing law.'},
+    {id:'inevitability', label:'Inevitability', layer:'inevitability', color:'#8b3a1e', description:'The sense that every event has already been mathematically summoned.'},
+    {id:'revelation', label:'Revelation', layer:'revelation', color:'#c8810a', description:'The moment when hidden structure becomes visible.'}
+  ],
+  events:[
+    {id:'arrival', title:'Arrival before knowledge', order:1, description:'A figure enters the system before understanding the system.', chapterIds:['ch-1']}
+  ],
+  lines:[
+    {
+      id:'line-1',
+      sectionId:'sec-womb',
+      number:1,
+      text:'Under the red mathematics, the first chamber opens.',
+      translationNote:'Placeholder line: replace with the actual Protoevangelium verse.',
+      scansion:{feet:['— ◡ ◡','— ◡ ◡','— ||','— ◡ ◡','— ◡ ◡','— ×'], caesura:'after foot 3', notes:'Manual dactylic hexameter scaffold.', confidence:'draft'},
+      motifIds:['womb','inevitability','revelation'],
+      eventIds:['arrival'],
+      revelation:'The opening is not an event but a revealed architecture.',
+      mathNote:'Six feet as nested gates; line one as generative axiom.',
+      wombNote:'The poem treats origin as enclosure, pressure, and passage.',
+      inevitabilityNote:'The line should feel already-arrived before it is spoken.',
+      nestlingNote:'The narrative is held inside a prior song.',
+      hyperStructureNote:'The poem is a meta-structure, not an ornament.',
+      chapterLinks:[]
+    }
+  ]
+};
+
+function cloneDefaultProtoevangelium(){
+  return JSON.parse(JSON.stringify(DEFAULT_PROTOEVANGELIUM));
+}
+
+function protoId(prefix='proto'){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+}
+
+function normalizeProtoScansion(value={}){
+  const feet = Array.isArray(value.feet) ? value.feet.slice(0,6) : [];
+  while(feet.length < 6) feet.push('');
+  return {
+    feet:feet.map(v=>String(v || '')),
+    caesura:String(value.caesura || ''),
+    notes:String(value.notes || ''),
+    confidence:String(value.confidence || 'draft')
+  };
+}
+
+function normalizeProtoLine(line={}, index=0){
+  return {
+    id:String(line.id || protoId('line')),
+    sectionId:String(line.sectionId || 'sec-womb'),
+    number:Number(line.number || index + 1),
+    text:String(line.text || ''),
+    translationNote:String(line.translationNote || ''),
+    scansion:normalizeProtoScansion(line.scansion || {}),
+    motifIds:Array.isArray(line.motifIds) ? line.motifIds.map(String) : splitTagText(line.motifIds || ''),
+    eventIds:Array.isArray(line.eventIds) ? line.eventIds.map(String) : splitTagText(line.eventIds || ''),
+    revelation:String(line.revelation || ''),
+    mathNote:String(line.mathNote || ''),
+    wombNote:String(line.wombNote || ''),
+    inevitabilityNote:String(line.inevitabilityNote || ''),
+    nestlingNote:String(line.nestlingNote || ''),
+    hyperStructureNote:String(line.hyperStructureNote || ''),
+    chapterLinks:Array.isArray(line.chapterLinks) ? line.chapterLinks.map(link=>({
+      id:String(link.id || protoId('plink')),
+      chapterId:String(link.chapterId || ''),
+      quote:String(link.quote || ''),
+      before:String(link.before || ''),
+      after:String(link.after || ''),
+      note:String(link.note || ''),
+      createdAt:link.createdAt || Date.now(),
+      updatedAt:link.updatedAt || Date.now()
+    })) : []
+  };
+}
+
+function normalizeProtoevangelium(value={}){
+  const base = cloneDefaultProtoevangelium();
+  const meta = Object.assign({}, base.meta, value.meta || {});
+  const sections = (Array.isArray(value.sections) && value.sections.length ? value.sections : base.sections).map((section,index)=>({
+    id:String(section.id || protoId('sec')),
+    title:String(section.title || `Section ${index + 1}`),
+    order:Number(section.order || index + 1),
+    description:String(section.description || '')
+  })).sort((a,b)=>a.order - b.order);
+  const motifs = (Array.isArray(value.motifs) && value.motifs.length ? value.motifs : base.motifs).map(motif=>({
+    id:String(motif.id || protoId('motif')),
+    label:String(motif.label || 'Motif'),
+    layer:String(motif.layer || 'motifs'),
+    color:String(motif.color || '#8b3a1e'),
+    description:String(motif.description || '')
+  }));
+  const events = (Array.isArray(value.events) && value.events.length ? value.events : base.events).map((event,index)=>({
+    id:String(event.id || protoId('event')),
+    title:String(event.title || 'Event'),
+    order:Number(event.order || index + 1),
+    description:String(event.description || ''),
+    chapterIds:Array.isArray(event.chapterIds) ? event.chapterIds.map(String) : splitTagText(event.chapterIds || '')
+  })).sort((a,b)=>a.order - b.order);
+  const lines = (Array.isArray(value.lines) && value.lines.length ? value.lines : base.lines).map(normalizeProtoLine).sort((a,b)=>a.number - b.number);
+  return {id:String(value.id || 'protoevangelium'), meta, sections, motifs, events, lines};
+}
+
+function loadProtoevangelium(){
+  try{
+    const raw = localStorage.getItem(PROTOEVANGELIUM_STORAGE_KEY);
+    if(raw) return normalizeProtoevangelium(JSON.parse(raw));
+  }catch(e){}
+  return normalizeProtoevangelium();
+}
+
+let protoevangelium = loadProtoevangelium();
+
+function saveProtoevangeliumLocal(options={}){
+  protoevangelium = normalizeProtoevangelium(protoevangelium);
+  try{ localStorage.setItem(PROTOEVANGELIUM_STORAGE_KEY, JSON.stringify(protoevangelium)); }catch(e){}
+  const status = document.getElementById('proto-status');
+  if(status && !options.silent) status.textContent = 'Protoevangelium saved locally.';
+}
+
+function protoMotif(id){
+  return (protoevangelium.motifs || []).find(m=>m.id===id) || null;
+}
+
+function protoEvent(id){
+  return (protoevangelium.events || []).find(e=>e.id===id) || null;
+}
+
+function protoLine(id){
+  return (protoevangelium.lines || []).find(line=>line.id===id) || null;
+}
+
+function protoLayerClassString(){
+  return Object.keys(_protoLayers)
+    .filter(key=>_protoLayers[key])
+    .map(key=>`proto-show-${key}`)
+    .join(' ');
+}
+
+function protoLineHasLayer(line, layer){
+  if(layer === 'motifs') return (line.motifIds || []).length > 0;
+  if(layer === 'events') return (line.eventIds || []).length > 0;
+  if(layer === 'links') return (line.chapterLinks || []).length > 0;
+  if(layer === 'revelation') return !!line.revelation;
+  if(layer === 'math') return !!line.mathNote;
+  if(layer === 'womb') return !!line.wombNote || (line.motifIds || []).some(id=>protoMotif(id)?.layer === 'womb');
+  if(layer === 'inevitability') return !!line.inevitabilityNote || (line.motifIds || []).some(id=>protoMotif(id)?.layer === 'inevitability');
+  if(layer === 'nestling') return !!line.nestlingNote;
+  if(layer === 'hyper') return !!line.hyperStructureNote;
+  return false;
+}
+
+function renderProtoLayerButtons(){
+  return `<div class="proto-layers">${Object.entries(PROTO_LAYER_LABELS).map(([key,label])=>`
+    <button class="proto-layer-btn ${_protoLayers[key] ? 'active' : ''}" type="button" onclick="toggleProtoLayer('${key}')">${escHtml(label)}</button>
+  `).join('')}</div>`;
+}
+
+function toggleProtoLayer(key){
+  if(!Object.prototype.hasOwnProperty.call(_protoLayers, key)) return;
+  _protoLayers[key] = !_protoLayers[key];
+  renderProtoevangelium();
+}
+
+function renderProtoChips(line){
+  const motifChips = (line.motifIds || []).map(id=>{
+    const motif = protoMotif(id);
+    if(!motif) return '';
+    return `<span class="proto-chip motif" style="border-color:${escHtml(motif.color)};color:${escHtml(motif.color)}">${escHtml(motif.label)}</span>`;
+  }).join('');
+  const eventChips = (line.eventIds || []).map(id=>{
+    const event = protoEvent(id);
+    return event ? `<span class="proto-chip event">${escHtml(event.title)}</span>` : '';
+  }).join('');
+  return `
+    <div class="proto-line-layers">
+      ${motifChips}
+      ${eventChips}
+      ${line.revelation ? '<span class="proto-chip revelation">Revelation</span>' : ''}
+      ${line.mathNote ? '<span class="proto-chip math">Divine Mathematics</span>' : ''}
+      ${line.wombNote ? '<span class="proto-chip womb">Womb</span>' : ''}
+      ${line.inevitabilityNote ? '<span class="proto-chip inevitability">Inevitability</span>' : ''}
+      ${line.nestlingNote ? '<span class="proto-chip nestling">Nestling</span>' : ''}
+      ${line.hyperStructureNote ? '<span class="proto-chip hyper">Hyper-Structure</span>' : ''}
+      ${(line.chapterLinks || []).length ? `<span class="proto-chip links">${line.chapterLinks.length} Chapter Link${line.chapterLinks.length === 1 ? '' : 's'}</span>` : ''}
+    </div>`;
+}
+
+function renderProtoScansion(line){
+  return `<div class="proto-scansion">${(line.scansion.feet || []).map((foot,index)=>`
+    <div class="proto-foot">${index + 1}. ${escHtml(foot || 'unscanned')}</div>
+  `).join('')}</div>`;
+}
+
+function renderProtoLine(line){
+  return `
+    <article class="proto-line ${line.id === _protoActiveLineId ? 'active' : ''}" onclick="setProtoActiveLine('${escHtml(line.id)}')">
+      <div class="proto-line-num">${String(line.number).padStart(2,'0')}</div>
+      <div>
+        <div class="proto-line-text">${escHtml(line.text || 'Untitled line')}</div>
+        ${renderProtoChips(line)}
+        ${renderProtoScansion(line)}
+      </div>
+    </article>`;
+}
+
+function protoLinkMatched(link, chapter){
+  if(!link || !chapter || !link.quote) return false;
+  return String(chapter.body || '').includes(link.quote);
+}
+
+function protoChapterLabel(chapterId){
+  const ch = chapters.find(c=>c.id===chapterId);
+  if(!ch) return chapterId || 'Unassigned chapter';
+  return ch.chapter || ch.book || ch.id;
+}
+
+function protoChapterHierarchy(chapterId){
+  const ch = chapters.find(c=>c.id===chapterId);
+  if(!ch) return '';
+  const ctx = getChapterReadingContext(ch);
+  return [ctx.novel, ctx.act, ctx.volume, ctx.subvolume].filter(Boolean).join(' / ');
+}
+
+function renderProtoDetail(lineId=_protoActiveLineId){
+  const panel = document.getElementById('proto-detail');
+  if(!panel) return;
+  const line = protoLine(lineId) || (protoevangelium.lines || [])[0];
+  if(!line){
+    panel.innerHTML = '<div class="proto-panel-label">Selected Line</div><div class="proto-panel-body">No poem lines yet.</div>';
+    return;
+  }
+  _protoActiveLineId = line.id;
+  const motifs = (line.motifIds || []).map(id=>protoMotif(id)).filter(Boolean);
+  const events = (line.eventIds || []).map(id=>protoEvent(id)).filter(Boolean);
+  const links = (line.chapterLinks || []).map(link=>{
+    const chapter = chapters.find(c=>c.id===link.chapterId);
+    const matched = protoLinkMatched(link, chapter);
+    return `<div class="proto-link-card ${matched ? '' : 'unmatched'}">
+      <div class="meta">${matched ? 'Matched' : 'Unmatched'} · ${escHtml(protoChapterLabel(link.chapterId))}</div>
+      <p>${escHtml(link.quote || 'No quote stored.')}</p>
+      ${link.note ? `<p>${escHtml(link.note)}</p>` : ''}
+      ${chapter ? `<button class="tiny-btn" type="button" onclick="showChapter('${escHtml(chapter.id)}')">Open Chapter</button>` : ''}
+    </div>`;
+  }).join('');
+  panel.innerHTML = `
+    <div class="proto-panel-label">Selected Line</div>
+    <div class="proto-panel-body">
+      <div class="proto-detail-title">Line ${escHtml(line.number)} · ${escHtml(line.scansion.confidence || 'draft')}</div>
+      <div class="proto-detail-block">${escHtml(line.text)}</div>
+      ${line.translationNote ? `<div class="proto-detail-block"><b>Translation / Poetic Note</b><br>${escHtml(line.translationNote)}</div>` : ''}
+      <div class="proto-detail-block"><b>Scansion</b><br>${(line.scansion.feet || []).map((foot,i)=>`${i + 1}. ${escHtml(foot || 'unscanned')}`).join('<br>')}${line.scansion.caesura ? `<br>Caesura: ${escHtml(line.scansion.caesura)}` : ''}${line.scansion.notes ? `<br>${escHtml(line.scansion.notes)}` : ''}</div>
+      ${motifs.length ? `<div class="proto-detail-block"><b>Motifs</b><br>${motifs.map(m=>`<span class="proto-chip motif" style="display:inline-flex;border-color:${escHtml(m.color)};color:${escHtml(m.color)}">${escHtml(m.label)}</span>`).join(' ')}</div>` : ''}
+      ${events.length ? `<div class="proto-detail-block"><b>Events</b><br>${events.map(event=>`${escHtml(event.title)}${event.description ? ` · ${escHtml(event.description)}` : ''}`).join('<br>')}</div>` : ''}
+      ${line.revelation ? `<div class="proto-detail-block"><b>Revelation</b><br>${escHtml(line.revelation)}</div>` : ''}
+      ${line.mathNote ? `<div class="proto-detail-block"><b>Divine Mathematics</b><br>${escHtml(line.mathNote)}</div>` : ''}
+      ${line.wombNote ? `<div class="proto-detail-block"><b>Womb</b><br>${escHtml(line.wombNote)}</div>` : ''}
+      ${line.inevitabilityNote ? `<div class="proto-detail-block"><b>Inevitability</b><br>${escHtml(line.inevitabilityNote)}</div>` : ''}
+      ${line.nestlingNote ? `<div class="proto-detail-block"><b>Nestling</b><br>${escHtml(line.nestlingNote)}</div>` : ''}
+      ${line.hyperStructureNote ? `<div class="proto-detail-block"><b>Hyper-Structure</b><br>${escHtml(line.hyperStructureNote)}</div>` : ''}
+      <div class="proto-detail-block"><b>Chapter Links</b>${links || '<p class="muted">No linked passages yet.</p>'}</div>
+    </div>`;
+}
+
+function renderProtoevangelium(options={}){
+  protoevangelium = normalizeProtoevangelium(protoevangelium);
+  const poem = document.getElementById('proto-poem');
+  if(!poem) return;
+  if(!_protoActiveLineId && protoevangelium.lines.length) _protoActiveLineId = protoevangelium.lines[0].id;
+  const meta = protoevangelium.meta;
+  const sectionsHtml = protoevangelium.sections.map(section=>{
+    const lines = protoevangelium.lines.filter(line=>line.sectionId === section.id);
+    return `<section class="proto-section">
+      <h2 class="proto-section-title">${escHtml(section.title)}</h2>
+      ${section.description ? `<div class="meta">${escHtml(section.description)}</div>` : ''}
+      ${lines.length ? lines.map(renderProtoLine).join('') : '<div class="proto-empty">No lines in this section yet.</div>'}
+    </section>`;
+  }).join('');
+  poem.className = `proto-poem-panel ${protoLayerClassString()}`;
+  poem.innerHTML = `
+    <section class="proto-meta">
+      <div class="proto-kicker">Poetic Engine · Dactylic Hexameter</div>
+      <h1 class="proto-title">${escHtml(meta.title || 'Protoevangelium')}</h1>
+      ${meta.subtitle ? `<div class="proto-subtitle">${escHtml(meta.subtitle)}</div>` : ''}
+      ${meta.description ? `<div class="proto-description">${escHtml(meta.description)}</div>` : ''}
+      ${meta.invocation ? `<div class="proto-invocation">${escHtml(meta.invocation)}</div>` : ''}
+      ${renderProtoLayerButtons()}
+    </section>
+    ${sectionsHtml || '<div class="proto-empty">No sections yet.</div>'}`;
+  renderProtoDetail(_protoActiveLineId);
+  if(options.admin !== false) renderProtoAdmin();
+}
+
+function setProtoActiveLine(id){
+  _protoActiveLineId = id;
+  renderProtoevangelium();
+}
+
+function showProtoevangelium(){
+  updateAdminUI();
+  _pushNav('proto-view');
+  const view = document.getElementById('proto-view');
+  if(view) view.style.display = 'block';
+  hideOthers('proto-view');
+  renderProtoevangelium();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateProtoMeta(field, value){
+  protoevangelium.meta[field] = value;
+  saveProtoevangeliumLocal({silent:true});
+  renderProtoevangelium({admin:false});
+}
+
+function addProtoSection(){
+  if(!requireAdmin()) return;
+  const order = (protoevangelium.sections || []).length + 1;
+  const id = protoId('sec');
+  protoevangelium.sections.push({id, title:`Section ${order}`, order, description:''});
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function updateProtoSection(id, field, value){
+  const section = protoevangelium.sections.find(item=>item.id===id);
+  if(!section) return;
+  section[field] = field === 'order' ? Number(value || 0) : value;
+  saveProtoevangeliumLocal({silent:true});
+  renderProtoevangelium({admin:false});
+}
+
+function deleteProtoSection(id){
+  if(!requireAdmin()) return;
+  if(protoevangelium.sections.length <= 1){ alert('Keep at least one poem section.'); return; }
+  if(!confirm('Delete this poem section? Lines will move to the first remaining section.')) return;
+  protoevangelium.sections = protoevangelium.sections.filter(item=>item.id!==id);
+  const fallback = protoevangelium.sections[0]?.id || '';
+  protoevangelium.lines.forEach(line=>{ if(line.sectionId === id) line.sectionId = fallback; });
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function addProtoMotif(){
+  if(!requireAdmin()) return;
+  const id = protoId('motif');
+  protoevangelium.motifs.push({id, label:'New Motif', layer:'motifs', color:'#8b3a1e', description:''});
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function updateProtoMotif(id, field, value){
+  const motif = protoevangelium.motifs.find(item=>item.id===id);
+  if(!motif) return;
+  motif[field] = value;
+  saveProtoevangeliumLocal({silent:true});
+  renderProtoevangelium({admin:false});
+}
+
+function deleteProtoMotif(id){
+  if(!requireAdmin()) return;
+  if(!confirm('Delete this motif from the Protoevangelium?')) return;
+  protoevangelium.motifs = protoevangelium.motifs.filter(item=>item.id!==id);
+  protoevangelium.lines.forEach(line=>{ line.motifIds = (line.motifIds || []).filter(motifId=>motifId!==id); });
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function addProtoEvent(){
+  if(!requireAdmin()) return;
+  const id = protoId('event');
+  const order = protoevangelium.events.length + 1;
+  protoevangelium.events.push({id, title:'New Event', order, description:'', chapterIds:[]});
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function updateProtoEvent(id, field, value){
+  const event = protoevangelium.events.find(item=>item.id===id);
+  if(!event) return;
+  if(field === 'chapterIds') event.chapterIds = splitTagText(value);
+  else event[field] = field === 'order' ? Number(value || 0) : value;
+  saveProtoevangeliumLocal({silent:true});
+  renderProtoevangelium({admin:false});
+}
+
+function deleteProtoEvent(id){
+  if(!requireAdmin()) return;
+  if(!confirm('Delete this event from the Protoevangelium?')) return;
+  protoevangelium.events = protoevangelium.events.filter(item=>item.id!==id);
+  protoevangelium.lines.forEach(line=>{ line.eventIds = (line.eventIds || []).filter(eventId=>eventId!==id); });
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function addProtoLine(){
+  if(!requireAdmin()) return;
+  const id = protoId('line');
+  const number = protoevangelium.lines.reduce((max,line)=>Math.max(max, Number(line.number || 0)), 0) + 1;
+  protoevangelium.lines.push(normalizeProtoLine({id, number, sectionId:protoevangelium.sections[0]?.id || '', text:'New hexameter line'}, number - 1));
+  _protoActiveLineId = id;
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function updateProtoLine(id, field, value){
+  const line = protoLine(id);
+  if(!line) return;
+  if(field === 'motifIds' || field === 'eventIds') line[field] = splitTagText(value);
+  else if(field === 'number') line[field] = Number(value || 0);
+  else line[field] = value;
+  saveProtoevangeliumLocal({silent:true});
+  renderProtoevangelium({admin:false});
+}
+
+function updateProtoLineScansion(id, field, value, footIndex=null){
+  const line = protoLine(id);
+  if(!line) return;
+  line.scansion = normalizeProtoScansion(line.scansion || {});
+  if(field === 'feet' && footIndex !== null) line.scansion.feet[footIndex] = value;
+  else line.scansion[field] = value;
+  saveProtoevangeliumLocal({silent:true});
+  renderProtoevangelium({admin:false});
+}
+
+function deleteProtoLine(id){
+  if(!requireAdmin()) return;
+  if(!confirm('Delete this Protoevangelium line?')) return;
+  protoevangelium.lines = protoevangelium.lines.filter(line=>line.id!==id);
+  _protoActiveLineId = protoevangelium.lines[0]?.id || '';
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function renderProtoLinkSource(){
+  const ch = chapters.find(c=>c.id===_protoSelectedChapterId) || chapters[0];
+  if(ch && !_protoSelectedChapterId) _protoSelectedChapterId = ch.id;
+  return `<textarea id="proto-link-source" rows="9" readonly>${escHtml(ch ? ch.body : '')}</textarea>`;
+}
+
+function setProtoLinkChapter(chapterId){
+  _protoSelectedChapterId = chapterId;
+  renderProtoevangelium();
+}
+
+function addProtoChapterLinkFromSelection(lineId){
+  if(!requireAdmin()) return;
+  const line = protoLine(lineId);
+  const source = document.getElementById('proto-link-source');
+  if(!line || !source) return;
+  const quote = source.value.slice(source.selectionStart, source.selectionEnd).trim();
+  if(!quote){ alert('Select chapter source text in the linker box first.'); return; }
+  const before = source.value.slice(Math.max(0, source.selectionStart - 90), source.selectionStart).trim();
+  const after = source.value.slice(source.selectionEnd, Math.min(source.value.length, source.selectionEnd + 90)).trim();
+  line.chapterLinks.push({
+    id:protoId('plink'),
+    chapterId:_protoSelectedChapterId,
+    quote,
+    before,
+    after,
+    note:'',
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  });
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function deleteProtoChapterLink(lineId, linkId){
+  if(!requireAdmin()) return;
+  const line = protoLine(lineId);
+  if(!line) return;
+  line.chapterLinks = (line.chapterLinks || []).filter(link=>link.id!==linkId);
+  saveProtoevangeliumLocal();
+  renderProtoevangelium();
+}
+
+function updateProtoChapterLinkNote(lineId, linkId, value){
+  const line = protoLine(lineId);
+  const link = line && (line.chapterLinks || []).find(item=>item.id===linkId);
+  if(!link) return;
+  link.note = value;
+  link.updatedAt = Date.now();
+  saveProtoevangeliumLocal({silent:true});
+}
+
+function renderProtoAdmin(){
+  const panel = document.getElementById('proto-admin');
+  if(!panel) return;
+  if(!isAdmin()){ panel.innerHTML = ''; return; }
+  const lineOptions = protoevangelium.lines.map(line=>`<option value="${escHtml(line.id)}" ${line.id===_protoActiveLineId?'selected':''}>${escHtml(line.number)} · ${escHtml(line.text.slice(0,70))}</option>`).join('');
+  const chapterOptions = chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${ch.id===_protoSelectedChapterId?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
+  const sectionOptions = (selectedId)=>protoevangelium.sections.map(section=>`<option value="${escHtml(section.id)}" ${section.id===selectedId?'selected':''}>${escHtml(section.title)}</option>`).join('');
+  const motifOptions = Object.entries(PROTO_LAYER_LABELS).filter(([key])=>key !== 'meter' && key !== 'links').map(([key,label])=>`<option value="${escHtml(key)}">${escHtml(label)}</option>`).join('');
+  const sectionsHtml = protoevangelium.sections.map(section=>`
+    <div class="proto-admin-card">
+      <div class="proto-admin-label">Section</div>
+      <div class="proto-admin-grid">
+        <label class="proto-field"><span>Title</span><input value="${escHtml(section.title)}" oninput="updateProtoSection('${escHtml(section.id)}','title',this.value)"></label>
+        <label class="proto-field"><span>Order</span><input type="number" value="${escHtml(section.order)}" oninput="updateProtoSection('${escHtml(section.id)}','order',this.value)"></label>
+        <label class="proto-field wide"><span>Description</span><textarea rows="2" oninput="updateProtoSection('${escHtml(section.id)}','description',this.value)">${escHtml(section.description)}</textarea></label>
+      </div>
+      <button class="tiny-btn danger" type="button" onclick="deleteProtoSection('${escHtml(section.id)}')">Delete Section</button>
+    </div>`).join('');
+  const motifsHtml = protoevangelium.motifs.map(motif=>`
+    <div class="proto-admin-card">
+      <div class="proto-admin-label">Motif</div>
+      <div class="proto-admin-grid">
+        <label class="proto-field"><span>Label</span><input value="${escHtml(motif.label)}" oninput="updateProtoMotif('${escHtml(motif.id)}','label',this.value)"></label>
+        <label class="proto-field"><span>Layer</span><select onchange="updateProtoMotif('${escHtml(motif.id)}','layer',this.value)">${motifOptions.replace(`value="${escHtml(motif.layer)}"`, `value="${escHtml(motif.layer)}" selected`)}</select></label>
+        <label class="proto-field"><span>Color</span><input type="color" value="${escHtml(motif.color)}" oninput="updateProtoMotif('${escHtml(motif.id)}','color',this.value)"></label>
+        <label class="proto-field wide"><span>Description</span><textarea rows="2" oninput="updateProtoMotif('${escHtml(motif.id)}','description',this.value)">${escHtml(motif.description)}</textarea></label>
+      </div>
+      <button class="tiny-btn danger" type="button" onclick="deleteProtoMotif('${escHtml(motif.id)}')">Delete Motif</button>
+    </div>`).join('');
+  const eventsHtml = protoevangelium.events.map(event=>`
+    <div class="proto-admin-card">
+      <div class="proto-admin-label">Event</div>
+      <div class="proto-admin-grid">
+        <label class="proto-field"><span>Title</span><input value="${escHtml(event.title)}" oninput="updateProtoEvent('${escHtml(event.id)}','title',this.value)"></label>
+        <label class="proto-field"><span>Order</span><input type="number" value="${escHtml(event.order)}" oninput="updateProtoEvent('${escHtml(event.id)}','order',this.value)"></label>
+        <label class="proto-field wide"><span>Chapter IDs</span><input value="${escHtml((event.chapterIds || []).join(', '))}" oninput="updateProtoEvent('${escHtml(event.id)}','chapterIds',this.value)"></label>
+        <label class="proto-field wide"><span>Description</span><textarea rows="2" oninput="updateProtoEvent('${escHtml(event.id)}','description',this.value)">${escHtml(event.description)}</textarea></label>
+      </div>
+      <button class="tiny-btn danger" type="button" onclick="deleteProtoEvent('${escHtml(event.id)}')">Delete Event</button>
+    </div>`).join('');
+  const linesHtml = protoevangelium.lines.map(line=>`
+    <div class="proto-admin-card">
+      <div class="proto-admin-label">Line ${escHtml(line.number)}</div>
+      <div class="proto-admin-grid">
+        <label class="proto-field"><span>Number</span><input type="number" value="${escHtml(line.number)}" oninput="updateProtoLine('${escHtml(line.id)}','number',this.value)"></label>
+        <label class="proto-field"><span>Section</span><select onchange="updateProtoLine('${escHtml(line.id)}','sectionId',this.value)">${sectionOptions(line.sectionId)}</select></label>
+        <label class="proto-field wide"><span>Poem Line</span><textarea rows="2" oninput="updateProtoLine('${escHtml(line.id)}','text',this.value)">${escHtml(line.text)}</textarea></label>
+        <label class="proto-field wide"><span>Motif IDs</span><input value="${escHtml((line.motifIds || []).join(', '))}" oninput="updateProtoLine('${escHtml(line.id)}','motifIds',this.value)"></label>
+        <label class="proto-field wide"><span>Event IDs</span><input value="${escHtml((line.eventIds || []).join(', '))}" oninput="updateProtoLine('${escHtml(line.id)}','eventIds',this.value)"></label>
+        ${(line.scansion.feet || []).map((foot,i)=>`<label class="proto-field"><span>Foot ${i + 1}</span><input value="${escHtml(foot)}" oninput="updateProtoLineScansion('${escHtml(line.id)}','feet',this.value,${i})"></label>`).join('')}
+        <label class="proto-field"><span>Caesura</span><input value="${escHtml(line.scansion.caesura)}" oninput="updateProtoLineScansion('${escHtml(line.id)}','caesura',this.value)"></label>
+        <label class="proto-field"><span>Meter Confidence</span><input value="${escHtml(line.scansion.confidence)}" oninput="updateProtoLineScansion('${escHtml(line.id)}','confidence',this.value)"></label>
+        <label class="proto-field wide"><span>Scansion Notes</span><textarea rows="2" oninput="updateProtoLineScansion('${escHtml(line.id)}','notes',this.value)">${escHtml(line.scansion.notes)}</textarea></label>
+        <label class="proto-field wide"><span>Translation / Poetic Note</span><textarea rows="2" oninput="updateProtoLine('${escHtml(line.id)}','translationNote',this.value)">${escHtml(line.translationNote)}</textarea></label>
+        <label class="proto-field wide"><span>Revelation</span><textarea rows="2" oninput="updateProtoLine('${escHtml(line.id)}','revelation',this.value)">${escHtml(line.revelation)}</textarea></label>
+        <label class="proto-field wide"><span>Divine Mathematics</span><textarea rows="2" oninput="updateProtoLine('${escHtml(line.id)}','mathNote',this.value)">${escHtml(line.mathNote)}</textarea></label>
+        <label class="proto-field wide"><span>Womb</span><textarea rows="2" oninput="updateProtoLine('${escHtml(line.id)}','wombNote',this.value)">${escHtml(line.wombNote)}</textarea></label>
+        <label class="proto-field wide"><span>Inevitability</span><textarea rows="2" oninput="updateProtoLine('${escHtml(line.id)}','inevitabilityNote',this.value)">${escHtml(line.inevitabilityNote)}</textarea></label>
+        <label class="proto-field wide"><span>Nestling</span><textarea rows="2" oninput="updateProtoLine('${escHtml(line.id)}','nestlingNote',this.value)">${escHtml(line.nestlingNote)}</textarea></label>
+        <label class="proto-field wide"><span>Hyper-Structure</span><textarea rows="2" oninput="updateProtoLine('${escHtml(line.id)}','hyperStructureNote',this.value)">${escHtml(line.hyperStructureNote)}</textarea></label>
+      </div>
+      ${(line.chapterLinks || []).map(link=>`<div class="proto-link-card ${protoLinkMatched(link, chapters.find(c=>c.id===link.chapterId)) ? '' : 'unmatched'}">
+        <div class="meta">${escHtml(protoChapterLabel(link.chapterId))}</div>
+        <p>${escHtml(link.quote)}</p>
+        <textarea rows="2" oninput="updateProtoChapterLinkNote('${escHtml(line.id)}','${escHtml(link.id)}',this.value)">${escHtml(link.note || '')}</textarea>
+        <button class="tiny-btn danger" type="button" onclick="deleteProtoChapterLink('${escHtml(line.id)}','${escHtml(link.id)}')">Remove Link</button>
+      </div>`).join('')}
+      <button class="tiny-btn danger" type="button" onclick="deleteProtoLine('${escHtml(line.id)}')">Delete Line</button>
+    </div>`).join('');
+  panel.innerHTML = `
+    <div class="proto-admin-label">Admin Poetic Engine</div>
+    <div class="proto-admin-grid">
+      <label class="proto-field"><span>Title</span><input value="${escHtml(protoevangelium.meta.title)}" oninput="updateProtoMeta('title',this.value)"></label>
+      <label class="proto-field"><span>Subtitle</span><input value="${escHtml(protoevangelium.meta.subtitle)}" oninput="updateProtoMeta('subtitle',this.value)"></label>
+      <label class="proto-field wide"><span>Description</span><textarea rows="2" oninput="updateProtoMeta('description',this.value)">${escHtml(protoevangelium.meta.description)}</textarea></label>
+      <label class="proto-field wide"><span>Invocation</span><textarea rows="2" oninput="updateProtoMeta('invocation',this.value)">${escHtml(protoevangelium.meta.invocation)}</textarea></label>
+    </div>
+    <div class="modal-actions">
+      <button class="cm-btn" type="button" onclick="saveProtoevangelium()">Save Protoevangelium</button>
+      <button class="cm-btn secondary" type="button" onclick="addProtoLine()">Add Line</button>
+      <button class="cm-btn secondary" type="button" onclick="addProtoSection()">Add Section</button>
+      <button class="cm-btn secondary" type="button" onclick="addProtoMotif()">Add Motif</button>
+      <button class="cm-btn secondary" type="button" onclick="addProtoEvent()">Add Event</button>
+    </div>
+    <div class="proto-admin-card">
+      <div class="proto-admin-label">Passage Linker</div>
+      <div class="proto-admin-grid">
+        <label class="proto-field"><span>Poem Line</span><select onchange="setProtoActiveLine(this.value)">${lineOptions}</select></label>
+        <label class="proto-field"><span>Chapter Source</span><select onchange="setProtoLinkChapter(this.value)">${chapterOptions}</select></label>
+        <label class="proto-field wide"><span>Select source text, then attach it</span>${renderProtoLinkSource()}</label>
+      </div>
+      <button class="cm-btn secondary" type="button" onclick="addProtoChapterLinkFromSelection('${escHtml(_protoActiveLineId || protoevangelium.lines[0]?.id || '')}')">Attach Selection To Selected Line</button>
+    </div>
+    <div class="proto-admin-list">${sectionsHtml}</div>
+    <div class="proto-admin-list">${motifsHtml}</div>
+    <div class="proto-admin-list">${eventsHtml}</div>
+    <div class="proto-admin-list">${linesHtml}</div>`;
+}
+
+async function syncProtoevangeliumToSupabase(){
+  const client = notesClient();
+  if(!client || !isAdmin()) return;
+  const {error} = await client.from('poetic_engines').upsert({
+    id:'protoevangelium',
+    data:normalizeProtoevangelium(protoevangelium),
+    updated_at:new Date().toISOString()
+  });
+  if(error) throw error;
+}
+
+async function saveProtoevangelium(){
+  if(!requireAdmin()) return;
+  saveProtoevangeliumLocal({silent:true});
+  const status = document.getElementById('proto-status');
+  try{
+    await syncProtoevangeliumToSupabase();
+    if(status) status.textContent = 'Protoevangelium saved locally and synced to Supabase.';
+  }catch(err){
+    console.warn('Protoevangelium Supabase sync unavailable:', err);
+    if(status) status.textContent = 'Protoevangelium saved locally. Supabase poetic_engines sync is unavailable until the schema is installed.';
+  }
+  renderProtoevangelium();
+}
+
+function protoLinksForChapter(chapterId){
+  const out = [];
+  (protoevangelium.lines || []).forEach(line=>{
+    (line.chapterLinks || []).forEach(link=>{
+      if(link.chapterId === chapterId) out.push({line, link});
+    });
+  });
+  return out;
+}
+
+function applyPoeticTraceHighlights(root, chapter){
+  if(!root || !chapter) return;
+  const matches = protoLinksForChapter(chapter.id).filter(item=>protoLinkMatched(item.link, chapter));
+  if(!matches.length) return;
+  const targets = root.querySelectorAll('p, blockquote, li');
+  targets.forEach(node=>{
+    const text = node.textContent || '';
+    if(matches.some(item=>item.link.quote && text.includes(item.link.quote.slice(0, 120)))){
+      node.classList.add('proto-trace-hit');
+    }
+  });
+}
+
+function renderChapterPoeticTraces(chapter, root){
+  if(root) applyPoeticTraceHighlights(root, chapter);
+  const panel = document.getElementById('cv-poetic-traces');
+  const toggle = document.getElementById('poetic-traces-toggle');
+  if(toggle) toggle.classList.toggle('on', _poeticTracesOn);
+  document.body.classList.toggle('poetic-traces-on', _poeticTracesOn);
+  if(!panel || !chapter) return;
+  const links = protoLinksForChapter(chapter.id);
+  if(!links.length){
+    panel.innerHTML = 'No Protoevangelium links yet.';
+    return;
+  }
+  panel.innerHTML = links.map(({line, link})=>{
+    const matched = protoLinkMatched(link, chapter);
+    const motifs = (line.motifIds || []).map(id=>protoMotif(id)).filter(Boolean).map(m=>m.label).join(', ');
+    return `<div class="proto-link-card ${matched ? '' : 'unmatched'}">
+      <div class="meta">Line ${escHtml(line.number)} · ${matched ? 'matched' : 'unmatched'}</div>
+      <p>${escHtml(line.text)}</p>
+      ${motifs ? `<div class="meta">${escHtml(motifs)}</div>` : ''}
+      <button class="tiny-btn" type="button" onclick="showProtoevangelium();setProtoActiveLine('${escHtml(line.id)}')">Open Line</button>
+    </div>`;
+  }).join('');
+}
+
+function togglePoeticTraces(){
+  _poeticTracesOn = !_poeticTracesOn;
+  document.body.classList.toggle('poetic-traces-on', _poeticTracesOn);
+  const toggle = document.getElementById('poetic-traces-toggle');
+  if(toggle) toggle.classList.toggle('on', _poeticTracesOn);
+}
 
 // ════════════════════════════════════════════════════════
 // BODY TEXT PARSER
@@ -5371,6 +6221,7 @@ function renderChapter(ch){
     </div>`;
 
   bodyEl.innerHTML = parsed + navBtns;
+  renderChapterPoeticTraces(ch, bodyEl);
 
   // Re-attach wl event listeners
   attachWlListeners(bodyEl);
@@ -6908,9 +7759,10 @@ function _updateNavUI(){
     'char-list-view':'tnav-chars',
     'char-detail-view':'tnav-chars',
     'wiki-view':'tnav-codex',
+    'proto-view':'tnav-proto',
     'assets-view':'tnav-assets'
   };
-  ['tnav-toc','tnav-chars','tnav-codex','tnav-assets','tnav-about'].forEach(id=>{
+  ['tnav-toc','tnav-chars','tnav-codex','tnav-proto','tnav-assets','tnav-about'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.classList.toggle('active', map[_currentView]===id);
   });
@@ -6991,7 +7843,7 @@ function nextChapter(){
 
 // ── Hide others ──
 function hideOthers(except){
-  const views=['landing','toc-view','chapter-view','about-view','char-list-view','char-detail-view','wiki-view','assets-view'];
+  const views=['landing','toc-view','chapter-view','about-view','char-list-view','char-detail-view','wiki-view','proto-view','assets-view'];
   views.forEach(v=>{
     if(v!==except){
       const el=document.getElementById(v);
@@ -9464,6 +10316,26 @@ async function loadUniversalContent(){
       saveEntities({localOnly:true});
     }
     try{
+      const hasLocalProto = !!localStorage.getItem(PROTOEVANGELIUM_STORAGE_KEY);
+      if(!hasLocalProto){
+        const {data:protoRow,error:protoError} = await client
+          .from('poetic_engines')
+          .select('id,data')
+          .eq('id','protoevangelium')
+          .maybeSingle();
+        if(protoError) throw protoError;
+        if(protoRow && protoRow.data){
+          protoevangelium = normalizeProtoevangelium(protoRow.data);
+          saveProtoevangeliumLocal({silent:true});
+          if(_currentView === 'proto-view') renderProtoevangelium();
+        }
+      }
+    }catch(protoErr){
+      console.warn('Shared Protoevangelium sync unavailable:', protoErr);
+      const status = document.getElementById('proto-status');
+      if(status && isAdmin()) status.textContent = 'Protoevangelium is local-only until the poetic_engines Supabase table is installed.';
+    }
+    try{
       const {data:chapterRows,error:chapterError} = await client
         .from('chapters')
         .select('id,position,data')
@@ -10772,6 +11644,7 @@ function attachPrimaryNavHandlers(){
     ['tnav-toc', ()=>showLanding()],
     ['tnav-chars', ()=>showCharacters()],
     ['tnav-codex', ()=>showWikiEntry()],
+    ['tnav-proto', ()=>showProtoevangelium()],
     ['tnav-assets', ()=>showAssets()],
     ['tnav-about', ()=>showAbout()]
   ];
@@ -10793,6 +11666,7 @@ Object.assign(window, {
   showCharacters,
   showCharDetail,
   showWikiEntry,
+  showProtoevangelium,
   showAssets
 });
 attachPrimaryNavHandlers();
