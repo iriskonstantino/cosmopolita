@@ -11663,6 +11663,7 @@ async function callDraftAiFunction(fragment){
   if(!client) throw new Error('Supabase is not configured. AI analysis needs the draft-ai-analyze Edge Function.');
   const {data, error} = await client.functions.invoke('draft-ai-analyze', {body:draftAiPayload(fragment)});
   if(error) throw error;
+  if(data && data.error) throw new Error(data.error);
   if(!data || !data.report) throw new Error('AI function returned no structured report.');
   return data.report;
 }
@@ -11671,7 +11672,10 @@ async function analyzeDraftWithAi(id){
   if(!requireAdmin()) return;
   await persistActiveDraftFromEditor({silent:true});
   const fragment = _draftFragments.find(item=>item.id===id) || activeDraft();
-  if(!fragment) return;
+  if(!fragment){
+    draftStatus('Create or select a draft fragment first. Paste text into the intake box and split it, upload a .txt/.md file, or click New Fragment.');
+    return;
+  }
   draftStatus(`Analyzing "${fragment.title}"...`);
   try{
     const report = await callDraftAiFunction(fragment);
@@ -11692,7 +11696,11 @@ async function analyzeDraftWithAi(id){
 
 async function analyzeActiveDraftWithAi(){
   const fragment = activeDraft();
-  if(fragment) await analyzeDraftWithAi(fragment.id);
+  if(!fragment){
+    draftStatus('No active draft fragment selected. Create or select a fragment first, then run AI analysis.');
+    return;
+  }
+  await analyzeDraftWithAi(fragment.id);
 }
 
 async function analyzeSelectedDraftsWithAi(){
@@ -11710,9 +11718,12 @@ function renderDraftAiPanel(fragment){
   const selectedCount = _draftSelectedIds.size;
   const last = fragment && fragment.aiAnalyses && fragment.aiAnalyses[0] ? draftDate(fragment.aiAnalyses[0].createdAt) : 'Never';
   const words = fragment ? draftWordCount(fragment) : 0;
+  const warning = fragment
+    ? `${words.toLocaleString()} active-fragment words · selected batch ${selectedCount}. Results are suggestions only.`
+    : `No active fragment selected · selected batch ${selectedCount}. Create or select a fragment before analysis.`;
   return `<section class="drafts-ai-panel">
     <div class="drafts-pane-title">AI Analysis</div>
-    <div class="drafts-ai-warning">${words.toLocaleString()} active-fragment words · selected batch ${selectedCount}. Results are suggestions only.</div>
+    <div class="drafts-ai-warning">${escHtml(warning)}</div>
     <div class="drafts-ai-actions">
       <button class="cm-btn secondary" type="button" onclick="analyzeActiveDraftWithAi()">Analyze Fragment</button>
       <button class="cm-btn secondary" type="button" onclick="analyzeSelectedDraftsWithAi()">Analyze Selected Visible</button>
