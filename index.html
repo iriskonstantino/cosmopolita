@@ -3716,6 +3716,98 @@ body:not(.admin-on) #tnav-drafts{
   min-height:46vh;
   overflow:auto;
 }
+.inbox-workspace{
+  display:grid;
+  gap:0.85rem;
+}
+.inbox-workspace-tabs,.idea-stage-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.45rem;
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.45rem;
+}
+.inbox-workspace-tab,.idea-stage-tab{
+  border:1px solid transparent;
+  background:var(--paper);
+  color:#777;
+  font-family:var(--mono);
+  font-size:0.52rem;
+  letter-spacing:0.11em;
+  text-transform:uppercase;
+  padding:0.45rem 0.62rem;
+  cursor:pointer;
+}
+.inbox-workspace-tab.active,.idea-stage-tab.active{
+  border-color:var(--ink);
+  background:var(--ink);
+  color:var(--paper);
+}
+.inbox-workspace-body{
+  min-width:0;
+}
+.inbox-source-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(260px,0.8fr);
+  gap:0.85rem;
+}
+.inbox-tab-panel{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.85rem;
+}
+.inbox-context-stack{
+  display:grid;
+  gap:0.65rem;
+}
+.inbox-context-card{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.72rem;
+}
+.inbox-context-title,.inbox-context-row,.inbox-next-label{
+  font-family:var(--mono);
+  text-transform:uppercase;
+}
+.inbox-context-title{
+  color:var(--ink);
+  font-size:0.62rem;
+  letter-spacing:0.13em;
+  margin-bottom:0.5rem;
+}
+.inbox-context-row{
+  display:flex;
+  justify-content:space-between;
+  gap:0.75rem;
+  border-top:1px solid var(--border);
+  padding-top:0.45rem;
+  margin-top:0.45rem;
+  color:#999;
+  font-size:0.48rem;
+  letter-spacing:0.08em;
+  line-height:1.45;
+}
+.inbox-context-row b{
+  color:var(--ink);
+  text-align:right;
+}
+.inbox-next-action{
+  display:grid;
+  gap:0.45rem;
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.65rem;
+}
+.inbox-next-label{
+  color:#999;
+  font-size:0.48rem;
+  letter-spacing:0.1em;
+}
+.inbox-next-action .cm-btn,.inbox-next-action .tiny-btn{
+  width:100%;
+  justify-content:center;
+}
 .drafts-stats{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -3904,6 +3996,41 @@ body:not(.admin-on) #tnav-drafts{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:0.85rem;
+}
+.idea-stage-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(220px,1fr));
+  gap:0.85rem;
+  align-items:start;
+  overflow-x:auto;
+  padding-bottom:0.25rem;
+}
+.idea-stage{
+  border:1px solid var(--border);
+  background:var(--paper);
+  min-width:220px;
+}
+.idea-stage-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:0.75rem;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+  padding:0.65rem 0.75rem;
+}
+.idea-stage-title{
+  font-family:var(--mono);
+  font-size:0.58rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+.idea-stage-count{
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.1em;
+  color:#999;
 }
 .idea-lane{
   border:1px solid var(--border);
@@ -4151,6 +4278,8 @@ body:not(.admin-on) #tnav-drafts{
 }
 .drafts-wrap.planning-mode .drafts-list-pane,
 .drafts-wrap.planning-mode .drafts-meta-pane,
+.drafts-wrap.ideas-mode .drafts-list-pane,
+.drafts-wrap.ideas-mode .drafts-meta-pane,
 .drafts-wrap.layers-mode .drafts-list-pane,
 .drafts-wrap.layers-mode .drafts-meta-pane,
 .drafts-wrap.ready-mode .drafts-list-pane,
@@ -4352,8 +4481,9 @@ body:not(.admin-on) #tnav-drafts{
 @media (max-width:850px){
   .drafts-wrap{grid-template-columns:1fr;}
   .drafts-list-pane,.drafts-meta-pane{border-left:none;border-right:none;border-bottom:1px solid var(--border);}
-  .drafts-editor-grid{grid-template-columns:1fr;}
+  .drafts-editor-grid,.inbox-source-grid{grid-template-columns:1fr;}
   .idea-repository-controls,.idea-lane-grid{grid-template-columns:1fr;}
+  .idea-stage-grid{grid-template-columns:1fr;overflow-x:visible;}
   .planning-lab{grid-template-columns:1fr;min-height:0;}
   .planning-pane{max-height:none;}
   .planning-body{min-height:40vh;}
@@ -4634,7 +4764,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.18</div>
+<div id="site-version-stamp">v2026.05.18.19</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -5180,10 +5310,10 @@ body:not(.admin-on) #tnav-drafts{
       <section id="draft-editor-panel"></section>
     </main>
     <aside class="drafts-meta-pane">
-      <div class="drafts-pane-title">Observatory</div>
+      <div class="drafts-pane-title">Context</div>
       <div id="draft-stats" class="drafts-stats"></div>
       <div id="draft-suggestions"></div>
-      <div class="drafts-pane-title">Convert</div>
+      <div class="drafts-pane-title">Guidepost</div>
       <div id="draft-conversions" class="drafts-convert-grid"></div>
       <div id="draft-status" class="content-status"></div>
     </aside>
@@ -5449,6 +5579,8 @@ const DRAFTS_IDEA_UI_STORAGE_KEY = 'cosmopolita_draft_idea_ui';
 const DRAFTS_TUTORIAL_SEEN_KEY = 'cosmopolita_drafts_tutorial_seen';
 const DRAFTS_HELP_OPEN_KEY = 'cosmopolita_drafts_help_open';
 const DRAFTS_LAYER_FILTER_KEY = 'cosmopolita_drafts_layer_filter';
+const DRAFTS_INBOX_TAB_KEY = 'cosmopolita_drafts_inbox_tab';
+const DRAFTS_IDEA_STAGE_KEY = 'cosmopolita_draft_idea_stage';
 const ROUTED_IDEA_STATUSES = ['open','working','used'];
 const ROUTED_IDEA_SECTIONS = [
   {id:'dialogue', label:'Dialogue'},
@@ -12059,6 +12191,8 @@ let _draftStatusMessage = '';
 let _draftAiSettings = loadDraftAiSettings();
 let _draftHelpOpen = (()=>{ try{ return localStorage.getItem(DRAFTS_HELP_OPEN_KEY) === '1'; }catch(e){ return false; }})();
 let _draftLayerFocus = (()=>{ try{ return localStorage.getItem(DRAFTS_LAYER_FILTER_KEY) || ''; }catch(e){ return ''; }})();
+let _draftInboxTab = (()=>{ try{ return localStorage.getItem(DRAFTS_INBOX_TAB_KEY) || 'source'; }catch(e){ return 'source'; }})();
+let _draftIdeaStage = (()=>{ try{ return localStorage.getItem(DRAFTS_IDEA_STAGE_KEY) || 'all'; }catch(e){ return 'all'; }})();
 let _draftTourStep = -1;
 
 function loadDraftsUi(){
@@ -12933,7 +13067,8 @@ function filteredDrafts(){
   return _draftFragments.filter(draftMatchesFilter);
 }
 
-function updateDraftFilter(key, value){
+async function updateDraftFilter(key, value){
+  await persistActiveDraftFromEditor({silent:true});
   _draftFilter[key] = value || '';
   if(key === 'view'){
     _draftFilter.type = '';
@@ -12941,7 +13076,7 @@ function updateDraftFilter(key, value){
     _draftFilter.layer = '';
   }
   saveDraftsUi();
-  renderDraftsView();
+  await renderDraftsView();
 }
 
 function draftStatus(message){
@@ -14059,7 +14194,7 @@ const DRAFTS_HELP_COPY = {
   inbox:{
     title:'Inbox',
     purpose:'Capture raw manuscript material here. Paste, upload, split, and keep fragments before they become organized ideas.',
-    next:'Create fragments, select one, run local suggestions or AI analysis, then accept useful suggestions.',
+    next:'Use the center tabs: Source for text, Preview for reading, AI Analysis to run models, Suggestions to approve, Accepted to inspect routed material, and Convert for exports.',
     destination:'Accepted AI becomes routed ideas. Raw fragments can become chapters, Codex entries, Proto lines, author notes, or research cards.'
   },
   layers:{
@@ -14070,8 +14205,8 @@ const DRAFTS_HELP_COPY = {
   },
   ideas:{
     title:'Idea Repository',
-    purpose:'This is the permanent archive of accepted AI/manual ideas. Ideas stay traceable to the source draft.',
-    next:'Assign unassigned ideas to chapters, send research-like ideas to Research, mark active items working, and mark finished items used.',
+    purpose:'This is the permanent archive of accepted AI/manual ideas, arranged by workflow stage instead of literary category.',
+    next:'Move left to right: assign unassigned ideas, send research leads, mark active items working, and mark finished items used.',
     destination:'Assigned ideas appear in the linked chapter Author Workspace. Research ideas also create Research leads/gaps.'
   },
   planning:{
@@ -14369,6 +14504,13 @@ function updateDraftIdeaFilter(key, value){
   renderDraftsView({keepCache:true});
 }
 
+function updateDraftIdeaStage(stage='all'){
+  _draftIdeaStage = stage || 'all';
+  if(_draftIdeaStage !== 'all' && !IDEA_STAGES.some(item=>item.id===_draftIdeaStage)) _draftIdeaStage = 'all';
+  try{ localStorage.setItem(DRAFTS_IDEA_STAGE_KEY, _draftIdeaStage); }catch(e){}
+  renderDraftsView({keepCache:true});
+}
+
 function allRoutedIdeaRows(){
   return _draftFragments.flatMap(fragment=>(fragment.routedIdeas || []).map(idea=>({fragment, idea:normalizeRoutedIdea(idea)})));
 }
@@ -14552,9 +14694,11 @@ function renderIdeaCard(row){
     ? `<select class="drafts-select" onchange="assignRoutedIdeaChapter('${escHtml(row.fragment.id)}','${escHtml(idea.id)}',this.value)">${draftIdeaAssignmentOptions(idea.chapterId)}</select>`
     : routedIdeaNeedsResearch(idea) && !idea.researchId
       ? `<button class="tiny-btn" type="button" onclick="sendRoutedIdeaToResearch('${escHtml(row.fragment.id)}','${escHtml(idea.id)}')">Send To Research</button>`
-      : idea.status !== 'used'
+      : idea.status === 'working'
         ? `<button class="tiny-btn" type="button" onclick="setDraftRoutedIdeaStatus('${escHtml(row.fragment.id)}','${escHtml(idea.id)}','used')">Mark Used</button>`
-        : `<button class="tiny-btn" type="button" onclick="openEditorialAuthorWorkspace('${escHtml(idea.chapterId)}')">Open Author Workspace</button>`;
+        : idea.status === 'used'
+          ? `<button class="tiny-btn" type="button" onclick="openEditorialAuthorWorkspace('${escHtml(idea.chapterId)}')">Open Author Workspace</button>`
+          : `<button class="tiny-btn" type="button" onclick="setDraftRoutedIdeaStatus('${escHtml(row.fragment.id)}','${escHtml(idea.id)}','working')">Mark Working</button>`;
   return `<article class="idea-card">
     <input class="idea-select-check" type="checkbox" ${_draftSelectedIdeaKeys.has(key)?'checked':''} onchange="toggleRoutedIdeaSelection('${escHtml(key)}',this.checked)">
     <div>${workflowBadge('Routed idea')} ${idea.researchId ? workflowBadge('Research lead') : ''} ${idea.status==='used' ? workflowBadge('Imported','imported') : ''}</div>
@@ -14575,6 +14719,7 @@ function renderIdeaCard(row){
 
 function renderDraftIdeaRepository(){
   const rows = visibleRoutedIdeaRows();
+  const stageTabs = [{id:'all', label:'All Stages'}].concat(IDEA_STAGES).map(stage=>`<button class="idea-stage-tab ${_draftIdeaStage===stage.id?'active':''}" type="button" onclick="updateDraftIdeaStage('${stage.id}')">${escHtml(stage.label)}</button>`).join('');
   const summary = {
     unassigned:rows.filter(row=>!row.idea.chapterId).length,
     assigned:rows.filter(row=>row.idea.chapterId).length,
@@ -14582,27 +14727,32 @@ function renderDraftIdeaRepository(){
     used:rows.filter(row=>row.idea.status==='used').length,
     research:rows.filter(row=>row.idea.researchId).length
   };
-  const lanes = ROUTED_IDEA_SECTIONS.map(section=>{
-    const laneRows = rows.filter(row=>row.idea.section === section.id);
-    return `<section class="idea-lane">
-      <div class="idea-lane-head">
-        <div class="idea-lane-title">${escHtml(section.label)}</div>
-        <div class="idea-lane-count">${laneRows.length}</div>
+  const stagesToRender = _draftIdeaStage === 'all' ? IDEA_STAGES : IDEA_STAGES.filter(stage=>stage.id===_draftIdeaStage);
+  const stages = stagesToRender.map(stage=>{
+    const stageRows = rows.filter(row=>draftIdeaStage(row) === stage.id);
+    return `<section class="idea-stage">
+      <div class="idea-stage-head">
+        <div>
+          <div class="idea-stage-title">${escHtml(stage.label)}</div>
+          <div class="idea-card-meta">${escHtml(stage.hint)}</div>
+        </div>
+        <div class="idea-stage-count">${stageRows.length}</div>
       </div>
-      ${laneRows.length ? laneRows.map(renderIdeaCard).join('') : '<div class="drafts-empty">No ideas in this lane.</div>'}
+      ${stageRows.length ? stageRows.map(renderIdeaCard).join('') : '<div class="drafts-empty">No ideas in this stage.</div>'}
     </section>`;
   }).join('');
   return `<section class="idea-repository">
     <div class="drafts-main-head">
       <div>
         <div class="drafts-kicker">Idea Repository</div>
-        <div class="drafts-title">Routed Ideas</div>
+        <div class="drafts-title">Workflow Board</div>
       </div>
       <div class="drafts-actions">
         <button class="cm-btn secondary" type="button" onclick="selectVisibleRoutedIdeas()">Select Visible</button>
         <button class="cm-btn secondary" type="button" onclick="clearRoutedIdeaSelection()">Clear</button>
       </div>
     </div>
+    <div class="idea-stage-tabs">${stageTabs}</div>
     <div class="idea-repository-controls">
       <select class="drafts-select" onchange="updateDraftIdeaFilter('section',this.value)">
         <option value="all" ${_draftIdeaFilter.section==='all'?'selected':''}>All Lanes</option>
@@ -14633,17 +14783,97 @@ function renderDraftIdeaRepository(){
       <div class="drafts-stat"><b>${summary.used}</b><div class="drafts-stat-label">Used</div></div>
       <div class="drafts-stat"><b>${summary.research}</b><div class="drafts-stat-label">Research Linked</div></div>
     </div>
-    <div class="idea-lane-grid">${lanes}</div>
+    <div class="idea-stage-grid">${stages}</div>
   </section>`;
 }
 
-function renderDraftEditor(fragment){
+const DRAFT_INBOX_TABS = [
+  {id:'source', label:'Source'},
+  {id:'preview', label:'Preview'},
+  {id:'ai', label:'AI Analysis'},
+  {id:'suggestions', label:'Suggestions'},
+  {id:'accepted', label:'Accepted'},
+  {id:'convert', label:'Convert'}
+];
+
+const IDEA_STAGES = [
+  {id:'unassigned', label:'Unassigned', hint:'Needs a chapter'},
+  {id:'assigned', label:'Assigned', hint:'Chapter linked'},
+  {id:'research', label:'Research Leads', hint:'Needs research work'},
+  {id:'working', label:'Working', hint:'Currently active'},
+  {id:'used', label:'Used', hint:'Already folded in'}
+];
+
+function draftIdeaStage(row){
+  const idea = row.idea || {};
+  if(idea.status === 'used' || idea.status === 'imported') return 'used';
+  if(idea.status === 'working') return 'working';
+  if(!idea.chapterId) return 'unassigned';
+  if(idea.researchId || routedIdeaNeedsResearch(idea)) return 'research';
+  return 'assigned';
+}
+
+async function setDraftInboxTab(tab='source'){
+  if(!DRAFT_INBOX_TABS.some(item=>item.id===tab)) tab = 'source';
+  await persistActiveDraftFromEditor({silent:true});
+  _draftInboxTab = tab;
+  try{ localStorage.setItem(DRAFTS_INBOX_TAB_KEY, _draftInboxTab); }catch(e){}
+  await renderDraftsView({keepCache:true});
+}
+
+function renderDraftSourceTab(fragment){
   if(!fragment) return '<div class="drafts-empty">Create or select a fragment. This is the inbox before canon.</div>';
-  const preview = fragment.body ? parseBody(fragment.body) : '<p class="ed-note">No draft text yet.</p>';
   return `
+      <div class="inbox-source-grid">
+        <div class="inbox-tab-panel">
+          <label class="drafts-field"><span>Title</span><input id="draft-title" class="drafts-input" value="${escHtml(fragment.title)}" oninput="queueDraftEditorSave()"></label>
+          <div class="drafts-filter-grid">
+            <label class="drafts-field"><span>Type</span><select id="draft-type" class="drafts-select" onchange="queueDraftEditorSave()">${draftSelectOptions(DRAFT_TYPES, fragment.type, 'Type')}</select></label>
+            <label class="drafts-field"><span>Status</span><select id="draft-status-field" class="drafts-select" onchange="queueDraftEditorSave()">${draftSelectOptions(DRAFT_STATUSES, fragment.status, 'Status')}</select></label>
+          </div>
+          <label class="drafts-field"><span>Body</span><textarea id="draft-body" class="drafts-textarea drafts-manuscript-box" oninput="queueDraftEditorSave()">${escHtml(fragment.body)}</textarea></label>
+        </div>
+        <div class="inbox-tab-panel">
+          <div class="drafts-filter-grid">
+            <label class="drafts-field"><span>Linked Chapter</span><select id="draft-linked-chapter" class="drafts-select" onchange="queueDraftEditorSave()">${draftChapterOptions(fragment.linkedChapterId)}</select></label>
+            <label class="drafts-field"><span>Linked Proto Line</span><select id="draft-linked-proto" class="drafts-select" onchange="queueDraftEditorSave()">${draftProtoOptions(fragment.linkedProtoLineId)}</select></label>
+          </div>
+          <label class="drafts-field"><span>Tags</span><input id="draft-tags" class="drafts-input" value="${escHtml(fragment.tags.join(', '))}" oninput="queueDraftEditorSave()"></label>
+          <label class="drafts-field"><span>Characters</span><input id="draft-characters" class="drafts-input" value="${escHtml(fragment.characters.join(', '))}" oninput="queueDraftEditorSave()"></label>
+          <label class="drafts-field"><span>Motifs</span><input id="draft-motifs" class="drafts-input" value="${escHtml(fragment.motifs.join(', '))}" oninput="queueDraftEditorSave()"></label>
+          <label class="drafts-field"><span>Locations</span><input id="draft-locations" class="drafts-input" value="${escHtml(fragment.locations.join(', '))}" oninput="queueDraftEditorSave()"></label>
+          <label class="drafts-field"><span>POV</span><input id="draft-pov" class="drafts-input" value="${escHtml(fragment.pov)}" oninput="queueDraftEditorSave()"></label>
+          <label class="drafts-field"><span>Timeline</span><input id="draft-timeline" class="drafts-input" value="${escHtml(fragment.timeline)}" oninput="queueDraftEditorSave()"></label>
+          <label class="drafts-field"><span>Narrative Devices</span><input id="draft-devices" class="drafts-input" value="${escHtml(fragment.narrativeDevices.join(', '))}" oninput="queueDraftEditorSave()"></label>
+          <label class="drafts-field"><span>Research Subject</span><input id="draft-research-subject" class="drafts-input" value="${escHtml(fragment.researchSubject)}" oninput="queueDraftEditorSave()"></label>
+          <label class="drafts-field"><span>Notes</span><textarea id="draft-notes" class="drafts-textarea" rows="4" oninput="queueDraftEditorSave()">${escHtml(fragment.notes)}</textarea></label>
+        </div>
+    </div>`;
+}
+
+function renderDraftPreviewTab(fragment){
+  if(!fragment) return '<div class="drafts-empty">Select a fragment to preview.</div>';
+  const preview = fragment.body ? parseBody(fragment.body) : '<p class="ed-note">No draft text yet.</p>';
+  return `<div class="inbox-tab-panel">
+    <div class="drafts-preview">${preview}</div>
+  </div>`;
+}
+
+function renderDraftInboxWorkspace(fragment){
+  if(!fragment) return '<div class="drafts-empty">Create or select a fragment. This is the inbox before canon.</div>';
+  if(!DRAFT_INBOX_TABS.some(tab=>tab.id===_draftInboxTab)) _draftInboxTab = 'source';
+  const tabs = DRAFT_INBOX_TABS.map(tab=>`<button class="inbox-workspace-tab ${_draftInboxTab===tab.id?'active':''}" type="button" onclick="setDraftInboxTab('${tab.id}')">${escHtml(tab.label)}</button>`).join('');
+  let body = '';
+  if(_draftInboxTab === 'source') body = renderDraftSourceTab(fragment);
+  else if(_draftInboxTab === 'preview') body = renderDraftPreviewTab(fragment);
+  else if(_draftInboxTab === 'ai') body = renderDraftAiPanel(fragment);
+  else if(_draftInboxTab === 'suggestions') body = renderDraftAiQueue(fragment) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(fragment);
+  else if(_draftInboxTab === 'accepted') body = renderDraftAcceptedIntelligence(fragment);
+  else if(_draftInboxTab === 'convert') body = renderDraftConversions(fragment);
+  return `<section class="inbox-workspace">
     <div class="drafts-main-head">
       <div>
-        <div class="drafts-kicker">Fragment Editor</div>
+        <div class="drafts-kicker">Fragment Workspace</div>
         <div class="drafts-title">${escHtml(fragment.title)}</div>
       </div>
       <div class="drafts-actions">
@@ -14652,32 +14882,92 @@ function renderDraftEditor(fragment){
         <button class="cm-btn secondary danger" type="button" onclick="draftDelete('${escHtml(fragment.id)}')">Delete</button>
       </div>
     </div>
-    <div class="drafts-editor-grid">
-      <div>
-        <label class="drafts-field"><span>Title</span><input id="draft-title" class="drafts-input" value="${escHtml(fragment.title)}" oninput="queueDraftEditorSave()"></label>
-        <div class="drafts-filter-grid">
-          <label class="drafts-field"><span>Type</span><select id="draft-type" class="drafts-select" onchange="queueDraftEditorSave()">${draftSelectOptions(DRAFT_TYPES, fragment.type, 'Type')}</select></label>
-          <label class="drafts-field"><span>Status</span><select id="draft-status-field" class="drafts-select" onchange="queueDraftEditorSave()">${draftSelectOptions(DRAFT_STATUSES, fragment.status, 'Status')}</select></label>
-        </div>
-        <label class="drafts-field"><span>Body</span><textarea id="draft-body" class="drafts-textarea" oninput="queueDraftEditorSave()">${escHtml(fragment.body)}</textarea></label>
-      </div>
-      <div>
-        <div class="drafts-preview">${preview}</div>
-        <div class="drafts-filter-grid" style="margin-top:.75rem">
-          <label class="drafts-field"><span>Linked Chapter</span><select id="draft-linked-chapter" class="drafts-select" onchange="queueDraftEditorSave()">${draftChapterOptions(fragment.linkedChapterId)}</select></label>
-          <label class="drafts-field"><span>Linked Proto Line</span><select id="draft-linked-proto" class="drafts-select" onchange="queueDraftEditorSave()">${draftProtoOptions(fragment.linkedProtoLineId)}</select></label>
-        </div>
-        <label class="drafts-field"><span>Tags</span><input id="draft-tags" class="drafts-input" value="${escHtml(fragment.tags.join(', '))}" oninput="queueDraftEditorSave()"></label>
-        <label class="drafts-field"><span>Characters</span><input id="draft-characters" class="drafts-input" value="${escHtml(fragment.characters.join(', '))}" oninput="queueDraftEditorSave()"></label>
-        <label class="drafts-field"><span>Motifs</span><input id="draft-motifs" class="drafts-input" value="${escHtml(fragment.motifs.join(', '))}" oninput="queueDraftEditorSave()"></label>
-        <label class="drafts-field"><span>Locations</span><input id="draft-locations" class="drafts-input" value="${escHtml(fragment.locations.join(', '))}" oninput="queueDraftEditorSave()"></label>
-        <label class="drafts-field"><span>POV</span><input id="draft-pov" class="drafts-input" value="${escHtml(fragment.pov)}" oninput="queueDraftEditorSave()"></label>
-        <label class="drafts-field"><span>Timeline</span><input id="draft-timeline" class="drafts-input" value="${escHtml(fragment.timeline)}" oninput="queueDraftEditorSave()"></label>
-        <label class="drafts-field"><span>Narrative Devices</span><input id="draft-devices" class="drafts-input" value="${escHtml(fragment.narrativeDevices.join(', '))}" oninput="queueDraftEditorSave()"></label>
-        <label class="drafts-field"><span>Research Subject</span><input id="draft-research-subject" class="drafts-input" value="${escHtml(fragment.researchSubject)}" oninput="queueDraftEditorSave()"></label>
-        <label class="drafts-field"><span>Notes</span><textarea id="draft-notes" class="drafts-textarea" rows="4" oninput="queueDraftEditorSave()">${escHtml(fragment.notes)}</textarea></label>
-      </div>
+    <div class="inbox-workspace-tabs">${tabs}</div>
+    <div class="inbox-workspace-body">${body}</div>
+  </section>`;
+}
+
+function renderDraftEditor(fragment){
+  return renderDraftInboxWorkspace(fragment);
+}
+
+function draftAiLastRun(fragment){
+  const runs = (fragment?.aiAnalyses || []).map(item=>Number(item.at || item.createdAt || 0)).filter(Boolean);
+  return runs.length ? Math.max(...runs) : 0;
+}
+
+function draftContextCounts(fragment){
+  if(!fragment) return {pending:0, accepted:0, ideas:0, dialogue:0, entities:0, lastAi:0};
+  return {
+    pending:(fragment.aiSuggestions || []).filter(item=>item.status === 'pending').length,
+    accepted:(fragment.aiSuggestions || []).filter(item=>item.status === 'accepted').length,
+    ideas:(fragment.routedIdeas || []).length,
+    dialogue:(fragment.dialogue || []).length,
+    entities:(fragment.entities || []).length,
+    lastAi:draftAiLastRun(fragment)
+  };
+}
+
+function renderDraftContextNextAction(fragment, counts){
+  if(!fragment){
+    return `<div class="inbox-next-action">
+      <div class="inbox-next-label">Next Action</div>
+      <button class="cm-btn secondary" type="button" onclick="createDraftFragment()">New Fragment</button>
     </div>`;
+  }
+  if(counts.pending){
+    return `<div class="inbox-next-action">
+      <div class="inbox-next-label">Next Action</div>
+      <button class="cm-btn secondary" type="button" onclick="setDraftInboxTab('suggestions')">Review Suggestions</button>
+    </div>`;
+  }
+  if(!counts.lastAi){
+    return `<div class="inbox-next-action">
+      <div class="inbox-next-label">Next Action</div>
+      <button class="cm-btn secondary" type="button" onclick="setDraftInboxTab('ai')">Analyze Fragment</button>
+    </div>`;
+  }
+  if(counts.accepted && !fragment.linkedChapterId){
+    return `<div class="inbox-next-action">
+      <div class="inbox-next-label">Next Action</div>
+      <button class="cm-btn secondary" type="button" onclick="setDraftInboxTab('accepted')">Assign Chapter</button>
+    </div>`;
+  }
+  if(counts.ideas){
+    return `<div class="inbox-next-action">
+      <div class="inbox-next-label">Next Action</div>
+      <button class="cm-btn secondary" type="button" onclick="updateDraftFilter('view','ideas')">Open Idea Board</button>
+    </div>`;
+  }
+  return `<div class="inbox-next-action">
+    <div class="inbox-next-label">Next Action</div>
+    <button class="cm-btn secondary" type="button" onclick="setDraftInboxTab('convert')">Convert or Archive</button>
+  </div>`;
+}
+
+function renderDraftContextSummary(fragment){
+  const counts = draftContextCounts(fragment);
+  const chapter = draftLinkedChapter(fragment || {});
+  const wordCount = fragment ? draftWordCount(fragment) : 0;
+  return `<div class="inbox-context-stack">
+    <div class="inbox-context-card">
+      <div class="inbox-context-title">Fragment Context</div>
+      <div class="inbox-context-row"><span>Words</span><b>${wordCount.toLocaleString()}</b></div>
+      <div class="inbox-context-row"><span>Type</span><b>${escHtml(fragment?.type || 'none')}</b></div>
+      <div class="inbox-context-row"><span>Status</span><b>${escHtml(fragment?.status || 'none')}</b></div>
+      <div class="inbox-context-row"><span>Linked Chapter</span><b>${escHtml(chapter?.chapter || chapter?.book || 'none')}</b></div>
+      <div class="inbox-context-row"><span>Last AI Run</span><b>${counts.lastAi ? escHtml(draftDate(counts.lastAi)) : 'never'}</b></div>
+    </div>
+    <div class="inbox-context-card">
+      <div class="inbox-context-title">Intelligence</div>
+      <div class="inbox-context-row"><span>Pending</span><b>${counts.pending}</b></div>
+      <div class="inbox-context-row"><span>Accepted</span><b>${counts.accepted}</b></div>
+      <div class="inbox-context-row"><span>Routed Ideas</span><b>${counts.ideas}</b></div>
+      <div class="inbox-context-row"><span>Dialogue</span><b>${counts.dialogue}</b></div>
+      <div class="inbox-context-row"><span>Entities</span><b>${counts.entities}</b></div>
+    </div>
+    ${renderDraftContextNextAction(fragment, counts)}
+  </div>`;
 }
 
 function readDraftEditor(fragment=activeDraft()){
@@ -14775,10 +15065,10 @@ async function renderDraftsView(options={}){
             ? renderReadyQueue()
             : isArchive
               ? renderArchiveView()
-              : renderDraftEditor(active);
+              : renderDraftInboxWorkspace(active);
   }
-  if(suggestions) suggestions.innerHTML = fullWorkspace ? '<div class="drafts-empty">Use the main workspace for this workflow step.</div>' : renderDraftAiPanel(active) + renderDraftAcceptedIntelligence(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
-  if(conversions) conversions.innerHTML = fullWorkspace ? '<div class="drafts-empty">Actions appear on the cards in this workflow.</div>' : renderDraftConversions(active);
+  if(suggestions) suggestions.innerHTML = fullWorkspace ? '<div class="drafts-empty">Use the main workspace for this workflow step.</div>' : renderDraftContextSummary(active);
+  if(conversions) conversions.innerHTML = fullWorkspace ? '<div class="drafts-empty">Actions appear on the cards in this workflow.</div>' : '<div class="drafts-empty">AI tools, suggestions, accepted material, and conversion actions now live in the center tabs.</div>';
   attachDraftControlHandlers();
   renderDraftsHelp();
 }
@@ -15875,6 +16165,8 @@ Object.assign(window, {
   setDraftLinkedChapterFromIntel,
   openLinkedDraftAuthorWorkspace,
   updateDraftIdeaFilter,
+  updateDraftIdeaStage,
+  setDraftInboxTab,
   toggleRoutedIdeaSelection,
   selectVisibleRoutedIdeas,
   clearRoutedIdeaSelection,
