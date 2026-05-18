@@ -4471,7 +4471,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.16</div>
+<div id="site-version-stamp">v2026.05.18.17</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -11867,6 +11867,14 @@ const WORKSHOP_LANES = [
 ];
 const DRAFT_AI_GROUPS = ['dialogue','entities','layers','literary','conversions'];
 const DRAFT_CODEX_ENTITY_TYPES = new Set(['faction','organization','institution','religion','government','place','object','technology','metaphysical system','motif']);
+const OPENROUTER_MODEL_PRESETS = [
+  {id:'openrouter/auto', label:'Auto Router'},
+  {id:'openai/gpt-4o-mini', label:'OpenAI GPT-4o Mini'},
+  {id:'google/gemini-2.5-flash-lite', label:'Gemini 2.5 Flash Lite'},
+  {id:'meta-llama/llama-3.3-70b-instruct', label:'Llama 3.3 70B Instruct'},
+  {id:'deepseek/deepseek-r1-0528-qwen3-8b', label:'DeepSeek R1 0528 Qwen3 8B'},
+  {id:'deepseek/deepseek-r1', label:'DeepSeek R1'}
+];
 let _draftsDBPromise = null;
 let _draftFragments = [];
 let _activeDraftId = '';
@@ -11925,6 +11933,16 @@ function saveDraftAiSettings(){
   try{ localStorage.setItem(DRAFTS_AI_SETTINGS_KEY, JSON.stringify(_draftAiSettings)); }catch(e){}
   draftStatus(_draftAiSettings.openRouterKey ? `OpenRouter key saved for ${_draftAiSettings.openRouterModel}.` : 'OpenRouter key cleared.');
   renderDraftsView({keepCache:true, keepEditor:true});
+}
+
+function setDraftAiModelPreset(value){
+  const input = document.getElementById('draft-ai-model');
+  if(input && value) input.value = value;
+  saveDraftAiSettings();
+}
+
+function openRouterNoEndpointMessage(model){
+  return `OpenRouter has no active endpoint for "${model}" right now. Free model slugs can disappear or run out of capacity; choose another model preset such as openrouter/auto, openai/gpt-4o-mini, or remove ":free" from the model id if OpenRouter lists a paid endpoint.`;
 }
 
 function draftId(){
@@ -12977,7 +12995,9 @@ async function callDraftOpenRouterFromBrowser(fragment){
   let data = null;
   try{ data = JSON.parse(text); }catch(e){}
   if(!res.ok){
-    throw new Error((data && data.error && (data.error.message || data.error)) || text || `OpenRouter request failed with HTTP ${res.status}`);
+    const message = (data && data.error && (data.error.message || data.error)) || text || `OpenRouter request failed with HTTP ${res.status}`;
+    if(/No endpoints found/i.test(String(message))) throw new Error(openRouterNoEndpointMessage(model));
+    throw new Error(message);
   }
   const output = openRouterOutputText(data);
   if(!output) throw new Error('OpenRouter returned no text.');
@@ -13160,6 +13180,13 @@ function renderDraftAiPanel(fragment){
     <div class="drafts-field">
       <label>OpenRouter Model</label>
       <input id="draft-ai-model" class="drafts-input" value="${escHtml(modelValue)}" placeholder="openai/gpt-4o-mini">
+    </div>
+    <div class="drafts-field">
+      <label>Model Preset</label>
+      <select class="drafts-select" onchange="setDraftAiModelPreset(this.value)">
+        <option value="">Choose preset...</option>
+        ${OPENROUTER_MODEL_PRESETS.map(model=>`<option value="${escHtml(model.id)}" ${model.id===modelValue?'selected':''}>${escHtml(model.label)} · ${escHtml(model.id)}</option>`).join('')}
+      </select>
     </div>
     <div class="drafts-ai-actions">
       <button class="cm-btn secondary" type="button" onclick="saveDraftAiSettings()">Save Key</button>
@@ -15303,6 +15330,7 @@ Object.assign(window, {
   analyzeActiveDraftWithAi,
   analyzeSelectedDraftsWithAi,
   saveDraftAiSettings,
+  setDraftAiModelPreset,
   testDraftAiConnection,
   selectVisibleDrafts,
   clearDraftSelection,
