@@ -4143,20 +4143,182 @@ body:not(.admin-on) #tnav-drafts{
   border-color:var(--ink);
 }
 .drafts-wrap.planning-mode,
-.drafts-wrap.ideas-mode{
+.drafts-wrap.ideas-mode,
+.drafts-wrap.layers-mode,
+.drafts-wrap.ready-mode,
+.drafts-wrap.archive-mode{
   grid-template-columns:1fr;
 }
 .drafts-wrap.planning-mode .drafts-list-pane,
 .drafts-wrap.planning-mode .drafts-meta-pane,
+.drafts-wrap.layers-mode .drafts-list-pane,
+.drafts-wrap.layers-mode .drafts-meta-pane,
+.drafts-wrap.ready-mode .drafts-list-pane,
+.drafts-wrap.ready-mode .drafts-meta-pane,
+.drafts-wrap.archive-mode .drafts-list-pane,
+.drafts-wrap.archive-mode .drafts-meta-pane,
 .drafts-wrap.planning-mode #draft-split-panel{
   display:none;
 }
-.drafts-wrap.ideas-mode #draft-split-panel{
+.drafts-wrap.ideas-mode #draft-split-panel,
+.drafts-wrap.layers-mode #draft-split-panel,
+.drafts-wrap.ready-mode #draft-split-panel,
+.drafts-wrap.archive-mode #draft-split-panel{
   display:none;
 }
 .drafts-wrap.planning-mode .drafts-main,
-.drafts-wrap.ideas-mode .drafts-main{
+.drafts-wrap.ideas-mode .drafts-main,
+.drafts-wrap.layers-mode .drafts-main,
+.drafts-wrap.ready-mode .drafts-main,
+.drafts-wrap.archive-mode .drafts-main{
   min-width:0;
+}
+.workflow-badge{
+  display:inline-block;
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:#777;
+  font-family:var(--mono);
+  font-size:0.45rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:0.13rem 0.32rem;
+  margin:0.15rem 0.2rem 0.15rem 0;
+}
+.workflow-badge.imported{border-color:var(--green);color:var(--green);background:#edf5ef}
+.workflow-panel{display:grid;gap:0.9rem}
+.workflow-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:0.55rem;
+}
+.workflow-card{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.75rem;
+}
+.workflow-card-title{
+  font-family:var(--display);
+  font-size:0.86rem;
+  font-weight:700;
+  letter-spacing:0.07em;
+  line-height:1.25;
+  text-transform:uppercase;
+}
+.workflow-card-meta{
+  margin-top:0.3rem;
+  font-family:var(--mono);
+  color:#999;
+  font-size:0.48rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.workflow-card-body{
+  margin-top:0.5rem;
+  color:#4f4840;
+  font-size:0.86rem;
+  line-height:1.5;
+}
+.layer-map-grid,.ready-queue-grid,.archive-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:0.85rem;
+}
+.layer-group,.ready-group,.archive-group{
+  border:1px solid var(--border);
+  background:var(--paper);
+}
+.layer-group-head,.ready-group-head,.archive-group-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:0.75rem;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+  padding:0.65rem 0.75rem;
+  font-family:var(--mono);
+  font-size:0.52rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+}
+.layer-card{
+  border-top:1px solid var(--border);
+  background:var(--white);
+  padding:0.65rem;
+  cursor:pointer;
+}
+.layer-card.active{box-shadow:inset 3px 0 0 var(--red)}
+.layer-card-name{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.78rem;
+  letter-spacing:0.07em;
+  text-transform:uppercase;
+}
+.layer-card-meta{
+  margin-top:0.28rem;
+  font-family:var(--mono);
+  font-size:0.46rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#999;
+}
+.drafts-help-drawer{
+  max-width:1380px;
+  margin:0 auto 0.85rem;
+  padding:0 1rem;
+  display:none;
+}
+.drafts-help-drawer.open{display:block}
+.drafts-help-inner{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.85rem;
+  display:grid;
+  gap:0.65rem;
+}
+.drafts-help-title{
+  font-family:var(--display);
+  font-size:1rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.drafts-help-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0.65rem;
+}
+.drafts-help-block{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.65rem;
+}
+.drafts-help-block b{
+  display:block;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  margin-bottom:0.35rem;
+}
+.drafts-help-block p{
+  margin:0;
+  font-size:0.84rem;
+  line-height:1.5;
+  color:#4f4840;
+}
+.drafts-tour{
+  border:1px solid var(--gold);
+  background:#fff8e8;
+  padding:0.75rem;
+}
+.drafts-tour-step{
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#7a4a1e;
 }
 .tiny-btn{
   border:1px solid var(--border);
@@ -4195,6 +4357,7 @@ body:not(.admin-on) #tnav-drafts{
   .planning-lab{grid-template-columns:1fr;min-height:0;}
   .planning-pane{max-height:none;}
   .planning-body{min-height:40vh;}
+  .drafts-help-grid{grid-template-columns:1fr;}
   .drafts-field.wide{grid-column:auto;}
   .assets-wrap{grid-template-columns:1fr;}
   #assets-view .side-panel{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
@@ -4471,7 +4634,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.17</div>
+<div id="site-version-stamp">v2026.05.18.18</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -4957,11 +5120,14 @@ body:not(.admin-on) #tnav-drafts{
   </div>
   <div id="drafts-view-tabs" class="drafts-view-tabs">
     <button id="draft-tab-inbox" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','inbox')">Inbox</button>
+    <button id="draft-tab-layers" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','layers')">Literary Layers</button>
     <button id="draft-tab-ideas" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','ideas')">Idea Repository</button>
     <button id="draft-tab-planning" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','planning')">Planning Notes</button>
-    <button id="draft-tab-layers" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','layers')">Literary Layers</button>
     <button id="draft-tab-ready" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','ready')">Ready Queue</button>
+    <button id="draft-tab-archive" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','archive')">Archive</button>
+    <button id="draft-help-toggle" class="drafts-view-tab" type="button" onclick="toggleDraftsHelp()">Help</button>
   </div>
+  <div id="drafts-help-drawer" class="drafts-help-drawer"></div>
   <div class="drafts-wrap">
     <aside class="drafts-list-pane">
       <div class="drafts-pane-title">Inbox</div>
@@ -5280,6 +5446,9 @@ const PROTOEVANGELIUM_STORAGE_KEY = 'cosmopolita_protoevangelium';
 const DRAFTS_UI_STORAGE_KEY = 'cosmopolita_drafts_ui';
 const DRAFTS_AI_SETTINGS_KEY = 'cosmopolita_drafts_ai_settings';
 const DRAFTS_IDEA_UI_STORAGE_KEY = 'cosmopolita_draft_idea_ui';
+const DRAFTS_TUTORIAL_SEEN_KEY = 'cosmopolita_drafts_tutorial_seen';
+const DRAFTS_HELP_OPEN_KEY = 'cosmopolita_drafts_help_open';
+const DRAFTS_LAYER_FILTER_KEY = 'cosmopolita_drafts_layer_filter';
 const ROUTED_IDEA_STATUSES = ['open','working','used'];
 const ROUTED_IDEA_SECTIONS = [
   {id:'dialogue', label:'Dialogue'},
@@ -11888,6 +12057,9 @@ let _draftSelectedIds = new Set();
 let _draftSelectedIdeaKeys = new Set();
 let _draftStatusMessage = '';
 let _draftAiSettings = loadDraftAiSettings();
+let _draftHelpOpen = (()=>{ try{ return localStorage.getItem(DRAFTS_HELP_OPEN_KEY) === '1'; }catch(e){ return false; }})();
+let _draftLayerFocus = (()=>{ try{ return localStorage.getItem(DRAFTS_LAYER_FILTER_KEY) || ''; }catch(e){ return ''; }})();
+let _draftTourStep = -1;
 
 function loadDraftsUi(){
   try{
@@ -13879,6 +14051,308 @@ function renderDraftConversions(fragment){
     <button class="cm-btn secondary" type="button" onclick="archiveActiveDraft()">Archive Fragment</button>`;
 }
 
+function workflowBadge(label, extra=''){
+  return `<span class="workflow-badge ${escHtml(extra)}">${escHtml(label)}</span>`;
+}
+
+const DRAFTS_HELP_COPY = {
+  inbox:{
+    title:'Inbox',
+    purpose:'Capture raw manuscript material here. Paste, upload, split, and keep fragments before they become organized ideas.',
+    next:'Create fragments, select one, run local suggestions or AI analysis, then accept useful suggestions.',
+    destination:'Accepted AI becomes routed ideas. Raw fragments can become chapters, Codex entries, Proto lines, author notes, or research cards.'
+  },
+  layers:{
+    title:'Literary Layers',
+    purpose:'See the manuscript by narrative layer instead of by file order: characters, motifs, places, POV, timeline, devices, dialogue, entities, and research subjects.',
+    next:'Click a layer card to focus matching fragments and routed ideas, then open the source draft or assign ideas.',
+    destination:'Layer map does not publish anything. It helps you decide what belongs in the Idea Repository or Ready Queue.'
+  },
+  ideas:{
+    title:'Idea Repository',
+    purpose:'This is the permanent archive of accepted AI/manual ideas. Ideas stay traceable to the source draft.',
+    next:'Assign unassigned ideas to chapters, send research-like ideas to Research, mark active items working, and mark finished items used.',
+    destination:'Assigned ideas appear in the linked chapter Author Workspace. Research ideas also create Research leads/gaps.'
+  },
+  planning:{
+    title:'Planning Notes',
+    purpose:'Keep non-fiction thinking, craft notes, outlines, canon logic, and research thoughts outside the manuscript fragments.',
+    next:'Write a planning note, highlight a passage, create a Workshop card, revise it, then import it when ready.',
+    destination:'Workshop cards can become routed ideas, research gaps, Author Workspace ideas, draft fragments, or Codex seeds.'
+  },
+  ready:{
+    title:'Ready Queue',
+    purpose:'A focused action list of material that is ready to move somewhere else.',
+    next:'Use each group to decide the next action: chapter, research, Codex, Protoevangelium, or Author Workspace.',
+    destination:'Ready items are not automatically published. You choose the import/assignment action.'
+  },
+  archive:{
+    title:'Archive',
+    purpose:'Find material you put away without losing it.',
+    next:'Review archived fragments, planning notes, workshop cards, and used routed ideas.',
+    destination:'Restore items by opening their source workspace and changing status when needed.'
+  }
+};
+
+const DRAFTS_TOUR_STEPS = [
+  ['inbox','Capture raw fragments in the Inbox. Paste/upload/split first, then analyze only selected material.'],
+  ['inbox','Run AI Analysis on a fragment. Suggestions wait for approval; nothing becomes canon automatically.'],
+  ['ideas','Accepted suggestions become routed ideas. This is where you assign ideas to chapters or send research leads.'],
+  ['layers','Use Literary Layers to see repeated characters, motifs, places, timeline clues, dialogue, and factions across fragments.'],
+  ['planning','Use Planning Notes for non-fiction thinking and Workshop cards before importing ideas into the manuscript system.'],
+  ['ready','Use Ready Queue as the practical next-action list.'],
+  ['ideas','Assigned ideas appear in the chapter Author Workspace as Routed Ideas; research-like ideas also become Research leads.']
+];
+
+function draftHelpView(){
+  return DRAFTS_HELP_COPY[_draftFilter.view] || DRAFTS_HELP_COPY.inbox;
+}
+
+function renderDraftsHelp(){
+  const drawer = document.getElementById('drafts-help-drawer');
+  if(!drawer) return;
+  drawer.classList.toggle('open', _draftHelpOpen || _draftTourStep >= 0);
+  const help = draftHelpView();
+  const tour = _draftTourStep >= 0 ? DRAFTS_TOUR_STEPS[_draftTourStep] : null;
+  drawer.innerHTML = `
+    <div class="drafts-help-inner">
+      <div class="drafts-main-head">
+        <div>
+          <div class="drafts-kicker">Drafts Guide</div>
+          <div class="drafts-help-title">${escHtml(help.title)}</div>
+        </div>
+        <div class="drafts-actions">
+          <button class="cm-btn secondary" type="button" onclick="startDraftsTour()">Restart Tutorial</button>
+          <button class="cm-btn secondary" type="button" onclick="toggleDraftsHelp(false)">Close</button>
+        </div>
+      </div>
+      ${tour ? `<div class="drafts-tour">
+        <div class="drafts-tour-step">Step ${_draftTourStep + 1} of ${DRAFTS_TOUR_STEPS.length} · ${escHtml(DRAFTS_HELP_COPY[tour[0]]?.title || 'Drafts')}</div>
+        <div class="workflow-card-body">${escHtml(tour[1])}</div>
+        <div class="drafts-actions">
+          <button class="tiny-btn" type="button" onclick="advanceDraftsTour(-1)">Previous</button>
+          <button class="tiny-btn" type="button" onclick="advanceDraftsTour(1)">${_draftTourStep === DRAFTS_TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</button>
+        </div>
+      </div>` : ''}
+      <div class="drafts-help-grid">
+        <div class="drafts-help-block"><b>What this is for</b><p>${escHtml(help.purpose)}</p></div>
+        <div class="drafts-help-block"><b>What to do next</b><p>${escHtml(help.next)}</p></div>
+        <div class="drafts-help-block"><b>Where it goes</b><p>${escHtml(help.destination)}</p></div>
+      </div>
+    </div>`;
+}
+
+function toggleDraftsHelp(force){
+  _draftHelpOpen = typeof force === 'boolean' ? force : !_draftHelpOpen;
+  try{ localStorage.setItem(DRAFTS_HELP_OPEN_KEY, _draftHelpOpen ? '1' : '0'); }catch(e){}
+  renderDraftsHelp();
+}
+
+function startDraftsTour(){
+  _draftTourStep = 0;
+  _draftHelpOpen = true;
+  try{ localStorage.setItem(DRAFTS_TUTORIAL_SEEN_KEY, '1'); }catch(e){}
+  updateDraftFilter('view', DRAFTS_TOUR_STEPS[0][0]);
+}
+
+function advanceDraftsTour(delta=1){
+  if(_draftTourStep < 0) return;
+  const next = _draftTourStep + delta;
+  if(next < 0) return;
+  if(next >= DRAFTS_TOUR_STEPS.length){
+    _draftTourStep = -1;
+    try{ localStorage.setItem(DRAFTS_TUTORIAL_SEEN_KEY, '1'); }catch(e){}
+    renderDraftsHelp();
+    return;
+  }
+  _draftTourStep = next;
+  updateDraftFilter('view', DRAFTS_TOUR_STEPS[_draftTourStep][0]);
+}
+
+function maybeStartDraftsTour(){
+  try{
+    if(localStorage.getItem(DRAFTS_TUTORIAL_SEEN_KEY)) return;
+    localStorage.setItem(DRAFTS_TUTORIAL_SEEN_KEY, '1');
+  }catch(e){}
+  _draftTourStep = 0;
+  _draftHelpOpen = true;
+}
+
+function layerFocusKey(group, value){
+  return `${group}::${value}`;
+}
+
+function addLayer(layerMap, group, value, item){
+  const text = String(value || '').trim();
+  if(!text) return;
+  const key = layerFocusKey(group, text.toLowerCase());
+  if(!layerMap[key]) layerMap[key] = {key, group, value:text, fragments:new Map(), ideas:new Map(), cards:new Map()};
+  if(item.fragment) layerMap[key].fragments.set(item.fragment.id, item.fragment);
+  if(item.idea) layerMap[key].ideas.set(item.idea.id, item);
+  if(item.card) layerMap[key].cards.set(item.card.id, item.card);
+}
+
+function buildDraftLayerMap(){
+  const map = {};
+  _draftFragments.forEach(fragment=>{
+    fragment.characters.forEach(value=>addLayer(map, 'Characters', value, {fragment}));
+    fragment.motifs.forEach(value=>addLayer(map, 'Motifs', value, {fragment}));
+    fragment.locations.forEach(value=>addLayer(map, 'Places', value, {fragment}));
+    fragment.narrativeDevices.forEach(value=>addLayer(map, 'Narrative Devices', value, {fragment}));
+    addLayer(map, 'POV', fragment.pov, {fragment});
+    addLayer(map, 'Timeline', fragment.timeline, {fragment});
+    addLayer(map, 'Research Subjects', fragment.researchSubject, {fragment});
+    (fragment.dialogue || []).forEach(item=>{
+      addLayer(map, 'Dialogue', item.speakerGuess, {fragment});
+      addLayer(map, 'Dialogue', item.addressedToGuess, {fragment});
+    });
+    (fragment.entities || []).forEach(item=>{
+      addLayer(map, 'Entities / Factions', item.name, {fragment});
+      addLayer(map, 'Entities / Factions', item.type, {fragment});
+    });
+    (fragment.routedIdeas || []).forEach(idea=>{
+      addLayer(map, routedIdeaSectionLabel(idea.section), idea.title, {fragment, idea:normalizeRoutedIdea(idea)});
+      addLayer(map, 'Routed Ideas', routedIdeaSectionLabel(idea.section), {fragment, idea:normalizeRoutedIdea(idea)});
+    });
+  });
+  _workshopCards.forEach(card=>{
+    card.tags.forEach(tag=>addLayer(map, 'Workshop Tags', tag, {card}));
+    addLayer(map, 'Workshop Cards', workshopLaneLabel(card.lane), {card});
+  });
+  return map;
+}
+
+function setDraftLayerFocus(key=''){
+  _draftLayerFocus = key || '';
+  try{ localStorage.setItem(DRAFTS_LAYER_FILTER_KEY, _draftLayerFocus); }catch(e){}
+  renderDraftsView({keepCache:true});
+}
+
+function renderLayerMap(){
+  const map = buildDraftLayerMap();
+  const groups = ['Characters','Motifs','Places','POV','Timeline','Narrative Devices','Dialogue','Entities / Factions','Research Subjects','Routed Ideas','Workshop Tags','Workshop Cards'];
+  const allLayers = Object.values(map).sort((a,b)=>a.value.localeCompare(b.value));
+  const focus = map[_draftLayerFocus] || null;
+  const groupHtml = groups.map(group=>{
+    const layers = allLayers.filter(layer=>layer.group===group);
+    return `<section class="layer-group">
+      <div class="layer-group-head"><span>${escHtml(group)}</span><b>${layers.length}</b></div>
+      ${layers.length ? layers.slice(0,24).map(layer=>`<article class="layer-card ${layer.key===_draftLayerFocus?'active':''}" onclick="setDraftLayerFocus('${escHtml(layer.key)}')">
+        <div class="layer-card-name">${escHtml(layer.value)}</div>
+        <div class="layer-card-meta">${layer.fragments.size} fragment${layer.fragments.size===1?'':'s'} · ${layer.ideas.size} idea${layer.ideas.size===1?'':'s'} · ${layer.cards.size} card${layer.cards.size===1?'':'s'}</div>
+      </article>`).join('') : '<div class="drafts-empty">No layers yet.</div>'}
+    </section>`;
+  }).join('');
+  const focusFragments = focus ? Array.from(focus.fragments.values()) : [];
+  const focusIdeas = focus ? Array.from(focus.ideas.values()) : [];
+  const focusCards = focus ? Array.from(focus.cards.values()) : [];
+  return `<section class="workflow-panel">
+    <div class="drafts-main-head">
+      <div>
+        <div class="drafts-kicker">Literary Layers</div>
+        <div class="drafts-title">Layer Map</div>
+      </div>
+      <div class="drafts-actions">
+        ${focus ? `<button class="cm-btn secondary" type="button" onclick="setDraftLayerFocus('')">Clear Focus</button>` : ''}
+      </div>
+    </div>
+    ${focus ? `<section class="workflow-card">
+      <div class="workflow-card-title">${escHtml(focus.group)} · ${escHtml(focus.value)}</div>
+      <div class="workflow-card-meta">${focusFragments.length} fragments · ${focusIdeas.length} routed ideas · ${focusCards.length} workshop cards</div>
+      <div class="workflow-card-body">
+        ${focusFragments.map(fragment=>`<article class="drafts-intel-card"><div class="drafts-intel-title">${escHtml(fragment.title)}</div><div>${workflowBadge('Source fragment')}</div><div class="drafts-intel-body">${escHtml(String(fragment.body || '').slice(0,180))}</div><button class="tiny-btn" type="button" onclick="openDraftFragmentInInbox('${escHtml(fragment.id)}')">Open Source Draft</button></article>`).join('')}
+        ${focusIdeas.map(row=>renderIdeaCard(row)).join('')}
+        ${focusCards.map(card=>renderWorkshopCard(card)).join('')}
+      </div>
+    </section>` : ''}
+    <div class="layer-map-grid">${groupHtml}</div>
+  </section>`;
+}
+
+function readyQueueItems(){
+  const fragments = _draftFragments.filter(fragment=>fragment.status === 'ready');
+  const cards = _workshopCards.filter(card=>card.status === 'ready');
+  const ideas = allRoutedIdeaRows().filter(row=>row.idea.chapterId && row.idea.status !== 'used');
+  return {
+    chapter:fragments.filter(fragment=>fragment.type === 'scene' || fragment.type === 'dialogue'),
+    research:cards.filter(card=>card.lane === 'research').concat(ideas.filter(row=>routedIdeaNeedsResearch(row.idea))),
+    codex:cards.filter(card=>['world-canon','character','theme-motif'].includes(card.lane)),
+    proto:fragments.filter(fragment=>fragment.type === 'poem').concat(cards.filter(card=>card.lane === 'scene-seeds')),
+    author:ideas.filter(row=>row.idea.chapterId && !routedIdeaNeedsResearch(row.idea)).concat(cards.filter(card=>card.linkedChapterId && card.status === 'ready'))
+  };
+}
+
+function renderReadyFragment(fragment){
+  return `<article class="workflow-card">
+    <div>${workflowBadge('Source fragment')}</div>
+    <div class="workflow-card-title">${escHtml(fragment.title)}</div>
+    <div class="workflow-card-meta">${escHtml(fragment.type)} · ${draftWordCount(fragment).toLocaleString()} words</div>
+    <div class="workflow-card-body">${escHtml(String(fragment.body || '').slice(0,180))}</div>
+    <button class="tiny-btn" type="button" onclick="openDraftFragmentInInbox('${escHtml(fragment.id)}')">Open Fragment</button>
+  </article>`;
+}
+
+function renderReadyCard(card){
+  return `<article class="workflow-card">
+    <div>${workflowBadge('Workshop card')}</div>
+    <div class="workflow-card-title">${escHtml(card.title)}</div>
+    <div class="workflow-card-meta">${escHtml(workshopLaneLabel(card.lane))} · ${escHtml(routedIdeaChapterLabel(card.linkedChapterId))}</div>
+    <div class="workflow-card-body">${escHtml(card.summary || card.sourceQuote || 'Ready workshop card.')}</div>
+    <div class="idea-card-actions">
+      <button class="tiny-btn" type="button" onclick="importWorkshopCardAsRoutedIdea('${escHtml(card.id)}')">Routed Idea</button>
+      <button class="tiny-btn" type="button" onclick="importWorkshopCardAsResearch('${escHtml(card.id)}')">Research</button>
+      <button class="tiny-btn" type="button" onclick="importWorkshopCardAsCodex('${escHtml(card.id)}')">Codex</button>
+    </div>
+  </article>`;
+}
+
+function renderReadyGroup(title, items, renderer){
+  return `<section class="ready-group">
+    <div class="ready-group-head"><span>${escHtml(title)}</span><b>${items.length}</b></div>
+    ${items.length ? items.map(renderer).join('') : '<div class="drafts-empty">Nothing ready here.</div>'}
+  </section>`;
+}
+
+function renderReadyQueue(){
+  const q = readyQueueItems();
+  return `<section class="workflow-panel">
+    <div class="drafts-main-head">
+      <div>
+        <div class="drafts-kicker">Ready Queue</div>
+        <div class="drafts-title">Next Actions</div>
+      </div>
+    </div>
+    <div class="ready-queue-grid">
+      ${renderReadyGroup('Chapter', q.chapter, renderReadyFragment)}
+      ${renderReadyGroup('Research', q.research, item=>item.idea ? renderIdeaCard(item) : renderReadyCard(item))}
+      ${renderReadyGroup('Codex', q.codex, renderReadyCard)}
+      ${renderReadyGroup('Protoevangelium', q.proto, item=>item.body ? renderReadyFragment(item) : renderReadyCard(item))}
+      ${renderReadyGroup('Author Workspace', q.author, item=>item.idea ? renderIdeaCard(item) : renderReadyCard(item))}
+    </div>
+  </section>`;
+}
+
+function renderArchiveView(){
+  const archivedFragments = _draftFragments.filter(fragment=>fragment.status === 'archived');
+  const archivedDocs = _planningDocs.filter(doc=>doc.status === 'archived');
+  const archivedCards = _workshopCards.filter(card=>card.status === 'archived');
+  const usedIdeas = allRoutedIdeaRows().filter(row=>row.idea.status === 'used');
+  return `<section class="workflow-panel">
+    <div class="drafts-main-head">
+      <div>
+        <div class="drafts-kicker">Archive</div>
+        <div class="drafts-title">Stored Material</div>
+      </div>
+    </div>
+    <div class="archive-grid">
+      ${renderReadyGroup('Archived Fragments', archivedFragments, renderReadyFragment)}
+      ${renderReadyGroup('Planning Notes', archivedDocs, doc=>`<article class="workflow-card"><div>${workflowBadge('Planning note')}</div><div class="workflow-card-title">${escHtml(doc.title)}</div><div class="workflow-card-meta">${escHtml(doc.type)} · ${draftDate(doc.updatedAt)}</div><button class="tiny-btn" type="button" onclick="selectPlanningDoc('${escHtml(doc.id)}');updateDraftFilter('view','planning')">Open Planning</button></article>`)}
+      ${renderReadyGroup('Workshop Cards', archivedCards, renderReadyCard)}
+      ${renderReadyGroup('Used Ideas', usedIdeas, renderIdeaCard)}
+    </div>
+  </section>`;
+}
+
 function draftIdeaChapterOptions(selected=''){
   return `<option value="all" ${selected==='all'?'selected':''}>All Chapters</option>
     <option value="unassigned" ${selected==='unassigned'?'selected':''}>Unassigned</option>` +
@@ -14059,24 +14533,41 @@ async function bulkSendRoutedIdeasToResearch(){
 
 async function openDraftFromRoutedIdea(sourceDraftId){
   await showDrafts();
+  _draftFilter.view = 'inbox';
+  saveDraftsUi();
   await selectDraftFragment(sourceDraftId);
+}
+
+async function openDraftFragmentInInbox(id){
+  await showDrafts();
+  _draftFilter.view = 'inbox';
+  saveDraftsUi();
+  await selectDraftFragment(id);
 }
 
 function renderIdeaCard(row){
   const idea = row.idea;
   const key = routedIdeaKey(idea);
+  const primary = !idea.chapterId
+    ? `<select class="drafts-select" onchange="assignRoutedIdeaChapter('${escHtml(row.fragment.id)}','${escHtml(idea.id)}',this.value)">${draftIdeaAssignmentOptions(idea.chapterId)}</select>`
+    : routedIdeaNeedsResearch(idea) && !idea.researchId
+      ? `<button class="tiny-btn" type="button" onclick="sendRoutedIdeaToResearch('${escHtml(row.fragment.id)}','${escHtml(idea.id)}')">Send To Research</button>`
+      : idea.status !== 'used'
+        ? `<button class="tiny-btn" type="button" onclick="setDraftRoutedIdeaStatus('${escHtml(row.fragment.id)}','${escHtml(idea.id)}','used')">Mark Used</button>`
+        : `<button class="tiny-btn" type="button" onclick="openEditorialAuthorWorkspace('${escHtml(idea.chapterId)}')">Open Author Workspace</button>`;
   return `<article class="idea-card">
     <input class="idea-select-check" type="checkbox" ${_draftSelectedIdeaKeys.has(key)?'checked':''} onchange="toggleRoutedIdeaSelection('${escHtml(key)}',this.checked)">
+    <div>${workflowBadge('Routed idea')} ${idea.researchId ? workflowBadge('Research lead') : ''} ${idea.status==='used' ? workflowBadge('Imported','imported') : ''}</div>
     <div class="idea-card-title">${escHtml(idea.title)}</div>
     <div class="idea-card-meta">${routedIdeaStatusHtml(idea.status)} · ${escHtml(routedIdeaChapterLabel(idea.chapterId))} · ${idea.confidence ? `confidence ${Math.round(idea.confidence * 100)}%` : 'unscored'}</div>
     <div class="idea-card-body">${escHtml(idea.summary || idea.context || 'No summary captured.')}</div>
     ${idea.quote ? `<div class="author-routed-quote">${escHtml(idea.quote)}</div>` : ''}
     <div class="idea-card-meta">Source: ${escHtml(row.fragment.title || idea.sourceFragmentTitle || 'Draft fragment')}</div>
     <div class="idea-card-actions">
-      <select class="drafts-select" onchange="assignRoutedIdeaChapter('${escHtml(row.fragment.id)}','${escHtml(idea.id)}',this.value)">${draftIdeaAssignmentOptions(idea.chapterId)}</select>
+      ${primary}
+      ${idea.chapterId ? `<select class="drafts-select" onchange="assignRoutedIdeaChapter('${escHtml(row.fragment.id)}','${escHtml(idea.id)}',this.value)">${draftIdeaAssignmentOptions(idea.chapterId)}</select>` : ''}
       <button class="tiny-btn" type="button" onclick="setDraftRoutedIdeaStatus('${escHtml(row.fragment.id)}','${escHtml(idea.id)}','working')">Working</button>
-      <button class="tiny-btn" type="button" onclick="setDraftRoutedIdeaStatus('${escHtml(row.fragment.id)}','${escHtml(idea.id)}','used')">Used</button>
-      ${routedIdeaNeedsResearch(idea) ? `<button class="tiny-btn" type="button" onclick="sendRoutedIdeaToResearch('${escHtml(row.fragment.id)}','${escHtml(idea.id)}')">Send To Research</button>` : ''}
+      ${routedIdeaNeedsResearch(idea) && idea.chapterId ? `<button class="tiny-btn" type="button" onclick="sendRoutedIdeaToResearch('${escHtml(row.fragment.id)}','${escHtml(idea.id)}')">Research</button>` : ''}
       <button class="tiny-btn" type="button" onclick="openDraftFromRoutedIdea('${escHtml(row.fragment.id)}')">Open Source Draft</button>
     </div>
   </article>`;
@@ -14084,6 +14575,13 @@ function renderIdeaCard(row){
 
 function renderDraftIdeaRepository(){
   const rows = visibleRoutedIdeaRows();
+  const summary = {
+    unassigned:rows.filter(row=>!row.idea.chapterId).length,
+    assigned:rows.filter(row=>row.idea.chapterId).length,
+    working:rows.filter(row=>row.idea.status==='working').length,
+    used:rows.filter(row=>row.idea.status==='used').length,
+    research:rows.filter(row=>row.idea.researchId).length
+  };
   const lanes = ROUTED_IDEA_SECTIONS.map(section=>{
     const laneRows = rows.filter(row=>row.idea.section === section.id);
     return `<section class="idea-lane">
@@ -14128,6 +14626,13 @@ function renderDraftIdeaRepository(){
       <button class="cm-btn secondary" type="button" onclick="bulkSendRoutedIdeasToResearch()">Send To Research</button>
     </div>
     <div class="drafts-card-meta">${rows.length} routed idea${rows.length === 1 ? '' : 's'} shown · ${_draftSelectedIdeaKeys.size} selected</div>
+    <div class="workflow-summary-grid">
+      <div class="drafts-stat"><b>${summary.unassigned}</b><div class="drafts-stat-label">Unassigned</div></div>
+      <div class="drafts-stat"><b>${summary.assigned}</b><div class="drafts-stat-label">Assigned</div></div>
+      <div class="drafts-stat"><b>${summary.working}</b><div class="drafts-stat-label">Working</div></div>
+      <div class="drafts-stat"><b>${summary.used}</b><div class="drafts-stat-label">Used</div></div>
+      <div class="drafts-stat"><b>${summary.research}</b><div class="drafts-stat-label">Research Linked</div></div>
+    </div>
     <div class="idea-lane-grid">${lanes}</div>
   </section>`;
 }
@@ -14237,11 +14742,18 @@ async function renderDraftsView(options={}){
   const layerSel = document.getElementById('draft-filter-layer');
   const search = document.getElementById('draft-search');
   const isPlanning = _draftFilter.view === 'planning';
+  const isLayers = _draftFilter.view === 'layers';
+  const isReady = _draftFilter.view === 'ready';
+  const isArchive = _draftFilter.view === 'archive';
+  const fullWorkspace = ['ideas','planning','layers','ready','archive'].includes(_draftFilter.view);
   if(wrap){
     wrap.classList.toggle('planning-mode', isPlanning);
     wrap.classList.toggle('ideas-mode', _draftFilter.view === 'ideas');
+    wrap.classList.toggle('layers-mode', isLayers);
+    wrap.classList.toggle('ready-mode', isReady);
+    wrap.classList.toggle('archive-mode', isArchive);
   }
-  ['inbox','ideas','planning','layers','ready'].forEach(view=>{
+  ['inbox','ideas','planning','layers','ready','archive'].forEach(view=>{
     const tab = document.getElementById('draft-tab-' + view);
     if(tab) tab.classList.toggle('active', (_draftFilter.view || 'inbox') === view);
   });
@@ -14250,14 +14762,25 @@ async function renderDraftsView(options={}){
   if(viewSel) viewSel.value = _draftFilter.view || 'inbox';
   if(layerSel) layerSel.innerHTML = draftLayerOptions();
   if(search) search.value = _draftFilter.search || '';
-  if(list) list.innerHTML = isPlanning ? '<div class="drafts-empty">Planning Notes has its own document list in the main workspace.</div>' : (visible.length ? visible.map(draftFragmentCard).join('') : '<div class="drafts-empty">No fragments match this view.</div>');
+  if(list) list.innerHTML = fullWorkspace ? '<div class="drafts-empty">This workflow has its own workspace in the main panel.</div>' : (visible.length ? visible.map(draftFragmentCard).join('') : '<div class="drafts-empty">No fragments match this view.</div>');
   if(stats) stats.innerHTML = renderDraftStats();
-  if(editor && (_draftFilter.view === 'ideas' || _draftFilter.view === 'planning' || !options.keepEditor)){
-    editor.innerHTML = _draftFilter.view === 'ideas' ? renderDraftIdeaRepository() : (_draftFilter.view === 'planning' ? renderPlanningLab() : renderDraftEditor(active));
+  if(editor && (fullWorkspace || !options.keepEditor)){
+    editor.innerHTML = _draftFilter.view === 'ideas'
+      ? renderDraftIdeaRepository()
+      : isPlanning
+        ? renderPlanningLab()
+        : isLayers
+          ? renderLayerMap()
+          : isReady
+            ? renderReadyQueue()
+            : isArchive
+              ? renderArchiveView()
+              : renderDraftEditor(active);
   }
-  if(suggestions) suggestions.innerHTML = isPlanning ? '<div class="drafts-empty">Planning AI and workshop actions live inside Planning Notes.</div>' : renderDraftAiPanel(active) + renderDraftAcceptedIntelligence(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
-  if(conversions) conversions.innerHTML = isPlanning ? '<div class="drafts-empty">Use workshop card import buttons to route planning material.</div>' : renderDraftConversions(active);
+  if(suggestions) suggestions.innerHTML = fullWorkspace ? '<div class="drafts-empty">Use the main workspace for this workflow step.</div>' : renderDraftAiPanel(active) + renderDraftAcceptedIntelligence(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
+  if(conversions) conversions.innerHTML = fullWorkspace ? '<div class="drafts-empty">Actions appear on the cards in this workflow.</div>' : renderDraftConversions(active);
   attachDraftControlHandlers();
+  renderDraftsHelp();
 }
 
 async function showDrafts(){
@@ -14267,6 +14790,7 @@ async function showDrafts(){
   const view = document.getElementById('drafts-view');
   if(view) view.style.display = 'block';
   hideOthers('drafts-view');
+  maybeStartDraftsTour();
   await renderDraftsView();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -15277,7 +15801,8 @@ function attachDraftControlHandlers(){
     ['draft-tab-ideas','ideas'],
     ['draft-tab-planning','planning'],
     ['draft-tab-layers','layers'],
-    ['draft-tab-ready','ready']
+    ['draft-tab-ready','ready'],
+    ['draft-tab-archive','archive']
   ];
   viewButtons.forEach(([id, view])=>{
     const el = document.getElementById(id);
@@ -15303,6 +15828,8 @@ function attachDraftControlHandlers(){
   if(splitBtn) splitBtn.onclick = () => draftSplitIntake();
   const clearBtn = document.getElementById('draft-clear-intake-btn');
   if(clearBtn) clearBtn.onclick = () => draftClearIntake();
+  const helpBtn = document.getElementById('draft-help-toggle');
+  if(helpBtn) helpBtn.onclick = () => toggleDraftsHelp();
 }
 
 Object.assign(window, {
@@ -15326,6 +15853,10 @@ Object.assign(window, {
   draftClearIntake,
   draftUploadFromInput,
   attachDraftControlHandlers,
+  toggleDraftsHelp,
+  startDraftsTour,
+  advanceDraftsTour,
+  setDraftLayerFocus,
   handleAnalyzeFragmentClick,
   analyzeActiveDraftWithAi,
   analyzeSelectedDraftsWithAi,
@@ -15355,6 +15886,7 @@ Object.assign(window, {
   bulkSetRoutedIdeasStatus,
   bulkSendRoutedIdeasToResearch,
   openDraftFromRoutedIdea,
+  openDraftFragmentInInbox,
   createPlanningDoc,
   selectPlanningDoc,
   persistActivePlanningDoc,
