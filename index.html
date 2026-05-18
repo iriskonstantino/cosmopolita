@@ -3495,6 +3495,7 @@ body:not(.logged-in) #tnav-assets{
       <button class="toc-add-btn admin-only" onclick="openNewChapterModal()">+ New Chapter</button>
       <div class="content-tools admin-only">
         <button class="ch-ctrl-btn" onclick="exportChapters()">Export Chapters</button>
+        <button class="ch-ctrl-btn" onclick="exportFullBackup()">Full Backup</button>
         <button class="ch-ctrl-btn" onclick="document.getElementById('chapter-import-input').click()">Import Chapters</button>
         <button class="ch-ctrl-btn" onclick="loadPublishedChapters(true)">Reload Published</button>
       </div>
@@ -4550,6 +4551,304 @@ function importChapters(event){
     }
   };
   reader.readAsText(file);
+}
+
+function backupSlugDate(date=new Date()){
+  return date.toISOString().replace(/[:.]/g,'-');
+}
+
+function backupReadLocalStorage(key){
+  try{
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){
+    return null;
+  }
+}
+
+function backupLocalStorageSnapshot(){
+  const keys = [
+    CHAPTERS_STORAGE_KEY,
+    CHAPTER_EDITOR_DRAFTS_KEY,
+    BOOK_ARCH_STORAGE_KEY,
+    'cosmopolita_entities',
+    'cosmopolita_characters',
+    'cosmopolita_text_alignment',
+    'cosmopolita_text_width'
+  ];
+  return keys.reduce((acc,key)=>{
+    try{ acc[key] = localStorage.getItem(key); }catch(e){ acc[key] = null; }
+    return acc;
+  }, {});
+}
+
+function backupWordCountForItems(items){
+  return (items || []).reduce((sum,ch)=>sum + chapterWordCount(ch), 0);
+}
+
+function backupFileToDataUrl(blob){
+  return new Promise((resolve,reject)=>{
+    if(!blob){ resolve(''); return; }
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result || '');
+    reader.onerror = () => reject(reader.error || new Error('Could not read file blob.'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function backupVaultFiles(){
+  try{
+    const files = await vaultGetAll();
+    const out = [];
+    for(const file of files){
+      let dataUrl = '';
+      try{ dataUrl = await backupFileToDataUrl(file.blob); }catch(e){}
+      out.push({
+        id:file.id,
+        name:file.name,
+        type:file.type,
+        size:file.size,
+        lastModified:file.lastModified,
+        addedAt:file.addedAt,
+        dataUrl
+      });
+    }
+    return out;
+  }catch(e){
+    return [];
+  }
+}
+
+async function buildFullBackupPayload(){
+  const now = new Date();
+  const readerNotes = await notesGetAll().catch(()=>[]);
+  const vaultFiles = await backupVaultFiles();
+  const normalizedChapters = normalizeChapterList(chapters || []);
+  return {
+    backupType:'cosmopolita-full-offline-backup',
+    version:1,
+    exportedAt:now.toISOString(),
+    site:{
+      title:document.title || 'COSMOPOLITA',
+      url:location.href,
+      userAgent:navigator.userAgent
+    },
+    counts:{
+      chapters:normalizedChapters.length,
+      chapterWords:backupWordCountForItems(normalizedChapters),
+      characters:(characters || []).length,
+      codexEntries:Object.keys(E || {}).length,
+      readerNotes:readerNotes.length,
+      vaultFiles:vaultFiles.length
+    },
+    content:{
+      chapters:normalizedChapters,
+      bookArchitecture:normalizeBookArchitecture(bookArchitecture),
+      codexEntries:E,
+      characters,
+      readerNotes,
+      fileVault:vaultFiles,
+      chapterEditorDrafts:backupReadLocalStorage(CHAPTER_EDITOR_DRAFTS_KEY) || {}
+    },
+    browserStorage:{
+      localStorage:backupLocalStorageSnapshot()
+    }
+  };
+}
+
+function backupEscapeHtml(value){
+  return String(value || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function backupParagraphs(text){
+  const value = String(text || '').trim();
+  if(!value) return '<p class="muted">Empty</p>';
+  return value.split(/\n\s*\n/).map(p=>`<p>${backupEscapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+}
+
+function backupChapterBodyHtml(body){
+  let value = String(body || '').trim();
+  if(!value) return '<p class="muted">No chapter text.</p>';
+  value = value
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/^===([^=]+)===$/gm,'<h3>$1</h3>')
+    .replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g,'<span class="wiki">$2</span>')
+    .replace(/\[\[([^\]]+)\]\]/g,'<span class="wiki">$1</span>');
+  return value.split(/\n\s*\n/).map(block=>{
+    if(/^<h3>/.test(block)) return block;
+    return `<p>${block.replace(/\n/g,'<br>')}</p>`;
+  }).join('');
+}
+
+function backupAuthorNotesHtml(notes){
+  notes = normalizeAuthorNotes(notes || {});
+  const thesis = notes.thesisBrief || {};
+  const research = notes.research || normalizeResearch();
+  const customTasks = notes.checklist.length ? notes.checklist.map(task=>`<li>${task.done?'[x]':'[ ]'} ${backupEscapeHtml(task.text)}</li>`).join('') : '<li class="muted">No custom tasks</li>';
+  const privateNotes = notes.notes.length ? notes.notes.map(note=>`<article class="note">${backupParagraphs(note.body)}<small>${backupEscapeHtml(authorNoteDate(note.updatedAt))}</small></article>`).join('') : '<p class="muted">No private notes</p>';
+  const inlineNotes = notes.inline.length ? notes.inline.map(note=>`<article class="note"><strong>${backupEscapeHtml(note.quote || 'No quote')}</strong>${backupParagraphs(note.body)}</article>`).join('') : '<p class="muted">No inline notes</p>';
+  const sources = research.sources.length ? research.sources.map(source=>`
+    <article class="source">
+      <h5>${backupEscapeHtml(source.title || 'Untitled Source')}</h5>
+      <p><b>Author/Institution:</b> ${backupEscapeHtml(source.author)} · <b>Type:</b> ${backupEscapeHtml(source.type)} · <b>Year:</b> ${backupEscapeHtml(source.year)}</p>
+      <p><b>URL/Citation:</b> ${backupEscapeHtml(source.url)}</p>
+      <p><b>Summary:</b> ${backupEscapeHtml(source.summary)}</p>
+      <p><b>Relevance:</b> ${backupEscapeHtml(source.relevance)}</p>
+      <p><b>Method/Discipline:</b> ${backupEscapeHtml(source.method)}</p>
+      <p><b>Reliability:</b> ${backupEscapeHtml(source.reliability)}</p>
+      <p><b>Use in Chapter:</b> ${backupEscapeHtml(source.chapterUse)}</p>
+    </article>`).join('') : '<p class="muted">No sources</p>';
+  const evidence = research.evidence.length ? research.evidence.map(item=>`
+    <article class="source">
+      <h5>${backupEscapeHtml(item.claim || 'Evidence Card')}</h5>
+      <p><b>Confidence:</b> ${backupEscapeHtml(item.confidence)}</p>
+      <p><b>Quote/Paraphrase:</b> ${backupEscapeHtml(item.quote)}</p>
+      <p><b>Chapter Application:</b> ${backupEscapeHtml(item.application)}</p>
+    </article>`).join('') : '<p class="muted">No evidence cards</p>';
+  const gaps = research.gaps.length ? research.gaps.map(gap=>`<li><b>${backupEscapeHtml(gap.status)}</b> · ${backupEscapeHtml(gap.question)} <span class="muted">${backupEscapeHtml(gap.nextStep)}</span></li>`).join('') : '<li class="muted">No gaps</li>';
+  return `
+    <section class="author-box">
+      <h4>Thesis / Core Question</h4>
+      <p><b>Thesis:</b> ${backupEscapeHtml(thesis.thesis)}</p>
+      <p><b>Core Question:</b> ${backupEscapeHtml(thesis.coreQuestion)}</p>
+      <p><b>Scope:</b> ${backupEscapeHtml(thesis.scope)}</p>
+      <p><b>Key Terms / Motifs:</b> ${backupEscapeHtml(thesis.keyTerms)}</p>
+      <h4>Research</h4>
+      <p><b>Research Question:</b> ${backupEscapeHtml(research.question)}</p>
+      <p><b>Working Thesis:</b> ${backupEscapeHtml(research.workingThesis)}</p>
+      <h5>Sources</h5>${sources}
+      <h5>Evidence / Claims</h5>${evidence}
+      <h5>Gaps / Next Questions</h5><ul>${gaps}</ul>
+      <h4>Author Notes</h4>
+      <h5>Custom Tasks</h5><ul>${customTasks}</ul>
+      <h5>Private Notes</h5>${privateNotes}
+      <h5>Inline Notes</h5>${inlineNotes}
+    </section>`;
+}
+
+function backupHtmlDocument(payload){
+  const chaptersHtml = payload.content.chapters.map((ch,index)=>`
+    <article class="chapter">
+      <h3>${String(index + 1).padStart(2,'0')} · ${backupEscapeHtml(ch.chapter || ch.book || 'Untitled Chapter')}</h3>
+      <div class="meta">${backupEscapeHtml([ch.novel, ch.act, ch.book, ch.volume, ch.subvolume, ch.part].filter(Boolean).join(' / '))}</div>
+      <div class="chapter-body">${backupChapterBodyHtml(ch.body)}</div>
+      ${backupAuthorNotesHtml(ch.authorNotes)}
+    </article>
+  `).join('');
+  const charactersHtml = (payload.content.characters || []).map(char=>`
+    <article class="card">
+      <h3>${backupEscapeHtml(char.name || char.id)}</h3>
+      <p><b>Role:</b> ${backupEscapeHtml(char.role)} · <b>Epithet:</b> ${backupEscapeHtml(char.epithet)}</p>
+      <div>${char.bio || '<p class="muted">No bio</p>'}</div>
+    </article>
+  `).join('');
+  const codexHtml = Object.entries(payload.content.codexEntries || {}).map(([key,entry])=>`
+    <article class="card">
+      <h3>${backupEscapeHtml(entry.t || key)}</h3>
+      <p><b>Key:</b> ${backupEscapeHtml(key)} · <b>Category:</b> ${backupEscapeHtml(entry.cat)}</p>
+      <p>${backupEscapeHtml(entry.desc || entry.b || entry.short || '')}</p>
+    </article>
+  `).join('');
+  const readerNotesHtml = (payload.content.readerNotes || []).map(note=>`
+    <article class="card">
+      <h3>${backupEscapeHtml(note.title || 'Reader Note')}</h3>
+      <p><b>Chapter:</b> ${backupEscapeHtml(note.chapterId)} · <b>Updated:</b> ${backupEscapeHtml(note.updatedAt || '')}</p>
+      ${backupParagraphs(note.body)}
+    </article>
+  `).join('');
+  const filesHtml = (payload.content.fileVault || []).map(file=>`
+    <article class="card">
+      <h3>${backupEscapeHtml(file.name)}</h3>
+      <p><b>Type:</b> ${backupEscapeHtml(file.type)} · <b>Size:</b> ${backupEscapeHtml(vaultFormatBytes(file.size))}</p>
+      ${file.dataUrl ? `<p><a href="${file.dataUrl}" download="${backupEscapeHtml(file.name)}">Download embedded file</a></p>` : '<p class="muted">File data unavailable</p>'}
+    </article>
+  `).join('');
+  const rawJson = JSON.stringify(payload, null, 2).replace(/</g,'\\u003c');
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COSMOPOLITA Full Backup · ${backupEscapeHtml(payload.exportedAt)}</title>
+<style>
+body{margin:0;background:#f4efe7;color:#1f1c18;font-family:Georgia,serif;line-height:1.55}
+header{background:#1f1c18;color:#f4efe7;padding:2rem}
+h1,h2,h3,h4,h5{font-family:Georgia,serif;letter-spacing:.04em}
+nav{position:sticky;top:0;background:#e8dfd2;border-bottom:1px solid #cfc4b5;padding:.75rem 2rem;display:flex;gap:.8rem;flex-wrap:wrap;z-index:2}
+nav a{color:#1f1c18;text-transform:uppercase;font:11px monospace;letter-spacing:.12em}
+main{max-width:1120px;margin:0 auto;padding:1.5rem}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin:1rem 0}
+.stat,.card,.chapter,.author-box{background:#fff;border:1px solid #d8cec0;padding:1rem}
+.stat b{display:block;font-size:1.6rem}
+.meta,.muted,small{color:#82786c;font-family:monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+.chapter{margin:1rem 0 2rem}
+.chapter-body{border-top:1px solid #d8cec0;border-bottom:1px solid #d8cec0;margin:1rem 0;padding:1rem 0}
+.wiki{border-bottom:1px dotted #8b3a1e;color:#8b3a1e}
+.author-box{background:#fbf8f3}
+.source,.note{border:1px solid #e1d8cc;background:#fff;margin:.6rem 0;padding:.75rem}
+pre{white-space:pre-wrap;word-break:break-word;background:#1f1c18;color:#f4efe7;padding:1rem;overflow:auto}
+a{color:#8b3a1e}
+</style>
+</head>
+<body>
+<header>
+  <div class="meta">Full Offline Backup</div>
+  <h1>COSMOPOLITA</h1>
+  <p>Exported ${backupEscapeHtml(new Date(payload.exportedAt).toLocaleString())}</p>
+</header>
+<nav>
+  <a href="#chapters">Chapters</a>
+  <a href="#characters">Characters</a>
+  <a href="#codex">Codex</a>
+  <a href="#reader-notes">Reader Notes</a>
+  <a href="#files">Files</a>
+  <a href="#raw-json">Raw JSON</a>
+</nav>
+<main>
+  <section class="summary">
+    <div class="stat"><b>${payload.counts.chapters}</b> Chapters</div>
+    <div class="stat"><b>${Number(payload.counts.chapterWords).toLocaleString()}</b> Words</div>
+    <div class="stat"><b>${payload.counts.characters}</b> Characters</div>
+    <div class="stat"><b>${payload.counts.codexEntries}</b> Codex Entries</div>
+    <div class="stat"><b>${payload.counts.readerNotes}</b> Reader Notes</div>
+    <div class="stat"><b>${payload.counts.vaultFiles}</b> Vault Files</div>
+  </section>
+  <section id="chapters"><h2>Chapters</h2>${chaptersHtml}</section>
+  <section id="characters"><h2>Characters</h2>${charactersHtml || '<p class="muted">No characters</p>'}</section>
+  <section id="codex"><h2>Codex</h2>${codexHtml || '<p class="muted">No codex entries</p>'}</section>
+  <section id="reader-notes"><h2>Reader Notes</h2>${readerNotesHtml || '<p class="muted">No reader notes</p>'}</section>
+  <section id="files"><h2>Offline File Vault</h2>${filesHtml || '<p class="muted">No vault files</p>'}</section>
+  <section id="raw-json"><h2>Raw Backup JSON</h2><p class="muted">This is the machine-readable recovery payload embedded in the backup.</p><pre id="backup-json">${backupEscapeHtml(rawJson)}</pre></section>
+</main>
+<scr` + `ipt type="application/json" id="cosmopolita-backup-data">${rawJson}</scr` + `ipt>
+</body>
+</html>`;
+}
+
+async function exportFullBackup(){
+  if(!requireAdmin()) return;
+  const status = document.getElementById('content-status');
+  if(status) status.textContent = 'Building full offline backup… large vault files may take a moment.';
+  try{
+    const payload = await buildFullBackupPayload();
+    const html = backupHtmlDocument(payload);
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cosmopolita-full-backup-${backupSlugDate(new Date(payload.exportedAt))}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    if(status) status.textContent = `Full backup exported: ${payload.counts.chapters} chapters, ${payload.counts.characters} characters, ${payload.counts.codexEntries} codex entries, ${payload.counts.readerNotes} reader notes, ${payload.counts.vaultFiles} vault files.`;
+  }catch(e){
+    console.error('Full backup failed:', e);
+    if(status) status.textContent = 'Full backup failed: ' + (e.message || e);
+    alert('Full backup failed. If the vault is very large, export files separately from the Files tab too.');
+  }
 }
 
 let chapters = normalizeChapterList(loadChapters());
