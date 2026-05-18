@@ -4471,7 +4471,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.13</div>
+<div id="site-version-stamp">v2026.05.18.14</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -4987,8 +4987,8 @@ body:not(.admin-on) #tnav-drafts{
             <option value="">All Layers</option>
           </select>
         </div>
-        <button class="cm-btn primary" type="button" onclick="createDraftFragment()">New Fragment</button>
-        <button class="cm-btn secondary" type="button" onclick="document.getElementById('draft-upload-input').click()">Upload .txt/.md</button>
+        <button id="draft-new-fragment-btn" class="cm-btn primary" type="button" onclick="createDraftFragment()">New Fragment</button>
+        <button id="draft-upload-btn" class="cm-btn secondary" type="button" onclick="document.getElementById('draft-upload-input').click()">Upload .txt/.md</button>
         <input id="draft-upload-input" type="file" accept=".txt,.md,text/plain,text/markdown" multiple hidden onchange="draftUploadFromInput(event)">
       </div>
       <div id="draft-list" class="drafts-card-list"></div>
@@ -5007,8 +5007,8 @@ body:not(.admin-on) #tnav-drafts{
           <input id="draft-split-delimiter" class="drafts-input" placeholder="Custom delimiter">
         </div>
         <div class="file-toolbar">
-          <button class="cm-btn secondary" type="button" onclick="draftSplitIntake()">Split Into Fragments</button>
-          <button class="cm-btn secondary" type="button" onclick="draftClearIntake()">Clear Intake</button>
+          <button id="draft-split-btn" class="cm-btn secondary" type="button" onclick="draftSplitIntake()">Split Into Fragments</button>
+          <button id="draft-clear-intake-btn" class="cm-btn secondary" type="button" onclick="draftClearIntake()">Clear Intake</button>
         </div>
       </div>
       <section id="draft-editor-panel"></section>
@@ -8588,6 +8588,7 @@ function setTextWidth(mode){
 document.addEventListener('DOMContentLoaded',()=>{
   updateAdminUI();
   _updateNavUI();
+  attachDraftControlHandlers();
   renderTOC();
   loadPublishedChapters();
   initCharacterFeature();
@@ -14197,6 +14198,7 @@ async function renderDraftsView(options={}){
   }
   if(suggestions) suggestions.innerHTML = isPlanning ? '<div class="drafts-empty">Planning AI and workshop actions live inside Planning Notes.</div>' : renderDraftAiPanel(active) + renderDraftAcceptedIntelligence(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
   if(conversions) conversions.innerHTML = isPlanning ? '<div class="drafts-empty">Use workshop card import buttons to route planning material.</div>' : renderDraftConversions(active);
+  attachDraftControlHandlers();
 }
 
 async function showDrafts(){
@@ -15210,6 +15212,40 @@ function attachPrimaryNavHandlers(){
   if(begin) begin.onclick = ()=>beginReading();
 }
 
+function attachDraftControlHandlers(){
+  const viewButtons = [
+    ['draft-tab-inbox','inbox'],
+    ['draft-tab-ideas','ideas'],
+    ['draft-tab-planning','planning'],
+    ['draft-tab-layers','layers'],
+    ['draft-tab-ready','ready']
+  ];
+  viewButtons.forEach(([id, view])=>{
+    const el = document.getElementById(id);
+    if(el) el.onclick = () => updateDraftFilter('view', view);
+  });
+  const search = document.getElementById('draft-search');
+  if(search) search.oninput = event => updateDraftFilter('search', event.target.value);
+  const viewSel = document.getElementById('draft-filter-view');
+  if(viewSel) viewSel.onchange = event => updateDraftFilter('view', event.target.value);
+  const typeSel = document.getElementById('draft-filter-type');
+  if(typeSel) typeSel.onchange = event => updateDraftFilter('type', event.target.value);
+  const statusSel = document.getElementById('draft-filter-status');
+  if(statusSel) statusSel.onchange = event => updateDraftFilter('status', event.target.value);
+  const layerSel = document.getElementById('draft-filter-layer');
+  if(layerSel) layerSel.onchange = event => updateDraftFilter('layer', event.target.value);
+  const newBtn = document.getElementById('draft-new-fragment-btn');
+  if(newBtn) newBtn.onclick = () => createDraftFragment();
+  const uploadBtn = document.getElementById('draft-upload-btn');
+  if(uploadBtn) uploadBtn.onclick = () => document.getElementById('draft-upload-input')?.click();
+  const uploadInput = document.getElementById('draft-upload-input');
+  if(uploadInput) uploadInput.onchange = event => draftUploadFromInput(event);
+  const splitBtn = document.getElementById('draft-split-btn');
+  if(splitBtn) splitBtn.onclick = () => draftSplitIntake();
+  const clearBtn = document.getElementById('draft-clear-intake-btn');
+  if(clearBtn) clearBtn.onclick = () => draftClearIntake();
+}
+
 Object.assign(window, {
   goHome,
   goBack,
@@ -15222,6 +15258,15 @@ Object.assign(window, {
   showWikiEntry,
   showProtoevangelium,
   showDrafts,
+  updateDraftFilter,
+  createDraftFragment,
+  selectDraftFragment,
+  persistActiveDraftFromEditor,
+  queueDraftEditorSave,
+  draftSplitIntake,
+  draftClearIntake,
+  draftUploadFromInput,
+  attachDraftControlHandlers,
   handleAnalyzeFragmentClick,
   analyzeActiveDraftWithAi,
   analyzeSelectedDraftsWithAi,
@@ -15272,7 +15317,10 @@ Object.assign(window, {
   showAssets
 });
 attachPrimaryNavHandlers();
-window.addEventListener('DOMContentLoaded', attachPrimaryNavHandlers);
+window.addEventListener('DOMContentLoaded', ()=>{
+  attachPrimaryNavHandlers();
+  attachDraftControlHandlers();
+});
 </script>
 
 <div id="character-modal-overlay" onclick="handleCharacterModalOverlayClick(event)">
