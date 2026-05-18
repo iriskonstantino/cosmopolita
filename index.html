@@ -60,6 +60,21 @@
 .tnav-link:first-child{border-left:none}
 .tnav-link:hover{color:var(--ink);background:var(--panel)}
 .tnav-link.active{color:var(--ink);font-weight:700}
+#site-version-stamp{
+  position:fixed;
+  right:0.45rem;
+  bottom:0.35rem;
+  z-index:3000;
+  font-family:var(--mono);
+  font-size:0.46rem;
+  line-height:1;
+  letter-spacing:0.08em;
+  color:rgba(15,14,13,0.38);
+  background:rgba(250,248,243,0.72);
+  border:1px solid rgba(216,211,200,0.55);
+  padding:0.16rem 0.28rem;
+  pointer-events:none;
+}
 /* Hide the per-view supertitle since topnav handles it */
 .chdr-supertitle{display:none}
 
@@ -4114,6 +4129,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
+<div id="site-version-stamp">v2026.05.18.1</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
