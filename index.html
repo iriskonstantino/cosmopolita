@@ -2068,6 +2068,199 @@ body.links-on .wl:hover{color:var(--red)}
   color:var(--red);
   margin-top:0.82rem;
 }
+.editorial-dashboard{
+  display:grid;
+  gap:1rem;
+  margin:0 0 2.25rem;
+  border-top:1.5px solid var(--ink);
+  border-bottom:1.5px solid var(--ink);
+  padding:1rem 0 1.1rem;
+}
+.editorial-dashboard-top{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:1rem;
+  align-items:end;
+}
+.editorial-kicker,
+.editorial-panel-label,
+.editorial-chip,
+.editorial-row-meta,
+.editorial-empty,
+.editorial-filter label{
+  font-family:var(--mono);
+  text-transform:uppercase;
+}
+.editorial-kicker{
+  font-size:0.54rem;
+  letter-spacing:0.2em;
+  color:#aaa;
+}
+.editorial-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:clamp(1.18rem,2.1vw,1.7rem);
+  line-height:1.05;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-top:0.35rem;
+}
+.editorial-sub{
+  font-family:var(--serif);
+  font-size:0.88rem;
+  line-height:1.55;
+  color:#555;
+  margin-top:0.45rem;
+}
+.editorial-filters{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(120px,1fr));
+  gap:0.55rem;
+  min-width:min(520px,100%);
+}
+.editorial-filter{
+  display:grid;
+  gap:0.3rem;
+}
+.editorial-filter label{
+  font-size:0.48rem;
+  letter-spacing:0.12em;
+  color:#aaa;
+}
+.editorial-filter select,
+.editorial-filter button{
+  border:1px solid var(--border);
+  background:var(--white);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:0.46rem 0.5rem;
+}
+.editorial-filter button{
+  cursor:pointer;
+}
+.editorial-filter button.active{
+  border-color:var(--ink);
+  background:var(--ink);
+  color:var(--white);
+}
+.editorial-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:0.55rem;
+}
+.editorial-chip{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.58rem 0.65rem;
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+  color:#888;
+}
+.editorial-chip strong{
+  display:block;
+  font-family:var(--display);
+  font-size:1.05rem;
+  letter-spacing:0.04em;
+  color:var(--ink);
+  margin-bottom:0.18rem;
+}
+.editorial-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(260px,0.8fr);
+  gap:1rem;
+  align-items:start;
+}
+.editorial-panel{
+  border:1px solid var(--border);
+  background:var(--white);
+  min-width:0;
+}
+.editorial-panel-label{
+  display:flex;
+  justify-content:space-between;
+  gap:0.75rem;
+  border-bottom:1px solid var(--border);
+  background:var(--paper);
+  color:#999;
+  font-size:0.54rem;
+  letter-spacing:0.16em;
+  padding:0.62rem 0.75rem;
+}
+.editorial-list{
+  display:grid;
+}
+.editorial-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:0.75rem;
+  align-items:center;
+  border-top:1px solid var(--border);
+  padding:0.7rem 0.75rem;
+}
+.editorial-row:first-child{border-top:none}
+.editorial-row-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.88rem;
+  letter-spacing:0.05em;
+  color:var(--ink);
+}
+.editorial-row-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.28rem 0.55rem;
+  margin-top:0.32rem;
+  font-size:0.48rem;
+  letter-spacing:0.08em;
+  color:#999;
+}
+.editorial-actions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:0.35rem;
+}
+.editorial-actions .ch-ctrl-btn{
+  padding:0.35rem 0.55rem;
+}
+.editorial-empty{
+  color:#aaa;
+  font-size:0.54rem;
+  letter-spacing:0.1em;
+  line-height:1.55;
+  padding:0.8rem;
+}
+.editorial-progress-list{
+  display:grid;
+  gap:0.45rem;
+  padding:0.75rem;
+}
+.editorial-progress-item{
+  display:grid;
+  gap:0.3rem;
+}
+.editorial-progress-top{
+  display:flex;
+  justify-content:space-between;
+  gap:0.75rem;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:#888;
+}
+.editorial-progress-track{
+  height:4px;
+  background:rgba(31,28,24,0.12);
+}
+.editorial-progress-fill{
+  height:100%;
+  background:var(--ink);
+}
 .toc-archive-label{
   font-family:var(--mono);
   font-size:0.58rem;
@@ -3377,6 +3570,12 @@ body:not(.logged-in) #tnav-assets{
   .toc-compact-header{grid-template-columns:1fr;}
   .toc-compact-header .chdr-left{padding:1rem 1.25rem 0.9rem;}
   .toc-dashboard{grid-template-columns:1fr;}
+  .editorial-dashboard-top,
+  .editorial-grid,
+  .editorial-summary-grid,
+  .editorial-filters{grid-template-columns:1fr;}
+  .editorial-row{grid-template-columns:1fr;}
+  .editorial-actions{justify-content:flex-start;}
   .toc-books-top{display:block;}
   .toc-books-meta{text-align:left;margin-top:0.45rem;}
   .toc-books-grid,
@@ -5293,6 +5492,7 @@ const DEFAULT_BOOK_ARCHITECTURE = {
 };
 let _tocBooksState = {novel:null, act:null, volume:null, subvolume:null};
 let _tocBooksEditorOpen = false;
+let _editorialDashboardFilters = {status:'all', scope:'all', attentionOnly:true};
 
 function tocJsArg(value){
   const escaped = String(value || '')
@@ -6094,9 +6294,294 @@ function tocChapterEntry(ch, i){
     </div>`;
 }
 
+function editorialSavedNotes(ch){
+  return normalizeAuthorNotes((ch && ch.authorNotes) || {});
+}
+
+function editorialReviewStats(ch){
+  return authorReviewStats(editorialSavedNotes(ch));
+}
+
+function editorialResearchGaps(ch){
+  const notes = editorialSavedNotes(ch);
+  return (notes.research.gaps || []).filter(gap=>['open','investigating'].includes(gap.status || 'open'));
+}
+
+function editorialOpenCustomTasks(ch){
+  return editorialSavedNotes(ch).checklist.filter(item=>!item.done);
+}
+
+function editorialDraftMap(){
+  return loadChapterEditorDrafts();
+}
+
+function editorialChapterDraft(ch, drafts=editorialDraftMap()){
+  return ch && drafts[chapterEditorDraftKey(ch.id)] ? drafts[chapterEditorDraftKey(ch.id)] : null;
+}
+
+function editorialChapterScope(ch){
+  const novel = tocNovelName(ch);
+  const act = tocActName(ch);
+  return {novel, act, key:`${novel}||${act}`};
+}
+
+function editorialScopeOptions(selected='all'){
+  const seen = new Set();
+  const options = [`<option value="all" ${selected === 'all' ? 'selected' : ''}>All Books / Acts</option>`];
+  (chapters || []).forEach(ch=>{
+    const scope = editorialChapterScope(ch);
+    if(seen.has(scope.key)) return;
+    seen.add(scope.key);
+    options.push(`<option value="${escHtml(scope.key)}" ${selected === scope.key ? 'selected' : ''}>${escHtml(scope.novel)} / ${escHtml(scope.act)}</option>`);
+  });
+  return options.join('');
+}
+
+function editorialStatusLabel(status){
+  return String(status || 'draft').replace('-', ' ');
+}
+
+function editorialAttentionScore(ch, drafts=editorialDraftMap()){
+  const notes = editorialSavedNotes(ch);
+  const review = authorReviewStats(notes);
+  const gaps = editorialResearchGaps(ch).length;
+  const tasks = editorialOpenCustomTasks(ch).length;
+  const hasDraft = !!editorialChapterDraft(ch, drafts);
+  let score = 0;
+  if(notes.status === 'needs-work') score += 70;
+  if(notes.status === 'revising') score += 35;
+  if(notes.status === 'draft') score += 18;
+  if(review.pct < 40) score += 30;
+  else if(review.pct < 75) score += 18;
+  else if(review.pct < 100) score += 8;
+  score += gaps * 14;
+  score += tasks * 8;
+  if(hasDraft) score += 22;
+  return score;
+}
+
+function editorialChapterRows(){
+  const drafts = editorialDraftMap();
+  const statusFilter = _editorialDashboardFilters.status || 'all';
+  const scopeFilter = _editorialDashboardFilters.scope || 'all';
+  return (chapters || []).map((ch,index)=>{
+    const notes = editorialSavedNotes(ch);
+    const review = authorReviewStats(notes);
+    const gaps = editorialResearchGaps(ch);
+    const tasks = editorialOpenCustomTasks(ch);
+    const scope = editorialChapterScope(ch);
+    const draft = editorialChapterDraft(ch, drafts);
+    return {
+      ch,
+      index,
+      notes,
+      review,
+      gaps,
+      tasks,
+      draft,
+      scope,
+      words:chapterWordCount(ch),
+      score:editorialAttentionScore(ch, drafts)
+    };
+  }).filter(row=>{
+    if(statusFilter !== 'all' && row.notes.status !== statusFilter) return false;
+    if(scopeFilter !== 'all' && row.scope.key !== scopeFilter) return false;
+    if(_editorialDashboardFilters.attentionOnly && row.score <= 0) return false;
+    return true;
+  }).sort((a,b)=>b.score - a.score || a.index - b.index);
+}
+
+function editorialPrimaryAction(ch, primary='edit'){
+  const id = escHtml(ch.id);
+  const buttons = {
+    edit:`<button class="ch-ctrl-btn" type="button" onclick="openEditChapterModal('${id}')">Edit Chapter</button>`,
+    workspace:`<button class="ch-ctrl-btn" type="button" onclick="openEditorialAuthorWorkspace('${id}')">Open Author Workspace</button>`,
+    read:`<button class="ch-ctrl-btn" type="button" onclick="showChapter('${id}')">Read</button>`
+  };
+  return `<div class="editorial-actions">${buttons[primary] || buttons.edit}</div>`;
+}
+
+function editorialTaskRow(row, primary='edit'){
+  const ch = row.ch;
+  const title = ch.chapter || ch.book || 'Untitled Chapter';
+  const meta = [
+    editorialStatusLabel(row.notes.status),
+    formatWordCount(row.words),
+    `${row.review.pct}% review`,
+    `${row.gaps.length} ${row.gaps.length===1?'gap':'gaps'}`,
+    row.draft ? 'local draft' : ''
+  ].filter(Boolean);
+  return `
+    <div class="editorial-row">
+      <div>
+        <div class="editorial-row-title">${escHtml(title)}</div>
+        <div class="editorial-row-meta">
+          ${chapterHierarchyLabel(ch) ? `<span>${escHtml(chapterHierarchyLabel(ch))}</span>` : ''}
+          ${meta.map(item=>`<span>${escHtml(item)}</span>`).join('')}
+        </div>
+      </div>
+      ${editorialPrimaryAction(ch, primary)}
+    </div>`;
+}
+
+function editorialDraftRows(){
+  const drafts = editorialDraftMap();
+  return Object.entries(drafts).map(([key,draft])=>{
+    const ch = key === '__new__' ? null : chapters.find(item=>chapterEditorDraftKey(item.id) === key);
+    const data = draft && draft.data ? draft.data : {};
+    return {key, draft, ch, data, updatedAt:draft && draft.updatedAt ? draft.updatedAt : 0};
+  }).sort((a,b)=>b.updatedAt - a.updatedAt);
+}
+
+function editorialRenderDraftRow(row){
+  const isNew = row.key === '__new__';
+  const title = row.data.chapter || (row.ch && row.ch.chapter) || (isNew ? 'New Chapter Draft' : 'Untitled Draft');
+  const meta = [
+    row.data.book || (row.ch && row.ch.book) || '',
+    row.updatedAt ? `autosaved ${authorNoteDate(row.updatedAt)}` : 'local draft'
+  ].filter(Boolean);
+  const action = isNew
+    ? `<button class="ch-ctrl-btn" type="button" onclick="openNewChapterModal()">Edit Chapter</button>`
+    : row.ch
+      ? `<button class="ch-ctrl-btn" type="button" onclick="openEditChapterModal('${escHtml(row.ch.id)}')">Edit Chapter</button>`
+      : `<button class="ch-ctrl-btn" type="button" onclick="openNewChapterModal()">Open Draft</button>`;
+  return `
+    <div class="editorial-row">
+      <div>
+        <div class="editorial-row-title">${escHtml(title)}</div>
+        <div class="editorial-row-meta">${meta.map(item=>`<span>${escHtml(item)}</span>`).join('')}</div>
+      </div>
+      <div class="editorial-actions">${action}</div>
+    </div>`;
+}
+
+function editorialRenderGapRow(row){
+  const gap = row.gap;
+  return `
+    <div class="editorial-row">
+      <div>
+        <div class="editorial-row-title">${escHtml(gap.question || 'Research gap')}</div>
+        <div class="editorial-row-meta">
+          <span>${escHtml(row.ch.chapter || row.ch.book || 'Untitled Chapter')}</span>
+          <span>${escHtml(gap.status || 'open')}</span>
+          ${gap.tags ? `<span>${escHtml(gap.tags)}</span>` : ''}
+          ${gap.nextStep ? `<span>${escHtml(gap.nextStep)}</span>` : ''}
+        </div>
+      </div>
+      ${editorialPrimaryAction(row.ch, 'workspace')}
+    </div>`;
+}
+
+function editorialProgressGroups(){
+  const groups = new Map();
+  function add(level, label, ch){
+    const key = `${level}||${label}`;
+    if(!groups.has(key)) groups.set(key, {level, label, chapters:[], words:0, reviewDone:0, reviewTotal:0});
+    const group = groups.get(key);
+    const review = editorialReviewStats(ch);
+    group.chapters.push(ch);
+    group.words += chapterWordCount(ch);
+    group.reviewDone += review.done;
+    group.reviewTotal += review.total;
+  }
+  (chapters || []).forEach(ch=>{
+    const ctx = getChapterReadingContext(ch);
+    add('Novel', ctx.novel || 'Untitled Novel', ch);
+    add('Act', ctx.act || 'Untitled Act', ch);
+    add('Volume', ctx.volume || 'Untitled Volume', ch);
+    add('Subvolume', ctx.subvolume || 'Main Sequence', ch);
+  });
+  return Array.from(groups.values()).sort((a,b)=>{
+    const levelOrder = {Novel:0, Act:1, Volume:2, Subvolume:3};
+    return levelOrder[a.level] - levelOrder[b.level] || b.words - a.words;
+  });
+}
+
+function editorialUpdateFilter(field, value){
+  if(field === 'attentionOnly') _editorialDashboardFilters.attentionOnly = !!value;
+  else _editorialDashboardFilters[field] = value || 'all';
+  renderTOCDashboard();
+}
+
+function renderEditorialDashboard(){
+  const rows = editorialChapterRows();
+  const drafts = editorialDraftRows();
+  const allRows = (chapters || []).map(ch=>({ch, notes:editorialSavedNotes(ch), review:editorialReviewStats(ch)}));
+  const statuses = ['draft','revising','ready','canonical','needs-work'];
+  const statusCounts = statuses.map(status=>({status, count:allRows.filter(row=>row.notes.status === status).length}));
+  const totalWords = chapterWordCountTotal(chapters || []);
+  const reviewDone = allRows.reduce((sum,row)=>sum + row.review.done, 0);
+  const reviewTotal = allRows.reduce((sum,row)=>sum + row.review.total, 0);
+  const reviewPct = reviewTotal ? Math.round((reviewDone / reviewTotal) * 100) : 0;
+  const gapRows = (chapters || []).flatMap(ch=>editorialResearchGaps(ch).map(gap=>({ch,gap})));
+  const progressGroups = editorialProgressGroups().slice(0, 10);
+  const attentionLabel = _editorialDashboardFilters.attentionOnly ? 'Needs attention' : 'All chapters';
+
+  return `
+    <section class="editorial-dashboard admin-only" aria-label="Editorial dashboard">
+      <div class="editorial-dashboard-top">
+        <div>
+          <div class="editorial-kicker">Editorial Dashboard</div>
+          <div class="editorial-title">What needs work next</div>
+          <div class="editorial-sub">${escHtml(attentionLabel)} · ${chapters.length} chapters · ${formatWordCount(totalWords)} · ${reviewPct}% review complete</div>
+        </div>
+        <div class="editorial-filters">
+          <div class="editorial-filter">
+            <label>Status</label>
+            <select onchange="editorialUpdateFilter('status', this.value)">
+              <option value="all">All Statuses</option>
+              ${statuses.map(status=>`<option value="${status}" ${_editorialDashboardFilters.status===status?'selected':''}>${editorialStatusLabel(status)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="editorial-filter">
+            <label>Book / Act</label>
+            <select onchange="editorialUpdateFilter('scope', this.value)">${editorialScopeOptions(_editorialDashboardFilters.scope)}</select>
+          </div>
+          <div class="editorial-filter">
+            <label>Focus</label>
+            <button class="${_editorialDashboardFilters.attentionOnly?'active':''}" type="button" onclick="editorialUpdateFilter('attentionOnly', !_editorialDashboardFilters.attentionOnly)">${_editorialDashboardFilters.attentionOnly?'Needs Attention':'Show All'}</button>
+          </div>
+        </div>
+      </div>
+      <div class="editorial-summary-grid">
+        ${statusCounts.map(item=>`<div class="editorial-chip"><strong>${item.count}</strong>${editorialStatusLabel(item.status)}</div>`).join('')}
+      </div>
+      <div class="editorial-grid">
+        <div class="editorial-panel">
+          <div class="editorial-panel-label"><span>Next Tasks</span><span>${rows.length} shown</span></div>
+          <div class="editorial-list">${rows.length ? rows.slice(0, 8).map(row=>editorialTaskRow(row, row.score > 0 ? 'edit' : 'read')).join('') : '<div class="editorial-empty">No chapters match these filters.</div>'}</div>
+        </div>
+        <div class="editorial-panel">
+          <div class="editorial-panel-label"><span>Drafts</span><span>${drafts.length}</span></div>
+          <div class="editorial-list">${drafts.length ? drafts.slice(0, 5).map(editorialRenderDraftRow).join('') : '<div class="editorial-empty">No local chapter drafts.</div>'}</div>
+        </div>
+        <div class="editorial-panel">
+          <div class="editorial-panel-label"><span>Research Gaps</span><span>${gapRows.length}</span></div>
+          <div class="editorial-list">${gapRows.length ? gapRows.slice(0, 8).map(editorialRenderGapRow).join('') : '<div class="editorial-empty">No open or investigating research gaps.</div>'}</div>
+        </div>
+        <div class="editorial-panel">
+          <div class="editorial-panel-label"><span>Book Progress</span><span>${progressGroups.length} groups</span></div>
+          <div class="editorial-progress-list">
+            ${progressGroups.length ? progressGroups.map(group=>{
+              const pct = group.reviewTotal ? Math.round((group.reviewDone / group.reviewTotal) * 100) : 0;
+              return `<div class="editorial-progress-item">
+                <div class="editorial-progress-top"><span>${escHtml(group.level)} · ${escHtml(group.label)}</span><span>${group.chapters.length} ch · ${formatWordCount(group.words)} · ${pct}%</span></div>
+                <div class="editorial-progress-track"><div class="editorial-progress-fill" style="width:${pct}%"></div></div>
+              </div>`;
+            }).join('') : '<div class="editorial-empty">No book progress yet.</div>'}
+          </div>
+        </div>
+      </div>
+    </section>`;
+}
+
 function renderTOCDashboard(){
   const dashboard = document.getElementById('toc-dashboard');
   if(!dashboard) return;
+  if(isAdmin()){
+    dashboard.innerHTML = renderEditorialDashboard();
+    return;
+  }
   const first = getFirstChapter();
   const latest = getLatestChapter();
   if(!first || !latest){
@@ -8410,6 +8895,11 @@ function openNewChapterModal(){
 
 function openEditChapterModal(id){
   openChapterEditor(id);
+}
+
+function openEditorialAuthorWorkspace(id){
+  openChapterEditor(id);
+  openAuthorWorkspace();
 }
 
 function openAdjacentChapterEditor(direction){
