@@ -4471,7 +4471,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.14</div>
+<div id="site-version-stamp">v2026.05.18.16</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -11907,18 +11907,23 @@ function saveDraftIdeaUi(){
 
 function loadDraftAiSettings(){
   try{
-    return Object.assign({provider:'gemini-browser', geminiKey:'', geminiModel:'gemini-2.5-flash'}, JSON.parse(localStorage.getItem(DRAFTS_AI_SETTINGS_KEY) || '{}'));
+    const saved = JSON.parse(localStorage.getItem(DRAFTS_AI_SETTINGS_KEY) || '{}');
+    return Object.assign({
+      provider:'openrouter-browser',
+      openRouterKey:saved.openRouterKey || saved.geminiKey || '',
+      openRouterModel:saved.openRouterModel || saved.geminiModel || 'openai/gpt-4o-mini'
+    }, saved);
   }catch(e){
-    return {provider:'gemini-browser', geminiKey:'', geminiModel:'gemini-2.5-flash'};
+    return {provider:'openrouter-browser', openRouterKey:'', openRouterModel:'openai/gpt-4o-mini'};
   }
 }
 
 function saveDraftAiSettings(){
-  const key = document.getElementById('draft-ai-key')?.value || _draftAiSettings.geminiKey || '';
-  const model = document.getElementById('draft-ai-model')?.value || _draftAiSettings.geminiModel || 'gemini-2.5-flash';
-  _draftAiSettings = {provider:'gemini-browser', geminiKey:key.trim(), geminiModel:model.trim() || 'gemini-2.5-flash'};
+  const key = document.getElementById('draft-ai-key')?.value || _draftAiSettings.openRouterKey || '';
+  const model = document.getElementById('draft-ai-model')?.value || _draftAiSettings.openRouterModel || 'openai/gpt-4o-mini';
+  _draftAiSettings = {provider:'openrouter-browser', openRouterKey:key.trim(), openRouterModel:model.trim() || 'openai/gpt-4o-mini'};
   try{ localStorage.setItem(DRAFTS_AI_SETTINGS_KEY, JSON.stringify(_draftAiSettings)); }catch(e){}
-  draftStatus(_draftAiSettings.geminiKey ? `Gemini browser key saved for ${_draftAiSettings.geminiModel}.` : 'Gemini key cleared.');
+  draftStatus(_draftAiSettings.openRouterKey ? `OpenRouter key saved for ${_draftAiSettings.openRouterModel}.` : 'OpenRouter key cleared.');
   renderDraftsView({keepCache:true, keepEditor:true});
 }
 
@@ -12569,7 +12574,7 @@ async function analyzePlanningNoteWithAi(){
   draftStatus(`Analyzing planning note "${doc.title}"...`);
   try{
     const fragment = normalizeDraftFragment({id:doc.id, title:doc.title, body:doc.body, type:'research', status:'inbox', tags:doc.tags, linkedChapterId:doc.linkedChapterId});
-    const report = await callDraftGeminiFromBrowser(fragment);
+    const report = await callDraftOpenRouterFromBrowser(fragment);
     const suggestions = draftAiSuggestionFromReport(report);
     const cards = [];
     for(const suggestion of suggestions){
@@ -12886,7 +12891,7 @@ function draftAiPayload(fragment){
   };
 }
 
-function draftGeminiSchema(){
+function draftAiResponseSchema(){
   return {
     type:'object',
     required:['dialogue','entities','layers','literaryFunction','conversionTargets','uncertainties'],
@@ -12911,49 +12916,75 @@ function draftGeminiSchema(){
   };
 }
 
-function geminiBrowserOutputText(data){
-  return (data.candidates || [])
-    .flatMap(candidate => (candidate.content && candidate.content.parts) || [])
-    .map(part => part.text || '')
-    .join('\n')
-    .trim();
+function strictJsonSchema(schema){
+  if(!schema || typeof schema !== 'object') return schema;
+  const copy = Array.isArray(schema) ? schema.map(strictJsonSchema) : Object.assign({}, schema);
+  if(copy.type === 'object'){
+    copy.additionalProperties = false;
+    if(copy.properties){
+      copy.properties = Object.fromEntries(Object.entries(copy.properties).map(([key,value])=>[key, strictJsonSchema(value)]));
+    }
+  }
+  if(copy.type === 'array' && copy.items) copy.items = strictJsonSchema(copy.items);
+  return copy;
 }
 
-async function callDraftGeminiFromBrowser(fragment){
-  const key = (_draftAiSettings.geminiKey || '').trim();
-  if(!key) throw new Error('Paste a Gemini API key into the AI panel and click Save Key first.');
-  const model = (_draftAiSettings.geminiModel || 'gemini-2.5-flash').trim();
+function openRouterOutputText(data){
+  const message = data && data.choices && data.choices[0] && data.choices[0].message;
+  const content = message && message.content;
+  if(Array.isArray(content)){
+    return content.map(part=>typeof part === 'string' ? part : (part && (part.text || part.content)) || '').join('\n').trim();
+  }
+  return String(content || '').trim();
+}
+
+async function callDraftOpenRouterFromBrowser(fragment){
+  const key = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '').trim();
+  if(!key) throw new Error('Paste an OpenRouter API key into the AI panel and click Save Key first.');
+  const model = (_draftAiSettings.openRouterModel || _draftAiSettings.geminiModel || 'openai/gpt-4o-mini').trim();
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), 120000);
   const payload = draftAiPayload(fragment);
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':`Bearer ${key}`,
+      'HTTP-Referer':location.origin && location.origin !== 'null' ? location.origin : 'file://cosmopolita-local',
+      'X-Title':'COSMOPOLITA Draft Inbox'
+    },
     signal:controller.signal,
     body:JSON.stringify({
-      contents:[{
-        role:'user',
-        parts:[{text:'You are a literary analysis engine for a nonlinear novel draft inbox. Return schema-valid JSON only. Analyze this draft fragment for dialogue speakers, entities, literary layers, and conversion targets. Be conservative and use confidence scores.\n\n' + JSON.stringify(payload)}]
-      }],
-      generationConfig:{
-        responseMimeType:'application/json',
-        responseSchema:draftGeminiSchema()
+      model,
+      messages:[
+        {role:'system', content:'You are a literary analysis engine for a nonlinear novel draft inbox. Return schema-valid JSON only. Be conservative and use confidence scores.'},
+        {role:'user', content:'Analyze this draft fragment for dialogue speakers, entities, literary layers, and conversion targets.\n\n' + JSON.stringify(payload)}
+      ],
+      response_format:{
+        type:'json_schema',
+        json_schema:{
+          name:'draft_inbox_analysis',
+          strict:true,
+          schema:strictJsonSchema(draftAiResponseSchema())
+        }
       }
     })
   }).catch(err=>{
-    if(err && err.name === 'AbortError') throw new Error('Gemini browser request timed out after 120 seconds.');
+    if(err && err.name === 'AbortError') throw new Error('OpenRouter request timed out after 120 seconds.');
     throw err;
   }).finally(()=>clearTimeout(timer));
   const text = await res.text();
   let data = null;
   try{ data = JSON.parse(text); }catch(e){}
   if(!res.ok){
-    throw new Error((data && data.error && data.error.message) || text || `Gemini browser request failed with HTTP ${res.status}`);
+    throw new Error((data && data.error && (data.error.message || data.error)) || text || `OpenRouter request failed with HTTP ${res.status}`);
   }
-  const output = geminiBrowserOutputText(data);
-  if(!output) throw new Error('Gemini returned no text.');
+  const output = openRouterOutputText(data);
+  if(!output) throw new Error('OpenRouter returned no text.');
   return JSON.parse(output);
 }
+
+const callDraftGeminiFromBrowser = callDraftOpenRouterFromBrowser;
 
 function draftAiSuggestionFromReport(report){
   const now = Date.now();
@@ -12987,16 +13018,16 @@ function draftAiSuggestionFromReport(report){
 }
 
 async function callDraftAiFunction(fragment){
-  if(_draftAiSettings.geminiKey) return callDraftGeminiFromBrowser(fragment);
+  if(_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey) return callDraftOpenRouterFromBrowser(fragment);
   const data = await draftAiDirectFunctionProbe(fragment, {timeoutMs:90000});
   if(!data || !data.report) throw new Error('AI function returned no structured report.');
   return data.report;
 }
 
 async function draftAiDirectFunctionProbe(fragment, options={}){
-  if(_draftAiSettings.geminiKey && fragment){
-    const report = await callDraftGeminiFromBrowser(fragment);
-    return {report, model:_draftAiSettings.geminiModel, provider:'browser-gemini'};
+  if((_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey) && fragment){
+    const report = await callDraftOpenRouterFromBrowser(fragment);
+    return {report, model:_draftAiSettings.openRouterModel || _draftAiSettings.geminiModel, provider:'browser-openrouter'};
   }
   const client = notesClient();
   if(!client) throw new Error('Supabase client is not available.');
@@ -13035,7 +13066,7 @@ async function draftAiDirectFunctionProbe(fragment, options={}){
 async function testDraftAiConnection(){
   draftStatus('Testing AI connection...');
   try{
-    const data = _draftAiSettings.geminiKey
+    const data = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey)
       ? await draftAiDirectFunctionProbe(activeDraft() || normalizeDraftFragment({id:'diagnostic', title:'Diagnostic', body:'Elzbieta said, "The city is hiding." The Compact listened.', type:'scene'}))
       : await draftAiDirectFunctionProbe(activeDraft());
     draftStatus(`AI connection works. Function returned ${data.report ? 'a structured report' : 'a response'} using ${data.model || 'configured model'}.`);
@@ -13057,9 +13088,9 @@ async function analyzeDraftWithAi(id){
   }
   draftStatus(`Analyzing "${fragment.title}"...`);
   try{
-    draftStatus(`Sending "${fragment.title}" to Gemini through Supabase...`);
+    draftStatus(`Sending "${fragment.title}" to OpenRouter...`);
     const report = await callDraftAiFunction(fragment);
-    draftStatus('Gemini returned a report. Building approval cards...');
+    draftStatus('OpenRouter returned a report. Building approval cards...');
     const suggestions = draftAiSuggestionFromReport(report);
     fragment.aiAnalyses = fragment.aiAnalyses || [];
     fragment.aiSuggestions = fragment.aiSuggestions || [];
@@ -13069,7 +13100,7 @@ async function analyzeDraftWithAi(id){
     await draftPut(fragment);
     draftStatus(suggestions.length
       ? `AI analysis complete: ${suggestions.length} suggestion${suggestions.length === 1 ? '' : 's'} awaiting review.`
-      : 'AI analysis complete, but Gemini returned no actionable suggestion cards. The raw report is saved in backup/history.');
+      : 'AI analysis complete, but OpenRouter returned no actionable suggestion cards. The raw report is saved in backup/history.');
   }catch(err){
     console.error('Draft AI analysis failed:', err);
     draftStatus('AI analysis unavailable: ' + (err.message || err) + '. Deterministic suggestions still work.');
@@ -13116,18 +13147,19 @@ function renderDraftAiPanel(fragment){
   const warning = fragment
     ? `${words.toLocaleString()} active-fragment words · selected batch ${selectedCount}. Results are suggestions only.`
     : `No active fragment selected · selected batch ${selectedCount}. Create or select a fragment before analysis.`;
-  const keyHint = _draftAiSettings.geminiKey ? 'Saved in this browser' : '';
+  const keyHint = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey) ? 'Saved in this browser' : '';
+  const modelValue = _draftAiSettings.openRouterModel || _draftAiSettings.geminiModel || 'openai/gpt-4o-mini';
   return `<section class="drafts-ai-panel">
     <div class="drafts-pane-title">AI Analysis</div>
     <div class="drafts-ai-warning">${escHtml(warning)}</div>
     <div id="draft-ai-status" class="file-vault-status">${escHtml(_draftStatusMessage || 'AI idle.')}</div>
     <div class="drafts-field">
-      <label>Gemini API Key</label>
-      <input id="draft-ai-key" class="drafts-input" type="password" value="${escHtml(_draftAiSettings.geminiKey)}" placeholder="Paste Gemini API key for in-browser AI">
+      <label>OpenRouter API Key</label>
+      <input id="draft-ai-key" class="drafts-input" type="password" value="${escHtml(_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '')}" placeholder="Paste OpenRouter API key">
     </div>
     <div class="drafts-field">
-      <label>Gemini Model</label>
-      <input id="draft-ai-model" class="drafts-input" value="${escHtml(_draftAiSettings.geminiModel || 'gemini-2.5-flash')}" placeholder="gemini-2.5-flash">
+      <label>OpenRouter Model</label>
+      <input id="draft-ai-model" class="drafts-input" value="${escHtml(modelValue)}" placeholder="openai/gpt-4o-mini">
     </div>
     <div class="drafts-ai-actions">
       <button class="cm-btn secondary" type="button" onclick="saveDraftAiSettings()">Save Key</button>
@@ -13137,7 +13169,7 @@ function renderDraftAiPanel(fragment){
       <button class="tiny-btn" type="button" onclick="selectVisibleDrafts()">Select Visible</button>
       <button class="tiny-btn" type="button" onclick="clearDraftSelection()">Clear</button>
     </div>
-    <div class="file-vault-status">Last analyzed: ${escHtml(last)} · Browser Gemini ${escHtml(keyHint || 'not configured')} · Supabase fallback ${supabaseConfigured() ? 'configured' : 'missing'} · ${_notesUser ? `logged in as ${escHtml(_notesUser.email || 'user')}` : 'not logged in'}</div>
+    <div class="file-vault-status">Last analyzed: ${escHtml(last)} · Browser OpenRouter ${escHtml(keyHint || 'not configured')} · Model ${escHtml(modelValue)} · Supabase fallback ${supabaseConfigured() ? 'configured' : 'missing'} · ${_notesUser ? `logged in as ${escHtml(_notesUser.email || 'user')}` : 'not logged in'}</div>
   </section>`;
 }
 
