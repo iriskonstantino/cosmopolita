@@ -4118,6 +4118,46 @@ body:not(.admin-on) #tnav-drafts{
 .workshop-status.ready{border-color:var(--gold);color:#7a4a1e;background:#fff8e8}
 .workshop-status.imported{border-color:var(--green);color:var(--green);background:#edf5ef}
 .workshop-status.archived{opacity:0.62;border-style:dashed}
+.drafts-view-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.45rem;
+  max-width:1380px;
+  margin:0 auto 0.75rem;
+  padding:0 1rem;
+}
+.drafts-view-tab{
+  border:1px solid var(--border);
+  background:var(--white);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:0.52rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  padding:0.5rem 0.7rem;
+  cursor:pointer;
+}
+.drafts-view-tab.active{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+.drafts-wrap.planning-mode,
+.drafts-wrap.ideas-mode{
+  grid-template-columns:1fr;
+}
+.drafts-wrap.planning-mode .drafts-list-pane,
+.drafts-wrap.planning-mode .drafts-meta-pane,
+.drafts-wrap.planning-mode #draft-split-panel{
+  display:none;
+}
+.drafts-wrap.ideas-mode #draft-split-panel{
+  display:none;
+}
+.drafts-wrap.planning-mode .drafts-main,
+.drafts-wrap.ideas-mode .drafts-main{
+  min-width:0;
+}
 .tiny-btn{
   border:1px solid var(--border);
   background:var(--white);
@@ -4431,7 +4471,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.12</div>
+<div id="site-version-stamp">v2026.05.18.13</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -4914,6 +4954,13 @@ body:not(.admin-on) #tnav-drafts{
       <div class="deco-red"></div>
       <div class="deco-navy"></div>
     </div>
+  </div>
+  <div id="drafts-view-tabs" class="drafts-view-tabs">
+    <button id="draft-tab-inbox" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','inbox')">Inbox</button>
+    <button id="draft-tab-ideas" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','ideas')">Idea Repository</button>
+    <button id="draft-tab-planning" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','planning')">Planning Notes</button>
+    <button id="draft-tab-layers" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','layers')">Literary Layers</button>
+    <button id="draft-tab-ready" class="drafts-view-tab" type="button" onclick="updateDraftFilter('view','ready')">Ready Queue</button>
   </div>
   <div class="drafts-wrap">
     <aside class="drafts-list-pane">
@@ -14121,6 +14168,7 @@ async function renderDraftsView(options={}){
   const editor = document.getElementById('draft-editor-panel');
   const suggestions = document.getElementById('draft-suggestions');
   const conversions = document.getElementById('draft-conversions');
+  const wrap = document.querySelector('#drafts-view .drafts-wrap');
   const active = activeDraft();
   const visible = filteredDrafts();
   const typeSel = document.getElementById('draft-filter-type');
@@ -14129,6 +14177,14 @@ async function renderDraftsView(options={}){
   const layerSel = document.getElementById('draft-filter-layer');
   const search = document.getElementById('draft-search');
   const isPlanning = _draftFilter.view === 'planning';
+  if(wrap){
+    wrap.classList.toggle('planning-mode', isPlanning);
+    wrap.classList.toggle('ideas-mode', _draftFilter.view === 'ideas');
+  }
+  ['inbox','ideas','planning','layers','ready'].forEach(view=>{
+    const tab = document.getElementById('draft-tab-' + view);
+    if(tab) tab.classList.toggle('active', (_draftFilter.view || 'inbox') === view);
+  });
   if(typeSel) typeSel.innerHTML = draftSelectOptions(isPlanning ? PLANNING_DOC_TYPES : DRAFT_TYPES, _draftFilter.type, 'All Types');
   if(statusSel) statusSel.innerHTML = draftSelectOptions(isPlanning ? PLANNING_DOC_STATUSES : DRAFT_STATUSES, _draftFilter.status, 'All Statuses');
   if(viewSel) viewSel.value = _draftFilter.view || 'inbox';
