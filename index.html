@@ -4197,7 +4197,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.8</div>
+<div id="site-version-stamp">v2026.05.18.9</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -12410,6 +12410,7 @@ function applyDraftAiSuggestionToFragment(fragment, suggestion){
 }
 
 async function appendAcceptedDialogueToNotes(index){
+  await persistActiveDraftFromEditor({silent:true});
   const fragment = activeDraft();
   if(!fragment || !fragment.dialogue || !fragment.dialogue[index]) return;
   const item = fragment.dialogue[index];
@@ -12420,14 +12421,11 @@ async function appendAcceptedDialogueToNotes(index){
     item.subtext ? `Subtext: ${item.subtext}` : '',
     item.sceneFunction ? `Scene Function: ${item.sceneFunction}` : ''
   ].filter(Boolean).join('\n');
-  fragment.notes = `${fragment.notes || ''}\n\n${note}`.trim();
-  fragment.updatedAt = Date.now();
-  await draftPut(fragment);
-  await renderDraftsView();
-  draftStatus('Accepted dialogue added to fragment notes.');
+  await appendTextToActiveDraftNotes(note, 'Accepted dialogue added to the fragment Notes field.');
 }
 
 async function appendAcceptedEntityToNotes(index){
+  await persistActiveDraftFromEditor({silent:true});
   const fragment = activeDraft();
   if(!fragment || !fragment.entities || !fragment.entities[index]) return;
   const item = fragment.entities[index];
@@ -12437,11 +12435,20 @@ async function appendAcceptedEntityToNotes(index){
     item.firstMentionQuote ? `First Mention: ${item.firstMentionQuote}` : '',
     (item.relationships || []).length ? `Relationships: ${item.relationships.join(', ')}` : ''
   ].filter(Boolean).join('\n');
+  await appendTextToActiveDraftNotes(note, 'Accepted entity added to the fragment Notes field.');
+}
+
+async function appendTextToActiveDraftNotes(note, message){
+  const fragment = activeDraft();
+  if(!fragment || !note) return;
   fragment.notes = `${fragment.notes || ''}\n\n${note}`.trim();
   fragment.updatedAt = Date.now();
-  await draftPut(fragment);
-  await renderDraftsView();
-  draftStatus('Accepted entity added to fragment notes.');
+  const saved = await draftPut(fragment);
+  _draftFragments = _draftFragments.map(item=>item.id===saved.id ? saved : item);
+  const notesBox = document.getElementById('draft-notes');
+  if(notesBox) notesBox.value = saved.notes || '';
+  await renderDraftsView({keepCache:true, keepEditor:true});
+  draftStatus(message || 'Added to fragment Notes field.');
 }
 
 async function createCodexFromAcceptedEntity(index){
