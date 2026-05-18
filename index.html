@@ -2282,6 +2282,15 @@ body:not(.logged-in) #tnav-assets{
 .width-option.primary{border-color:var(--ink);background:var(--ink);color:var(--white);}
 .width-option.secondary{background:transparent;color:var(--ink);border:1.5px solid var(--ink);}
 .width-option.secondary:hover{background:var(--panel);}
+.chapter-admin-actions{
+  display:grid;
+  gap:0.45rem;
+}
+.chapter-admin-actions .ch-ctrl-btn{
+  width:100%;
+  text-align:left;
+  padding:0.5rem 0.65rem;
+}
 .cm-section-label{
   font-family:var(--mono);font-size:0.54rem;
   letter-spacing:0.18em;text-transform:uppercase;
@@ -3692,6 +3701,11 @@ body:not(.logged-in) #tnav-assets{
 
     <!-- ── SIDE PANEL ── -->
     <aside class="side-panel" id="cv-side-panel">
+
+      <div class="panel-sec admin-only" id="cv-admin-panel">
+        <div class="panel-hd">Chapter Admin</div>
+        <div class="chapter-admin-actions" id="cv-admin-actions"></div>
+      </div>
 
       <div class="panel-sec">
         <div class="panel-hd">Annotations</div>
@@ -5142,9 +5156,6 @@ function renderChapter(ch){
     ${readingContext.novel ? `<div class="chdr-architect">${escHtml(readingContext.novel)}</div>` : ''}
     <div class="chdr-title">${escHtml(readingContext.volume||ch.book||'')}</div>
     ${subtitleHtml}
-    <div class="chdr-actions admin-only">
-      <button class="ch-ctrl-btn" type="button" onclick="openEditChapterModal('${escHtml(ch.id)}')">Edit Chapter</button>
-    </div>
     <div class="chdr-meta">${metaHtml}</div>
   `;
 
@@ -5162,14 +5173,7 @@ function renderChapter(ch){
         : `<button class="next-chapter-btn admin-only" onclick="openNewChapterModal()">Add Next Chapter</button>`}
     </div>`;
 
-  // Edit/delete controls
-  const controls = `
-    <div class="ch-controls admin-only">
-      <button class="ch-ctrl-btn" onclick="openEditChapterModal('${ch.id}')">Edit Chapter</button>
-      <button class="ch-ctrl-btn danger" onclick="deleteChapter('${ch.id}')">Delete Chapter</button>
-    </div>`;
-
-  bodyEl.innerHTML = parsed + controls + navBtns;
+  bodyEl.innerHTML = parsed + navBtns;
 
   // Re-attach wl event listeners
   attachWlListeners(bodyEl);
@@ -5177,6 +5181,14 @@ function renderChapter(ch){
   // Side panel meta table
   const metaTable = document.getElementById('cv-meta-table');
   metaTable.innerHTML = metaMap.filter(([,v])=>v).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+
+  const adminActions = document.getElementById('cv-admin-actions');
+  if(adminActions){
+    adminActions.innerHTML = `
+      <button class="ch-ctrl-btn" type="button" onclick="openEditChapterModal('${escHtml(ch.id)}')">Edit Chapter</button>
+      <button class="ch-ctrl-btn danger" type="button" onclick="deleteChapter('${escHtml(ch.id)}')">Delete Chapter</button>
+    `;
+  }
 
   // Side panel sections
   const secLinks = document.getElementById('cv-section-links');
