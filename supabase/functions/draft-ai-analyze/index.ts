@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const ADMIN_EMAIL = (Deno.env.get("ADMIN_EMAIL") || "pcygnus2112@gmail.com").toLowerCase();
-const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
+const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -124,15 +124,12 @@ const analysisSchema = {
   },
 };
 
-function outputText(data: any) {
-  if (typeof data.output_text === "string") return data.output_text;
-  const chunks: string[] = [];
-  for (const item of data.output || []) {
-    for (const content of item.content || []) {
-      if (content.type === "output_text" && content.text) chunks.push(content.text);
-    }
-  }
-  return chunks.join("\n");
+function geminiOutputText(data: any) {
+  return (data.candidates || [])
+    .flatMap((candidate: any) => (candidate.content && candidate.content.parts) || [])
+    .map((part: any) => part.text || "")
+    .join("\n")
+    .trim();
 }
 
 serve(async (req) => {
@@ -141,38 +138,31 @@ serve(async (req) => {
 
   try {
     await requireAdmin(req);
-    const apiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!apiKey) throw new Error("OPENAI_API_KEY is not configured.");
+    const apiKey = Deno.env.get("GEMINI_API_KEY") || Deno.env.get("GOOGLE_API_KEY");
+    if (!apiKey) throw new Error("GEMINI_API_KEY is not configured.");
     const payload = await req.json();
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
-        model: OPENAI_MODEL,
-        input: [
-          {
-            role: "system",
-            content:
-              "You are a literary analysis engine for a nonlinear novel draft inbox. Return only schema-valid JSON. Be conservative: use confidence scores, preserve uncertainty, and never claim canon certainty.",
-          },
+        contents: [
           {
             role: "user",
-            content:
-              "Analyze this draft fragment for dialogue speakers, entities, literary layers, and conversion targets. Existing project context is included for disambiguation.\n\n" +
-              JSON.stringify(payload),
+            parts: [{
+              text:
+                "You are a literary analysis engine for a nonlinear novel draft inbox. Return only schema-valid JSON. Be conservative: use confidence scores, preserve uncertainty, and never claim canon certainty.\n\n" +
+                "Analyze this draft fragment for dialogue speakers, entities, literary layers, and conversion targets. Existing project context is included for disambiguation.\n\n" +
+                JSON.stringify(payload),
+            }],
           },
         ],
-        text: {
-          format: {
-            type: "json_schema",
-            name: "draft_fragment_analysis",
-            schema: analysisSchema,
-            strict: true,
-          },
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: analysisSchema,
         },
       }),
     });
@@ -182,9 +172,10 @@ serve(async (req) => {
       throw new Error(`OpenAI request failed: ${message}`);
     }
     const data = await response.json();
-    const text = outputText(data);
+    const text = geminiOutputText(data);
+    if (!text) throw new Error("Gemini returned no text.");
     const report = JSON.parse(text);
-    return json({ report, model: OPENAI_MODEL });
+    return json({ report, model: GEMINI_MODEL });
   } catch (err) {
     return json({ error: err instanceof Error ? err.message : String(err) }, 400);
   }
