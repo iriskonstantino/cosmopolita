@@ -2406,6 +2406,9 @@ body:not(.admin-on) .admin-only{
 body:not(.logged-in) #tnav-assets{
   display:none!important;
 }
+body:not(.admin-on) #tnav-drafts{
+  display:none!important;
+}
 .content-status{
   font-family:var(--mono);
   font-size:0.56rem;
@@ -3575,7 +3578,187 @@ body:not(.logged-in) #tnav-assets{
   background:var(--white);
   padding:1rem;
 }
+
+/* ─── DRAFT INBOX / MANUSCRIPT OBSERVATORY ───── */
+#drafts-view{display:none;padding-top:48px;}
+.drafts-wrap{
+  display:grid;
+  grid-template-columns:320px minmax(0,1fr) 300px;
+  min-height:calc(100vh - 48px);
+  background:var(--paper);
+}
+.drafts-list-pane,.drafts-meta-pane{
+  border-right:1px solid var(--border);
+  background:var(--panel);
+  min-height:0;
+}
+.drafts-meta-pane{border-right:none;border-left:1px solid var(--border);}
+.drafts-list-pane,.drafts-main,.drafts-meta-pane{padding:1rem;overflow:auto;}
+.drafts-pane-title,.drafts-kicker,.drafts-stat-label,.drafts-card-meta,.drafts-field label,.drafts-suggestion-label{
+  font-family:var(--mono);
+  text-transform:uppercase;
+}
+.drafts-pane-title{
+  font-size:0.62rem;
+  letter-spacing:0.16em;
+  color:#777;
+  margin-bottom:0.75rem;
+}
+.drafts-toolbar,.drafts-filter-grid,.drafts-convert-grid{
+  display:grid;
+  gap:0.55rem;
+}
+.drafts-filter-grid{grid-template-columns:1fr 1fr;}
+.drafts-input,.drafts-select,.drafts-textarea{
+  width:100%;
+  border:1px solid var(--border);
+  background:var(--white);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:0.9rem;
+  line-height:1.45;
+  padding:0.55rem 0.65rem;
+}
+.drafts-textarea{min-height:150px;resize:vertical;}
+.drafts-manuscript-box{min-height:250px;}
+.drafts-card-list{display:grid;gap:0.65rem;margin-top:0.85rem;}
+.drafts-card{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.75rem;
+  cursor:pointer;
+}
+.drafts-card.active{border-color:var(--ink);box-shadow:3px 3px 0 var(--ink);}
+.drafts-card.archived{opacity:0.62;}
+.drafts-card-title{
+  font-family:var(--display);
+  font-weight:700;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  font-size:0.85rem;
+  line-height:1.25;
+}
+.drafts-card-meta{
+  color:#999;
+  font-size:0.5rem;
+  letter-spacing:0.08em;
+  line-height:1.5;
+  margin-top:0.35rem;
+}
+.drafts-chip-row{display:flex;flex-wrap:wrap;gap:0.32rem;margin-top:0.5rem;}
+.drafts-chip{
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:#777;
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:0.13rem 0.34rem;
+}
+.drafts-main-head{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  align-items:flex-start;
+  border-bottom:1px solid var(--border);
+  padding-bottom:0.8rem;
+  margin-bottom:0.85rem;
+}
+.drafts-title{
+  font-family:var(--display);
+  font-size:1.55rem;
+  line-height:1;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.drafts-kicker{
+  color:#999;
+  font-size:0.55rem;
+  letter-spacing:0.16em;
+  margin-bottom:0.3rem;
+}
+.drafts-actions{display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:flex-end;}
+.drafts-editor-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.75rem;
+}
+.drafts-field{display:grid;gap:0.28rem;margin-bottom:0.65rem;}
+.drafts-field.wide{grid-column:1 / -1;}
+.drafts-field label{
+  color:#999;
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+}
+#draft-body{min-height:46vh;font-size:1rem;}
+.drafts-preview{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:1rem;
+  min-height:46vh;
+  overflow:auto;
+}
+.drafts-stats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.55rem;
+  margin-bottom:0.85rem;
+}
+.drafts-stat{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.65rem;
+}
+.drafts-stat b{
+  display:block;
+  font-family:var(--display);
+  font-size:1.35rem;
+  line-height:1;
+}
+.drafts-stat-label{
+  color:#999;
+  font-size:0.48rem;
+  letter-spacing:0.1em;
+  margin-top:0.3rem;
+}
+.drafts-suggestion{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.65rem;
+  margin-bottom:0.55rem;
+}
+.drafts-suggestion-label{
+  color:#999;
+  font-size:0.5rem;
+  letter-spacing:0.1em;
+  margin-bottom:0.32rem;
+}
+.drafts-suggestion-value{
+  font-size:0.9rem;
+  line-height:1.45;
+}
+.drafts-empty{
+  border:1px solid var(--border);
+  background:var(--white);
+  color:#999;
+  font-family:var(--mono);
+  font-size:0.58rem;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  padding:1rem;
+}
+.drafts-split-panel{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.75rem;
+  margin-bottom:0.85rem;
+}
 @media (max-width:850px){
+  .drafts-wrap{grid-template-columns:1fr;}
+  .drafts-list-pane,.drafts-meta-pane{border-left:none;border-right:none;border-bottom:1px solid var(--border);}
+  .drafts-editor-grid{grid-template-columns:1fr;}
+  .drafts-field.wide{grid-column:auto;}
   .assets-wrap{grid-template-columns:1fr;}
   #assets-view .side-panel{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
   .file-card{grid-template-columns:1fr;}
@@ -3846,6 +4029,7 @@ body:not(.logged-in) #tnav-assets{
 	    <button class="tnav-link" id="tnav-chars"    onclick="showCharacters()">Characters</button>
 	    <button class="tnav-link" id="tnav-codex"    onclick="showWikiEntry()">Codex</button>
 	    <button class="tnav-link" id="tnav-proto"    onclick="showProtoevangelium()">Protoevangelium</button>
+	    <button class="tnav-link" id="tnav-drafts"   onclick="showDrafts()">Drafts</button>
 	    <button class="tnav-link" id="tnav-assets"   onclick="showAssets()">Files</button>
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
@@ -4316,6 +4500,80 @@ body:not(.logged-in) #tnav-assets{
 </div>
 
 
+<!-- ════ DRAFT INBOX / MANUSCRIPT OBSERVATORY ═══════ -->
+<div id="drafts-view" class="admin-only" style="display:none">
+  <div class="chapter-header toc-compact-header">
+    <div class="chdr-left">
+      <div class="chdr-title">Draft Inbox</div>
+      <div class="chdr-subtitle">Manuscript Observatory &nbsp;&middot;&nbsp; private admin workspace</div>
+    </div>
+    <div class="chdr-deco">
+      <div class="deco-gold"></div>
+      <div class="deco-red"></div>
+      <div class="deco-navy"></div>
+    </div>
+  </div>
+  <div class="drafts-wrap">
+    <aside class="drafts-list-pane">
+      <div class="drafts-pane-title">Inbox</div>
+      <div class="drafts-toolbar">
+        <input id="draft-search" class="drafts-input" placeholder="Search fragments..." oninput="updateDraftFilter('search',this.value)">
+        <div class="drafts-filter-grid">
+          <select id="draft-filter-view" class="drafts-select" onchange="updateDraftFilter('view',this.value)">
+            <option value="inbox">Inbox</option>
+            <option value="layers">Literary Layers</option>
+            <option value="orphans">Orphans</option>
+            <option value="ready">Ready Queue</option>
+            <option value="archive">Archive</option>
+          </select>
+          <select id="draft-filter-type" class="drafts-select" onchange="updateDraftFilter('type',this.value)">
+            <option value="">All Types</option>
+          </select>
+          <select id="draft-filter-status" class="drafts-select" onchange="updateDraftFilter('status',this.value)">
+            <option value="">All Statuses</option>
+          </select>
+          <select id="draft-filter-layer" class="drafts-select" onchange="updateDraftFilter('layer',this.value)">
+            <option value="">All Layers</option>
+          </select>
+        </div>
+        <button class="cm-btn primary" type="button" onclick="createDraftFragment()">New Fragment</button>
+        <button class="cm-btn secondary" type="button" onclick="document.getElementById('draft-upload-input').click()">Upload .txt/.md</button>
+        <input id="draft-upload-input" type="file" accept=".txt,.md,text/plain,text/markdown" multiple hidden onchange="draftUploadFromInput(event)">
+      </div>
+      <div id="draft-list" class="drafts-card-list"></div>
+    </aside>
+    <main class="drafts-main">
+      <div id="draft-split-panel" class="drafts-split-panel">
+        <div class="drafts-pane-title">Paste / Split Manuscript</div>
+        <textarea id="draft-intake-text" class="drafts-textarea drafts-manuscript-box" placeholder="Paste raw nonlinear manuscript material here, then split it into fragments."></textarea>
+        <div class="drafts-filter-grid">
+          <select id="draft-split-mode" class="drafts-select">
+            <option value="heading">Headings / chapter markers</option>
+            <option value="blank">Blank-line blocks</option>
+            <option value="section">===Section=== markers</option>
+            <option value="custom">Custom delimiter</option>
+          </select>
+          <input id="draft-split-delimiter" class="drafts-input" placeholder="Custom delimiter">
+        </div>
+        <div class="file-toolbar">
+          <button class="cm-btn secondary" type="button" onclick="draftSplitIntake()">Split Into Fragments</button>
+          <button class="cm-btn secondary" type="button" onclick="draftClearIntake()">Clear Intake</button>
+        </div>
+      </div>
+      <section id="draft-editor-panel"></section>
+    </main>
+    <aside class="drafts-meta-pane">
+      <div class="drafts-pane-title">Observatory</div>
+      <div id="draft-stats" class="drafts-stats"></div>
+      <div id="draft-suggestions"></div>
+      <div class="drafts-pane-title">Convert</div>
+      <div id="draft-conversions" class="drafts-convert-grid"></div>
+      <div id="draft-status" class="content-status"></div>
+    </aside>
+  </div>
+</div>
+
+
 <!-- ════ OFFLINE FILE VAULT ═════════════════════════ -->
 <div id="assets-view" style="display:none">
   <div class="chapter-header">
@@ -4568,6 +4826,7 @@ const CHAPTERS_STORAGE_KEY = 'cosmopolita_chapters';
 const CHAPTERS_DATA_URL = 'data/chapters.json';
 const CHAPTER_EDITOR_DRAFTS_KEY = 'cosmopolita_chapter_editor_drafts';
 const PROTOEVANGELIUM_STORAGE_KEY = 'cosmopolita_protoevangelium';
+const DRAFTS_UI_STORAGE_KEY = 'cosmopolita_drafts_ui';
 
 const CH1_BODY = `The [[port-actual|Port of Port-Actual]] was not, in any meaningful sense, a single port. By the time [[elzbieta|Elzbieta Vorn]] arrived on the 14th of Drymonth aboard the *Catechism of Tides*—a mid-displacement packet vessel flagged alternately to four jurisdictions depending on which was least inconvenient at any given moment—the port had achieved the administrative character of a small nation-state operating inside the body of a larger one, its [[compact|Compact authorities]] maintaining seventeen separate arrival counters and an unknown number of informal ones, staffed by officials whose authority derived from documents no one had verified in living memory.
 
@@ -5115,6 +5374,7 @@ async function buildFullBackupPayload(){
   const now = new Date();
   const readerNotes = await (typeof notesGetAllLocal === 'function' ? notesGetAllLocal() : Promise.resolve([])).catch(()=>[]);
   const vaultFiles = await backupVaultFiles();
+  const draftFragments = await (typeof draftGetAll === 'function' ? draftGetAll() : Promise.resolve([])).catch(()=>[]);
   const normalizedChapters = normalizeChapterList(chapters || []);
   return {
     backupType:'cosmopolita-full-offline-backup',
@@ -5132,7 +5392,9 @@ async function buildFullBackupPayload(){
       codexEntries:Object.keys(E || {}).length,
       readerNotes:readerNotes.length,
       vaultFiles:vaultFiles.length,
-      protoLines:(protoevangelium.lines || []).length
+      protoLines:(protoevangelium.lines || []).length,
+      draftFragments:draftFragments.length,
+      draftWords:backupWordCountForItems(draftFragments.map(fragment=>({body:fragment.body})))
     },
     content:{
       chapters:normalizedChapters,
@@ -5141,6 +5403,7 @@ async function buildFullBackupPayload(){
       characters,
       readerNotes,
       fileVault:vaultFiles,
+      draftFragments,
       protoevangelium:normalizeProtoevangelium(protoevangelium),
       chapterEditorDrafts:backupReadLocalStorage(CHAPTER_EDITOR_DRAFTS_KEY) || {}
     },
@@ -5277,6 +5540,28 @@ function backupProtoevangeliumHtml(proto){
     </section>`;
 }
 
+function backupDraftFragmentsHtml(fragments=[]){
+  if(!fragments.length) return '<p class="muted">No draft fragments</p>';
+  return fragments.map(fragment=>`
+    <article class="chapter">
+      <h3>${backupEscapeHtml(fragment.title || 'Untitled Fragment')}</h3>
+      <div class="meta">${backupEscapeHtml(fragment.type)} · ${backupEscapeHtml(fragment.status)} · ${Number(draftWordCount(fragment)).toLocaleString()} words · updated ${backupEscapeHtml(draftDate(fragment.updatedAt))}</div>
+      <p><b>Tags:</b> ${backupEscapeHtml((fragment.tags || []).join(', '))}</p>
+      <p><b>Characters:</b> ${backupEscapeHtml((fragment.characters || []).join(', '))}</p>
+      <p><b>Motifs:</b> ${backupEscapeHtml((fragment.motifs || []).join(', '))}</p>
+      <p><b>Locations:</b> ${backupEscapeHtml((fragment.locations || []).join(', '))}</p>
+      <p><b>POV:</b> ${backupEscapeHtml(fragment.pov)} · <b>Timeline:</b> ${backupEscapeHtml(fragment.timeline)}</p>
+      <p><b>Narrative Devices:</b> ${backupEscapeHtml((fragment.narrativeDevices || []).join(', '))}</p>
+      <p><b>Linked Chapter:</b> ${backupEscapeHtml(protoChapterLabel(fragment.linkedChapterId))} · <b>Linked Proto Line:</b> ${backupEscapeHtml(fragment.linkedProtoLineId)}</p>
+      <p><b>Source:</b> ${backupEscapeHtml(fragment.sourceFilename)}</p>
+      ${fragment.notes ? `<div class="author-box"><h4>Notes</h4>${backupParagraphs(fragment.notes)}</div>` : ''}
+      <div class="chapter-body">${backupChapterBodyHtml(fragment.body)}</div>
+      ${(fragment.conversionHistory || []).length ? `<h4>Conversion History</h4><ul>${fragment.conversionHistory.map(item=>`<li>${backupEscapeHtml(item.target)} · ${backupEscapeHtml(item.targetId)} · ${backupEscapeHtml(draftDate(item.at))}</li>`).join('')}</ul>` : ''}
+      ${fragment.suggestions && Object.keys(fragment.suggestions).length ? `<h4>Suggestions</h4><pre>${backupEscapeHtml(JSON.stringify(fragment.suggestions, null, 2))}</pre>` : ''}
+    </article>
+  `).join('');
+}
+
 function backupHtmlDocument(payload){
   const chaptersHtml = payload.content.chapters.map((ch,index)=>`
     <article class="chapter">
@@ -5315,6 +5600,7 @@ function backupHtmlDocument(payload){
     </article>
   `).join('');
   const protoHtml = backupProtoevangeliumHtml(payload.content.protoevangelium);
+  const draftsHtml = backupDraftFragmentsHtml(payload.content.draftFragments || []);
   const rawJson = JSON.stringify(payload, null, 2).replace(/</g,'\\u003c');
   return `<!doctype html>
 <html lang="en">
@@ -5350,6 +5636,7 @@ a{color:#8b3a1e}
 </header>
 <nav>
   <a href="#chapters">Chapters</a>
+  <a href="#drafts">Draft Inbox</a>
   <a href="#protoevangelium">Protoevangelium</a>
   <a href="#characters">Characters</a>
   <a href="#codex">Codex</a>
@@ -5366,8 +5653,11 @@ a{color:#8b3a1e}
     <div class="stat"><b>${payload.counts.readerNotes}</b> Reader Notes</div>
     <div class="stat"><b>${payload.counts.vaultFiles}</b> Vault Files</div>
     <div class="stat"><b>${payload.counts.protoLines}</b> Proto Lines</div>
+    <div class="stat"><b>${payload.counts.draftFragments}</b> Draft Fragments</div>
+    <div class="stat"><b>${Number(payload.counts.draftWords).toLocaleString()}</b> Draft Words</div>
   </section>
   <section id="chapters"><h2>Chapters</h2>${chaptersHtml}</section>
+  <section id="drafts"><h2>Draft Inbox</h2>${draftsHtml}</section>
   <section id="protoevangelium"><h2>Protoevangelium</h2>${protoHtml}</section>
   <section id="characters"><h2>Characters</h2>${charactersHtml || '<p class="muted">No characters</p>'}</section>
   <section id="codex"><h2>Codex</h2>${codexHtml || '<p class="muted">No codex entries</p>'}</section>
@@ -5396,7 +5686,7 @@ async function exportFullBackup(){
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    if(status) status.textContent = `Full backup exported: ${payload.counts.chapters} chapters, ${payload.counts.protoLines} Protoevangelium lines, ${payload.counts.characters} characters, ${payload.counts.codexEntries} codex entries, ${payload.counts.readerNotes} reader notes, ${payload.counts.vaultFiles} vault files.`;
+    if(status) status.textContent = `Full backup exported: ${payload.counts.chapters} chapters, ${payload.counts.draftFragments} draft fragments, ${payload.counts.protoLines} Protoevangelium lines, ${payload.counts.characters} characters, ${payload.counts.codexEntries} codex entries, ${payload.counts.readerNotes} reader notes, ${payload.counts.vaultFiles} vault files.`;
   }catch(e){
     console.error('Full backup failed:', e);
     const message = e && e.message ? e.message : String(e || 'Unknown error');
@@ -7758,9 +8048,10 @@ function _updateNavUI(){
     'char-detail-view':'tnav-chars',
     'wiki-view':'tnav-codex',
     'proto-view':'tnav-proto',
+    'drafts-view':'tnav-drafts',
     'assets-view':'tnav-assets'
   };
-  ['tnav-toc','tnav-chars','tnav-codex','tnav-proto','tnav-assets','tnav-about'].forEach(id=>{
+  ['tnav-toc','tnav-chars','tnav-codex','tnav-proto','tnav-drafts','tnav-assets','tnav-about'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.classList.toggle('active', map[_currentView]===id);
   });
@@ -7797,6 +8088,7 @@ function _showViewById(id){
     const overlay=document.querySelector('#char-hero-section .char-hero-overlay');
     if(overlay) overlay.style.opacity=0;
   }
+  if(id==='drafts-view') renderDraftsView();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -7841,7 +8133,7 @@ function nextChapter(){
 
 // ── Hide others ──
 function hideOthers(except){
-  const views=['landing','toc-view','chapter-view','about-view','char-list-view','char-detail-view','wiki-view','proto-view','assets-view'];
+  const views=['landing','toc-view','chapter-view','about-view','char-list-view','char-detail-view','wiki-view','proto-view','drafts-view','assets-view'];
   views.forEach(v=>{
     if(v!==except){
       const el=document.getElementById(v);
@@ -10915,6 +11207,692 @@ document.addEventListener('click',e=>{
 });
 
 // ════════════════════════════════════════════════════════
+// DRAFT INBOX / MANUSCRIPT OBSERVATORY
+// ════════════════════════════════════════════════════════
+const DRAFTS_DB_NAME = 'cosmopolita_draft_inbox';
+const DRAFTS_DB_VERSION = 1;
+const DRAFTS_STORE = 'draftFragments';
+const DRAFT_TYPES = ['scene','dialogue','poem','research','outline','worldbuilding','character','discard'];
+const DRAFT_STATUSES = ['inbox','sorting','developing','ready','converted','archived'];
+let _draftsDBPromise = null;
+let _draftFragments = [];
+let _activeDraftId = '';
+let _draftFilter = loadDraftsUi();
+let _draftSaveTimer = null;
+
+function loadDraftsUi(){
+  try{
+    return Object.assign({search:'', view:'inbox', type:'', status:'', layer:''}, JSON.parse(localStorage.getItem(DRAFTS_UI_STORAGE_KEY) || '{}'));
+  }catch(e){
+    return {search:'', view:'inbox', type:'', status:'', layer:''};
+  }
+}
+
+function saveDraftsUi(){
+  try{ localStorage.setItem(DRAFTS_UI_STORAGE_KEY, JSON.stringify(_draftFilter)); }catch(e){}
+}
+
+function draftId(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'draft-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+}
+
+function openDraftsDB(){
+  if(_draftsDBPromise) return _draftsDBPromise;
+  _draftsDBPromise = new Promise((resolve,reject)=>{
+    if(!window.indexedDB){ reject(new Error('IndexedDB is not available in this browser.')); return; }
+    const req = indexedDB.open(DRAFTS_DB_NAME, DRAFTS_DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if(!db.objectStoreNames.contains(DRAFTS_STORE)){
+        const store = db.createObjectStore(DRAFTS_STORE, {keyPath:'id'});
+        store.createIndex('updatedAt','updatedAt',{unique:false});
+        store.createIndex('status','status',{unique:false});
+        store.createIndex('type','type',{unique:false});
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error('Could not open draft inbox.'));
+  });
+  return _draftsDBPromise;
+}
+
+function normalizeDraftFragment(value={}){
+  const now = Date.now();
+  const type = DRAFT_TYPES.includes(value.type) ? value.type : 'scene';
+  const status = DRAFT_STATUSES.includes(value.status) ? value.status : 'inbox';
+  return {
+    id:String(value.id || draftId()),
+    title:String(value.title || '').trim() || 'Untitled Fragment',
+    body:String(value.body || ''),
+    type,
+    status,
+    tags:Array.isArray(value.tags) ? value.tags.map(String) : splitTagText(value.tags || ''),
+    characters:Array.isArray(value.characters) ? value.characters.map(String) : splitTagText(value.characters || ''),
+    motifs:Array.isArray(value.motifs) ? value.motifs.map(String) : splitTagText(value.motifs || ''),
+    locations:Array.isArray(value.locations) ? value.locations.map(String) : splitTagText(value.locations || ''),
+    pov:String(value.pov || ''),
+    timeline:String(value.timeline || ''),
+    narrativeDevices:Array.isArray(value.narrativeDevices) ? value.narrativeDevices.map(String) : splitTagText(value.narrativeDevices || ''),
+    linkedChapterId:String(value.linkedChapterId || ''),
+    linkedProtoLineId:String(value.linkedProtoLineId || ''),
+    researchSubject:String(value.researchSubject || ''),
+    notes:String(value.notes || ''),
+    sourceFilename:String(value.sourceFilename || ''),
+    suggestions:value.suggestions && typeof value.suggestions === 'object' ? value.suggestions : {},
+    conversionHistory:Array.isArray(value.conversionHistory) ? value.conversionHistory : [],
+    createdAt:value.createdAt || now,
+    updatedAt:value.updatedAt || value.createdAt || now
+  };
+}
+
+async function draftPut(fragment){
+  const db = await openDraftsDB();
+  const item = normalizeDraftFragment(fragment);
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(DRAFTS_STORE, 'readwrite');
+    tx.objectStore(DRAFTS_STORE).put(item);
+    tx.oncomplete = () => resolve(item);
+    tx.onerror = () => reject(tx.error || new Error('Could not save draft fragment.'));
+  });
+}
+
+async function draftGetAll(){
+  const db = await openDraftsDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(DRAFTS_STORE, 'readonly');
+    const req = tx.objectStore(DRAFTS_STORE).getAll();
+    req.onsuccess = () => resolve((req.result || []).map(normalizeDraftFragment).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)));
+    req.onerror = () => reject(req.error || new Error('Could not load draft fragments.'));
+  });
+}
+
+async function draftDelete(id){
+  if(!requireAdmin()) return;
+  if(!confirm('Delete this draft fragment? Archive is safer unless you truly want it gone.')) return;
+  const db = await openDraftsDB();
+  await new Promise((resolve,reject)=>{
+    const tx = db.transaction(DRAFTS_STORE, 'readwrite');
+    tx.objectStore(DRAFTS_STORE).delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error || new Error('Could not delete draft fragment.'));
+  });
+  if(_activeDraftId === id) _activeDraftId = '';
+  await renderDraftsView();
+}
+
+async function draftRefreshCache(){
+  _draftFragments = await draftGetAll();
+  if(!_activeDraftId && _draftFragments.length) _activeDraftId = _draftFragments[0].id;
+}
+
+function activeDraft(){
+  return _draftFragments.find(item=>item.id===_activeDraftId) || null;
+}
+
+function draftWordCount(fragment){
+  return String(fragment && fragment.body || '').trim().split(/\s+/).filter(Boolean).length;
+}
+
+function draftDate(ts){
+  return ts ? new Date(ts).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : 'Just now';
+}
+
+function draftSelectOptions(values, selected, emptyLabel){
+  return `<option value="">${escHtml(emptyLabel)}</option>` + values.map(v=>`<option value="${escHtml(v)}" ${v===selected?'selected':''}>${escHtml(v)}</option>`).join('');
+}
+
+function draftChapterOptions(selected=''){
+  return `<option value="">No chapter linked</option>` + chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${ch.id===selected?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
+}
+
+function draftProtoOptions(selected=''){
+  return `<option value="">No Proto line linked</option>` + (protoevangelium.lines || []).map(line=>`<option value="${escHtml(line.id)}" ${line.id===selected?'selected':''}>Line ${escHtml(line.number)} · ${escHtml(line.text.slice(0, 58))}</option>`).join('');
+}
+
+function draftLayerOptions(){
+  const layerSet = new Set();
+  _draftFragments.forEach(fragment=>{
+    [...fragment.characters, ...fragment.motifs, ...fragment.locations, ...fragment.narrativeDevices, fragment.pov, fragment.timeline, fragment.researchSubject].filter(Boolean).forEach(v=>layerSet.add(v));
+  });
+  return '<option value="">All Layers</option>' + Array.from(layerSet).sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escHtml(v)}" ${_draftFilter.layer===v?'selected':''}>${escHtml(v)}</option>`).join('');
+}
+
+function draftTextSearch(fragment){
+  return [
+    fragment.title, fragment.body, fragment.type, fragment.status,
+    fragment.tags.join(' '), fragment.characters.join(' '), fragment.motifs.join(' '),
+    fragment.locations.join(' '), fragment.pov, fragment.timeline,
+    fragment.narrativeDevices.join(' '), fragment.researchSubject, fragment.notes
+  ].join(' ').toLowerCase();
+}
+
+function draftIsOrphan(fragment){
+  return !fragment.tags.length && !fragment.characters.length && !fragment.motifs.length && !fragment.locations.length && !fragment.linkedChapterId && !fragment.linkedProtoLineId;
+}
+
+function draftMatchesFilter(fragment){
+  const term = String(_draftFilter.search || '').trim().toLowerCase();
+  if(term && !draftTextSearch(fragment).includes(term)) return false;
+  if(_draftFilter.type && fragment.type !== _draftFilter.type) return false;
+  if(_draftFilter.status && fragment.status !== _draftFilter.status) return false;
+  if(_draftFilter.layer){
+    const layers = [...fragment.characters, ...fragment.motifs, ...fragment.locations, ...fragment.narrativeDevices, fragment.pov, fragment.timeline, fragment.researchSubject].filter(Boolean);
+    if(!layers.some(v=>v.toLowerCase() === _draftFilter.layer.toLowerCase())) return false;
+  }
+  if(_draftFilter.view === 'archive') return fragment.status === 'archived';
+  if(fragment.status === 'archived') return false;
+  if(_draftFilter.view === 'orphans') return draftIsOrphan(fragment);
+  if(_draftFilter.view === 'ready') return fragment.status === 'ready' || fragment.tags.some(tag=>/ready|high-value|priority/i.test(tag));
+  return true;
+}
+
+function filteredDrafts(){
+  return _draftFragments.filter(draftMatchesFilter);
+}
+
+function updateDraftFilter(key, value){
+  _draftFilter[key] = value || '';
+  saveDraftsUi();
+  renderDraftsView();
+}
+
+function draftStatus(message){
+  const el = document.getElementById('draft-status');
+  if(el) el.textContent = message || '';
+}
+
+function draftFragmentCard(fragment){
+  const chips = [fragment.type, fragment.status, ...fragment.tags.slice(0,3), ...fragment.motifs.slice(0,2)].filter(Boolean);
+  return `<article class="drafts-card ${fragment.id===_activeDraftId?'active':''} ${fragment.status==='archived'?'archived':''}" onclick="selectDraftFragment('${escHtml(fragment.id)}')">
+    <div class="drafts-card-title">${escHtml(fragment.title)}</div>
+    <div class="drafts-card-meta">${draftWordCount(fragment).toLocaleString()} words · ${escHtml(draftDate(fragment.updatedAt))}</div>
+    <div class="drafts-chip-row">${chips.map(chip=>`<span class="drafts-chip">${escHtml(chip)}</span>`).join('')}</div>
+  </article>`;
+}
+
+async function selectDraftFragment(id){
+  await persistActiveDraftFromEditor({silent:true});
+  _activeDraftId = id;
+  await renderDraftsView();
+}
+
+function renderDraftStats(){
+  const totalWords = _draftFragments.reduce((sum,fragment)=>sum + draftWordCount(fragment), 0);
+  const visible = filteredDrafts();
+  return `
+    <div class="drafts-stat"><b>${_draftFragments.length}</b><div class="drafts-stat-label">Fragments</div></div>
+    <div class="drafts-stat"><b>${totalWords.toLocaleString()}</b><div class="drafts-stat-label">Draft Words</div></div>
+    <div class="drafts-stat"><b>${visible.length}</b><div class="drafts-stat-label">Visible</div></div>
+    <div class="drafts-stat"><b>${_draftFragments.filter(draftIsOrphan).length}</b><div class="drafts-stat-label">Orphans</div></div>`;
+}
+
+function draftSuggestionCandidates(fragment){
+  const text = `${fragment.title}\n${fragment.body}`;
+  const lower = text.toLowerCase();
+  const charHits = characters.filter(char=>char.name && lower.includes(char.name.toLowerCase())).map(char=>char.name);
+  const codexHits = Object.entries(E || {}).filter(([,entry])=>{
+    const title = (entry && (entry.t || entry.title)) || '';
+    return title && lower.includes(String(title).toLowerCase());
+  }).map(([key,entry])=>entry.t || key).slice(0,12);
+  const motifWords = Array.from(new Set((text.match(/\b[A-Za-z][A-Za-z'-]{5,}\b/g) || [])
+    .map(word=>word.toLowerCase())
+    .filter(word=>!['because','through','before','little','chapter','should','fragment','nothing','something','people','between','without','within','another'].includes(word))))
+    .slice(0,12);
+  const dialogueLines = String(fragment.body || '').split(/\n/).filter(line=>/^\s*["“]|^\s*[A-Z][^:]{1,32}:/.test(line)).length;
+  const lines = String(fragment.body || '').split(/\n/).filter(Boolean).length || 1;
+  const dialogueDensity = Math.round((dialogueLines / lines) * 100);
+  const headingCount = (fragment.body.match(/(^|\n)(#{1,3}\s+.+|={3}.+={3}|chapter\s+\w+)/gi) || []).length;
+  let type = 'scene';
+  if(dialogueDensity > 35) type = 'dialogue';
+  else if(/\b(source|citation|doi|bibliography|research|archive)\b/i.test(text)) type = 'research';
+  else if(/\b(stanza|hexameter|protoevangelium|poem|line)\b/i.test(text)) type = 'poem';
+  else if(/\b(outline|beat|act|sequence|todo)\b/i.test(text)) type = 'outline';
+  return {characters:charHits, codex:codexHits, motifs:motifWords, dialogueDensity, headingCount, type};
+}
+
+function renderDraftSuggestions(fragment){
+  if(!fragment) return '<div class="drafts-empty">Select a fragment for suggestions.</div>';
+  const suggestions = fragment.suggestions && Object.keys(fragment.suggestions).length ? fragment.suggestions : draftSuggestionCandidates(fragment);
+  const block = (label, value, action='') => `<div class="drafts-suggestion">
+    <div class="drafts-suggestion-label">${escHtml(label)}</div>
+    <div class="drafts-suggestion-value">${escHtml(Array.isArray(value) ? (value.join(', ') || 'None') : value)}</div>
+    ${action}
+  </div>`;
+  return `
+    ${block('Suggested Type', suggestions.type || 'scene', `<button class="tiny-btn" type="button" onclick="applyDraftSuggestion('type')">Apply</button>`)}
+    ${block('Characters', suggestions.characters || [], `<button class="tiny-btn" type="button" onclick="applyDraftSuggestion('characters')">Apply</button>`)}
+    ${block('Codex Terms', suggestions.codex || [], `<button class="tiny-btn" type="button" onclick="applyDraftSuggestion('tagsFromCodex')">Apply as Tags</button>`)}
+    ${block('Motif Candidates', suggestions.motifs || [], `<button class="tiny-btn" type="button" onclick="applyDraftSuggestion('motifs')">Apply</button>`)}
+    ${block('Dialogue Density', `${suggestions.dialogueDensity || 0}%`)}
+    ${block('Possible Headings', suggestions.headingCount || 0)}
+    <button class="cm-btn secondary" type="button" onclick="runDraftSuggestions()">Refresh Suggestions</button>`;
+}
+
+async function runDraftSuggestions(){
+  const fragment = activeDraft();
+  if(!fragment) return;
+  fragment.suggestions = draftSuggestionCandidates(fragment);
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+  draftStatus('Suggestions refreshed. Apply only the ones you want.');
+}
+
+async function applyDraftSuggestion(kind){
+  const fragment = activeDraft();
+  if(!fragment) return;
+  const suggestions = fragment.suggestions && Object.keys(fragment.suggestions).length ? fragment.suggestions : draftSuggestionCandidates(fragment);
+  if(kind === 'type') fragment.type = suggestions.type || fragment.type;
+  if(kind === 'characters') fragment.characters = Array.from(new Set([...fragment.characters, ...(suggestions.characters || [])]));
+  if(kind === 'motifs') fragment.motifs = Array.from(new Set([...fragment.motifs, ...(suggestions.motifs || [])]));
+  if(kind === 'tagsFromCodex') fragment.tags = Array.from(new Set([...fragment.tags, ...(suggestions.codex || [])]));
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+}
+
+function renderDraftConversions(fragment){
+  if(!fragment) return '<div class="drafts-empty">Select a fragment to convert it.</div>';
+  return `
+    <button class="cm-btn secondary" type="button" onclick="convertDraftToChapter()">Convert To New Chapter</button>
+    <button class="cm-btn secondary" type="button" onclick="appendDraftToChapter()">Append To Linked Chapter</button>
+    <button class="cm-btn secondary" type="button" onclick="convertDraftToCodex()">Create Codex Entry</button>
+    <button class="cm-btn secondary" type="button" onclick="convertDraftToProtoLine()">Create Proto Line</button>
+    <button class="cm-btn secondary" type="button" onclick="convertDraftToCharacter()">Create Character Seed</button>
+    <button class="cm-btn secondary" type="button" onclick="convertDraftToAuthorNote()">Create Chapter Author Note</button>
+    <button class="cm-btn secondary" type="button" onclick="convertDraftToResearch('source')">Create Research Source</button>
+    <button class="cm-btn secondary" type="button" onclick="convertDraftToResearch('evidence')">Create Research Evidence</button>
+    <button class="cm-btn secondary" type="button" onclick="convertDraftToResearch('gap')">Create Research Gap</button>
+    <button class="cm-btn secondary" type="button" onclick="archiveActiveDraft()">Archive Fragment</button>`;
+}
+
+function renderDraftEditor(fragment){
+  if(!fragment) return '<div class="drafts-empty">Create or select a fragment. This is the inbox before canon.</div>';
+  const preview = fragment.body ? parseBody(fragment.body) : '<p class="ed-note">No draft text yet.</p>';
+  return `
+    <div class="drafts-main-head">
+      <div>
+        <div class="drafts-kicker">Fragment Editor</div>
+        <div class="drafts-title">${escHtml(fragment.title)}</div>
+      </div>
+      <div class="drafts-actions">
+        <button class="cm-btn secondary" type="button" onclick="persistActiveDraftFromEditor()">Save Fragment</button>
+        <button class="cm-btn secondary" type="button" onclick="runDraftSuggestions()">Suggest Layers</button>
+        <button class="cm-btn secondary danger" type="button" onclick="draftDelete('${escHtml(fragment.id)}')">Delete</button>
+      </div>
+    </div>
+    <div class="drafts-editor-grid">
+      <div>
+        <label class="drafts-field"><span>Title</span><input id="draft-title" class="drafts-input" value="${escHtml(fragment.title)}" oninput="queueDraftEditorSave()"></label>
+        <div class="drafts-filter-grid">
+          <label class="drafts-field"><span>Type</span><select id="draft-type" class="drafts-select" onchange="queueDraftEditorSave()">${draftSelectOptions(DRAFT_TYPES, fragment.type, 'Type')}</select></label>
+          <label class="drafts-field"><span>Status</span><select id="draft-status-field" class="drafts-select" onchange="queueDraftEditorSave()">${draftSelectOptions(DRAFT_STATUSES, fragment.status, 'Status')}</select></label>
+        </div>
+        <label class="drafts-field"><span>Body</span><textarea id="draft-body" class="drafts-textarea" oninput="queueDraftEditorSave()">${escHtml(fragment.body)}</textarea></label>
+      </div>
+      <div>
+        <div class="drafts-preview">${preview}</div>
+        <div class="drafts-filter-grid" style="margin-top:.75rem">
+          <label class="drafts-field"><span>Linked Chapter</span><select id="draft-linked-chapter" class="drafts-select" onchange="queueDraftEditorSave()">${draftChapterOptions(fragment.linkedChapterId)}</select></label>
+          <label class="drafts-field"><span>Linked Proto Line</span><select id="draft-linked-proto" class="drafts-select" onchange="queueDraftEditorSave()">${draftProtoOptions(fragment.linkedProtoLineId)}</select></label>
+        </div>
+        <label class="drafts-field"><span>Tags</span><input id="draft-tags" class="drafts-input" value="${escHtml(fragment.tags.join(', '))}" oninput="queueDraftEditorSave()"></label>
+        <label class="drafts-field"><span>Characters</span><input id="draft-characters" class="drafts-input" value="${escHtml(fragment.characters.join(', '))}" oninput="queueDraftEditorSave()"></label>
+        <label class="drafts-field"><span>Motifs</span><input id="draft-motifs" class="drafts-input" value="${escHtml(fragment.motifs.join(', '))}" oninput="queueDraftEditorSave()"></label>
+        <label class="drafts-field"><span>Locations</span><input id="draft-locations" class="drafts-input" value="${escHtml(fragment.locations.join(', '))}" oninput="queueDraftEditorSave()"></label>
+        <label class="drafts-field"><span>POV</span><input id="draft-pov" class="drafts-input" value="${escHtml(fragment.pov)}" oninput="queueDraftEditorSave()"></label>
+        <label class="drafts-field"><span>Timeline</span><input id="draft-timeline" class="drafts-input" value="${escHtml(fragment.timeline)}" oninput="queueDraftEditorSave()"></label>
+        <label class="drafts-field"><span>Narrative Devices</span><input id="draft-devices" class="drafts-input" value="${escHtml(fragment.narrativeDevices.join(', '))}" oninput="queueDraftEditorSave()"></label>
+        <label class="drafts-field"><span>Research Subject</span><input id="draft-research-subject" class="drafts-input" value="${escHtml(fragment.researchSubject)}" oninput="queueDraftEditorSave()"></label>
+        <label class="drafts-field"><span>Notes</span><textarea id="draft-notes" class="drafts-textarea" rows="4" oninput="queueDraftEditorSave()">${escHtml(fragment.notes)}</textarea></label>
+      </div>
+    </div>`;
+}
+
+function readDraftEditor(fragment=activeDraft()){
+  if(!fragment) return null;
+  return normalizeDraftFragment(Object.assign({}, fragment, {
+    title:(document.getElementById('draft-title')?.value || '').trim() || 'Untitled Fragment',
+    body:document.getElementById('draft-body')?.value || '',
+    type:document.getElementById('draft-type')?.value || fragment.type,
+    status:document.getElementById('draft-status-field')?.value || fragment.status,
+    tags:splitTagText(document.getElementById('draft-tags')?.value || ''),
+    characters:splitTagText(document.getElementById('draft-characters')?.value || ''),
+    motifs:splitTagText(document.getElementById('draft-motifs')?.value || ''),
+    locations:splitTagText(document.getElementById('draft-locations')?.value || ''),
+    pov:document.getElementById('draft-pov')?.value || '',
+    timeline:document.getElementById('draft-timeline')?.value || '',
+    narrativeDevices:splitTagText(document.getElementById('draft-devices')?.value || ''),
+    linkedChapterId:document.getElementById('draft-linked-chapter')?.value || '',
+    linkedProtoLineId:document.getElementById('draft-linked-proto')?.value || '',
+    researchSubject:document.getElementById('draft-research-subject')?.value || '',
+    notes:document.getElementById('draft-notes')?.value || '',
+    updatedAt:Date.now()
+  }));
+}
+
+async function persistActiveDraftFromEditor(options={}){
+  const existing = activeDraft();
+  if(!existing || !document.getElementById('draft-title')) return;
+  const next = readDraftEditor(existing);
+  const saved = await draftPut(next);
+  _draftFragments = _draftFragments.map(fragment=>fragment.id===saved.id ? saved : fragment);
+  if(!options.silent) draftStatus('Draft fragment saved.');
+}
+
+function queueDraftEditorSave(){
+  clearTimeout(_draftSaveTimer);
+  _draftSaveTimer = setTimeout(async()=>{
+    await persistActiveDraftFromEditor({silent:true});
+    await renderDraftsView({keepEditor:true});
+    draftStatus('Fragment autosaved.');
+  }, 450);
+}
+
+async function renderDraftsView(options={}){
+  try{
+    if(!options.keepCache) await draftRefreshCache();
+  }catch(e){
+    console.error('Draft inbox failed:', e);
+    draftStatus('Draft inbox failed: ' + (e.message || e));
+    return;
+  }
+  const list = document.getElementById('draft-list');
+  const stats = document.getElementById('draft-stats');
+  const editor = document.getElementById('draft-editor-panel');
+  const suggestions = document.getElementById('draft-suggestions');
+  const conversions = document.getElementById('draft-conversions');
+  const active = activeDraft();
+  const visible = filteredDrafts();
+  const typeSel = document.getElementById('draft-filter-type');
+  const statusSel = document.getElementById('draft-filter-status');
+  const viewSel = document.getElementById('draft-filter-view');
+  const layerSel = document.getElementById('draft-filter-layer');
+  const search = document.getElementById('draft-search');
+  if(typeSel) typeSel.innerHTML = draftSelectOptions(DRAFT_TYPES, _draftFilter.type, 'All Types');
+  if(statusSel) statusSel.innerHTML = draftSelectOptions(DRAFT_STATUSES, _draftFilter.status, 'All Statuses');
+  if(viewSel) viewSel.value = _draftFilter.view || 'inbox';
+  if(layerSel) layerSel.innerHTML = draftLayerOptions();
+  if(search) search.value = _draftFilter.search || '';
+  if(list) list.innerHTML = visible.length ? visible.map(draftFragmentCard).join('') : '<div class="drafts-empty">No fragments match this view.</div>';
+  if(stats) stats.innerHTML = renderDraftStats();
+  if(editor && !options.keepEditor) editor.innerHTML = renderDraftEditor(active);
+  if(suggestions) suggestions.innerHTML = renderDraftSuggestions(active);
+  if(conversions) conversions.innerHTML = renderDraftConversions(active);
+}
+
+async function showDrafts(){
+  if(!requireAdmin()) return;
+  updateAdminUI();
+  _pushNav('drafts-view');
+  const view = document.getElementById('drafts-view');
+  if(view) view.style.display = 'block';
+  hideOthers('drafts-view');
+  await renderDraftsView();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function createDraftFragment(data={}){
+  if(!requireAdmin()) return;
+  const now = Date.now();
+  const item = normalizeDraftFragment(Object.assign({
+    id:draftId(),
+    title:'New Fragment',
+    body:'',
+    type:'scene',
+    status:'inbox',
+    createdAt:now,
+    updatedAt:now
+  }, data));
+  await draftPut(item);
+  _activeDraftId = item.id;
+  await renderDraftsView();
+}
+
+function draftTitleFromBody(body, fallback='Untitled Fragment'){
+  const first = String(body || '').split(/\n/).map(line=>line.trim()).find(Boolean) || fallback;
+  return first.replace(/^#+\s*/, '').replace(/^={3}|={3}$/g, '').slice(0, 90);
+}
+
+function draftSplitText(text, mode, delimiter=''){
+  text = String(text || '').trim();
+  if(!text) return [];
+  if(mode === 'custom' && delimiter){
+    return text.split(delimiter).map(part=>part.trim()).filter(Boolean);
+  }
+  if(mode === 'section'){
+    return text.split(/(?=^===[^=]+===$)/gm).map(part=>part.trim()).filter(Boolean);
+  }
+  if(mode === 'blank'){
+    return text.split(/\n\s*\n\s*\n+/).map(part=>part.trim()).filter(Boolean);
+  }
+  return text.split(/(?=^(?:#{1,3}\s+.+|chapter\s+\w+.*|[IVXLCDM]+\.\s+.+)$)/gim).map(part=>part.trim()).filter(Boolean);
+}
+
+async function draftCreateFragmentsFromText(text, sourceFilename='', mode='heading', delimiter=''){
+  const parts = draftSplitText(text, mode, delimiter);
+  if(!parts.length) return 0;
+  for(const part of parts){
+    const now = Date.now();
+    await draftPut(normalizeDraftFragment({
+      id:draftId(),
+      title:draftTitleFromBody(part, sourceFilename || 'Imported Fragment'),
+      body:part,
+      type:'scene',
+      status:'inbox',
+      sourceFilename,
+      suggestions:draftSuggestionCandidates({title:draftTitleFromBody(part), body:part, tags:[], characters:[], motifs:[], locations:[], narrativeDevices:[]}),
+      createdAt:now,
+      updatedAt:now
+    }));
+  }
+  return parts.length;
+}
+
+async function draftSplitIntake(){
+  if(!requireAdmin()) return;
+  const text = document.getElementById('draft-intake-text')?.value || '';
+  const mode = document.getElementById('draft-split-mode')?.value || 'heading';
+  const delimiter = document.getElementById('draft-split-delimiter')?.value || '';
+  const count = await draftCreateFragmentsFromText(text, 'Pasted Manuscript', mode, delimiter);
+  if(count){
+    document.getElementById('draft-intake-text').value = '';
+    draftStatus(`Created ${count} draft fragment${count === 1 ? '' : 's'}.`);
+  }else{
+    draftStatus('No fragments created. Try another split mode.');
+  }
+  await renderDraftsView();
+}
+
+function draftClearIntake(){
+  const el = document.getElementById('draft-intake-text');
+  if(el) el.value = '';
+}
+
+async function draftUploadFromInput(event){
+  if(!requireAdmin()) return;
+  const files = Array.from(event.target.files || []);
+  const mode = document.getElementById('draft-split-mode')?.value || 'heading';
+  const delimiter = document.getElementById('draft-split-delimiter')?.value || '';
+  let total = 0;
+  for(const file of files){
+    const text = await file.text();
+    total += await draftCreateFragmentsFromText(text, file.name, mode, delimiter);
+  }
+  event.target.value = '';
+  await renderDraftsView();
+  draftStatus(`Imported ${total} fragment${total === 1 ? '' : 's'} from ${files.length} file${files.length === 1 ? '' : 's'}.`);
+}
+
+function recordDraftConversion(fragment, target, targetId){
+  fragment.conversionHistory.unshift({target, targetId, at:Date.now()});
+  fragment.status = 'converted';
+  fragment.updatedAt = Date.now();
+}
+
+async function archiveActiveDraft(){
+  const fragment = activeDraft();
+  if(!fragment) return;
+  fragment.status = fragment.status === 'archived' ? 'inbox' : 'archived';
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+}
+
+async function convertDraftToChapter(){
+  const fragment = activeDraft();
+  if(!fragment || !requireAdmin()) return;
+  await persistActiveDraftFromEditor({silent:true});
+  const latest = activeDraft() || fragment;
+  const last = chapters.length ? chapters[chapters.length - 1] : {};
+  const chapter = normalizeChapterList([{
+    id:'ch-' + Date.now(),
+    num:toRoman(chapters.length + 1),
+    novel:last.novel || '',
+    act:last.act || '',
+    book:last.book || 'Imported Drafts',
+    volume:last.volume || '',
+    subvolume:last.subvolume || '',
+    part:last.part || '',
+    chapter:latest.title,
+    meta:{narrator:latest.pov || '', setting:latest.locations.join(', '), year:latest.timeline || '', aesthetic:latest.motifs.join(', '), mode:latest.type},
+    body:latest.body,
+    authorNotes:normalizeAuthorNotes({status:'draft', notes:[{id:authorNoteId('note'), body:`Converted from draft fragment ${latest.title}.`, createdAt:Date.now(), updatedAt:Date.now()}]})
+  }])[0];
+  chapters.push(chapter);
+  saveChapters(chapters);
+  syncChaptersToSupabase().catch(err=>console.warn('Draft chapter sync failed:', err));
+  latest.linkedChapterId = chapter.id;
+  recordDraftConversion(latest, 'chapter', chapter.id);
+  await draftPut(latest);
+  renderTOC();
+  await renderDraftsView();
+}
+
+async function appendDraftToChapter(){
+  const fragment = activeDraft();
+  if(!fragment || !requireAdmin()) return;
+  await persistActiveDraftFromEditor({silent:true});
+  const latest = activeDraft() || fragment;
+  const chapter = chapters.find(ch=>ch.id===latest.linkedChapterId) || chapters[0];
+  if(!chapter){ alert('No chapter exists to append to yet.'); return; }
+  chapter.body = `${chapter.body || ''}\n\n===Draft Fragment: ${latest.title}===\n\n${latest.body}`.trim();
+  chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
+  chapter.authorNotes.notes.unshift({id:authorNoteId('note'), body:`Appended draft fragment: ${latest.title}`, createdAt:Date.now(), updatedAt:Date.now()});
+  saveChapters(chapters);
+  syncChaptersToSupabase().catch(err=>console.warn('Draft append sync failed:', err));
+  latest.linkedChapterId = chapter.id;
+  recordDraftConversion(latest, 'chapter-append', chapter.id);
+  await draftPut(latest);
+  await renderDraftsView();
+}
+
+async function convertDraftToCodex(){
+  const fragment = activeDraft();
+  if(!fragment || !requireAdmin()) return;
+  await persistActiveDraftFromEditor({silent:true});
+  const latest = activeDraft() || fragment;
+  const key = latest.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'draft-entry-' + Date.now();
+  E[key] = {t:latest.title, cat:'Draft Fragment', kind:latest.type, short:latest.tags.join(', '), desc:backupParagraphs(latest.body), meta:[['Status', latest.status], ['Source', latest.sourceFilename]], tags:latest.tags};
+  saveEntities();
+  syncCodexEntryToSupabase(key, E[key]).catch(err=>console.warn('Draft Codex sync failed:', err));
+  recordDraftConversion(latest, 'codex', key);
+  await draftPut(latest);
+  await renderDraftsView();
+}
+
+async function convertDraftToProtoLine(){
+  const fragment = activeDraft();
+  if(!fragment || !requireAdmin()) return;
+  await persistActiveDraftFromEditor({silent:true});
+  const latest = activeDraft() || fragment;
+  const id = protoId('line');
+  const number = (protoevangelium.lines || []).reduce((max,line)=>Math.max(max, Number(line.number || 0)), 0) + 1;
+  protoevangelium.lines.push(normalizeProtoLine({
+    id,
+    number,
+    sectionId:protoevangelium.sections[0]?.id || '',
+    text:latest.body.split(/\n/).map(line=>line.trim()).filter(Boolean)[0] || latest.title,
+    translationNote:latest.body,
+    motifIds:latest.motifs,
+    hyperStructureNote:latest.notes
+  }, number - 1));
+  saveProtoevangeliumLocal({silent:true});
+  syncProtoevangeliumToSupabase().catch(err=>console.warn('Draft Proto sync failed:', err));
+  latest.linkedProtoLineId = id;
+  recordDraftConversion(latest, 'proto-line', id);
+  await draftPut(latest);
+  await renderDraftsView();
+}
+
+async function convertDraftToCharacter(){
+  const fragment = activeDraft();
+  if(!fragment || !requireAdmin()) return;
+  await persistActiveDraftFromEditor({silent:true});
+  const latest = activeDraft() || fragment;
+  const id = normalizeCharacterId(latest.title);
+  characters.push({
+    id,
+    name:latest.title,
+    role:'Draft Character Seed',
+    epithet:latest.tags.join(', '),
+    image:'',
+    bio:backupParagraphs(latest.body),
+    stats:{'Source':'Draft Inbox','Status':latest.status,'POV':latest.pov},
+    tags:{books:[], factions:[], locations:latest.locations, families:[], races:[], aesthetics:latest.motifs}
+  });
+  saveCharacters(characters);
+  syncCharacterToSupabase(characters[characters.length - 1]).catch(err=>console.warn('Draft character sync failed:', err));
+  recordDraftConversion(latest, 'character', id);
+  await draftPut(latest);
+  renderCharacterFilters();
+  await renderDraftsView();
+}
+
+async function convertDraftToAuthorNote(){
+  const fragment = activeDraft();
+  if(!fragment || !requireAdmin()) return;
+  await persistActiveDraftFromEditor({silent:true});
+  const latest = activeDraft() || fragment;
+  const chapter = chapters.find(ch=>ch.id===latest.linkedChapterId) || chapters[0];
+  if(!chapter){ alert('No chapter exists for this author note.'); return; }
+  chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
+  chapter.authorNotes.notes.unshift({id:authorNoteId('note'), body:`${latest.title}\n\n${latest.body}`, createdAt:Date.now(), updatedAt:Date.now()});
+  saveChapters(chapters);
+  syncChaptersToSupabase().catch(err=>console.warn('Draft author note sync failed:', err));
+  latest.linkedChapterId = chapter.id;
+  recordDraftConversion(latest, 'author-note', chapter.id);
+  await draftPut(latest);
+  await renderDraftsView();
+}
+
+async function convertDraftToResearch(kind='source'){
+  const fragment = activeDraft();
+  if(!fragment || !requireAdmin()) return;
+  await persistActiveDraftFromEditor({silent:true});
+  const latest = activeDraft() || fragment;
+  const chapter = chapters.find(ch=>ch.id===latest.linkedChapterId) || chapters[0];
+  if(!chapter){ alert('No chapter exists for this research card.'); return; }
+  chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
+  const research = chapter.authorNotes.research = normalizeResearch(chapter.authorNotes.research || {});
+  const subjectId = research.subjects[0]?.id || DEFAULT_RESEARCH_SUBJECT_ID;
+  if(kind === 'source'){
+    research.sources.unshift({id:authorNoteId('source'), subjectId, tags:latest.tags.join(', '), title:latest.title, author:'', type:'Draft Fragment', container:'Draft Inbox', publisher:'', url:'', doi:'', accessDate:'', year:'', citationOverride:'', citationNotes:'', summary:latest.body, relevance:latest.notes, method:latest.type, reliability:'Draft material; verify before use.', chapterUse:'Imported from Draft Inbox.', createdAt:Date.now(), updatedAt:Date.now()});
+  }else if(kind === 'evidence'){
+    research.evidence.unshift({id:authorNoteId('evidence'), subjectId, tags:latest.tags.join(', '), claim:latest.title, sourceId:'', quote:latest.body, application:latest.notes, confidence:'medium', createdAt:Date.now(), updatedAt:Date.now()});
+  }else{
+    research.gaps.unshift({id:authorNoteId('gap'), subjectId, tags:latest.tags.join(', '), question:latest.title, nextStep:latest.body, status:'open', createdAt:Date.now(), updatedAt:Date.now()});
+  }
+  saveChapters(chapters);
+  syncChaptersToSupabase().catch(err=>console.warn('Draft research sync failed:', err));
+  latest.linkedChapterId = chapter.id;
+  recordDraftConversion(latest, 'research-' + kind, chapter.id);
+  await draftPut(latest);
+  await renderDraftsView();
+}
+
+// ════════════════════════════════════════════════════════
 // OFFLINE FILE VAULT — stores 10MB+ uploads as IndexedDB blobs
 // ════════════════════════════════════════════════════════
 const VAULT_DB_NAME = 'cosmopolita_file_vault';
@@ -11643,6 +12621,7 @@ function attachPrimaryNavHandlers(){
     ['tnav-chars', ()=>showCharacters()],
     ['tnav-codex', ()=>showWikiEntry()],
     ['tnav-proto', ()=>showProtoevangelium()],
+    ['tnav-drafts', ()=>showDrafts()],
     ['tnav-assets', ()=>showAssets()],
     ['tnav-about', ()=>showAbout()]
   ];
@@ -11665,6 +12644,7 @@ Object.assign(window, {
   showCharDetail,
   showWikiEntry,
   showProtoevangelium,
+  showDrafts,
   showAssets
 });
 attachPrimaryNavHandlers();
