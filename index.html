@@ -11695,6 +11695,7 @@ async function analyzeDraftWithAi(id){
 }
 
 async function analyzeActiveDraftWithAi(){
+  draftStatus('Analyze Fragment clicked. Preparing active draft...');
   const fragment = activeDraft();
   if(!fragment){
     draftStatus('No active draft fragment selected. Create or select a fragment first, then run AI analysis.');
@@ -11703,8 +11704,18 @@ async function analyzeActiveDraftWithAi(){
   await analyzeDraftWithAi(fragment.id);
 }
 
+async function handleAnalyzeFragmentClick(){
+  try{
+    await analyzeActiveDraftWithAi();
+  }catch(err){
+    console.error('Analyze Fragment click failed:', err);
+    draftStatus('Analyze Fragment failed before request: ' + (err.message || err));
+  }
+}
+
 async function analyzeSelectedDraftsWithAi(){
   if(!requireAdmin()) return;
+  draftStatus('Analyze Selected clicked. Preparing selected fragments...');
   const ids = Array.from(_draftSelectedIds).filter(id=>_draftFragments.some(fragment=>fragment.id===id));
   if(!ids.length){ draftStatus('Select visible draft fragments first.'); return; }
   for(let i=0;i<ids.length;i++){
@@ -11725,7 +11736,7 @@ function renderDraftAiPanel(fragment){
     <div class="drafts-pane-title">AI Analysis</div>
     <div class="drafts-ai-warning">${escHtml(warning)}</div>
     <div class="drafts-ai-actions">
-      <button class="cm-btn secondary" type="button" onclick="analyzeActiveDraftWithAi()">Analyze Fragment</button>
+      <button class="cm-btn secondary" type="button" onclick="handleAnalyzeFragmentClick()">Analyze Fragment</button>
       <button class="cm-btn secondary" type="button" onclick="analyzeSelectedDraftsWithAi()">Analyze Selected Visible</button>
       <button class="tiny-btn" type="button" onclick="selectVisibleDrafts()">Select Visible</button>
       <button class="tiny-btn" type="button" onclick="clearDraftSelection()">Clear</button>
@@ -13058,6 +13069,17 @@ Object.assign(window, {
   showWikiEntry,
   showProtoevangelium,
   showDrafts,
+  handleAnalyzeFragmentClick,
+  analyzeActiveDraftWithAi,
+  analyzeSelectedDraftsWithAi,
+  selectVisibleDrafts,
+  clearDraftSelection,
+  toggleDraftSelection,
+  acceptDraftAiSuggestion,
+  rejectDraftAiSuggestion,
+  acceptDraftAiGroup,
+  runDraftSuggestions,
+  applyDraftSuggestion,
   showAssets
 });
 attachPrimaryNavHandlers();
