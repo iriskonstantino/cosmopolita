@@ -3854,9 +3854,6 @@ body:not(.logged-in) #tnav-assets{
             </select>
           </div>
           <div id="ce-author-summary" class="ce-author-summary">No author notes yet.</div>
-          <div class="author-note-actions">
-            <button class="author-note-btn" type="button" onclick="openAuthorWorkspace()">Open Author Workspace</button>
-          </div>
         </div>
       </aside>
       <main class="chapter-editor-main">
@@ -3866,6 +3863,7 @@ body:not(.logged-in) #tnav-assets{
             <div class="ce-title" id="ce-title">Untitled Chapter</div>
           </div>
           <div class="ce-actions">
+            <button class="cm-btn secondary" type="button" onclick="openAuthorWorkspace()">Open Author Workspace</button>
             <button class="cm-btn secondary" id="ce-prev-chapter-btn" type="button" onclick="openAdjacentChapterEditor(-1)">Edit Previous</button>
             <button class="cm-btn secondary" id="ce-next-chapter-btn" type="button" onclick="openAdjacentChapterEditor(1)">Edit Next</button>
             <button class="cm-btn secondary" type="button" onclick="closeChapterEditor()">Cancel</button>
