@@ -3300,6 +3300,51 @@ body:not(.admin-on) #tnav-drafts{
   text-transform:uppercase;
   padding:0.75rem;
 }
+.author-form-report-body{
+  display:grid;
+  gap:0.8rem;
+  padding:0.85rem;
+}
+.author-form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.7rem;
+}
+.author-form-grid>div,.author-form-list,.author-form-event{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.7rem;
+}
+.author-form-grid span,.author-form-list b,.author-form-event-num{
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#999;
+}
+.author-form-grid p,.author-form-list p,.author-form-list li,.author-form-text,.author-form-causal{
+  font-size:0.84rem;
+  line-height:1.55;
+  color:#4f4840;
+  margin-top:0.35rem;
+}
+.author-form-list ul{
+  margin:0.45rem 0 0 1rem;
+  padding:0;
+}
+.author-form-events{
+  display:grid;
+  gap:0.55rem;
+}
+.author-form-event{
+  display:grid;
+  grid-template-columns:2.25rem minmax(0,1fr);
+  gap:0.65rem;
+}
+.author-form-event-num{
+  color:var(--red);
+  text-align:center;
+}
 .author-passage-quote{
   border-left:3px solid var(--ink);
   background:var(--paper);
@@ -4571,7 +4616,7 @@ body:not(.admin-on) #tnav-drafts{
   .author-workspace-actions{justify-content:flex-start;}
   .author-progress{width:100%;min-width:0;}
   .author-thesis-brief{margin:1rem 1.25rem 0;}
-  .author-thesis-grid,.author-research-grid,.author-research-row{grid-template-columns:1fr;}
+  .author-thesis-grid,.author-research-grid,.author-research-row,.author-form-grid{grid-template-columns:1fr;}
   .author-thesis-field.wide,.author-research-field.wide{grid-column:auto;}
   .author-workspace-grid{grid-template-columns:1fr;padding:1rem 1.25rem 1.5rem;}
   .author-read-body{max-height:none;}
@@ -4764,7 +4809,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.19</div>
+<div id="site-version-stamp">v2026.05.18.20</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -5165,6 +5210,7 @@ body:not(.admin-on) #tnav-drafts{
             <button class="author-tab-btn active" id="aw-tab-checklist" type="button" onclick="setAuthorWorkspaceTab('checklist')">Revision Checklist</button>
             <button class="author-tab-btn" id="aw-tab-routed" type="button" onclick="setAuthorWorkspaceTab('routed')">Routed Ideas</button>
             <button class="author-tab-btn" id="aw-tab-research" type="button" onclick="setAuthorWorkspaceTab('research')">Research</button>
+            <button class="author-tab-btn" id="aw-tab-form" type="button" onclick="setAuthorWorkspaceTab('form')">Form Report</button>
           </div>
           <div class="author-tab-panel active" id="aw-checklist-panel">
             <div class="author-review-list" id="aw-review-list"></div>
@@ -5197,6 +5243,9 @@ body:not(.admin-on) #tnav-drafts{
           </div>
           <div class="author-tab-panel" id="aw-research-panel">
             <div class="author-research-wrap" id="aw-research-board"></div>
+          </div>
+          <div class="author-tab-panel" id="aw-form-panel">
+            <div class="author-research-wrap" id="aw-form-report-board"></div>
           </div>
         </section>
       </div>
@@ -5935,6 +5984,41 @@ function normalizeResearch(value={}){
   };
 }
 
+function normalizeChapterFormReport(value={}){
+  const now = Date.now();
+  return {
+    id:String(value.id || authorNoteId('form-report')),
+    createdAt:value.createdAt || now,
+    updatedAt:value.updatedAt || value.createdAt || now,
+    model:String(value.model || ''),
+    chapterTitle:String(value.chapterTitle || ''),
+    summary:String(value.summary || ''),
+    form:String(value.form || ''),
+    narrativeFunction:String(value.narrativeFunction || ''),
+    eventArc:String(value.eventArc || ''),
+    pacing:String(value.pacing || ''),
+    pov:String(value.pov || ''),
+    stakes:String(value.stakes || ''),
+    characterMovement:String(value.characterMovement || ''),
+    motifPattern:String(value.motifPattern || ''),
+    structuralNotes:String(value.structuralNotes || ''),
+    revisionPriorities:Array.isArray(value.revisionPriorities) ? value.revisionPriorities.map(String) : [],
+    continuityFlags:Array.isArray(value.continuityFlags) ? value.continuityFlags.map(String) : [],
+    events:Array.isArray(value.events) ? value.events.map((event,index)=>({
+      id:String(event.id || authorNoteId('event')),
+      order:Number(event.order || index + 1),
+      title:String(event.title || `Event ${index + 1}`),
+      summary:String(event.summary || ''),
+      function:String(event.function || ''),
+      cause:String(event.cause || ''),
+      consequence:String(event.consequence || ''),
+      characters:String(event.characters || ''),
+      tension:String(event.tension || ''),
+      location:String(event.location || '')
+    })) : []
+  };
+}
+
 function normalizeAuthorNotes(value={}){
   const statusOptions = ['draft','revising','ready','canonical','needs-work'];
   const status = statusOptions.includes(value.status) ? value.status : 'draft';
@@ -5964,7 +6048,8 @@ function normalizeAuthorNotes(value={}){
   const thesisBrief = normalizeThesisBrief(value.thesisBrief || {});
   const research = normalizeResearch(value.research || {});
   const routedIdeas = Array.isArray(value.routedIdeas) ? value.routedIdeas.map(normalizeRoutedIdea) : [];
-  return {status, checklist, notes, inline, reviewChecklist, thesisBrief, research, routedIdeas};
+  const formReports = Array.isArray(value.formReports) ? value.formReports.map(normalizeChapterFormReport) : [];
+  return {status, checklist, notes, inline, reviewChecklist, thesisBrief, research, routedIdeas, formReports};
 }
 
 function normalizeChapterList(raw){
@@ -9897,7 +9982,7 @@ function setAuthorWorkspaceOpenSections(openSections){
 }
 
 function setAuthorWorkspaceTab(tab){
-  const next = ['research','routed'].includes(tab) ? tab : 'checklist';
+  const next = ['research','routed','form'].includes(tab) ? tab : 'checklist';
   setChapterEditorDraftUi(_chapterEditorBaseId, {authorWorkspaceTab:next});
   renderAuthorWorkspaceTabs(next);
 }
@@ -9906,14 +9991,17 @@ function renderAuthorWorkspaceTabs(active=authorWorkspaceActiveTab()){
   const checklistTab = document.getElementById('aw-tab-checklist');
   const routedTab = document.getElementById('aw-tab-routed');
   const researchTab = document.getElementById('aw-tab-research');
+  const formTab = document.getElementById('aw-tab-form');
   const checklistPanel = document.getElementById('aw-checklist-panel');
   const routedPanel = document.getElementById('aw-routed-panel');
   const researchPanel = document.getElementById('aw-research-panel');
+  const formPanel = document.getElementById('aw-form-panel');
   const title = document.getElementById('aw-panel-title');
   [checklistTab, checklistPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'checklist'); });
   [routedTab, routedPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'routed'); });
   [researchTab, researchPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'research'); });
-  if(title) title.textContent = active === 'research' ? 'Research Board' : active === 'routed' ? 'Routed Ideas' : 'Revision Checklist';
+  [formTab, formPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'form'); });
+  if(title) title.textContent = active === 'research' ? 'Research Board' : active === 'routed' ? 'Routed Ideas' : active === 'form' ? 'Chapter Form Report' : 'Revision Checklist';
   updateAuthorWorkspaceStatsOnly();
 }
 
@@ -10005,6 +10093,214 @@ function updateAuthorThesisField(field, value){
     handleChapterEditorInput();
     renderAuthorThesisBrief(_chapterEditorAuthorNotes);
   }
+}
+
+function chapterFormReportSchema(){
+  return {
+    type:'object',
+    required:['summary','form','narrativeFunction','eventArc','pacing','pov','stakes','characterMovement','motifPattern','structuralNotes','revisionPriorities','continuityFlags','events'],
+    properties:{
+      summary:{type:'string'},
+      form:{type:'string'},
+      narrativeFunction:{type:'string'},
+      eventArc:{type:'string'},
+      pacing:{type:'string'},
+      pov:{type:'string'},
+      stakes:{type:'string'},
+      characterMovement:{type:'string'},
+      motifPattern:{type:'string'},
+      structuralNotes:{type:'string'},
+      revisionPriorities:{type:'array', items:{type:'string'}},
+      continuityFlags:{type:'array', items:{type:'string'}},
+      events:{type:'array', items:{
+        type:'object',
+        required:['order','title','summary','function','cause','consequence','characters','tension','location'],
+        properties:{
+          order:{type:'number'},
+          title:{type:'string'},
+          summary:{type:'string'},
+          function:{type:'string'},
+          cause:{type:'string'},
+          consequence:{type:'string'},
+          characters:{type:'string'},
+          tension:{type:'string'},
+          location:{type:'string'}
+        }
+      }}
+    }
+  };
+}
+
+function chapterFormAnalysisPayload(data=readChapterEditorData()){
+  return {
+    chapter:{
+      id:data.id,
+      title:data.chapter,
+      number:data.num,
+      novel:data.novel,
+      book:data.book,
+      volume:data.volume,
+      subvolume:data.subvolume,
+      part:data.part,
+      meta:data.meta,
+      wordCount:data.body ? data.body.trim().split(/\s+/).filter(Boolean).length : 0
+    },
+    thesisBrief:(_chapterEditorAuthorNotes && _chapterEditorAuthorNotes.thesisBrief) || {},
+    body:String(data.body || '').slice(0, 60000)
+  };
+}
+
+async function callChapterFormOpenRouter(data=readChapterEditorData()){
+  const key = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '').trim();
+  if(!key) throw new Error('Paste an OpenRouter API key in the Form Report panel or Draft Inbox AI panel first.');
+  const model = (_draftAiSettings.openRouterModel || _draftAiSettings.geminiModel || 'openai/gpt-4o-mini').trim();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 120000);
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':`Bearer ${key}`,
+      'HTTP-Referer':location.origin && location.origin !== 'null' ? location.origin : 'file://cosmopolita-local',
+      'X-Title':'COSMOPOLITA Chapter Form Report'
+    },
+    signal:controller.signal,
+    body:JSON.stringify({
+      model,
+      messages:[
+        {role:'system', content:'You are a rigorous narrative form analyst for a literary novel. Return schema-valid JSON only. Focus on events, form, narrative function, pacing, causality, POV, motifs, and revision priorities. Do not rewrite the chapter.'},
+        {role:'user', content:'Analyze this chapter and produce a structured chapter form report.\n\n' + JSON.stringify(chapterFormAnalysisPayload(data))}
+      ],
+      response_format:{
+        type:'json_schema',
+        json_schema:{
+          name:'chapter_form_report',
+          strict:true,
+          schema:strictJsonSchema(chapterFormReportSchema())
+        }
+      }
+    })
+  }).catch(err=>{
+    if(err && err.name === 'AbortError') throw new Error('OpenRouter request timed out after 120 seconds.');
+    throw err;
+  }).finally(()=>clearTimeout(timer));
+  const text = await res.text();
+  let response = null;
+  try{ response = JSON.parse(text); }catch(e){}
+  if(!res.ok){
+    const message = (response && response.error && (response.error.message || response.error)) || text || `OpenRouter request failed with HTTP ${res.status}`;
+    if(/No endpoints found/i.test(String(message))) throw new Error(openRouterNoEndpointMessage(model));
+    throw new Error(message);
+  }
+  const output = openRouterOutputText(response);
+  if(!output) throw new Error('OpenRouter returned no report text.');
+  return normalizeChapterFormReport(Object.assign(JSON.parse(output), {
+    model,
+    chapterTitle:data.chapter || 'Untitled Chapter',
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  }));
+}
+
+function saveAuthorAiSettings(){
+  const key = document.getElementById('aw-ai-key')?.value || _draftAiSettings.openRouterKey || '';
+  const model = document.getElementById('aw-ai-model')?.value || _draftAiSettings.openRouterModel || 'openai/gpt-4o-mini';
+  _draftAiSettings = {provider:'openrouter-browser', openRouterKey:key.trim(), openRouterModel:model.trim() || 'openai/gpt-4o-mini'};
+  try{ localStorage.setItem(DRAFTS_AI_SETTINGS_KEY, JSON.stringify(_draftAiSettings)); }catch(e){}
+  const status = document.getElementById('aw-form-status');
+  if(status) status.textContent = _draftAiSettings.openRouterKey ? `OpenRouter key saved for ${_draftAiSettings.openRouterModel}.` : 'OpenRouter key cleared.';
+}
+
+async function analyzeChapterFormReport(){
+  if(!requireAdmin()) return;
+  handleChapterEditorInput();
+  const status = document.getElementById('aw-form-status');
+  try{
+    const data = readChapterEditorData();
+    if(!data.body){ if(status) status.textContent = 'Add chapter text before running a report.'; return; }
+    saveAuthorAiSettings();
+    if(status) status.textContent = 'Analyzing chapter form, events, and narrative architecture...';
+    const report = await callChapterFormOpenRouter(data);
+    _chapterEditorAuthorNotes.formReports = Array.isArray(_chapterEditorAuthorNotes.formReports) ? _chapterEditorAuthorNotes.formReports : [];
+    _chapterEditorAuthorNotes.formReports.unshift(report);
+    handleChapterEditorInput();
+    renderAuthorFormReportBoard();
+    renderAuthorWorkspaceTabs('form');
+    if(status) status.textContent = 'Chapter form report saved to Author Workspace.';
+  }catch(err){
+    console.error('Chapter form report failed:', err);
+    if(status) status.textContent = 'Form report failed: ' + (err.message || err);
+  }
+}
+
+function deleteAuthorFormReport(id){
+  _chapterEditorAuthorNotes.formReports = (_chapterEditorAuthorNotes.formReports || []).filter(report=>report.id!==id);
+  handleChapterEditorInput();
+  renderAuthorFormReportBoard();
+  renderAuthorWorkspaceTabs('form');
+}
+
+function renderAuthorFormReportCard(report){
+  report = normalizeChapterFormReport(report);
+  const eventRows = report.events.length ? report.events.map(event=>`
+    <div class="author-form-event">
+      <div class="author-form-event-num">${String(event.order).padStart(2,'0')}</div>
+      <div>
+        <div class="author-research-title">${escHtml(event.title)}</div>
+        <div class="author-note-meta">${escHtml([event.location, event.characters, event.tension].filter(Boolean).join(' · '))}</div>
+        <div class="author-form-text">${escHtml(event.summary)}</div>
+        <div class="author-form-causal"><b>Cause:</b> ${escHtml(event.cause || '—')}<br><b>Consequence:</b> ${escHtml(event.consequence || '—')}<br><b>Function:</b> ${escHtml(event.function || '—')}</div>
+      </div>
+    </div>`).join('') : '<div class="author-research-empty">No event sequence in this report.</div>';
+  return `<section class="author-research-card">
+    <div class="author-research-card-head">
+      <div>
+        <div class="author-research-title">${escHtml(report.chapterTitle || 'Chapter Form Report')}</div>
+        <div class="author-note-meta">${escHtml(authorNoteDate(report.createdAt))} · ${escHtml(report.model || 'model not recorded')}</div>
+      </div>
+      <button class="author-note-btn danger" type="button" onclick="deleteAuthorFormReport('${escHtml(report.id)}')">Delete</button>
+    </div>
+    <div class="author-form-report-body">
+      <div class="author-form-grid">
+        <div><span>Summary</span><p>${escHtml(report.summary || '—')}</p></div>
+        <div><span>Form</span><p>${escHtml(report.form || '—')}</p></div>
+        <div><span>Narrative Function</span><p>${escHtml(report.narrativeFunction || '—')}</p></div>
+        <div><span>Event Arc</span><p>${escHtml(report.eventArc || '—')}</p></div>
+        <div><span>Pacing</span><p>${escHtml(report.pacing || '—')}</p></div>
+        <div><span>POV</span><p>${escHtml(report.pov || '—')}</p></div>
+        <div><span>Stakes</span><p>${escHtml(report.stakes || '—')}</p></div>
+        <div><span>Character Movement</span><p>${escHtml(report.characterMovement || '—')}</p></div>
+        <div><span>Motif Pattern</span><p>${escHtml(report.motifPattern || '—')}</p></div>
+        <div><span>Structural Notes</span><p>${escHtml(report.structuralNotes || '—')}</p></div>
+      </div>
+      <div class="author-form-list"><b>Revision Priorities</b>${report.revisionPriorities.length ? `<ul>${report.revisionPriorities.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : '<p>None listed.</p>'}</div>
+      <div class="author-form-list"><b>Continuity Flags</b>${report.continuityFlags.length ? `<ul>${report.continuityFlags.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : '<p>None listed.</p>'}</div>
+      <div class="author-form-events">${eventRows}</div>
+    </div>
+  </section>`;
+}
+
+function renderAuthorFormReportBoard(){
+  const board = document.getElementById('aw-form-report-board');
+  if(!board) return;
+  const reports = (_chapterEditorAuthorNotes.formReports || []).map(normalizeChapterFormReport);
+  const modelValue = _draftAiSettings.openRouterModel || _draftAiSettings.geminiModel || 'openai/gpt-4o-mini';
+  board.innerHTML = `
+    <section class="author-research-card">
+      <div class="author-research-card-head">
+        <div>
+          <div class="author-research-title">AI Chapter Form Analysis</div>
+          <div class="author-note-meta">Private report for summary, form, event sequence, narrative mechanics, and revision priorities.</div>
+        </div>
+        <button class="author-note-btn" type="button" onclick="analyzeChapterFormReport()">Analyze Chapter</button>
+      </div>
+      <div class="author-research-grid">
+        <div class="author-research-field"><label>OpenRouter API Key</label><input id="aw-ai-key" class="author-research-input" type="password" value="${escHtml(_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '')}" placeholder="Paste OpenRouter API key"></div>
+        <div class="author-research-field"><label>OpenRouter Model</label><input id="aw-ai-model" class="author-research-input" value="${escHtml(modelValue)}" placeholder="openai/gpt-4o-mini"></div>
+        <div class="author-research-field wide"><button class="author-note-btn" type="button" onclick="saveAuthorAiSettings()">Save AI Settings</button><div id="aw-form-status" class="file-vault-status">Ready. Reports are saved privately with this chapter.</div></div>
+      </div>
+    </section>
+    ${reports.length ? reports.map(renderAuthorFormReportCard).join('') : '<div class="author-research-empty">No form reports yet. Run Analyze Chapter to create one.</div>'}`;
 }
 
 function researchSourcesOptions(selected=''){
@@ -10341,6 +10637,7 @@ function renderAuthorWorkspace(){
   }
   renderAuthorRoutedIdeasBoard();
   renderAuthorResearchBoard();
+  renderAuthorFormReportBoard();
   renderAuthorWorkspaceTabs();
   renderAuthorNotesEditor();
 }
@@ -10401,6 +10698,9 @@ function updateAuthorWorkspaceStatsOnly(){
     } else if(active === 'routed'){
       const routed = (_chapterEditorAuthorNotes.routedIdeas || []).filter(idea=>idea.status !== 'used');
       openCount.textContent = `${routed.length} active ideas`;
+    } else if(active === 'form'){
+      const reports = (_chapterEditorAuthorNotes.formReports || []).length;
+      openCount.textContent = `${reports} report${reports === 1 ? '' : 's'}`;
     } else {
       openCount.textContent = `${stats.open} open`;
     }
@@ -16194,6 +16494,9 @@ Object.assign(window, {
   importWorkshopCardAsDraftFragment,
   importWorkshopCardAsCodex,
   updateAuthorRoutedIdea,
+  analyzeChapterFormReport,
+  saveAuthorAiSettings,
+  deleteAuthorFormReport,
   removeAcceptedDialogue,
   removeAcceptedEntity,
   runDraftSuggestions,
