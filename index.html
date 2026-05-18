@@ -4129,7 +4129,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.1</div>
+<div id="site-version-stamp">v2026.05.18.2</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -11677,11 +11677,52 @@ function draftAiSuggestionFromReport(report){
 async function callDraftAiFunction(fragment){
   const client = notesClient();
   if(!client) throw new Error('Supabase is not configured. AI analysis needs the draft-ai-analyze Edge Function.');
-  const {data, error} = await client.functions.invoke('draft-ai-analyze', {body:draftAiPayload(fragment)});
+  const payload = draftAiPayload(fragment);
+  const {data, error} = await client.functions.invoke('draft-ai-analyze', {body:payload});
   if(error) throw error;
   if(data && data.error) throw new Error(data.error);
   if(!data || !data.report) throw new Error('AI function returned no structured report.');
   return data.report;
+}
+
+async function draftAiDirectFunctionProbe(fragment){
+  const client = notesClient();
+  if(!client) throw new Error('Supabase client is not available.');
+  const {data:sessionData} = await client.auth.getSession();
+  const token = sessionData && sessionData.session && sessionData.session.access_token;
+  if(!token) throw new Error('You are not logged in. Log in as admin before using AI analysis.');
+  const url = `${SUPABASE_URL}/functions/v1/draft-ai-analyze`;
+  const res = await fetch(url, {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':`Bearer ${token}`,
+      'apikey':SUPABASE_ANON_KEY
+    },
+    body:JSON.stringify(fragment ? draftAiPayload(fragment) : {
+      fragment:{id:'diagnostic', title:'Diagnostic', body:'Diagnostic request.', type:'scene', status:'inbox'},
+      context:{characters:[], codexEntries:[], protoLines:[], protoMotifs:[]}
+    })
+  });
+  const text = await res.text();
+  let data = null;
+  try{ data = JSON.parse(text); }catch(e){}
+  if(!res.ok || (data && data.error)){
+    throw new Error((data && data.error) || text || `Function failed with HTTP ${res.status}`);
+  }
+  return data || {};
+}
+
+async function testDraftAiConnection(){
+  draftStatus('Testing AI connection...');
+  try{
+    const data = await draftAiDirectFunctionProbe(activeDraft());
+    draftStatus(`AI connection works. Function returned ${data.report ? 'a structured report' : 'a response'} using ${data.model || 'configured model'}.`);
+  }catch(err){
+    console.error('AI connection test failed:', err);
+    draftStatus('AI connection failed: ' + (err.message || err));
+    alert('AI connection failed:\n\n' + (err.message || err));
+  }
 }
 
 async function analyzeDraftWithAi(id){
@@ -11754,10 +11795,11 @@ function renderDraftAiPanel(fragment){
     <div class="drafts-ai-actions">
       <button class="cm-btn secondary" type="button" onclick="handleAnalyzeFragmentClick()">Analyze Fragment</button>
       <button class="cm-btn secondary" type="button" onclick="analyzeSelectedDraftsWithAi()">Analyze Selected Visible</button>
+      <button class="cm-btn secondary" type="button" onclick="testDraftAiConnection()">Test AI Connection</button>
       <button class="tiny-btn" type="button" onclick="selectVisibleDrafts()">Select Visible</button>
       <button class="tiny-btn" type="button" onclick="clearDraftSelection()">Clear</button>
     </div>
-    <div class="file-vault-status">Last analyzed: ${escHtml(last)}</div>
+    <div class="file-vault-status">Last analyzed: ${escHtml(last)} · ${supabaseConfigured() ? 'Supabase configured' : 'Supabase missing'} · ${_notesUser ? `logged in as ${escHtml(_notesUser.email || 'user')}` : 'not logged in'}</div>
   </section>`;
 }
 
@@ -13088,6 +13130,7 @@ Object.assign(window, {
   handleAnalyzeFragmentClick,
   analyzeActiveDraftWithAi,
   analyzeSelectedDraftsWithAi,
+  testDraftAiConnection,
   selectVisibleDrafts,
   clearDraftSelection,
   toggleDraftSelection,
