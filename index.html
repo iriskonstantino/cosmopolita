@@ -4482,6 +4482,75 @@ body:not(.admin-on) #tnav-drafts{
   line-height:1.5;
   color:#4f4840;
 }
+.drafts-help-flow{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:0.45rem;
+}
+.drafts-help-flow-step,.drafts-help-recipe,.drafts-glossary-group,.drafts-workflow-hint{
+  border:1px solid var(--border);
+  background:var(--paper);
+  padding:0.65rem;
+}
+.drafts-help-flow-step b,.drafts-help-recipe b,.drafts-glossary-group b,.drafts-workflow-hint b{
+  display:block;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:0.35rem;
+}
+.drafts-help-flow-step p,.drafts-help-recipe p,.drafts-glossary-row p,.drafts-workflow-hint p{
+  margin:0;
+  font-size:0.8rem;
+  line-height:1.45;
+  color:#4f4840;
+}
+.drafts-help-section-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.82rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-top:0.4rem;
+}
+.drafts-help-recipes,.drafts-glossary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.65rem;
+}
+.drafts-glossary-group{
+  display:grid;
+  gap:0.55rem;
+}
+.drafts-glossary-row{
+  border-top:1px solid var(--border);
+  padding-top:0.5rem;
+}
+.drafts-glossary-row strong{
+  display:block;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:#8b3a1e;
+  margin-bottom:0.25rem;
+}
+.drafts-glossary-row span{
+  display:block;
+  font-size:0.76rem;
+  line-height:1.45;
+  color:#5f554b;
+}
+.drafts-workflow-hint{
+  background:#fff8e8;
+  border-color:var(--gold);
+}
+.drafts-workflow-hint p{
+  color:#5f4d32;
+}
 .drafts-tour{
   border:1px solid var(--gold);
   background:#fff8e8;
@@ -4532,7 +4601,7 @@ body:not(.admin-on) #tnav-drafts{
   .planning-lab{grid-template-columns:1fr;min-height:0;}
   .planning-pane{max-height:none;}
   .planning-body{min-height:40vh;}
-  .drafts-help-grid{grid-template-columns:1fr;}
+  .drafts-help-grid,.drafts-help-flow,.drafts-help-recipes,.drafts-glossary-grid{grid-template-columns:1fr;}
   .drafts-field.wide{grid-column:auto;}
   .assets-wrap{grid-template-columns:1fr;}
   #assets-view .side-panel{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
