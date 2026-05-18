@@ -4197,7 +4197,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.9</div>
+<div id="site-version-stamp">v2026.05.18.10</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -12051,7 +12051,7 @@ function renderDraftAcceptedIntelligence(fragment){
       <div class="drafts-intel-body">${escHtml(item.quote || item.subtext || 'No quote captured.')}</div>
       ${item.subtext ? `<div class="drafts-intel-body"><b>Subtext:</b> ${escHtml(item.subtext)}</div>` : ''}
       <div class="drafts-ai-card-actions">
-        <button class="tiny-btn" type="button" onclick="appendAcceptedDialogueToNotes(${index})">Add To Notes</button>
+        <button class="tiny-btn" type="button" onclick="appendAcceptedDialogueToNotes(${index})">Add To Fragment Notes</button>
         <button class="tiny-btn danger" type="button" onclick="removeAcceptedDialogue(${index})">Remove</button>
       </div>
     </article>`).join('');
@@ -12065,7 +12065,7 @@ function renderDraftAcceptedIntelligence(fragment){
       ${(item.aliases || []).length ? `<div class="drafts-chip-row">${item.aliases.map(alias=>`<span class="drafts-chip">${escHtml(alias)}</span>`).join('')}</div>` : ''}
       <div class="drafts-ai-card-actions">
         ${canCodex ? `<button class="tiny-btn" type="button" onclick="createCodexFromAcceptedEntity(${index})">Create Codex</button>` : ''}
-        <button class="tiny-btn" type="button" onclick="appendAcceptedEntityToNotes(${index})">Add To Notes</button>
+        <button class="tiny-btn" type="button" onclick="appendAcceptedEntityToNotes(${index})">Add To Fragment Notes</button>
         <button class="tiny-btn danger" type="button" onclick="removeAcceptedEntity(${index})">Remove</button>
       </div>
     </article>`;
@@ -12443,11 +12443,17 @@ async function appendTextToActiveDraftNotes(note, message){
   if(!fragment || !note) return;
   fragment.notes = `${fragment.notes || ''}\n\n${note}`.trim();
   fragment.updatedAt = Date.now();
+  fragment.conversionHistory = fragment.conversionHistory || [];
+  fragment.conversionHistory.unshift({target:'fragment-note', targetId:note.slice(0, 90), at:Date.now()});
   const saved = await draftPut(fragment);
   _draftFragments = _draftFragments.map(item=>item.id===saved.id ? saved : item);
+  await renderDraftsView({keepCache:true});
   const notesBox = document.getElementById('draft-notes');
-  if(notesBox) notesBox.value = saved.notes || '';
-  await renderDraftsView({keepCache:true, keepEditor:true});
+  if(notesBox){
+    notesBox.value = saved.notes || '';
+    notesBox.focus();
+    notesBox.scrollIntoView({behavior:'smooth', block:'center'});
+  }
   draftStatus(message || 'Added to fragment Notes field.');
 }
 
