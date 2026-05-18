@@ -3609,7 +3609,7 @@ body:not(.admin-on) #tnav-drafts{
 }
 .drafts-meta-pane{border-right:none;border-left:1px solid var(--border);}
 .drafts-list-pane,.drafts-main,.drafts-meta-pane{padding:1rem;overflow:auto;}
-.drafts-pane-title,.drafts-kicker,.drafts-stat-label,.drafts-card-meta,.drafts-field label,.drafts-suggestion-label{
+.drafts-pane-title,.drafts-kicker,.drafts-stat-label,.drafts-card-meta,.drafts-field label,.drafts-suggestion-label,.drafts-intel-label,.drafts-intel-meta{
   font-family:var(--mono);
   text-transform:uppercase;
 }
@@ -3819,6 +3819,54 @@ body:not(.admin-on) #tnav-drafts{
   line-height:1.45;
   color:#4f4840;
   margin-top:0.32rem;
+}
+.drafts-intel-summary{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0.45rem;
+  margin:0.65rem 0 0.85rem;
+}
+.drafts-intel-stat{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.5rem;
+}
+.drafts-intel-stat b{
+  display:block;
+  font-family:var(--display);
+  font-size:1.05rem;
+  line-height:1;
+}
+.drafts-intel-label,.drafts-intel-meta{
+  color:#999;
+  font-size:0.46rem;
+  letter-spacing:0.1em;
+  margin-top:0.28rem;
+}
+.drafts-intel-section{
+  border-top:1px solid var(--border);
+  padding-top:0.65rem;
+  margin-top:0.75rem;
+}
+.drafts-intel-card{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.6rem;
+  margin-bottom:0.5rem;
+}
+.drafts-intel-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.74rem;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  line-height:1.25;
+}
+.drafts-intel-body{
+  font-size:0.8rem;
+  color:#4f4840;
+  line-height:1.45;
+  margin-top:0.28rem;
 }
 .tiny-btn{
   border:1px solid var(--border);
@@ -4129,7 +4177,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.6</div>
+<div id="site-version-stamp">v2026.05.18.7</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -11492,6 +11540,8 @@ function draftLayerOptions(){
   const layerSet = new Set();
   _draftFragments.forEach(fragment=>{
     [...fragment.characters, ...fragment.motifs, ...fragment.locations, ...fragment.narrativeDevices, fragment.pov, fragment.timeline, fragment.researchSubject].filter(Boolean).forEach(v=>layerSet.add(v));
+    (fragment.dialogue || []).forEach(item=>[item.speakerGuess, item.addressedToGuess].filter(Boolean).forEach(v=>layerSet.add(v)));
+    (fragment.entities || []).forEach(item=>[item.name, item.type].filter(Boolean).forEach(v=>layerSet.add(v)));
   });
   return '<option value="">All Layers</option>' + Array.from(layerSet).sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escHtml(v)}" ${_draftFilter.layer===v?'selected':''}>${escHtml(v)}</option>`).join('');
 }
@@ -11501,7 +11551,9 @@ function draftTextSearch(fragment){
     fragment.title, fragment.body, fragment.type, fragment.status,
     fragment.tags.join(' '), fragment.characters.join(' '), fragment.motifs.join(' '),
     fragment.locations.join(' '), fragment.pov, fragment.timeline,
-    fragment.narrativeDevices.join(' '), fragment.researchSubject, fragment.notes
+    fragment.narrativeDevices.join(' '), fragment.researchSubject, fragment.notes,
+    (fragment.dialogue || []).map(item=>[item.quote, item.speakerGuess, item.addressedToGuess, item.emotionalTone, item.subtext, item.sceneFunction].join(' ')).join(' '),
+    (fragment.entities || []).map(item=>[item.name, item.type, item.description, item.suggestedCodexCategory, (item.aliases || []).join(' '), (item.relationships || []).join(' ')].join(' ')).join(' ')
   ].join(' ').toLowerCase();
 }
 
@@ -11515,7 +11567,12 @@ function draftMatchesFilter(fragment){
   if(_draftFilter.type && fragment.type !== _draftFilter.type) return false;
   if(_draftFilter.status && fragment.status !== _draftFilter.status) return false;
   if(_draftFilter.layer){
-    const layers = [...fragment.characters, ...fragment.motifs, ...fragment.locations, ...fragment.narrativeDevices, fragment.pov, fragment.timeline, fragment.researchSubject].filter(Boolean);
+    const layers = [
+      ...fragment.characters, ...fragment.motifs, ...fragment.locations, ...fragment.narrativeDevices,
+      fragment.pov, fragment.timeline, fragment.researchSubject,
+      ...(fragment.dialogue || []).flatMap(item=>[item.speakerGuess, item.addressedToGuess]),
+      ...(fragment.entities || []).flatMap(item=>[item.name, item.type])
+    ].filter(Boolean);
     if(!layers.some(v=>v.toLowerCase() === _draftFilter.layer.toLowerCase())) return false;
   }
   if(_draftFilter.view === 'archive') return fragment.status === 'archived';
@@ -11546,10 +11603,12 @@ function draftStatus(message){
 function draftFragmentCard(fragment){
   const chips = [fragment.type, fragment.status, ...fragment.tags.slice(0,3), ...fragment.motifs.slice(0,2)].filter(Boolean);
   const pendingAi = (fragment.aiSuggestions || []).filter(item=>item.status === 'pending').length;
+  const acceptedDialogue = (fragment.dialogue || []).length;
+  const acceptedEntities = (fragment.entities || []).length;
   return `<article class="drafts-card ${fragment.id===_activeDraftId?'active':''} ${fragment.status==='archived'?'archived':''}" onclick="selectDraftFragment('${escHtml(fragment.id)}')">
     <input class="drafts-select-check" type="checkbox" ${_draftSelectedIds.has(fragment.id)?'checked':''} onclick="event.stopPropagation()" onchange="toggleDraftSelection('${escHtml(fragment.id)}',this.checked)">
     <div class="drafts-card-title">${escHtml(fragment.title)}</div>
-    <div class="drafts-card-meta">${draftWordCount(fragment).toLocaleString()} words · ${escHtml(draftDate(fragment.updatedAt))}${pendingAi ? ` · ${pendingAi} AI pending` : ''}</div>
+    <div class="drafts-card-meta">${draftWordCount(fragment).toLocaleString()} words · ${escHtml(draftDate(fragment.updatedAt))}${pendingAi ? ` · ${pendingAi} AI pending` : ''}${acceptedDialogue || acceptedEntities ? ` · ${acceptedDialogue} dialogue · ${acceptedEntities} entities` : ''}</div>
     <div class="drafts-chip-row">${chips.map(chip=>`<span class="drafts-chip">${escHtml(chip)}</span>`).join('')}</div>
   </article>`;
 }
@@ -11949,6 +12008,64 @@ function renderDraftAiSuggestionCard(item){
   </article>`;
 }
 
+function draftConfidenceText(value){
+  const num = Number(value || 0);
+  return num ? `${Math.round(num * 100)}%` : 'unscored';
+}
+
+function renderDraftAcceptedIntelligence(fragment){
+  if(!fragment) return '<div class="drafts-empty">Select a fragment to see accepted intelligence.</div>';
+  const dialogue = fragment.dialogue || [];
+  const entities = fragment.entities || [];
+  const accepted = (fragment.aiSuggestions || []).filter(item=>item.status === 'accepted');
+  const rejected = (fragment.aiSuggestions || []).filter(item=>item.status === 'rejected');
+  const conversions = (fragment.conversionHistory || []).filter(item=>String(item.target || '').startsWith('ai-'));
+  const dialogueCards = dialogue.slice(0,8).map((item,index)=>`
+    <article class="drafts-intel-card">
+      <div class="drafts-intel-title">${escHtml(item.speakerGuess || 'Unknown Speaker')}</div>
+      <div class="drafts-intel-meta">to ${escHtml(item.addressedToGuess || 'unknown')} · ${escHtml(item.emotionalTone || 'tone unknown')} · ${escHtml(draftConfidenceText(item.confidence))}</div>
+      <div class="drafts-intel-body">${escHtml(item.quote || item.subtext || 'No quote captured.')}</div>
+      ${item.subtext ? `<div class="drafts-intel-body"><b>Subtext:</b> ${escHtml(item.subtext)}</div>` : ''}
+      <div class="drafts-ai-card-actions">
+        <button class="tiny-btn" type="button" onclick="appendAcceptedDialogueToNotes(${index})">Add To Notes</button>
+        <button class="tiny-btn danger" type="button" onclick="removeAcceptedDialogue(${index})">Remove</button>
+      </div>
+    </article>`).join('');
+  const entityCards = entities.slice(0,10).map((item,index)=>{
+    const canCodex = DRAFT_CODEX_ENTITY_TYPES.has(String(item.type || '').toLowerCase()) || String(item.type || '').toLowerCase() === 'character';
+    return `<article class="drafts-intel-card">
+      <div class="drafts-intel-title">${escHtml(item.name || 'Unnamed Entity')}</div>
+      <div class="drafts-intel-meta">${escHtml(item.type || 'entity')} · ${escHtml(item.suggestedCodexCategory || 'no category')} · ${escHtml(draftConfidenceText(item.confidence))}</div>
+      <div class="drafts-intel-body">${escHtml(item.description || item.firstMentionQuote || 'No description captured.')}</div>
+      ${(item.aliases || []).length ? `<div class="drafts-chip-row">${item.aliases.map(alias=>`<span class="drafts-chip">${escHtml(alias)}</span>`).join('')}</div>` : ''}
+      <div class="drafts-ai-card-actions">
+        ${canCodex ? `<button class="tiny-btn" type="button" onclick="createCodexFromAcceptedEntity(${index})">Create Codex</button>` : ''}
+        <button class="tiny-btn" type="button" onclick="appendAcceptedEntityToNotes(${index})">Add To Notes</button>
+        <button class="tiny-btn danger" type="button" onclick="removeAcceptedEntity(${index})">Remove</button>
+      </div>
+    </article>`;
+  }).join('');
+  const conversionCards = conversions.slice(0,8).map(item=>`
+    <article class="drafts-intel-card">
+      <div class="drafts-intel-title">${escHtml(item.target || 'AI Recommendation')}</div>
+      <div class="drafts-intel-body">${escHtml(item.targetId || '')}</div>
+      <div class="drafts-intel-meta">${escHtml(draftDate(item.at))}</div>
+    </article>`).join('');
+  return `<section class="drafts-ai-panel">
+    <div class="drafts-pane-title">Accepted Intelligence</div>
+    <div class="drafts-intel-summary">
+      <div class="drafts-intel-stat"><b>${dialogue.length}</b><div class="drafts-intel-label">Dialogue</div></div>
+      <div class="drafts-intel-stat"><b>${entities.length}</b><div class="drafts-intel-label">Entities</div></div>
+      <div class="drafts-intel-stat"><b>${accepted.length}</b><div class="drafts-intel-label">Accepted</div></div>
+    </div>
+    ${dialogue.length ? `<div class="drafts-intel-section"><div class="drafts-ai-group-title">Dialogue & Speakers</div>${dialogueCards}${dialogue.length > 8 ? `<div class="drafts-intel-meta">${dialogue.length - 8} more saved in this fragment.</div>` : ''}</div>` : ''}
+    ${entities.length ? `<div class="drafts-intel-section"><div class="drafts-ai-group-title">Entities & Factions</div>${entityCards}${entities.length > 10 ? `<div class="drafts-intel-meta">${entities.length - 10} more saved in this fragment.</div>` : ''}</div>` : ''}
+    ${conversions.length ? `<div class="drafts-intel-section"><div class="drafts-ai-group-title">AI Conversion Recommendations</div>${conversionCards}</div>` : ''}
+    ${!dialogue.length && !entities.length && !conversions.length ? '<div class="drafts-empty">Accepted AI suggestions will appear here as usable fragment intelligence.</div>' : ''}
+    ${rejected.length ? `<div class="drafts-intel-meta">${rejected.length} rejected suggestion${rejected.length === 1 ? '' : 's'} kept in history/backup.</div>` : ''}
+  </section>`;
+}
+
 async function runDraftSuggestions(){
   const fragment = activeDraft();
   if(!fragment) return;
@@ -12052,6 +12169,73 @@ function applyDraftAiSuggestionToFragment(fragment, suggestion){
   if(suggestion.group === 'conversions'){
     fragment.conversionHistory.unshift({target:'ai-recommended-' + (payload.target || suggestion.kind), targetId:payload.rationale || suggestion.summary || '', at:Date.now()});
   }
+}
+
+async function appendAcceptedDialogueToNotes(index){
+  const fragment = activeDraft();
+  if(!fragment || !fragment.dialogue || !fragment.dialogue[index]) return;
+  const item = fragment.dialogue[index];
+  const note = [
+    `AI Dialogue: ${item.speakerGuess || 'Unknown Speaker'}${item.addressedToGuess ? ` to ${item.addressedToGuess}` : ''}`,
+    item.quote ? `Quote: ${item.quote}` : '',
+    item.emotionalTone ? `Tone: ${item.emotionalTone}` : '',
+    item.subtext ? `Subtext: ${item.subtext}` : '',
+    item.sceneFunction ? `Scene Function: ${item.sceneFunction}` : ''
+  ].filter(Boolean).join('\n');
+  fragment.notes = `${fragment.notes || ''}\n\n${note}`.trim();
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+  draftStatus('Accepted dialogue added to fragment notes.');
+}
+
+async function appendAcceptedEntityToNotes(index){
+  const fragment = activeDraft();
+  if(!fragment || !fragment.entities || !fragment.entities[index]) return;
+  const item = fragment.entities[index];
+  const note = [
+    `AI Entity: ${item.name || 'Unnamed'} (${item.type || 'entity'})`,
+    item.description ? `Description: ${item.description}` : '',
+    item.firstMentionQuote ? `First Mention: ${item.firstMentionQuote}` : '',
+    (item.relationships || []).length ? `Relationships: ${item.relationships.join(', ')}` : ''
+  ].filter(Boolean).join('\n');
+  fragment.notes = `${fragment.notes || ''}\n\n${note}`.trim();
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+  draftStatus('Accepted entity added to fragment notes.');
+}
+
+async function createCodexFromAcceptedEntity(index){
+  const fragment = activeDraft();
+  if(!fragment || !fragment.entities || !fragment.entities[index]) return;
+  const key = createCodexEntityFromAi(fragment.entities[index]);
+  fragment.conversionHistory = fragment.conversionHistory || [];
+  fragment.conversionHistory.unshift({target:'accepted-entity-codex', targetId:key, at:Date.now()});
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+  draftStatus(`Codex entry created from accepted entity: ${key}`);
+}
+
+async function removeAcceptedDialogue(index){
+  const fragment = activeDraft();
+  if(!fragment || !fragment.dialogue || !fragment.dialogue[index]) return;
+  fragment.dialogue.splice(index, 1);
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+  draftStatus('Accepted dialogue removed from this fragment.');
+}
+
+async function removeAcceptedEntity(index){
+  const fragment = activeDraft();
+  if(!fragment || !fragment.entities || !fragment.entities[index]) return;
+  fragment.entities.splice(index, 1);
+  fragment.updatedAt = Date.now();
+  await draftPut(fragment);
+  await renderDraftsView();
+  draftStatus('Accepted entity removed from this fragment.');
 }
 
 async function acceptDraftAiSuggestion(id){
@@ -12218,7 +12402,7 @@ async function renderDraftsView(options={}){
   if(list) list.innerHTML = visible.length ? visible.map(draftFragmentCard).join('') : '<div class="drafts-empty">No fragments match this view.</div>';
   if(stats) stats.innerHTML = renderDraftStats();
   if(editor && !options.keepEditor) editor.innerHTML = renderDraftEditor(active);
-  if(suggestions) suggestions.innerHTML = renderDraftAiPanel(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
+  if(suggestions) suggestions.innerHTML = renderDraftAiPanel(active) + renderDraftAcceptedIntelligence(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
   if(conversions) conversions.innerHTML = renderDraftConversions(active);
 }
 
@@ -13256,6 +13440,11 @@ Object.assign(window, {
   acceptDraftAiSuggestion,
   rejectDraftAiSuggestion,
   acceptDraftAiGroup,
+  appendAcceptedDialogueToNotes,
+  appendAcceptedEntityToNotes,
+  createCodexFromAcceptedEntity,
+  removeAcceptedDialogue,
+  removeAcceptedEntity,
   runDraftSuggestions,
   applyDraftSuggestion,
   showAssets
