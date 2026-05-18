@@ -4007,6 +4007,117 @@ body:not(.admin-on) #tnav-drafts{
   font-style:italic;
   color:#4f4840;
 }
+.planning-lab{
+  display:grid;
+  grid-template-columns:260px minmax(0,1fr) 340px;
+  gap:0.85rem;
+  min-height:calc(100vh - 140px);
+}
+.planning-pane{
+  min-width:0;
+  border:1px solid var(--border);
+  background:var(--white);
+  overflow:auto;
+}
+.planning-pane-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:0.6rem;
+  border-bottom:1px solid var(--border);
+  background:var(--paper);
+  padding:0.65rem 0.75rem;
+  font-family:var(--mono);
+  font-size:0.54rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:#999;
+}
+.planning-doc-list{
+  display:grid;
+  gap:0.5rem;
+  padding:0.65rem;
+}
+.planning-doc-card{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.62rem;
+  cursor:pointer;
+}
+.planning-doc-card.active{border-color:var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.planning-doc-title,.workshop-card-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:0.76rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  line-height:1.3;
+}
+.planning-doc-meta,.workshop-card-meta{
+  margin-top:0.28rem;
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#999;
+}
+.planning-editor{
+  padding:0.75rem;
+}
+.planning-body{
+  min-height:54vh;
+  font-size:1rem;
+  line-height:1.6;
+}
+.workshop-board{
+  display:grid;
+  gap:0.75rem;
+  padding:0.65rem;
+}
+.workshop-lane{
+  border:1px solid var(--border);
+  background:var(--paper);
+}
+.workshop-lane-head{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+  padding:0.55rem 0.65rem;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+}
+.workshop-card{
+  border-top:1px solid var(--border);
+  background:var(--white);
+  padding:0.65rem;
+}
+.workshop-card-body{
+  margin-top:0.4rem;
+  font-size:0.82rem;
+  line-height:1.45;
+  color:#4f4840;
+}
+.workshop-card-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.35rem;
+  margin-top:0.5rem;
+}
+.workshop-status{
+  display:inline-block;
+  border:1px solid var(--border);
+  padding:0.12rem 0.32rem;
+  font-family:var(--mono);
+  font-size:0.45rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.workshop-status.ready{border-color:var(--gold);color:#7a4a1e;background:#fff8e8}
+.workshop-status.imported{border-color:var(--green);color:var(--green);background:#edf5ef}
+.workshop-status.archived{opacity:0.62;border-style:dashed}
 .tiny-btn{
   border:1px solid var(--border);
   background:var(--white);
@@ -4041,6 +4152,9 @@ body:not(.admin-on) #tnav-drafts{
   .drafts-list-pane,.drafts-meta-pane{border-left:none;border-right:none;border-bottom:1px solid var(--border);}
   .drafts-editor-grid{grid-template-columns:1fr;}
   .idea-repository-controls,.idea-lane-grid{grid-template-columns:1fr;}
+  .planning-lab{grid-template-columns:1fr;min-height:0;}
+  .planning-pane{max-height:none;}
+  .planning-body{min-height:40vh;}
   .drafts-field.wide{grid-column:auto;}
   .assets-wrap{grid-template-columns:1fr;}
   #assets-view .side-panel{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
@@ -4317,7 +4431,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.11</div>
+<div id="site-version-stamp">v2026.05.18.12</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -4810,6 +4924,7 @@ body:not(.admin-on) #tnav-drafts{
           <select id="draft-filter-view" class="drafts-select" onchange="updateDraftFilter('view',this.value)">
             <option value="inbox">Inbox</option>
             <option value="ideas">Idea Repository</option>
+            <option value="planning">Planning Notes</option>
             <option value="layers">Literary Layers</option>
             <option value="orphans">Orphans</option>
             <option value="ready">Ready Queue</option>
@@ -5355,7 +5470,10 @@ function normalizeRoutedIdea(value={}, fallback={}){
   const status = ROUTED_IDEA_STATUSES.includes(value.status) ? value.status : (fallback.status || 'open');
   return {
     id:String(value.id || fallback.id || authorNoteId('idea')),
+    sourceKind:String(value.sourceKind || fallback.sourceKind || 'draft'),
     sourceDraftId:String(value.sourceDraftId || fallback.sourceDraftId || ''),
+    sourcePlanningDocId:String(value.sourcePlanningDocId || fallback.sourcePlanningDocId || ''),
+    sourceWorkshopCardId:String(value.sourceWorkshopCardId || fallback.sourceWorkshopCardId || ''),
     sourceSuggestionId:String(value.sourceSuggestionId || fallback.sourceSuggestionId || ''),
     sourceFragmentTitle:String(value.sourceFragmentTitle || fallback.sourceFragmentTitle || ''),
     type:String(value.type || fallback.type || ''),
@@ -5710,6 +5828,8 @@ async function buildFullBackupPayload(){
   const readerNotes = await (typeof notesGetAllLocal === 'function' ? notesGetAllLocal() : Promise.resolve([])).catch(()=>[]);
   const vaultFiles = await backupVaultFiles();
   const draftFragments = await (typeof draftGetAll === 'function' ? draftGetAll() : Promise.resolve([])).catch(()=>[]);
+  const planningDocs = await (typeof planningGetAll === 'function' ? planningGetAll() : Promise.resolve([])).catch(()=>[]);
+  const workshopCards = await (typeof workshopGetAll === 'function' ? workshopGetAll() : Promise.resolve([])).catch(()=>[]);
   const normalizedChapters = normalizeChapterList(chapters || []);
   return {
     backupType:'cosmopolita-full-offline-backup',
@@ -5729,7 +5849,10 @@ async function buildFullBackupPayload(){
       vaultFiles:vaultFiles.length,
       protoLines:(protoevangelium.lines || []).length,
       draftFragments:draftFragments.length,
-      draftWords:backupWordCountForItems(draftFragments.map(fragment=>({body:fragment.body})))
+      draftWords:backupWordCountForItems(draftFragments.map(fragment=>({body:fragment.body}))),
+      planningDocs:planningDocs.length,
+      planningWords:backupWordCountForItems(planningDocs.map(doc=>({body:doc.body}))),
+      workshopCards:workshopCards.length
     },
     content:{
       chapters:normalizedChapters,
@@ -5739,6 +5862,8 @@ async function buildFullBackupPayload(){
       readerNotes,
       fileVault:vaultFiles,
       draftFragments,
+      planningDocs,
+      workshopCards,
       protoevangelium:normalizeProtoevangelium(protoevangelium),
       chapterEditorDrafts:backupReadLocalStorage(CHAPTER_EDITOR_DRAFTS_KEY) || {}
     },
@@ -5908,6 +6033,43 @@ function backupDraftFragmentsHtml(fragments=[]){
   }).join('');
 }
 
+function backupPlanningHtml(docs=[], cards=[]){
+  if(!docs.length && !cards.length) return '<p class="muted">No planning notes or workshop cards</p>';
+  const cardsByDoc = cards.reduce((acc, raw)=>{
+    const card = normalizeWorkshopCard(raw);
+    const key = card.planningDocId || '_manual';
+    if(!acc[key]) acc[key] = [];
+    acc[key].push(card);
+    return acc;
+  }, {});
+  const docHtml = docs.map(raw=>{
+    const doc = normalizePlanningDoc(raw);
+    const docCards = cardsByDoc[doc.id] || [];
+    return `<article class="chapter">
+      <h3>${backupEscapeHtml(doc.title)}</h3>
+      <div class="meta">${backupEscapeHtml(doc.type)} · ${backupEscapeHtml(doc.status)} · ${Number(String(doc.body || '').trim().split(/\s+/).filter(Boolean).length).toLocaleString()} words · updated ${backupEscapeHtml(draftDate(doc.updatedAt))}</div>
+      <p><b>Tags:</b> ${backupEscapeHtml(doc.tags.join(', '))}</p>
+      <p><b>Linked Chapter:</b> ${backupEscapeHtml(protoChapterLabel(doc.linkedChapterId))} · <b>Linked Draft:</b> ${backupEscapeHtml(doc.linkedDraftId)} · <b>Linked Proto Line:</b> ${backupEscapeHtml(doc.linkedProtoLineId)}</p>
+      <div class="chapter-body">${backupParagraphs(doc.body)}</div>
+      <h4>Draft Workshop Cards</h4>
+      ${docCards.length ? docCards.map(card=>`<article class="source">
+        <h5>${backupEscapeHtml(workshopLaneLabel(card.lane))} · ${backupEscapeHtml(card.title)}</h5>
+        <p><b>Status:</b> ${backupEscapeHtml(card.status)} · <b>Tags:</b> ${backupEscapeHtml(card.tags.join(', '))} · <b>Linked Chapter:</b> ${backupEscapeHtml(protoChapterLabel(card.linkedChapterId))}</p>
+        ${card.summary ? `<p><b>Summary:</b> ${backupEscapeHtml(card.summary)}</p>` : ''}
+        ${card.sourceQuote ? `<p><b>Source Quote:</b> ${backupEscapeHtml(card.sourceQuote)}</p>` : ''}
+        ${card.notes ? `<p><b>Notes:</b> ${backupEscapeHtml(card.notes)}</p>` : ''}
+        ${card.importHistory.length ? `<p><b>Import History:</b> ${backupEscapeHtml(card.importHistory.map(item=>`${item.target}:${item.targetId || ''}`).join(', '))}</p>` : ''}
+      </article>`).join('') : '<p class="muted">No workshop cards for this planning note</p>'}
+    </article>`;
+  }).join('');
+  const manualCards = (cardsByDoc._manual || []).map(card=>`<article class="source">
+    <h5>${backupEscapeHtml(workshopLaneLabel(card.lane))} · ${backupEscapeHtml(card.title)}</h5>
+    <p><b>Status:</b> ${backupEscapeHtml(card.status)}</p>
+    ${card.summary ? `<p>${backupEscapeHtml(card.summary)}</p>` : ''}
+  </article>`).join('');
+  return docHtml + (manualCards ? `<article class="chapter"><h3>Manual Workshop Cards</h3>${manualCards}</article>` : '');
+}
+
 function backupHtmlDocument(payload){
   const chaptersHtml = payload.content.chapters.map((ch,index)=>`
     <article class="chapter">
@@ -5947,6 +6109,7 @@ function backupHtmlDocument(payload){
   `).join('');
   const protoHtml = backupProtoevangeliumHtml(payload.content.protoevangelium);
   const draftsHtml = backupDraftFragmentsHtml(payload.content.draftFragments || []);
+  const planningHtml = backupPlanningHtml(payload.content.planningDocs || [], payload.content.workshopCards || []);
   const rawJson = JSON.stringify(payload, null, 2).replace(/</g,'\\u003c');
   return `<!doctype html>
 <html lang="en">
@@ -5983,6 +6146,7 @@ a{color:#8b3a1e}
 <nav>
   <a href="#chapters">Chapters</a>
   <a href="#drafts">Draft Inbox</a>
+  <a href="#planning">Planning Notes</a>
   <a href="#protoevangelium">Protoevangelium</a>
   <a href="#characters">Characters</a>
   <a href="#codex">Codex</a>
@@ -6001,9 +6165,13 @@ a{color:#8b3a1e}
     <div class="stat"><b>${payload.counts.protoLines}</b> Proto Lines</div>
     <div class="stat"><b>${payload.counts.draftFragments}</b> Draft Fragments</div>
     <div class="stat"><b>${Number(payload.counts.draftWords).toLocaleString()}</b> Draft Words</div>
+    <div class="stat"><b>${payload.counts.planningDocs}</b> Planning Notes</div>
+    <div class="stat"><b>${payload.counts.workshopCards}</b> Workshop Cards</div>
+    <div class="stat"><b>${Number(payload.counts.planningWords).toLocaleString()}</b> Planning Words</div>
   </section>
   <section id="chapters"><h2>Chapters</h2>${chaptersHtml}</section>
   <section id="drafts"><h2>Draft Inbox</h2>${draftsHtml}</section>
+  <section id="planning"><h2>Planning Notes + Draft Workshop</h2>${planningHtml}</section>
   <section id="protoevangelium"><h2>Protoevangelium</h2>${protoHtml}</section>
   <section id="characters"><h2>Characters</h2>${charactersHtml || '<p class="muted">No characters</p>'}</section>
   <section id="codex"><h2>Codex</h2>${codexHtml || '<p class="muted">No codex entries</p>'}</section>
@@ -6032,7 +6200,7 @@ async function exportFullBackup(){
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    if(status) status.textContent = `Full backup exported: ${payload.counts.chapters} chapters, ${payload.counts.draftFragments} draft fragments, ${payload.counts.protoLines} Protoevangelium lines, ${payload.counts.characters} characters, ${payload.counts.codexEntries} codex entries, ${payload.counts.readerNotes} reader notes, ${payload.counts.vaultFiles} vault files.`;
+    if(status) status.textContent = `Full backup exported: ${payload.counts.chapters} chapters, ${payload.counts.draftFragments} draft fragments, ${payload.counts.planningDocs} planning notes, ${payload.counts.workshopCards} workshop cards, ${payload.counts.protoLines} Protoevangelium lines, ${payload.counts.characters} characters, ${payload.counts.codexEntries} codex entries, ${payload.counts.readerNotes} reader notes, ${payload.counts.vaultFiles} vault files.`;
   }catch(e){
     console.error('Full backup failed:', e);
     const message = e && e.message ? e.message : String(e || 'Unknown error');
@@ -11630,15 +11798,33 @@ document.addEventListener('click',e=>{
 // DRAFT INBOX / MANUSCRIPT OBSERVATORY
 // ════════════════════════════════════════════════════════
 const DRAFTS_DB_NAME = 'cosmopolita_draft_inbox';
-const DRAFTS_DB_VERSION = 1;
+const DRAFTS_DB_VERSION = 3;
 const DRAFTS_STORE = 'draftFragments';
+const PLANNING_DOCS_STORE = 'planningDocs';
+const WORKSHOP_CARDS_STORE = 'workshopCards';
 const DRAFT_TYPES = ['scene','dialogue','poem','research','outline','worldbuilding','character','discard'];
 const DRAFT_STATUSES = ['inbox','sorting','developing','ready','converted','archived'];
+const PLANNING_DOC_TYPES = ['note','outline','research','craft','world-canon','structure','theme','scene-seed'];
+const PLANNING_DOC_STATUSES = ['open','working','ready','archived'];
+const WORKSHOP_CARD_STATUSES = ['open','working','ready','imported','archived'];
+const WORKSHOP_LANES = [
+  {id:'research', label:'Research'},
+  {id:'craft', label:'Craft'},
+  {id:'world-canon', label:'World / Canon'},
+  {id:'character', label:'Character'},
+  {id:'structure', label:'Structure'},
+  {id:'theme', label:'Theme / Motif'},
+  {id:'scene-seeds', label:'Scene Seeds'},
+  {id:'questions', label:'Questions'}
+];
 const DRAFT_AI_GROUPS = ['dialogue','entities','layers','literary','conversions'];
 const DRAFT_CODEX_ENTITY_TYPES = new Set(['faction','organization','institution','religion','government','place','object','technology','metaphysical system','motif']);
 let _draftsDBPromise = null;
 let _draftFragments = [];
 let _activeDraftId = '';
+let _planningDocs = [];
+let _workshopCards = [];
+let _activePlanningDocId = '';
 let _draftFilter = loadDraftsUi();
 let _draftIdeaFilter = loadDraftIdeaUi();
 let _draftSaveTimer = null;
@@ -11705,6 +11891,19 @@ function openDraftsDB(){
         store.createIndex('updatedAt','updatedAt',{unique:false});
         store.createIndex('status','status',{unique:false});
         store.createIndex('type','type',{unique:false});
+      }
+      if(!db.objectStoreNames.contains(PLANNING_DOCS_STORE)){
+        const store = db.createObjectStore(PLANNING_DOCS_STORE, {keyPath:'id'});
+        store.createIndex('updatedAt','updatedAt',{unique:false});
+        store.createIndex('status','status',{unique:false});
+        store.createIndex('type','type',{unique:false});
+      }
+      if(!db.objectStoreNames.contains(WORKSHOP_CARDS_STORE)){
+        const store = db.createObjectStore(WORKSHOP_CARDS_STORE, {keyPath:'id'});
+        store.createIndex('updatedAt','updatedAt',{unique:false});
+        store.createIndex('status','status',{unique:false});
+        store.createIndex('lane','lane',{unique:false});
+        store.createIndex('planningDocId','planningDocId',{unique:false});
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -11850,6 +12049,595 @@ function draftProtoOptions(selected=''){
   return `<option value="">No Proto line linked</option>` + (protoevangelium.lines || []).map(line=>`<option value="${escHtml(line.id)}" ${line.id===selected?'selected':''}>Line ${escHtml(line.number)} · ${escHtml(line.text.slice(0, 58))}</option>`).join('');
 }
 
+function workshopLaneLabel(id){
+  return (WORKSHOP_LANES.find(lane=>lane.id===id) || WORKSHOP_LANES[0]).label;
+}
+
+function normalizePlanningDoc(value={}){
+  const now = Date.now();
+  const type = PLANNING_DOC_TYPES.includes(value.type) ? value.type : 'note';
+  const status = PLANNING_DOC_STATUSES.includes(value.status) ? value.status : 'open';
+  return {
+    id:String(value.id || draftId()),
+    title:String(value.title || '').trim() || 'Untitled Planning Note',
+    body:String(value.body || ''),
+    type,
+    status,
+    tags:Array.isArray(value.tags) ? value.tags.map(String) : splitTagText(value.tags || ''),
+    sourceFilename:String(value.sourceFilename || ''),
+    linkedChapterId:String(value.linkedChapterId || ''),
+    linkedDraftId:String(value.linkedDraftId || ''),
+    linkedProtoLineId:String(value.linkedProtoLineId || ''),
+    createdAt:value.createdAt || now,
+    updatedAt:value.updatedAt || value.createdAt || now,
+    archivedAt:value.archivedAt || (status === 'archived' ? now : null)
+  };
+}
+
+function normalizeWorkshopCard(value={}){
+  const now = Date.now();
+  const lane = WORKSHOP_LANES.some(item=>item.id===value.lane) ? value.lane : 'research';
+  const status = WORKSHOP_CARD_STATUSES.includes(value.status) ? value.status : 'open';
+  return {
+    id:String(value.id || draftId()),
+    planningDocId:String(value.planningDocId || ''),
+    sourceQuote:String(value.sourceQuote || ''),
+    before:String(value.before || ''),
+    after:String(value.after || ''),
+    title:String(value.title || '').trim() || 'Workshop Card',
+    summary:String(value.summary || ''),
+    lane,
+    status,
+    tags:Array.isArray(value.tags) ? value.tags.map(String) : splitTagText(value.tags || ''),
+    notes:String(value.notes || ''),
+    linkedChapterId:String(value.linkedChapterId || ''),
+    linkedDraftId:String(value.linkedDraftId || ''),
+    linkedResearchId:String(value.linkedResearchId || ''),
+    createdAt:value.createdAt || now,
+    updatedAt:value.updatedAt || value.createdAt || now,
+    archivedAt:value.archivedAt || (status === 'archived' ? now : null),
+    importHistory:Array.isArray(value.importHistory) ? value.importHistory : []
+  };
+}
+
+async function planningPut(doc){
+  const db = await openDraftsDB();
+  const item = normalizePlanningDoc(doc);
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(PLANNING_DOCS_STORE, 'readwrite');
+    tx.objectStore(PLANNING_DOCS_STORE).put(item);
+    tx.oncomplete = () => resolve(item);
+    tx.onerror = () => reject(tx.error || new Error('Could not save planning note.'));
+  });
+}
+
+async function planningGetAll(){
+  const db = await openDraftsDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(PLANNING_DOCS_STORE, 'readonly');
+    const req = tx.objectStore(PLANNING_DOCS_STORE).getAll();
+    req.onsuccess = () => resolve((req.result || []).map(normalizePlanningDoc).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)));
+    req.onerror = () => reject(req.error || new Error('Could not load planning notes.'));
+  });
+}
+
+async function workshopPut(card){
+  const db = await openDraftsDB();
+  const item = normalizeWorkshopCard(card);
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(WORKSHOP_CARDS_STORE, 'readwrite');
+    tx.objectStore(WORKSHOP_CARDS_STORE).put(item);
+    tx.oncomplete = () => resolve(item);
+    tx.onerror = () => reject(tx.error || new Error('Could not save workshop card.'));
+  });
+}
+
+async function workshopGetAll(){
+  const db = await openDraftsDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(WORKSHOP_CARDS_STORE, 'readonly');
+    const req = tx.objectStore(WORKSHOP_CARDS_STORE).getAll();
+    req.onsuccess = () => resolve((req.result || []).map(normalizeWorkshopCard).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)));
+    req.onerror = () => reject(req.error || new Error('Could not load workshop cards.'));
+  });
+}
+
+async function planningRefreshCache(){
+  [_planningDocs, _workshopCards] = await Promise.all([planningGetAll(), workshopGetAll()]);
+  if(!_activePlanningDocId && _planningDocs.length) _activePlanningDocId = _planningDocs[0].id;
+  if(_activePlanningDocId && !_planningDocs.some(doc=>doc.id===_activePlanningDocId)){
+    _activePlanningDocId = _planningDocs[0]?.id || '';
+  }
+}
+
+function activePlanningDoc(){
+  return _planningDocs.find(doc=>doc.id===_activePlanningDocId) || null;
+}
+
+function planningDocSearchText(doc){
+  const cards = _workshopCards.filter(card=>card.planningDocId === doc.id);
+  return [doc.title, doc.body, doc.type, doc.status, doc.tags.join(' '), doc.sourceFilename, cards.map(card=>[card.title, card.summary, card.sourceQuote, card.notes, card.tags.join(' ')].join(' ')).join(' ')].join(' ').toLowerCase();
+}
+
+function filteredPlanningDocs(){
+  const term = String(_draftFilter.search || '').trim().toLowerCase();
+  return _planningDocs.filter(doc=>{
+    if(doc.status === 'archived' && _draftFilter.status !== 'archived' && _draftFilter.view !== 'archive') return false;
+    if(_draftFilter.type && doc.type !== _draftFilter.type) return false;
+    if(_draftFilter.status && doc.status !== _draftFilter.status) return false;
+    return !term || planningDocSearchText(doc).includes(term);
+  });
+}
+
+function planningDocCard(doc){
+  const count = _workshopCards.filter(card=>card.planningDocId===doc.id && card.status!=='archived').length;
+  return `<article class="planning-doc-card ${doc.id===_activePlanningDocId?'active':''}" onclick="selectPlanningDoc('${escHtml(doc.id)}')">
+    <div class="planning-doc-title">${escHtml(doc.title)}</div>
+    <div class="planning-doc-meta">${escHtml(doc.type)} · ${escHtml(doc.status)} · ${doc.body.trim().split(/\s+/).filter(Boolean).length.toLocaleString()} words · ${count} workshop card${count === 1 ? '' : 's'}</div>
+    <div class="drafts-chip-row">${doc.tags.slice(0,4).map(tag=>`<span class="drafts-chip">${escHtml(tag)}</span>`).join('')}</div>
+  </article>`;
+}
+
+function planningTypeOptions(selected=''){
+  return PLANNING_DOC_TYPES.map(type=>`<option value="${escHtml(type)}" ${type===selected?'selected':''}>${escHtml(type)}</option>`).join('');
+}
+
+function planningStatusOptions(selected=''){
+  return PLANNING_DOC_STATUSES.map(status=>`<option value="${escHtml(status)}" ${status===selected?'selected':''}>${escHtml(status)}</option>`).join('');
+}
+
+function workshopLaneOptions(selected=''){
+  return WORKSHOP_LANES.map(lane=>`<option value="${escHtml(lane.id)}" ${lane.id===selected?'selected':''}>${escHtml(lane.label)}</option>`).join('');
+}
+
+function workshopStatusOptions(selected=''){
+  return WORKSHOP_CARD_STATUSES.map(status=>`<option value="${escHtml(status)}" ${status===selected?'selected':''}>${escHtml(status)}</option>`).join('');
+}
+
+function readPlanningEditor(doc=activePlanningDoc()){
+  if(!doc || !document.getElementById('planning-title')) return null;
+  return normalizePlanningDoc(Object.assign({}, doc, {
+    title:(document.getElementById('planning-title')?.value || '').trim() || 'Untitled Planning Note',
+    body:document.getElementById('planning-body')?.value || '',
+    type:document.getElementById('planning-type')?.value || doc.type,
+    status:document.getElementById('planning-status-field')?.value || doc.status,
+    tags:splitTagText(document.getElementById('planning-tags')?.value || ''),
+    linkedChapterId:document.getElementById('planning-linked-chapter')?.value || '',
+    linkedDraftId:document.getElementById('planning-linked-draft')?.value || '',
+    linkedProtoLineId:document.getElementById('planning-linked-proto')?.value || '',
+    updatedAt:Date.now()
+  }));
+}
+
+async function persistActivePlanningDoc(options={}){
+  const existing = activePlanningDoc();
+  if(!existing || !document.getElementById('planning-title')) return null;
+  const saved = await planningPut(readPlanningEditor(existing));
+  _planningDocs = _planningDocs.map(doc=>doc.id===saved.id ? saved : doc);
+  if(!options.silent) draftStatus('Planning note saved.');
+  return saved;
+}
+
+function queuePlanningSave(){
+  clearTimeout(_draftSaveTimer);
+  _draftSaveTimer = setTimeout(async()=>{
+    await persistActivePlanningDoc({silent:true});
+    await renderDraftsView({keepCache:true, keepEditor:true});
+    draftStatus('Planning note autosaved.');
+  }, 450);
+}
+
+async function createPlanningDoc(data={}){
+  if(!requireAdmin()) return;
+  const now = Date.now();
+  const item = await planningPut(normalizePlanningDoc(Object.assign({
+    id:draftId(),
+    title:'New Planning Note',
+    body:'',
+    type:'note',
+    status:'open',
+    createdAt:now,
+    updatedAt:now
+  }, data)));
+  _activePlanningDocId = item.id;
+  await renderDraftsView({keepCache:false});
+  draftStatus('Planning note created.');
+}
+
+async function selectPlanningDoc(id){
+  await persistActivePlanningDoc({silent:true});
+  _activePlanningDocId = id;
+  await renderDraftsView({keepCache:false});
+}
+
+async function archivePlanningDoc(id=''){
+  if(!requireAdmin()) return;
+  const doc = _planningDocs.find(item=>item.id===(id || _activePlanningDocId));
+  if(!doc) return;
+  doc.status = doc.status === 'archived' ? 'open' : 'archived';
+  doc.archivedAt = doc.status === 'archived' ? Date.now() : null;
+  doc.updatedAt = Date.now();
+  await planningPut(doc);
+  await renderDraftsView({keepCache:false});
+  draftStatus(doc.status === 'archived' ? 'Planning note archived.' : 'Planning note restored.');
+}
+
+function planningSelectionContext(textarea){
+  const start = textarea.selectionStart || 0;
+  const end = textarea.selectionEnd || 0;
+  const body = textarea.value || '';
+  const quote = body.slice(start, end).trim();
+  return {quote, before:body.slice(Math.max(0, start - 160), start), after:body.slice(end, Math.min(body.length, end + 160))};
+}
+
+function workshopCardFromSelection(doc, context){
+  const quote = context.quote || '';
+  return normalizeWorkshopCard({
+    id:draftId(),
+    planningDocId:doc.id,
+    sourceQuote:quote,
+    before:context.before || '',
+    after:context.after || '',
+    title:draftTitleFromBody(quote, doc.title),
+    summary:quote,
+    lane:'questions',
+    status:'open',
+    tags:doc.tags,
+    linkedChapterId:doc.linkedChapterId,
+    linkedDraftId:doc.linkedDraftId,
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  });
+}
+
+async function createWorkshopCardFromSelection(){
+  const doc = await persistActivePlanningDoc({silent:true}) || activePlanningDoc();
+  const textarea = document.getElementById('planning-body');
+  if(!doc || !textarea){ draftStatus('Select a planning note first.'); return; }
+  const context = planningSelectionContext(textarea);
+  if(!context.quote){ draftStatus('Highlight text in the planning editor first.'); return; }
+  const card = await workshopPut(workshopCardFromSelection(doc, context));
+  _workshopCards.unshift(card);
+  await renderDraftsView({keepCache:true});
+  draftStatus('Workshop card created from highlighted planning text.');
+}
+
+async function updateWorkshopCard(id, field, value){
+  const card = _workshopCards.find(item=>item.id===id);
+  if(!card) return;
+  if(field === 'tags') card.tags = splitTagText(value || '');
+  else if(field in card) card[field] = value;
+  card.updatedAt = Date.now();
+  if(card.status === 'archived' && !card.archivedAt) card.archivedAt = Date.now();
+  if(card.status !== 'archived') card.archivedAt = null;
+  const saved = await workshopPut(card);
+  _workshopCards = _workshopCards.map(item=>item.id===saved.id ? saved : item);
+}
+
+async function archiveWorkshopCard(id){
+  const card = _workshopCards.find(item=>item.id===id);
+  if(!card) return;
+  card.status = card.status === 'archived' ? 'open' : 'archived';
+  card.archivedAt = card.status === 'archived' ? Date.now() : null;
+  card.updatedAt = Date.now();
+  await workshopPut(card);
+  await renderDraftsView({keepCache:false});
+  draftStatus(card.status === 'archived' ? 'Workshop card archived.' : 'Workshop card restored.');
+}
+
+function workshopCardBodyText(card, doc){
+  return [
+    card.summary,
+    card.sourceQuote ? `Source quote:\n${card.sourceQuote}` : '',
+    card.notes ? `Notes:\n${card.notes}` : '',
+    doc ? `Planning source: ${doc.title}` : ''
+  ].filter(Boolean).join('\n\n');
+}
+
+function routedIdeaFromWorkshopCard(card, doc, sourceDraftId=''){
+  const sectionMap = {
+    research:'research',
+    craft:'literary',
+    'world-canon':'world',
+    character:'character',
+    structure:'literary',
+    'theme-motif':'theme',
+    'scene-seeds':'conversion',
+    questions:'research'
+  };
+  return normalizeRoutedIdea({
+    id:'idea-' + card.id,
+    sourceKind:'planning',
+    sourceDraftId,
+    sourcePlanningDocId:card.planningDocId,
+    sourceWorkshopCardId:card.id,
+    sourceFragmentTitle:doc ? doc.title : 'Planning Notes',
+    type:card.lane,
+    section:sectionMap[card.lane] || 'literary',
+    title:card.title,
+    summary:card.summary || card.notes,
+    quote:card.sourceQuote,
+    context:[card.before, card.after].filter(Boolean).join(' ... '),
+    confidence:0,
+    status:card.status === 'ready' ? 'open' : card.status,
+    chapterId:card.linkedChapterId,
+    notes:card.notes,
+    routingHistory:[{action:'created-from-workshop-card', at:Date.now(), sourceWorkshopCardId:card.id}]
+  });
+}
+
+async function importWorkshopCardAsDraftFragment(id){
+  const card = _workshopCards.find(item=>item.id===id);
+  if(!card) return null;
+  const doc = _planningDocs.find(item=>item.id===card.planningDocId);
+  const typeMap = {research:'research', craft:'outline', 'world-canon':'worldbuilding', character:'character', structure:'outline', 'theme-motif':'outline', 'scene-seeds':'scene', questions:'research'};
+  const fragment = normalizeDraftFragment({
+    id:draftId(),
+    title:card.title,
+    body:workshopCardBodyText(card, doc),
+    type:typeMap[card.lane] || 'outline',
+    status:'sorting',
+    tags:mergeUniqueValues(card.tags, [workshopLaneLabel(card.lane), 'planning-workshop']),
+    linkedChapterId:card.linkedChapterId || (doc && doc.linkedChapterId) || '',
+    notes:`Imported from Planning Notes${doc ? `: ${doc.title}` : ''}.`,
+    sourceFilename:'Planning Notes',
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  });
+  const idea = routedIdeaFromWorkshopCard(card, doc, fragment.id);
+  fragment.routedIdeas = [idea];
+  const saved = await draftPut(fragment);
+  card.linkedDraftId = saved.id;
+  card.status = 'imported';
+  card.importHistory.unshift({target:'draft-fragment', targetId:saved.id, at:Date.now()});
+  await workshopPut(card);
+  if(idea.chapterId){
+    const chapter = chapters.find(ch=>ch.id===idea.chapterId);
+    if(chapter){
+      const chapterIdea = ensureChapterRoutedIdea(chapter, idea);
+      const researchId = ensureResearchGapForRoutedIdea(chapter, chapterIdea || idea);
+      if(researchId) card.linkedResearchId = researchId;
+      saveChapters(chapters);
+    }
+  }
+  await renderDraftsView({keepCache:false});
+  draftStatus('Workshop card imported as a new Draft Inbox fragment and routed idea.');
+  return saved;
+}
+
+async function importWorkshopCardAsRoutedIdea(id){
+  await importWorkshopCardAsDraftFragment(id);
+}
+
+async function importWorkshopCardToAuthorWorkspace(id){
+  const card = _workshopCards.find(item=>item.id===id);
+  if(!card) return;
+  const doc = _planningDocs.find(item=>item.id===card.planningDocId);
+  const chapterId = card.linkedChapterId || (doc && doc.linkedChapterId) || '';
+  const chapter = chapters.find(ch=>ch.id===chapterId);
+  if(!chapter){ draftStatus('Choose a linked chapter on this workshop card before importing to Author Workspace.'); return; }
+  const idea = routedIdeaFromWorkshopCard(Object.assign({}, card, {linkedChapterId:chapter.id}), doc, card.linkedDraftId || '');
+  const chapterIdea = ensureChapterRoutedIdea(chapter, idea);
+  const researchId = ensureResearchGapForRoutedIdea(chapter, chapterIdea || idea);
+  card.linkedChapterId = chapter.id;
+  if(researchId) card.linkedResearchId = researchId;
+  card.status = 'imported';
+  card.importHistory.unshift({target:'author-routed-idea', targetId:`${chapter.id}:${idea.id}`, at:Date.now()});
+  await workshopPut(card);
+  saveChapters(chapters);
+  syncChaptersToSupabase().catch(err=>console.warn('Workshop author import sync failed:', err));
+  await renderDraftsView({keepCache:false});
+  draftStatus('Workshop card imported to the linked chapter Routed Ideas tab.');
+}
+
+async function importWorkshopCardAsResearch(id){
+  const card = _workshopCards.find(item=>item.id===id);
+  if(!card) return;
+  const doc = _planningDocs.find(item=>item.id===card.planningDocId);
+  const chapterId = card.linkedChapterId || (doc && doc.linkedChapterId) || '';
+  const chapter = chapters.find(ch=>ch.id===chapterId);
+  if(!chapter){ draftStatus('Choose a linked chapter on this workshop card before importing as Research.'); return; }
+  chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
+  const research = chapter.authorNotes.research = normalizeResearch(chapter.authorNotes.research || {});
+  const subjectId = ensureWorkshopResearchSubject(research, workshopLaneLabel(card.lane), mergeUniqueValues(card.tags, ['planning-workshop']).join(', '));
+  const gap = {
+    id:authorNoteId('gap'),
+    subjectId,
+    tags:mergeUniqueValues(card.tags, ['planning-workshop']).join(', '),
+    question:card.title,
+    nextStep:[card.summary, card.sourceQuote, card.notes].filter(Boolean).join('\n\n'),
+    status:'open',
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  };
+  research.gaps.unshift(gap);
+  card.linkedChapterId = chapter.id;
+  card.linkedResearchId = gap.id;
+  card.status = 'imported';
+  card.importHistory.unshift({target:'chapter-research-gap', targetId:`${chapter.id}:${gap.id}`, at:Date.now()});
+  await workshopPut(card);
+  saveChapters(chapters);
+  syncChaptersToSupabase().catch(err=>console.warn('Workshop research import sync failed:', err));
+  await renderDraftsView({keepCache:false});
+  draftStatus('Workshop card imported as a chapter Research gap.');
+}
+
+async function importWorkshopCardAsCodex(id){
+  const card = _workshopCards.find(item=>item.id===id);
+  if(!card) return;
+  const key = codexKeyFromName(card.title);
+  E[key] = {
+    t:card.title,
+    cat:workshopLaneLabel(card.lane),
+    kind:'planning-workshop',
+    short:card.tags.join(', '),
+    desc:backupParagraphs(workshopCardBodyText(card, _planningDocs.find(doc=>doc.id===card.planningDocId))),
+    meta:[['Source','Planning Notes'], ['Lane', workshopLaneLabel(card.lane)], ['Status', card.status]],
+    tags:mergeUniqueValues(card.tags, ['planning-workshop', card.lane])
+  };
+  saveEntities();
+  syncCodexEntryToSupabase(key, E[key]).catch(err=>console.warn('Workshop Codex sync failed:', err));
+  card.status = 'imported';
+  card.importHistory.unshift({target:'codex', targetId:key, at:Date.now()});
+  await workshopPut(card);
+  await renderDraftsView({keepCache:false});
+  draftStatus(`Workshop card imported as Codex seed: ${key}`);
+}
+
+function workshopLaneFromAiSuggestion(suggestion){
+  const section = routeIdeaSectionFromSuggestion(suggestion);
+  if(section === 'research' || section === 'entities') return 'research';
+  if(section === 'character') return 'character';
+  if(section === 'world' || section === 'continuity') return 'world-canon';
+  if(section === 'theme') return 'theme-motif';
+  if(section === 'dialogue' || section === 'literary') return 'craft';
+  if(section === 'conversion') return 'scene-seeds';
+  return 'questions';
+}
+
+function workshopCardFromAiSuggestion(doc, suggestion){
+  const payload = suggestion.payload || {};
+  return normalizeWorkshopCard({
+    id:draftId(),
+    planningDocId:doc.id,
+    sourceQuote:payload.quote || payload.firstMentionQuote || '',
+    title:routedIdeaTitleFromSuggestion(suggestion),
+    summary:routedIdeaSummaryFromSuggestion(suggestion) || suggestion.summary,
+    lane:workshopLaneFromAiSuggestion(suggestion),
+    status:'open',
+    tags:mergeUniqueValues(doc.tags, [suggestion.kind, suggestion.group].filter(Boolean)),
+    notes:'AI-suggested workshop card. Review before importing.',
+    linkedChapterId:doc.linkedChapterId,
+    linkedDraftId:doc.linkedDraftId,
+    createdAt:Date.now(),
+    updatedAt:Date.now()
+  });
+}
+
+async function analyzePlanningNoteWithAi(){
+  const doc = await persistActivePlanningDoc({silent:true}) || activePlanningDoc();
+  if(!doc){ draftStatus('Create or select a planning note first.'); return; }
+  if(!doc.body.trim()){ draftStatus('Add planning text before running AI analysis.'); return; }
+  draftStatus(`Analyzing planning note "${doc.title}"...`);
+  try{
+    const fragment = normalizeDraftFragment({id:doc.id, title:doc.title, body:doc.body, type:'research', status:'inbox', tags:doc.tags, linkedChapterId:doc.linkedChapterId});
+    const report = await callDraftGeminiFromBrowser(fragment);
+    const suggestions = draftAiSuggestionFromReport(report);
+    const cards = [];
+    for(const suggestion of suggestions){
+      const card = await workshopPut(workshopCardFromAiSuggestion(doc, suggestion));
+      cards.push(card);
+    }
+    await renderDraftsView({keepCache:false});
+    draftStatus(cards.length ? `AI created ${cards.length} pending workshop card${cards.length === 1 ? '' : 's'} from this planning note.` : 'AI returned no workshop cards for this planning note.');
+  }catch(err){
+    console.warn('Planning AI failed:', err);
+    draftStatus('Planning AI unavailable: ' + (err.message || err) + '. You can still highlight text and create cards manually.');
+  }
+}
+
+function renderWorkshopCard(card){
+  const doc = _planningDocs.find(item=>item.id===card.planningDocId);
+  return `<article class="workshop-card ${card.status==='archived'?'archived':''}">
+    <input class="drafts-input workshop-card-title" value="${escHtml(card.title)}" onchange="updateWorkshopCard('${escHtml(card.id)}','title',this.value)">
+    <div class="workshop-card-meta">${escHtml(workshopLaneLabel(card.lane))} · ${escHtml(card.status)} · ${doc ? `source: ${escHtml(doc.title)}` : 'manual card'}</div>
+    <div class="drafts-filter-grid">
+      <select class="drafts-select" onchange="updateWorkshopCard('${escHtml(card.id)}','lane',this.value)">${workshopLaneOptions(card.lane)}</select>
+      <select class="drafts-select" onchange="updateWorkshopCard('${escHtml(card.id)}','status',this.value)">${workshopStatusOptions(card.status)}</select>
+    </div>
+    <label class="drafts-field"><span>Summary</span><textarea class="drafts-textarea workshop-card-body" rows="3" onchange="updateWorkshopCard('${escHtml(card.id)}','summary',this.value)">${escHtml(card.summary)}</textarea></label>
+    ${card.sourceQuote ? `<div class="author-routed-quote">${escHtml(card.sourceQuote)}</div>` : ''}
+    <label class="drafts-field"><span>Notes</span><textarea class="drafts-textarea workshop-card-body" rows="3" onchange="updateWorkshopCard('${escHtml(card.id)}','notes',this.value)">${escHtml(card.notes)}</textarea></label>
+    <label class="drafts-field"><span>Tags</span><input class="drafts-input" value="${escHtml(card.tags.join(', '))}" onchange="updateWorkshopCard('${escHtml(card.id)}','tags',this.value)"></label>
+    <label class="drafts-field"><span>Linked Chapter</span><select class="drafts-select" onchange="updateWorkshopCard('${escHtml(card.id)}','linkedChapterId',this.value)">${draftChapterOptions(card.linkedChapterId)}</select></label>
+    <div class="workshop-card-actions">
+      <button class="tiny-btn" type="button" onclick="importWorkshopCardAsRoutedIdea('${escHtml(card.id)}')">Import Routed Idea</button>
+      <button class="tiny-btn" type="button" onclick="importWorkshopCardAsResearch('${escHtml(card.id)}')">Import Research Gap</button>
+      <button class="tiny-btn" type="button" onclick="importWorkshopCardToAuthorWorkspace('${escHtml(card.id)}')">Import Author Workspace</button>
+      <button class="tiny-btn" type="button" onclick="importWorkshopCardAsDraftFragment('${escHtml(card.id)}')">New Draft Fragment</button>
+      <button class="tiny-btn" type="button" onclick="importWorkshopCardAsCodex('${escHtml(card.id)}')">Codex Seed</button>
+      <button class="tiny-btn" type="button" onclick="archiveWorkshopCard('${escHtml(card.id)}')">${card.status==='archived'?'Restore':'Archive'}</button>
+    </div>
+    ${card.importHistory.length ? `<div class="workshop-card-meta">Imported: ${card.importHistory.map(item=>`${escHtml(item.target)} ${escHtml(item.targetId || '')}`).join(' · ')}</div>` : ''}
+  </article>`;
+}
+
+function renderWorkshopBoard(doc){
+  const term = String(_draftFilter.search || '').trim().toLowerCase();
+  const cards = _workshopCards.filter(card=>{
+    if(doc && card.planningDocId !== doc.id) return false;
+    if(card.status === 'archived' && _draftFilter.status !== 'archived' && _draftFilter.view !== 'archive') return false;
+    if(_draftFilter.status && card.status !== _draftFilter.status) return false;
+    if(!term) return true;
+    return [card.title, card.summary, card.sourceQuote, card.notes, card.tags.join(' '), workshopLaneLabel(card.lane)].join(' ').toLowerCase().includes(term);
+  });
+  return `<div class="workshop-board">
+    ${WORKSHOP_LANES.map(lane=>{
+      const laneCards = cards.filter(card=>card.lane===lane.id);
+      return `<section class="workshop-lane">
+        <div class="workshop-lane-head"><span>${escHtml(lane.label)}</span><b>${laneCards.length}</b></div>
+        ${laneCards.length ? laneCards.map(renderWorkshopCard).join('') : '<div class="drafts-empty">No cards in this lane.</div>'}
+      </section>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderPlanningLab(){
+  const doc = activePlanningDoc();
+  const docs = filteredPlanningDocs();
+  return `<section class="planning-lab">
+    <aside class="planning-pane">
+      <div class="planning-pane-head">
+        <div>
+          <div class="drafts-kicker">Planning Notes</div>
+          <div class="drafts-pane-title">Non-fiction repository</div>
+        </div>
+        <button class="tiny-btn" type="button" onclick="createPlanningDoc()">New</button>
+      </div>
+      <div class="planning-doc-list">${docs.length ? docs.map(planningDocCard).join('') : '<div class="drafts-empty">No planning notes yet.</div>'}</div>
+    </aside>
+    <main class="planning-pane">
+      ${doc ? `
+        <div class="planning-pane-head">
+          <div>
+            <div class="drafts-kicker">Document Editor</div>
+            <div class="drafts-pane-title">${escHtml(doc.title)}</div>
+          </div>
+          <div class="drafts-actions">
+            <button class="cm-btn secondary" type="button" onclick="persistActivePlanningDoc()">Save</button>
+            <button class="cm-btn secondary" type="button" onclick="archivePlanningDoc()">${doc.status==='archived'?'Restore':'Archive'}</button>
+          </div>
+        </div>
+        <label class="drafts-field"><span>Title</span><input id="planning-title" class="drafts-input" value="${escHtml(doc.title)}" oninput="queuePlanningSave()"></label>
+        <div class="drafts-filter-grid">
+          <label class="drafts-field"><span>Type</span><select id="planning-type" class="drafts-select" onchange="queuePlanningSave()">${planningTypeOptions(doc.type)}</select></label>
+          <label class="drafts-field"><span>Status</span><select id="planning-status-field" class="drafts-select" onchange="queuePlanningSave()">${planningStatusOptions(doc.status)}</select></label>
+        </div>
+        <label class="drafts-field"><span>Tags</span><input id="planning-tags" class="drafts-input" value="${escHtml(doc.tags.join(', '))}" oninput="queuePlanningSave()"></label>
+        <div class="drafts-filter-grid">
+          <label class="drafts-field"><span>Linked Chapter</span><select id="planning-linked-chapter" class="drafts-select" onchange="queuePlanningSave()">${draftChapterOptions(doc.linkedChapterId)}</select></label>
+          <label class="drafts-field"><span>Linked Proto Line</span><select id="planning-linked-proto" class="drafts-select" onchange="queuePlanningSave()">${draftProtoOptions(doc.linkedProtoLineId)}</select></label>
+        </div>
+        <label class="drafts-field"><span>Linked Draft Id</span><input id="planning-linked-draft" class="drafts-input" value="${escHtml(doc.linkedDraftId)}" oninput="queuePlanningSave()"></label>
+        <label class="drafts-field"><span>Planning Document</span><textarea id="planning-body" class="drafts-textarea planning-body" oninput="queuePlanningSave()">${escHtml(doc.body)}</textarea></label>
+        <div class="drafts-actions">
+          <button class="cm-btn secondary" type="button" onclick="createWorkshopCardFromSelection()">Create Workshop Card From Selection</button>
+          <button class="cm-btn secondary" type="button" onclick="analyzePlanningNoteWithAi()">Analyze Planning Note</button>
+        </div>
+      ` : `<div class="drafts-empty">Create a planning note for outlines, research thoughts, canon logic, craft plans, and nonlinear ideas.</div>`}
+    </main>
+    <aside class="planning-pane">
+      <div class="planning-pane-head">
+        <div>
+          <div class="drafts-kicker">Draft Workshop</div>
+          <div class="drafts-pane-title">Cards before canon</div>
+        </div>
+      </div>
+      ${renderWorkshopBoard(doc)}
+    </aside>
+  </section>`;
+}
+
 function draftLayerOptions(){
   const layerSet = new Set();
   _draftFragments.forEach(fragment=>{
@@ -11876,6 +12664,7 @@ function draftIsOrphan(fragment){
 }
 
 function draftMatchesFilter(fragment){
+  if(_draftFilter.view === 'planning') return false;
   const term = String(_draftFilter.search || '').trim().toLowerCase();
   if(term && !draftTextSearch(fragment).includes(term)) return false;
   if(_draftFilter.type && fragment.type !== _draftFilter.type) return false;
@@ -11903,6 +12692,11 @@ function filteredDrafts(){
 
 function updateDraftFilter(key, value){
   _draftFilter[key] = value || '';
+  if(key === 'view'){
+    _draftFilter.type = '';
+    _draftFilter.status = '';
+    _draftFilter.layer = '';
+  }
   saveDraftsUi();
   renderDraftsView();
 }
@@ -11953,11 +12747,15 @@ async function selectDraftFragment(id){
 function renderDraftStats(){
   const totalWords = _draftFragments.reduce((sum,fragment)=>sum + draftWordCount(fragment), 0);
   const visible = filteredDrafts();
+  const planningWords = _planningDocs.reduce((sum,doc)=>sum + String(doc.body || '').trim().split(/\s+/).filter(Boolean).length, 0);
   return `
     <div class="drafts-stat"><b>${_draftFragments.length}</b><div class="drafts-stat-label">Fragments</div></div>
     <div class="drafts-stat"><b>${totalWords.toLocaleString()}</b><div class="drafts-stat-label">Draft Words</div></div>
     <div class="drafts-stat"><b>${visible.length}</b><div class="drafts-stat-label">Visible</div></div>
-    <div class="drafts-stat"><b>${_draftFragments.filter(draftIsOrphan).length}</b><div class="drafts-stat-label">Orphans</div></div>`;
+    <div class="drafts-stat"><b>${_draftFragments.filter(draftIsOrphan).length}</b><div class="drafts-stat-label">Orphans</div></div>
+    <div class="drafts-stat"><b>${_planningDocs.length}</b><div class="drafts-stat-label">Planning Notes</div></div>
+    <div class="drafts-stat"><b>${_workshopCards.length}</b><div class="drafts-stat-label">Workshop Cards</div></div>
+    <div class="drafts-stat"><b>${planningWords.toLocaleString()}</b><div class="drafts-stat-label">Planning Words</div></div>`;
 }
 
 function draftSuggestionCandidates(fragment){
@@ -13308,7 +14106,7 @@ function queueDraftEditorSave(){
 
 async function renderDraftsView(options={}){
   try{
-    if(!options.keepCache) await draftRefreshCache();
+    if(!options.keepCache) await Promise.all([draftRefreshCache(), planningRefreshCache()]);
   }catch(e){
     console.error('Draft inbox failed:', e);
     draftStatus('Draft inbox failed: ' + (e.message || e));
@@ -13326,16 +14124,19 @@ async function renderDraftsView(options={}){
   const viewSel = document.getElementById('draft-filter-view');
   const layerSel = document.getElementById('draft-filter-layer');
   const search = document.getElementById('draft-search');
-  if(typeSel) typeSel.innerHTML = draftSelectOptions(DRAFT_TYPES, _draftFilter.type, 'All Types');
-  if(statusSel) statusSel.innerHTML = draftSelectOptions(DRAFT_STATUSES, _draftFilter.status, 'All Statuses');
+  const isPlanning = _draftFilter.view === 'planning';
+  if(typeSel) typeSel.innerHTML = draftSelectOptions(isPlanning ? PLANNING_DOC_TYPES : DRAFT_TYPES, _draftFilter.type, 'All Types');
+  if(statusSel) statusSel.innerHTML = draftSelectOptions(isPlanning ? PLANNING_DOC_STATUSES : DRAFT_STATUSES, _draftFilter.status, 'All Statuses');
   if(viewSel) viewSel.value = _draftFilter.view || 'inbox';
   if(layerSel) layerSel.innerHTML = draftLayerOptions();
   if(search) search.value = _draftFilter.search || '';
-  if(list) list.innerHTML = visible.length ? visible.map(draftFragmentCard).join('') : '<div class="drafts-empty">No fragments match this view.</div>';
+  if(list) list.innerHTML = isPlanning ? '<div class="drafts-empty">Planning Notes has its own document list in the main workspace.</div>' : (visible.length ? visible.map(draftFragmentCard).join('') : '<div class="drafts-empty">No fragments match this view.</div>');
   if(stats) stats.innerHTML = renderDraftStats();
-  if(editor && (_draftFilter.view === 'ideas' || !options.keepEditor)) editor.innerHTML = _draftFilter.view === 'ideas' ? renderDraftIdeaRepository() : renderDraftEditor(active);
-  if(suggestions) suggestions.innerHTML = renderDraftAiPanel(active) + renderDraftAcceptedIntelligence(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
-  if(conversions) conversions.innerHTML = renderDraftConversions(active);
+  if(editor && (_draftFilter.view === 'ideas' || _draftFilter.view === 'planning' || !options.keepEditor)){
+    editor.innerHTML = _draftFilter.view === 'ideas' ? renderDraftIdeaRepository() : (_draftFilter.view === 'planning' ? renderPlanningLab() : renderDraftEditor(active));
+  }
+  if(suggestions) suggestions.innerHTML = isPlanning ? '<div class="drafts-empty">Planning AI and workshop actions live inside Planning Notes.</div>' : renderDraftAiPanel(active) + renderDraftAcceptedIntelligence(active) + renderDraftAiQueue(active) + `<div class="drafts-pane-title">Local Suggestions</div>` + renderDraftSuggestions(active);
+  if(conversions) conversions.innerHTML = isPlanning ? '<div class="drafts-empty">Use workshop card import buttons to route planning material.</div>' : renderDraftConversions(active);
 }
 
 async function showDrafts(){
@@ -14389,6 +15190,20 @@ Object.assign(window, {
   bulkSetRoutedIdeasStatus,
   bulkSendRoutedIdeasToResearch,
   openDraftFromRoutedIdea,
+  createPlanningDoc,
+  selectPlanningDoc,
+  persistActivePlanningDoc,
+  queuePlanningSave,
+  createWorkshopCardFromSelection,
+  updateWorkshopCard,
+  archiveWorkshopCard,
+  archivePlanningDoc,
+  analyzePlanningNoteWithAi,
+  importWorkshopCardAsRoutedIdea,
+  importWorkshopCardAsResearch,
+  importWorkshopCardToAuthorWorkspace,
+  importWorkshopCardAsDraftFragment,
+  importWorkshopCardAsCodex,
   updateAuthorRoutedIdea,
   removeAcceptedDialogue,
   removeAcceptedEntity,
