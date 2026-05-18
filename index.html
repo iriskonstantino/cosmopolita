@@ -3182,8 +3182,11 @@ body:not(.logged-in) #tnav-assets{
 
 @media(min-width:721px){
   .author-workspace-grid{
-    height:calc(100vh - 315px);
+    position:sticky;
+    top:132px;
+    height:calc(100vh - 148px);
     min-height:520px;
+    align-items:stretch;
   }
   .author-read-panel,
   .author-review-panel{
@@ -5041,8 +5044,9 @@ async function exportFullBackup(){
     if(status) status.textContent = `Full backup exported: ${payload.counts.chapters} chapters, ${payload.counts.characters} characters, ${payload.counts.codexEntries} codex entries, ${payload.counts.readerNotes} reader notes, ${payload.counts.vaultFiles} vault files.`;
   }catch(e){
     console.error('Full backup failed:', e);
-    if(status) status.textContent = 'Full backup failed: ' + (e.message || e);
-    alert('Full backup failed. If the vault is very large, export files separately from the Files tab too.');
+    const message = e && e.message ? e.message : String(e || 'Unknown error');
+    if(status) status.textContent = 'Full backup failed: ' + message;
+    alert('Full backup failed: ' + message + '\n\nIf the vault is very large, export files separately from the Files tab too.');
   }
 }
 
