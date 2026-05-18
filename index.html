@@ -13372,7 +13372,11 @@ function ensureChapterRoutedIdea(chapter, idea){
   chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
   chapter.authorNotes.routedIdeas = Array.isArray(chapter.authorNotes.routedIdeas) ? chapter.authorNotes.routedIdeas.map(normalizeRoutedIdea) : [];
   const chapterIdea = normalizeRoutedIdea(Object.assign({}, idea, {chapterId:chapter.id}));
-  const existing = chapter.authorNotes.routedIdeas.find(item=>item.sourceDraftId === chapterIdea.sourceDraftId && item.sourceSuggestionId === chapterIdea.sourceSuggestionId);
+  const existing = chapter.authorNotes.routedIdeas.find(item=>{
+    if(chapterIdea.sourceWorkshopCardId) return item.sourceWorkshopCardId === chapterIdea.sourceWorkshopCardId;
+    if(chapterIdea.sourceSuggestionId) return item.sourceDraftId === chapterIdea.sourceDraftId && item.sourceSuggestionId === chapterIdea.sourceSuggestionId;
+    return item.id === chapterIdea.id;
+  });
   if(existing){
     existing.section = chapterIdea.section;
     existing.type = chapterIdea.type;
