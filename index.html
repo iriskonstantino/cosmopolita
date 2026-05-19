@@ -4707,6 +4707,67 @@ body:not(.admin-on) #tnav-drafts{
   font-size:1.35rem;
   color:var(--red);
 }
+.logic-hero{
+  position:relative;
+  min-height:210px;
+  border:1px solid var(--border);
+  background:linear-gradient(110deg,rgba(42,35,29,0.92),rgba(112,26,18,0.78));
+  color:var(--white);
+  overflow:hidden;
+  padding:1rem;
+  display:flex;
+  align-items:flex-end;
+  margin-bottom:0.85rem;
+}
+.logic-hero-img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0.42;
+  filter:saturate(0.86) contrast(1.08);
+}
+.logic-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,0.05),rgba(0,0,0,0.72));
+}
+.logic-hero-content{position:relative;z-index:1;max-width:760px}
+.logic-hero .logic-title{color:var(--white);font-size:clamp(1.75rem,4vw,3.1rem)}
+.logic-hero .logic-meta{color:#eadfcf}
+.logic-gauge-card{
+  border:1px solid var(--border);
+  background:#fbf8f3;
+  padding:0.7rem;
+}
+.logic-gauge-row{
+  display:flex;
+  justify-content:space-between;
+  gap:0.6rem;
+  align-items:baseline;
+  margin-bottom:0.35rem;
+}
+.logic-gauge-bar{
+  height:0.55rem;
+  border:1px solid var(--border);
+  background:#eee4d8;
+  overflow:hidden;
+}
+.logic-gauge-bar span{
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,var(--red),var(--gold));
+}
+.logic-timeline-controls{display:flex;gap:0.45rem;flex-wrap:wrap;margin-top:0.55rem}
+.logic-report-paragraph{
+  font-family:var(--serif);
+  font-size:0.96rem;
+  line-height:1.72;
+  color:#332d27;
+  margin:0.65rem 0 0;
+}
 .logic-panel{padding:0.9rem;margin-bottom:0.85rem}
 .logic-card-title{
   font-family:var(--display);
@@ -5144,7 +5205,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.08</div>
+<div id="site-version-stamp">v2026.05.19.09</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -6059,7 +6120,7 @@ const LOGIC_CULTURAL_INFERENCE_LENSES = [
 const LOGIC_CHARACTER_TYPES = ['character'];
 const LOGIC_WORLD_ENTITY_TYPES = LOGIC_ENTITY_TYPES.filter(type=>!LOGIC_CHARACTER_TYPES.includes(type));
 const LOGIC_SUGGESTION_KINDS = ['observation','report','consistency'];
-const LOGIC_REPORT_TYPES = ['Entity Extraction Report','Character Trend Report','Faction/Culture Logic Report','Chapter Consistency Report','Interaction Report','Character Dossier','Decision Forecast','Branch Simulation','Lifestyle & Culture Atlas','Relationship Report'];
+const LOGIC_REPORT_TYPES = ['Entity Extraction Report','Character Trend Report','Faction/Culture Logic Report','Chapter Consistency Report','Interaction Report','Character Dossier','Decision Forecast','Branch Simulation','Lifestyle & Culture Atlas','Relationship Report','Biopsychosocial Report'];
 const LOGIC_TABS = [
   {id:'profiles', label:'Entity Profiles'},
   {id:'ontology', label:'Ontology'},
@@ -7017,6 +7078,10 @@ function logicConfidence(value){
   return num ? `${Math.round(num * 100)}%` : 'unscored';
 }
 
+function clampPercent(value){
+  return Math.max(0, Math.min(100, Math.round(Number(value || 0))));
+}
+
 function logicFacetInferencePriority(item){
   if(!item) return 0;
   let score = 0;
@@ -7028,6 +7093,28 @@ function logicFacetInferencePriority(item){
   if(item.status === 'canon') score += 3;
   if(item.status === 'observed') score += 2;
   return score;
+}
+
+function logicEntityImage(entity){
+  if(!entity) return '';
+  if(entity.sourceKind === 'character'){
+    const char = characters.find(item=>item.id===entity.sourceId || item.name===entity.name);
+    return characterImageUrl(char);
+  }
+  if(entity.sourceKind === 'codex'){
+    const entry = normalizeCodexEntry(entity.sourceId || entity.name, E[entity.sourceId] || E[normalizeCodexKey(entity.name)] || {});
+    return codexHeroImage(entry) || codexFlagImage(entry);
+  }
+  return '';
+}
+
+function logicGaugeCard(label, value, hint=''){
+  const pct = clampPercent(value);
+  return `<article class="logic-gauge-card">
+    <div class="logic-gauge-row"><div class="logic-card-title">${escHtml(label)}</div><div class="logic-kicker">${pct}%</div></div>
+    <div class="logic-gauge-bar"><span style="width:${pct}%"></span></div>
+    ${hint ? `<div class="logic-meta" style="margin-top:.35rem">${escHtml(hint)}</div>` : ''}
+  </article>`;
 }
 
 function logicEntitySearchText(entity){
@@ -7206,7 +7293,7 @@ function renderLogicOntologySuggestionCard(raw){
     ${item.inferenceBasis ? `<div class="logic-ontology-source"><b>Basis:</b> ${escHtml(item.inferenceBasis)}</div>` : ''}
     ${webSources.length ? `<div class="logic-ontology-source"><b>Web:</b> ${webSources.map(source=>source.url ? `<a href="${escHtml(source.url)}" target="_blank" rel="noopener">${escHtml(source.title || source.url)}</a>` : escHtml(source.title || source.note)).join(' · ')}</div>` : ''}
     <div class="logic-actions">
-      ${item.status === 'pending' ? `<button class="logic-mini-btn primary" type="button" onclick="acceptLogicOntologySuggestion('${escHtml(item.id)}','')">Accept</button><button class="logic-mini-btn" type="button" onclick="acceptLogicOntologySuggestion('${escHtml(item.id)}','provisional')">Provisional</button><button class="logic-mini-btn" type="button" onclick="acceptLogicOntologySuggestion('${escHtml(item.id)}','canon')">Canonize</button><button class="logic-mini-btn" type="button" onclick="editLogicOntologySuggestion('${escHtml(item.id)}')">Edit</button><button class="logic-mini-btn" type="button" onclick="rejectLogicOntologySuggestion('${escHtml(item.id)}')">Reject</button>` : workflowBadge(item.status)}
+      ${item.status === 'pending' ? `<button class="logic-mini-btn primary" type="button" onclick="acceptLogicOntologySuggestion('${escHtml(item.id)}','')">Accept</button><button class="logic-mini-btn" type="button" onclick="editLogicOntologySuggestion('${escHtml(item.id)}')">Edit</button><button class="logic-mini-btn" type="button" onclick="rejectLogicOntologySuggestion('${escHtml(item.id)}')">Reject</button>` : workflowBadge(item.status)}
     </div>
   </article>`;
 }
@@ -7241,16 +7328,27 @@ function renderLogicProfiles(){
   if(!entity) return `<div class="drafts-empty">Create or select an entity to begin tracking logic.</div>`;
   const obs = logicObservationsForEntity(entity.id);
   const stats = logicEntityStats(entity);
-  const byDimension = LOGIC_DIMENSIONS.map(dim=>{
-    const count = obs.filter(item=>item.dimension===dim).length;
-    if(!count) return '';
-    const pct = Math.min(100, Math.round((count / Math.max(1, obs.length)) * 100));
-    return `<div class="logic-card"><div class="logic-card-title">${escHtml(dim)}</div><div class="logic-dimension-bar"><div class="logic-dimension-fill" style="width:${pct}%"></div></div><div class="logic-meta">${count} observation${count===1?'':'s'}</div></div>`;
-  }).join('');
+  const facets = logicFacetsForEntity(entity.id, true);
+  const image = logicEntityImage(entity);
+  const countCats = cats => facets.filter(item=>cats.includes(item.category)).length + obs.filter(item=>cats.includes(item.dimension)).length;
+  const totalSignals = Math.max(1, facets.length + obs.length);
+  const gauges = [
+    logicGaugeCard('Observed Behavior', (obs.length / totalSignals) * 100, `${obs.length} accepted observations`),
+    logicGaugeCard('Motivation Pressure', countCats(['desire','fear','wound','trigger','stress']) * 18, 'desire, fear, wounds, stress, triggers'),
+    logicGaugeCard('Relationship Pressure', countCats(['relationship','faction','culture']) * 18, 'relationships, loyalties, cultural pressure'),
+    logicGaugeCard('Contradiction Risk', countCats(['contradiction','continuity note']) * 16, 'contradictions and continuity notes'),
+    logicGaugeCard('Lifestyle Signal', countCats(['fashion','food','alcohol','art','media','venue','consumer','ritual']) * 14, 'taste, habit, venue, cultural patterning'),
+    logicGaugeCard('Psych Signal', countCats(['psyche','body','speech','moral','habit']) * 14, 'psyche, speech, body, habit, moral logic')
+  ].join('');
   return `<section>
-    <div class="logic-kicker">Entity Profile</div>
-    <div class="logic-title">${escHtml(entity.name)}</div>
-    <div class="logic-meta">${escHtml(logicTypeLabel(entity.type))} · ${escHtml(entity.sourceKind)} · ${escHtml(entity.tags.join(', ') || 'no tags')}</div>
+    <div class="logic-hero">
+      ${image ? `<img class="logic-hero-img" src="${escHtml(image)}" alt="${escHtml(entity.name)}" onerror="this.remove()">` : ''}
+      <div class="logic-hero-content">
+        <div class="logic-kicker">Entity Profile</div>
+        <div class="logic-title">${escHtml(entity.name)}</div>
+        <div class="logic-meta">${escHtml(logicTypeLabel(entity.type))} · ${escHtml(entity.sourceKind)} · ${escHtml(entity.tags.join(', ') || 'no tags')}</div>
+      </div>
+    </div>
     <div class="logic-actions" style="margin-top:.7rem">
       ${entity.sourceKind === 'character' ? `<button class="logic-mini-btn" type="button" onclick="showCharDetail('${escHtml(entity.sourceId)}')">Open Character</button>` : ''}
       ${entity.sourceKind === 'codex' ? `<button class="logic-mini-btn" type="button" onclick="showCodexEntry('${escHtml(entity.sourceId)}')">Open Codex</button>` : ''}
@@ -7263,12 +7361,14 @@ function renderLogicProfiles(){
       <div class="logic-stat"><b>${stats.relationships}</b><div class="logic-stat-label">Links</div></div>
       <div class="logic-stat"><b>${stats.flags}</b><div class="logic-stat-label">Flags</div></div>
     </div>
-    <div class="logic-matrix-grid">${byDimension || '<div class="drafts-empty">No tracked dimensions yet.</div>'}</div>
+    <div class="logic-matrix-grid">${gauges}</div>
     ${renderManualObservationForm(entity)}
     <section class="logic-panel">
       <div class="logic-card-title">Timeline</div>
+      <div class="logic-card-body">Accepted observations over time. Collapse the list when you want the dashboard without the case-file detail.</div>
+      <div class="logic-timeline-controls"><button class="logic-mini-btn" type="button" onclick="setLogicTimelineOpen(true)">Expand All</button><button class="logic-mini-btn" type="button" onclick="setLogicTimelineOpen(false)">Collapse All</button></div>
       <div class="logic-timeline">
-        ${obs.length ? obs.map(item=>`<div class="logic-timeline-item"><div class="logic-meta">${escHtml(logicSourceLabel(item.sourceKind,item.sourceId,item.sourceTitle))}</div><div>${logicObservationCard(item)}</div></div>`).join('') : '<div class="drafts-empty">No observations yet. Add one manually or run AI analysis.</div>'}
+        ${obs.length ? obs.map(item=>`<details class="logic-timeline-item" open><summary class="logic-meta">${escHtml(logicSourceLabel(item.sourceKind,item.sourceId,item.sourceTitle))} · ${escHtml(item.dimension)}</summary><div>${logicObservationCard(item)}</div></details>`).join('') : '<div class="drafts-empty">No observations yet. Add one manually or run AI analysis.</div>'}
       </div>
     </section>
   </section>`;
@@ -7342,7 +7442,7 @@ function renderLogicOntology(){
 function renderLogicPsychProfile(){
   const entity = logicEntityById(_logicSelectedEntityId);
   if(!entity) return `<div class="drafts-empty">Select an entity for a psych profile.</div>`;
-  const cats = ['psyche','desire','fear','wound','stress','trigger','moral','habit','speech','body','contradiction'];
+  const cats = ['psyche','desire','fear','wound','stress','trigger','moral','habit','speech','body','relationship','contradiction'];
   const facets = logicFacetList(entity.id, cats);
   const rows = cats.map(cat=>{
     const items = facets.filter(item=>item.category===cat);
@@ -7356,6 +7456,7 @@ function renderLogicPsychProfile(){
   return `<section>
     <div class="logic-kicker">Psych Profile</div>
     <div class="logic-title">${escHtml(entity.name)}</div>
+    <section class="logic-panel"><div class="logic-card-title">What This Tab Does</div><div class="logic-card-body">Ontology tracks outward facts. Psych Profile tracks inferred unconscious structure: defenses, desire, shame, repression, projection, repetition, psychosexual patterning, symbolic substitutions, Jungian shadow/archetypes, and Lacanian lack/Other. Treat these as interpretive working intelligence, not public canon.</div><div class="logic-actions" style="margin-top:.65rem"><button class="logic-mini-btn primary" type="button" onclick="generateLogicPsychProfile()">Generate Psych Profile</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('pending')">Review Pending AI</button></div></section>
     <div class="logic-stat-grid">
       <div class="logic-stat"><b>${facets.filter(item=>item.status==='canon').length}</b><div class="logic-stat-label">Canon Facets</div></div>
       <div class="logic-stat"><b>${facets.filter(item=>item.status==='inferred').length}</b><div class="logic-stat-label">Inferred</div></div>
@@ -7444,10 +7545,41 @@ function generateLogicDossier(reportType='Character Dossier'){
   renderLogicMachine();
 }
 
-function logicForecastFromInputs(forecastType='decision'){
-  const entity = logicEntityById(_logicSelectedEntityId);
-  if(!entity) return null;
-  const inputs = {
+async function generateLogicBiopsychosocialReport(){
+  const entity = logicSelectedOrFirstEntity();
+  if(!entity){
+    logicSetStatus('Create or select an entity before generating a biopsychosocial report.');
+    renderLogicMachine();
+    return;
+  }
+  _logicSelectedEntityId = entity.id;
+  logicSetStatus(`Generating biopsychosocial report for ${entity.name}...`);
+  renderLogicMachine();
+  try{
+    const {model, parsed} = await callLogicDossierOpenRouter(entity);
+    const dossier = normalizeLogicDossier({
+      reportType:'Biopsychosocial Report',
+      entityId:entity.id,
+      entityName:entity.name,
+      title:parsed.title || `${entity.name} · Biopsychosocial Report`,
+      summary:parsed.summary || `Academic-style report generated from Logic Machine data for ${entity.name}.`,
+      sections:parsed.sections || {},
+      includeProvisional:true
+    });
+    dossier.model = model;
+    _logicStore.dossiers.unshift(dossier);
+    saveLogicStore();
+    _logicActiveTab = 'reports';
+    logicSetStatus('Biopsychosocial report generated.');
+  }catch(err){
+    console.error('Biopsychosocial report failed:', err);
+    logicSetStatus('Biopsychosocial report failed: ' + (err.message || err));
+  }
+  renderLogicMachine();
+}
+
+function logicForecastInputs(){
+  return {
     event:document.getElementById('logic-forecast-event')?.value || '',
     location:document.getElementById('logic-forecast-location')?.value || '',
     pressure:document.getElementById('logic-forecast-pressure')?.value || '',
@@ -7455,6 +7587,12 @@ function logicForecastFromInputs(forecastType='decision'){
     stakes:document.getElementById('logic-forecast-stakes')?.value || '',
     emotionalState:document.getElementById('logic-forecast-emotion')?.value || ''
   };
+}
+
+function logicForecastFromInputs(forecastType='decision'){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return null;
+  const inputs = logicForecastInputs();
   const includeProvisional = logicIncludeProvisionalReports();
   const likely = logicFacetBullets(entity.id, ['desire','habit','moral','relationship','faction','culture','future'], null, includeProvisional).map(item=>`Likely to follow: ${item}`);
   const unlikely = logicFacetBullets(entity.id, ['fear','wound','stress','contradiction'], null, includeProvisional).map(item=>`Unlikely without pressure/setup: ${item}`);
@@ -7473,12 +7611,39 @@ function logicForecastFromInputs(forecastType='decision'){
   });
 }
 
-function generateLogicForecast(forecastType='decision'){
-  const forecast = logicForecastFromInputs(forecastType);
-  if(!forecast) return;
-  _logicStore.forecasts.unshift(forecast);
+async function generateLogicForecast(forecastType='decision'){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return;
+  const inputs = logicForecastInputs();
+  logicSetStatus(`Generating ${forecastType === 'branch' ? 'branch simulation' : 'decision forecast'} for ${entity.name}...`);
+  renderLogicMachine();
+  try{
+    const {parsed} = await callLogicForecastOpenRouter(entity, inputs, forecastType);
+    const forecast = normalizeLogicForecast({
+      forecastType,
+      entityId:entity.id,
+      entityName:entity.name,
+      title:parsed.title || `${entity.name} · ${forecastType === 'branch' ? 'Branch Simulation' : 'Decision Forecast'}`,
+      inputs,
+      likely:parsed.likely,
+      unlikely:parsed.unlikely,
+      needsSetup:parsed.needsSetup,
+      consequences:parsed.consequences,
+      summary:parsed.summary
+    });
+    _logicStore.forecasts.unshift(forecast);
+    saveLogicStore();
+    logicSetStatus(`${forecast.title} saved.`);
+  }catch(err){
+    console.error('Logic forecast failed:', err);
+    logicSetStatus('AI forecast failed: ' + (err.message || err));
+  }
+  renderLogicMachine();
+}
+
+function deleteLogicForecast(id){
+  _logicStore.forecasts = (_logicStore.forecasts || []).filter(item=>item.id!==id);
   saveLogicStore();
-  logicSetStatus(`${forecast.title} saved.`);
   renderLogicMachine();
 }
 
@@ -7494,7 +7659,7 @@ function renderLogicForecastForm(kind='decision'){
       <label class="logic-field"><span>Stakes</span><input id="logic-forecast-stakes" class="logic-input" placeholder="What can be lost?"></label>
       <label class="logic-field"><span>Emotional State</span><input id="logic-forecast-emotion" class="logic-input" placeholder="Fear, hunger, shame, zeal..."></label>
     </div>
-    <div class="logic-actions" style="margin-top:.65rem"><label class="logic-chip"><input id="logic-include-provisional" type="checkbox" style="vertical-align:middle"> Include provisional</label><button class="logic-mini-btn primary" type="button" onclick="generateLogicForecast('${kind}')">${kind === 'branch' ? 'Run Branch Simulation' : 'Generate Forecast'}</button></div>
+    <div class="logic-actions" style="margin-top:.65rem"><button class="logic-mini-btn primary" type="button" onclick="generateLogicForecast('${kind}')">${kind === 'branch' ? 'Run AI Branch Simulation' : 'Generate AI Forecast'}</button></div>
   </section>`;
 }
 
@@ -7510,19 +7675,20 @@ function renderLogicForecastCards(kind='decision'){
       <div><div class="logic-kicker">Needs Setup</div><ul>${item.needsSetup.map(row=>`<li>${escHtml(row)}</li>`).join('')}</ul></div>
     </div>
     <div class="logic-card-body">${escHtml(item.consequences.join(' '))}</div>
+    <div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="deleteLogicForecast('${escHtml(item.id)}')">Delete</button></div>
   </article>`).join('') : '<div class="drafts-empty">No saved forecasts yet.</div>'}</div>`;
 }
 
 function renderLogicForecast(){
   const entity = logicEntityById(_logicSelectedEntityId);
   if(!entity) return `<div class="drafts-empty">Select an entity to forecast decisions.</div>`;
-  return `<section><div class="logic-kicker">Decision Forecast</div><div class="logic-title">${escHtml(entity.name)}</div><div class="logic-meta">Consistency forecast from accepted ontology facets.</div>${renderLogicForecastForm('decision')}${renderLogicForecastCards('decision')}</section>`;
+  return `<section><div class="logic-kicker">Decision Forecast</div><div class="logic-title">${escHtml(entity.name)}</div><div class="logic-meta">AI predicts likely future choices from ontology, psych profile, cultural inference, relationship pressure, real-world analogues, and narrative weight.</div>${renderLogicForecastForm('decision')}${renderLogicForecastCards('decision')}</section>`;
 }
 
 function renderLogicBranchSimulator(){
   const entity = logicEntityById(_logicSelectedEntityId);
   if(!entity) return `<div class="drafts-empty">Select an entity to simulate branches.</div>`;
-  return `<section><div class="logic-kicker">Branch Simulator</div><div class="logic-title">${escHtml(entity.name)}</div><div class="logic-meta">Test hypothetical events against the current ontology.</div>${renderLogicForecastForm('branch')}${renderLogicForecastCards('branch')}</section>`;
+  return `<section><div class="logic-kicker">Branch Simulator</div><div class="logic-title">${escHtml(entity.name)}</div><div class="logic-meta">AI tests a hypothetical event and returns alternate possible paths, not one prediction.</div>${renderLogicForecastForm('branch')}${renderLogicForecastCards('branch')}</section>`;
 }
 
 function renderLogicLifestyleAtlas(){
@@ -7618,10 +7784,10 @@ function renderLogicReports(){
   const entity = logicEntityById(_logicSelectedEntityId);
   const dossiers = logicDossiersForEntity(entity && entity.id);
   const forecasts = logicForecastsForEntity(entity && entity.id);
-  const dossierHtml = dossiers.map(dossier=>`<article class="logic-card"><div class="logic-card-title">${escHtml(dossier.title)}</div><div class="logic-meta">${escHtml(dossier.reportType)} · ${escHtml(authorNoteDate(dossier.createdAt))}</div><div class="logic-card-body">${escHtml(dossier.summary)}</div>${Object.entries(dossier.sections || {}).map(([key,items])=>`<div class="logic-infographic-row"><div class="logic-kicker">${escHtml(key)}</div><div>${Array.isArray(items) && items.length ? `<ul>${items.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : '<span class="logic-meta">No entries</span>'}</div></div>`).join('')}</article>`).join('');
-  const forecastHtml = forecasts.map(item=>`<article class="logic-card"><div class="logic-card-title">${escHtml(item.title)}</div><div class="logic-meta">${escHtml(item.forecastType)} · ${escHtml(authorNoteDate(item.createdAt))}</div><div class="logic-card-body">${escHtml(item.summary)}</div><div class="logic-chip-row"><span class="logic-chip">${escHtml(item.inputs.event || 'no event')}</span><span class="logic-chip">${escHtml(item.inputs.pressure || 'no pressure')}</span></div></article>`).join('');
+  const dossierHtml = dossiers.map(dossier=>`<article class="logic-card"><div class="logic-card-title">${escHtml(dossier.title)}</div><div class="logic-meta">${escHtml(dossier.reportType)} · ${escHtml(authorNoteDate(dossier.createdAt))}</div><div class="logic-card-body">${escHtml(dossier.summary)}</div>${Object.entries(dossier.sections || {}).map(([key,items])=>`<div class="logic-infographic-row"><div class="logic-kicker">${escHtml(key)}</div><div>${Array.isArray(items) && items.length ? `<ul>${items.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : (typeof items === 'string' && items ? `<p class="logic-report-paragraph">${escHtml(items)}</p>` : '<span class="logic-meta">No entries</span>')}</div></div>`).join('')}</article>`).join('');
+  const forecastHtml = forecasts.map(item=>`<article class="logic-card"><div class="logic-card-title">${escHtml(item.title)}</div><div class="logic-meta">${escHtml(item.forecastType)} · ${escHtml(authorNoteDate(item.createdAt))}</div><div class="logic-card-body">${escHtml(item.summary)}</div><div class="logic-chip-row"><span class="logic-chip">${escHtml(item.inputs.event || 'no event')}</span><span class="logic-chip">${escHtml(item.inputs.pressure || 'no pressure')}</span></div><div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="deleteLogicForecast('${escHtml(item.id)}')">Delete</button></div></article>`).join('');
   const oldReportHtml = reports.length ? reports.map(report=>`<article class="logic-card ${report.severity ? `logic-severity-${escHtml(report.severity)}` : ''}"><div class="logic-card-title">${escHtml(report.title)}</div><div class="logic-meta">${escHtml(report.reportType)} · ${escHtml(report.entityName || 'multi-entity')} · ${escHtml(authorNoteDate(report.createdAt))} · ${escHtml(logicConfidence(report.confidence))}</div><div class="logic-card-body">${escHtml(report.summary)}</div>${report.findings.length ? `<ul>${report.findings.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : ''}<div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="deleteLogicReport('${escHtml(report.id)}')">Delete</button></div></article>`).join('') : '';
-  return `<section><div class="logic-kicker">Reports</div><div class="logic-title">Dossiers, forecasts, simulations, and AI reports</div>${_logicStatusMessage ? `<div class="content-status" style="margin-top:.55rem">${escHtml(_logicStatusMessage)}</div>` : ''}<div class="logic-actions" style="margin-top:.7rem"><label class="logic-chip"><input id="logic-include-provisional" type="checkbox" style="vertical-align:middle"> Include provisional</label><button class="logic-mini-btn primary" type="button" onclick="generateLogicDossier('Character Dossier')">Generate Character Dossier</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Relationship Report')">Generate Relationship Report</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Lifestyle & Culture Atlas')">Generate Lifestyle Report</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('forecast')">Forecast</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('simulator')">Simulate</button></div><div class="logic-report-grid" style="margin-top:.85rem">${dossierHtml}${forecastHtml}${oldReportHtml || (!dossierHtml && !forecastHtml ? '<div class="drafts-empty">No reports yet.</div>' : '')}</div></section>`;
+  return `<section><div class="logic-kicker">Reports</div><div class="logic-title">Dossiers, forecasts, simulations, and AI reports</div>${_logicStatusMessage ? `<div class="content-status" style="margin-top:.55rem">${escHtml(_logicStatusMessage)}</div>` : ''}<div class="logic-actions" style="margin-top:.7rem"><label class="logic-chip"><input id="logic-include-provisional" type="checkbox" style="vertical-align:middle"> Include provisional</label><button class="logic-mini-btn primary" type="button" onclick="generateLogicBiopsychosocialReport()">Generate Biopsychosocial Report</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Character Dossier')">Generate Character Dossier</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Relationship Report')">Generate Relationship Report</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Lifestyle & Culture Atlas')">Generate Lifestyle Report</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('forecast')">Forecast</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('simulator')">Simulate</button></div><div class="logic-report-grid" style="margin-top:.85rem">${dossierHtml}${forecastHtml}${oldReportHtml || (!dossierHtml && !forecastHtml ? '<div class="drafts-empty">No reports yet.</div>' : '')}</div></section>`;
 }
 
 function renderLogicPending(){
@@ -7690,6 +7856,12 @@ function setLogicRailFilter(value){
   _logicRailFilter = ['all','characters','world'].includes(value) ? value : 'all';
   saveLogicUi();
   renderLogicMachine();
+}
+
+function setLogicTimelineOpen(open){
+  document.querySelectorAll('.logic-timeline-item').forEach(item=>{
+    if(item.tagName === 'DETAILS') item.open = !!open;
+  });
 }
 
 function setLogicRelationshipScope(value){
@@ -7968,6 +8140,46 @@ function logicAiSchema(){
   };
 }
 
+function logicForecastSchema(){
+  return {
+    type:'object',
+    required:['title','summary','likely','unlikely','needsSetup','consequences'],
+    properties:{
+      title:{type:'string'},
+      summary:{type:'string'},
+      likely:{type:'array',items:{type:'string'}},
+      unlikely:{type:'array',items:{type:'string'}},
+      needsSetup:{type:'array',items:{type:'string'}},
+      consequences:{type:'array',items:{type:'string'}}
+    }
+  };
+}
+
+function logicDossierSchema(){
+  return {
+    type:'object',
+    required:['title','summary','sections'],
+    properties:{
+      title:{type:'string'},
+      summary:{type:'string'},
+      sections:{type:'object',required:['Identifying Overview','Biological/Embodied Presentation','Psychological Structure','Psychosexual Dynamics','Social Context','Lifestyle/Aesthetic Patterning','Relationships','Habits/Moods','Risks/Contradictions','Narrative Function','Forecast Notes','Open Questions'],properties:{
+        'Identifying Overview':{type:'string'},
+        'Biological/Embodied Presentation':{type:'string'},
+        'Psychological Structure':{type:'string'},
+        'Psychosexual Dynamics':{type:'string'},
+        'Social Context':{type:'string'},
+        'Lifestyle/Aesthetic Patterning':{type:'string'},
+        'Relationships':{type:'string'},
+        'Habits/Moods':{type:'string'},
+        'Risks/Contradictions':{type:'string'},
+        'Narrative Function':{type:'string'},
+        'Forecast Notes':{type:'string'},
+        'Open Questions':{type:'string'}
+      }}
+    }
+  };
+}
+
 function logicAiKnownContext(){
   return {
     entities:logicEntities().map(entity=>({id:entity.id, name:entity.name, type:entity.type, aliases:entity.aliases})).slice(0, 500),
@@ -8063,11 +8275,40 @@ function logicEntityEvidencePayload(entity, focus='full', researchAngle='balance
   };
 }
 
+function logicEntityIntelligencePayload(entity){
+  return {
+    selectedEntity:{id:entity.id, name:entity.name, type:entity.type, aliases:entity.aliases, tags:entity.tags, notes:entity.notes},
+    ontology:logicFacetsForEntity(entity.id, true).map(facet=>({
+      category:facet.category,
+      title:facet.title,
+      value:facet.value,
+      status:facet.status,
+      suggestionType:facet.suggestionType,
+      analogue:facet.realLifeAnalogue,
+      reasoning:facet.reasoningChain,
+      relationEffects:facet.relationEffects
+    })).slice(0, 160),
+    observations:logicObservationsForEntity(entity.id).map(obs=>({
+      dimension:obs.dimension,
+      value:obs.value,
+      trigger:obs.trigger,
+      source:logicSourceLabel(obs.sourceKind, obs.sourceId, obs.sourceTitle),
+      quote:obs.quote,
+      relatedEntities:obs.relatedEntities
+    })).slice(0, 120),
+    relatedEntities:logicEntities().filter(other=>other.id!==entity.id).map(other=>({name:other.name,type:other.type,tags:other.tags})).slice(0, 120)
+  };
+}
+
 function logicOntologyInstruction(payload){
   const modeLabel = payload.mode === 'cultural' ? `Cultural Inference lens: ${payload.culturalLens}` : `Ontology focus: ${payload.focus}`;
+  const psychLine = payload.mode === 'psych'
+    ? 'Psych Profile mode: focus on unconscious structure, psychosexuality, defense mechanisms, repetition compulsion, repression, projection, sublimation, shame, desire, Jungian shadow/archetypes, Lacanian lack/Other, symbolic substitutions, and erotic/aesthetic displacements. Do not produce outward fashion/taste ontology unless it reveals unconscious structure.'
+    : '';
   return [
     'Return ONLY valid JSON matching the schema. No markdown, headings, bullets, explanations, or prose outside JSON.',
     modeLabel,
+    psychLine,
     'Generate approval-first ontology cards for the selected entity.',
     'Do not repeat, paraphrase, summarize, or lightly rewrite anything in doNotRepeat.',
     'Each suggestion must add a new inferred taste, behavior, relation, aesthetic, venue, purchase pattern, contradiction, or future behavior forecast.',
@@ -8277,6 +8518,87 @@ async function callLogicOntologyOpenRouter(payload, options={}){
   }
 }
 
+async function callLogicForecastOpenRouter(entity, inputs, forecastType='decision'){
+  const key = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '').trim();
+  if(!key) throw new Error('Paste an OpenRouter API key in Logic AI Settings first.');
+  const model = (_draftAiSettings.openRouterModel || _draftAiSettings.geminiModel || 'openai/gpt-4o-mini').trim();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 120000);
+  const payload = {forecastType, inputs, intelligence:logicEntityIntelligencePayload(entity)};
+  const modeText = forecastType === 'branch'
+    ? 'Branch Simulation: generate multiple possible responses to the hypothetical event. Separate paths by pressure, unconscious reaction, relationship influence, and narrative consequence. Do not present one deterministic future.'
+    : 'Decision Forecast: predict likely and unlikely future choices from accepted ontology, psychosexual/unconscious patterns, relationships, cultural trends, real-world analogues, and narrative/literary weight.';
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method:'POST',
+    headers:openRouterAuthHeaders('COSMOPOLITA Logic Machine'),
+    signal:controller.signal,
+    body:JSON.stringify({
+      model,
+      provider:{require_parameters:true},
+      messages:[
+        {role:'system', content:'Return only valid JSON matching the schema. You are a literary character-logic forecaster. Use ontology, psych profile, cultural inference, relationships, and narrative weight. Do not add prose outside JSON.'},
+        {role:'user', content:modeText + '\n\n' + JSON.stringify(payload)}
+      ],
+      response_format:{
+        type:'json_schema',
+        json_schema:{name:'logic_forecast', strict:true, schema:strictJsonSchema(logicForecastSchema())}
+      }
+    })
+  }).catch(err=>{
+    if(err && err.name === 'AbortError') throw new Error('OpenRouter forecast request timed out after 120 seconds.');
+    throw err;
+  }).finally(()=>clearTimeout(timer));
+  const text = await res.text();
+  _logicAiLastRawPreview = text.slice(0, 3000);
+  let data = null;
+  try{ data = JSON.parse(text); }catch(e){}
+  if(!res.ok){
+    const message = (data && data.error && (data.error.message || data.error)) || text || `OpenRouter forecast failed with HTTP ${res.status}`;
+    if(/No endpoints found/i.test(String(message))) throw new Error(openRouterNoEndpointMessage(model));
+    throw new Error(message);
+  }
+  const parsed = parseOpenRouterJsonOutput(openRouterOutputText(data), 'Logic forecast');
+  return {model, parsed};
+}
+
+async function callLogicDossierOpenRouter(entity){
+  const key = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '').trim();
+  if(!key) throw new Error('Paste an OpenRouter API key in Logic AI Settings first.');
+  const model = (_draftAiSettings.openRouterModel || _draftAiSettings.geminiModel || 'openai/gpt-4o-mini').trim();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 140000);
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method:'POST',
+    headers:openRouterAuthHeaders('COSMOPOLITA Logic Machine'),
+    signal:controller.signal,
+    body:JSON.stringify({
+      model,
+      provider:{require_parameters:true},
+      messages:[
+        {role:'system', content:'Return only valid JSON matching the schema. Write an academic biopsychosocial character report in polished paragraph prose. Use only supplied working logic data and clearly mark uncertainty. Include psychosexual and unconscious dynamics where supported.'},
+        {role:'user', content:'Generate a biopsychosocial report for this entity. Each section should be a paragraph, not bullets.\n\n' + JSON.stringify(logicEntityIntelligencePayload(entity))}
+      ],
+      response_format:{
+        type:'json_schema',
+        json_schema:{name:'logic_biopsychosocial_report', strict:true, schema:strictJsonSchema(logicDossierSchema())}
+      }
+    })
+  }).catch(err=>{
+    if(err && err.name === 'AbortError') throw new Error('OpenRouter biopsychosocial report timed out after 140 seconds.');
+    throw err;
+  }).finally(()=>clearTimeout(timer));
+  const text = await res.text();
+  _logicAiLastRawPreview = text.slice(0, 3000);
+  let data = null;
+  try{ data = JSON.parse(text); }catch(e){}
+  if(!res.ok){
+    const message = (data && data.error && (data.error.message || data.error)) || text || `OpenRouter report failed with HTTP ${res.status}`;
+    throw new Error(message);
+  }
+  const parsed = parseOpenRouterJsonOutput(openRouterOutputText(data), 'Biopsychosocial report');
+  return {model, parsed};
+}
+
 function storeLogicAiReport(parsed, source, model){
   const now = Date.now();
   const suggestions = [];
@@ -8401,7 +8723,7 @@ async function analyzeLogicOntologyEntity(mode='ontology'){
     await draftRefreshCache().catch(()=>{});
   }
   const webResearch = !!document.getElementById('logic-ontology-web')?.checked;
-  const focus = document.getElementById('logic-ontology-focus')?.value || 'full';
+  const focus = mode === 'psych' ? 'psychology' : (document.getElementById('logic-ontology-focus')?.value || 'full');
   const researchAngle = document.getElementById('logic-ontology-research-angle')?.value || 'balanced';
   const culturalLens = document.getElementById('logic-cultural-lens')?.value || 'balanced';
   logicSetStatus(`Generating ${mode === 'cultural' ? 'cultural inference' : 'ontology insights'} for ${entity.name}${webResearch ? ' with web research' : ''} (${mode === 'cultural' ? culturalLens : researchAngle})...`);
@@ -8418,6 +8740,13 @@ async function analyzeLogicOntologyEntity(mode='ontology'){
     logicSetStatus('Ontology enrichment failed: ' + (err.message || err));
     renderLogicMachine();
   }
+}
+
+async function generateLogicPsychProfile(){
+  if(!requireAdmin()) return;
+  const focus = document.getElementById('logic-ontology-focus');
+  if(focus) focus.value = 'psychology';
+  await analyzeLogicOntologyEntity('psych');
 }
 
 async function analyzeLogicChapter(id=_logicChapterId){
@@ -9020,7 +9349,7 @@ function backupLogicMachineHtml(store={}){
       <h5>${backupEscapeHtml(dossier.reportType)} · ${backupEscapeHtml(dossier.title)}</h5>
       <p><b>Entity:</b> ${backupEscapeHtml(dossier.entityName)}</p>
       <p>${backupEscapeHtml(dossier.summary)}</p>
-      ${Object.entries(dossier.sections || {}).map(([key,items])=>`<p><b>${backupEscapeHtml(key)}:</b> ${backupEscapeHtml(Array.isArray(items) ? items.join(' | ') : '')}</p>`).join('')}
+      ${Object.entries(dossier.sections || {}).map(([key,items])=>`<p><b>${backupEscapeHtml(key)}:</b> ${backupEscapeHtml(Array.isArray(items) ? items.join(' | ') : String(items || ''))}</p>`).join('')}
     </article>`;
   }).join('') : '<p class="muted">No dossiers</p>';
   const forecastHtml = logic.forecasts.length ? logic.forecasts.map(raw=>{
@@ -19477,7 +19806,11 @@ Object.assign(window, {
   logicSetFacetStatus,
   logicUpdateFacet,
   generateLogicDossier,
+  generateLogicBiopsychosocialReport,
   generateLogicForecast,
+  deleteLogicForecast,
+  generateLogicPsychProfile,
+  setLogicTimelineOpen,
   analyzeLogicOntologyEntity,
   acceptLogicOntologySuggestion,
   rejectLogicOntologySuggestion,
