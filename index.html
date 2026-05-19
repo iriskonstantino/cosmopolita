@@ -7963,7 +7963,7 @@ async function callLogicOntologyOpenRouter(payload, options={}){
     }
   };
   if(options.webResearch){
-    body.tools = [{type:'openrouter:web_search'}];
+    body.tools = [{type:'openrouter:web_search', parameters:{max_results:5, max_total_results:10, search_context_size:'low'}}];
   }
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method:'POST',
