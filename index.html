@@ -4711,7 +4711,7 @@ body:not(.admin-on) #tnav-drafts{
   position:relative;
   min-height:210px;
   border:1px solid var(--border);
-  background:linear-gradient(110deg,rgba(42,35,29,0.92),rgba(112,26,18,0.78));
+  background:linear-gradient(110deg,#f7efe4,#ead6be);
   color:var(--white);
   overflow:hidden;
   padding:1rem;
@@ -4725,18 +4725,29 @@ body:not(.admin-on) #tnav-drafts{
   width:100%;
   height:100%;
   object-fit:cover;
-  opacity:0.42;
-  filter:saturate(0.86) contrast(1.08);
+  opacity:1;
+  filter:none;
 }
 .logic-hero::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(180deg,rgba(0,0,0,0.05),rgba(0,0,0,0.72));
+  display:none;
 }
-.logic-hero-content{position:relative;z-index:1;max-width:760px}
+.logic-hero-content{
+  position:relative;
+  z-index:1;
+  max-width:760px;
+  background:rgba(24,20,16,0.74);
+  border:1px solid rgba(255,255,255,0.24);
+  padding:0.75rem 0.85rem;
+}
 .logic-hero .logic-title{color:var(--white);font-size:clamp(1.75rem,4vw,3.1rem)}
 .logic-hero .logic-meta{color:#eadfcf}
+.logic-image-controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.45rem;
+  align-items:center;
+  margin:0.55rem 0 0.85rem;
+}
 .logic-gauge-card{
   border:1px solid var(--border);
   background:#fbf8f3;
@@ -4761,6 +4772,23 @@ body:not(.admin-on) #tnav-drafts{
   background:linear-gradient(90deg,var(--red),var(--gold));
 }
 .logic-timeline-controls{display:flex;gap:0.45rem;flex-wrap:wrap;margin-top:0.55rem}
+.logic-timeline-summary{
+  cursor:pointer;
+  list-style:none;
+  display:grid;
+  grid-template-columns:minmax(7rem,0.28fr) minmax(0,1fr);
+  gap:0.65rem;
+  align-items:start;
+}
+.logic-timeline-summary::-webkit-details-marker{display:none}
+.logic-timeline-headline{
+  font-family:var(--serif);
+  font-size:0.84rem;
+  line-height:1.35;
+  color:#3f372f;
+  text-transform:none;
+  letter-spacing:0.02em;
+}
 .logic-report-paragraph{
   font-family:var(--serif);
   font-size:0.96rem;
@@ -4834,6 +4862,62 @@ body:not(.admin-on) #tnav-drafts{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:0.7rem;
+}
+.logic-ontology-workspace,.logic-report-workspace{
+  display:grid;
+  grid-template-columns:minmax(180px,240px) minmax(0,1fr);
+  gap:0.85rem;
+  align-items:start;
+  margin-top:0.85rem;
+}
+.logic-ontology-index,.logic-report-index{
+  position:sticky;
+  top:4.6rem;
+  max-height:calc(100vh - 5rem);
+  overflow:auto;
+}
+.logic-index-btn{
+  width:100%;
+  border:1px solid var(--border);
+  background:#fbf8f3;
+  color:var(--ink);
+  display:flex;
+  justify-content:space-between;
+  gap:0.65rem;
+  align-items:center;
+  padding:0.5rem;
+  margin-bottom:0.35rem;
+  cursor:pointer;
+  text-align:left;
+}
+.logic-index-btn.active{border-color:var(--red);box-shadow:inset 3px 0 0 var(--red);background:var(--white)}
+.logic-reader{
+  background:var(--white);
+  border:1px solid var(--border);
+  padding:1.25rem;
+}
+.logic-reader-inner{
+  max-width:780px;
+  margin:0 auto;
+  font-family:var(--serif);
+}
+.logic-reader-inner h3{
+  font-family:var(--display);
+  font-size:1.55rem;
+  line-height:1.1;
+  color:var(--ink);
+  margin:0 0 0.7rem;
+}
+.logic-reader-section{
+  border-top:1px solid var(--border);
+  padding-top:0.85rem;
+  margin-top:0.85rem;
+}
+.logic-reader-section summary{
+  cursor:pointer;
+  font-family:var(--display);
+  font-weight:700;
+  color:var(--ink);
 }
 .logic-ontology-group{
   border:1px solid var(--border);
@@ -4925,9 +5009,10 @@ body:not(.admin-on) #tnav-drafts{
   .planning-pane{max-height:none;}
   .planning-body{min-height:40vh;}
   .drafts-help-grid,.drafts-help-flow,.drafts-help-recipes,.drafts-glossary-grid{grid-template-columns:1fr;}
-  .logic-shell,.logic-grid,.logic-matrix-grid,.logic-report-grid,.logic-form-grid,.logic-stat-grid,.author-logic-summary,.logic-facet-grid,.logic-forecast-columns{grid-template-columns:1fr;}
+  .logic-shell,.logic-grid,.logic-matrix-grid,.logic-report-grid,.logic-form-grid,.logic-stat-grid,.author-logic-summary,.logic-facet-grid,.logic-forecast-columns,.logic-ontology-workspace,.logic-report-workspace{grid-template-columns:1fr;}
   .logic-rail{position:relative;top:auto;max-height:none;}
-  .logic-timeline-item,.logic-infographic-row{grid-template-columns:1fr;}
+  .logic-ontology-index,.logic-report-index{position:relative;top:auto;max-height:none}
+  .logic-timeline-item,.logic-infographic-row,.logic-timeline-summary{grid-template-columns:1fr;}
   .drafts-field.wide{grid-column:auto;}
   .assets-wrap{grid-template-columns:1fr;}
   #assets-view .side-panel{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
@@ -5205,7 +5290,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.09</div>
+<div id="site-version-stamp">v2026.05.19.11</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -7048,7 +7133,7 @@ function loadLogicUi(){
 }
 
 function saveLogicUi(){
-  try{ localStorage.setItem(LOGIC_UI_STORAGE_KEY, JSON.stringify({tab:_logicActiveTab, entityId:_logicSelectedEntityId, filter:_logicFilter, railFilter:_logicRailFilter, relationshipScope:_logicRelationshipScope, chapterId:_logicChapterId, draftId:_logicDraftId})); }catch(e){}
+  try{ localStorage.setItem(LOGIC_UI_STORAGE_KEY, JSON.stringify({tab:_logicActiveTab, entityId:_logicSelectedEntityId, filter:_logicFilter, railFilter:_logicRailFilter, relationshipScope:_logicRelationshipScope, chapterId:_logicChapterId, draftId:_logicDraftId, ontologyCategory:_logicOntologyCategory, ontologySearch:_logicOntologySearch, reportFilter:_logicReportFilter, selectedReport:_logicSelectedReportKey, timelineFilter:_logicTimelineFilter, timelineCollapsed:_logicTimelineCollapsed, imageSettings:_logicImageSettings})); }catch(e){}
 }
 
 function normalizeLogicTabId(tab){
@@ -7065,6 +7150,13 @@ function logicInitUi(){
   _logicRelationshipScope = ['selected','influence','global'].includes(ui.relationshipScope) ? ui.relationshipScope : (_logicRelationshipScope || 'selected');
   _logicChapterId = ui.chapterId || _logicChapterId || (chapters[0] && chapters[0].id) || '';
   _logicDraftId = ui.draftId || _logicDraftId || '';
+  _logicOntologyCategory = ui.ontologyCategory || _logicOntologyCategory || '';
+  _logicOntologySearch = ui.ontologySearch || _logicOntologySearch || '';
+  _logicReportFilter = ['all','biopsychosocial','forecasts','simulations','chapter-checks','old'].includes(ui.reportFilter) ? ui.reportFilter : (_logicReportFilter || 'all');
+  _logicSelectedReportKey = ui.selectedReport || _logicSelectedReportKey || '';
+  _logicTimelineFilter = ['recent','all','risks'].includes(ui.timelineFilter) ? ui.timelineFilter : (_logicTimelineFilter || 'recent');
+  _logicTimelineCollapsed = typeof ui.timelineCollapsed === 'boolean' ? ui.timelineCollapsed : _logicTimelineCollapsed;
+  _logicImageSettings = ui.imageSettings && typeof ui.imageSettings === 'object' ? ui.imageSettings : (_logicImageSettings || {});
   const entities = logicEntities();
   _logicSelectedEntityId = ui.entityId && entities.some(entity=>entity.id===ui.entityId) ? ui.entityId : (_logicSelectedEntityId || (entities[0] && entities[0].id) || '');
 }
@@ -7106,6 +7198,24 @@ function logicEntityImage(entity){
     return codexHeroImage(entry) || codexFlagImage(entry);
   }
   return '';
+}
+
+function logicImageSetting(entityId){
+  const defaults = {position:'center center', zoom:100};
+  const saved = (_logicImageSettings && _logicImageSettings[entityId]) || {};
+  return Object.assign(defaults, saved);
+}
+
+function logicSetImageCrop(position='', zoom=''){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return;
+  const current = logicImageSetting(entity.id);
+  _logicImageSettings[entity.id] = {
+    position:position || current.position,
+    zoom:zoom === '' ? current.zoom : Number(zoom || 100)
+  };
+  saveLogicUi();
+  renderLogicMachine();
 }
 
 function logicGaugeCard(label, value, hint=''){
@@ -7330,6 +7440,7 @@ function renderLogicProfiles(){
   const stats = logicEntityStats(entity);
   const facets = logicFacetsForEntity(entity.id, true);
   const image = logicEntityImage(entity);
+  const imageSetting = logicImageSetting(entity.id);
   const countCats = cats => facets.filter(item=>cats.includes(item.category)).length + obs.filter(item=>cats.includes(item.dimension)).length;
   const totalSignals = Math.max(1, facets.length + obs.length);
   const gauges = [
@@ -7342,7 +7453,7 @@ function renderLogicProfiles(){
   ].join('');
   return `<section>
     <div class="logic-hero">
-      ${image ? `<img class="logic-hero-img" src="${escHtml(image)}" alt="${escHtml(entity.name)}" onerror="this.remove()">` : ''}
+      ${image ? `<img class="logic-hero-img" src="${escHtml(image)}" alt="${escHtml(entity.name)}" style="object-position:${escHtml(imageSetting.position)};transform:scale(${Number(imageSetting.zoom || 100) / 100})" onerror="this.remove()">` : ''}
       <div class="logic-hero-content">
         <div class="logic-kicker">Entity Profile</div>
         <div class="logic-title">${escHtml(entity.name)}</div>
@@ -7352,9 +7463,11 @@ function renderLogicProfiles(){
     <div class="logic-actions" style="margin-top:.7rem">
       ${entity.sourceKind === 'character' ? `<button class="logic-mini-btn" type="button" onclick="showCharDetail('${escHtml(entity.sourceId)}')">Open Character</button>` : ''}
       ${entity.sourceKind === 'codex' ? `<button class="logic-mini-btn" type="button" onclick="showCodexEntry('${escHtml(entity.sourceId)}')">Open Codex</button>` : ''}
-      <button class="logic-mini-btn" type="button" onclick="analyzeLogicEntityAcrossText()">Analyze Entity</button>
+      <button class="logic-mini-btn" type="button" onclick="analyzeLogicEntityAcrossText()">Scan Text For Entity</button>
       <button class="logic-mini-btn" type="button" onclick="setLogicTab('ontology')">Open Ontology</button>
     </div>
+    <div class="logic-meta" style="margin-top:.45rem">Scan Text For Entity scans chapters and draft fragments for this entity, then sends matching excerpts to Pending AI as observations. Ontology generation is separate.</div>
+    ${image ? `<div class="logic-image-controls"><span class="logic-kicker">Image Crop</span>${[['left center','Left'],['center top','Top'],['center center','Center'],['center bottom','Bottom'],['right center','Right']].map(([pos,label])=>`<button class="logic-mini-btn ${imageSetting.position===pos?'primary':''}" type="button" onclick="logicSetImageCrop('${pos}')">${label}</button>`).join('')}<label class="logic-chip">Zoom <input type="range" min="100" max="180" value="${escHtml(imageSetting.zoom)}" oninput="logicSetImageCrop('', this.value)" style="vertical-align:middle;width:7rem"></label></div>` : ''}
     <div class="logic-stat-grid">
       <div class="logic-stat"><b>${stats.observations}</b><div class="logic-stat-label">Observations</div></div>
       <div class="logic-stat"><b>${stats.facets}</b><div class="logic-stat-label">Ontology Facets</div></div>
@@ -7366,12 +7479,28 @@ function renderLogicProfiles(){
     <section class="logic-panel">
       <div class="logic-card-title">Timeline</div>
       <div class="logic-card-body">Accepted observations over time. Collapse the list when you want the dashboard without the case-file detail.</div>
-      <div class="logic-timeline-controls"><button class="logic-mini-btn" type="button" onclick="setLogicTimelineOpen(true)">Expand All</button><button class="logic-mini-btn" type="button" onclick="setLogicTimelineOpen(false)">Collapse All</button></div>
+      <div class="logic-timeline-controls"><button class="logic-mini-btn ${_logicTimelineFilter==='recent'?'primary':''}" type="button" onclick="setLogicTimelineFilter('recent')">Show Recent</button><button class="logic-mini-btn ${_logicTimelineFilter==='all'?'primary':''}" type="button" onclick="setLogicTimelineFilter('all')">Show All</button><button class="logic-mini-btn ${_logicTimelineFilter==='risks'?'primary':''}" type="button" onclick="setLogicTimelineFilter('risks')">Only Risks</button><button class="logic-mini-btn" type="button" onclick="setLogicTimelineOpen(true)">Expand All</button><button class="logic-mini-btn" type="button" onclick="setLogicTimelineOpen(false)">Collapse All</button></div>
       <div class="logic-timeline">
-        ${obs.length ? obs.map(item=>`<details class="logic-timeline-item" open><summary class="logic-meta">${escHtml(logicSourceLabel(item.sourceKind,item.sourceId,item.sourceTitle))} · ${escHtml(item.dimension)}</summary><div>${logicObservationCard(item)}</div></details>`).join('') : '<div class="drafts-empty">No observations yet. Add one manually or run AI analysis.</div>'}
+        ${renderLogicTimelineItems(obs)}
       </div>
     </section>
   </section>`;
+}
+
+function logicTimelineHeadline(obs){
+  const text = String(obs.value || obs.summary || obs.trigger || '').replace(/\s+/g, ' ').trim();
+  return text.length > 80 ? text.slice(0, 80) + '...' : (text || 'Observation');
+}
+
+function renderLogicTimelineItems(obs=[]){
+  let items = obs;
+  if(_logicTimelineFilter === 'recent') items = obs.slice(0, 8);
+  if(_logicTimelineFilter === 'risks') items = obs.filter(item=>item.dimension === 'contradiction' || /risk|contradict|inconsistent|sudden|needs setup/i.test(`${item.value} ${item.trigger}`));
+  if(!items.length) return '<div class="drafts-empty">No observations match this timeline filter.</div>';
+  return items.map(item=>`<details class="logic-timeline-item" ${_logicTimelineCollapsed ? '' : 'open'}>
+    <summary class="logic-timeline-summary"><span class="logic-meta">${escHtml(logicSourceLabel(item.sourceKind,item.sourceId,item.sourceTitle))}<br>${escHtml(authorNoteDate(item.createdAt))} · ${escHtml(item.dimension)}</span><span class="logic-timeline-headline">${escHtml(logicTimelineHeadline(item))}</span></summary>
+    <div>${logicObservationCard(item)}</div>
+  </details>`).join('');
 }
 
 function logicFacetList(entityId, categories=[], includeProvisional=true){
@@ -7387,14 +7516,15 @@ function renderLogicOntology(){
   if(!entity) return `<div class="drafts-empty">Select an entity to edit its ontology.</div>`;
   const facets = logicFacetsForEntity(entity.id, true);
   const pendingOntology = logicOntologySuggestionsForEntity(entity.id);
-  const grouped = LOGIC_FACET_CATEGORIES.map(category=>{
-    const items = facets.filter(facet=>facet.category===category.id);
-    return `<section class="logic-ontology-group">
-      <div class="logic-card-title">${escHtml(category.label)}</div>
-      <div class="logic-meta">${items.length} facet${items.length===1?'':'s'}</div>
-      <div class="logic-timeline">${items.length ? items.map(logicFacetCard).join('') : '<div class="drafts-empty">No facets in this category.</div>'}</div>
-    </section>`;
-  }).join('');
+  const categoriesWithCounts = LOGIC_FACET_CATEGORIES.map(category=>({category, count:facets.filter(facet=>facet.category===category.id).length}));
+  const firstWithContent = (categoriesWithCounts.find(item=>item.count) || categoriesWithCounts[0] || {}).category;
+  const activeCategory = LOGIC_FACET_CATEGORIES.some(cat=>cat.id===_logicOntologyCategory) ? _logicOntologyCategory : (firstWithContent && firstWithContent.id) || 'psyche';
+  const activeLabel = logicFacetCategoryLabel(activeCategory);
+  const search = String(_logicOntologySearch || '').trim().toLowerCase();
+  const activeItems = facets.filter(facet=>facet.category===activeCategory).filter(facet=>!search || [facet.title, facet.value, facet.evidence, facet.tags.join(' ')].join(' ').toLowerCase().includes(search));
+  const filled = categoriesWithCounts.filter(item=>item.count);
+  const empty = categoriesWithCounts.filter(item=>!item.count);
+  const categoryButton = ({category,count})=>`<button class="logic-index-btn ${activeCategory===category.id?'active':''}" type="button" onclick="setLogicOntologyCategory('${escHtml(category.id)}')"><span>${escHtml(category.label)}</span><span class="logic-meta">${count}</span></button>`;
   return `<section>
     <div class="logic-kicker">Unified Ontology</div>
     <div class="logic-title">${escHtml(entity.name)}</div>
@@ -7434,7 +7564,19 @@ function renderLogicOntology(){
     ${renderLogicAiSettings()}
     ${_logicStatusMessage ? `<div class="content-status" style="margin-top:.55rem">${escHtml(_logicStatusMessage)}</div>` : ''}
     ${pendingOntology.length ? `<section class="logic-panel" style="margin-top:.85rem"><div class="logic-card-title">Pending Ontology For ${escHtml(entity.name)}</div><div class="logic-report-grid">${pendingOntology.map(renderLogicOntologySuggestionCard).join('')}</div></section>` : ''}
-    <div class="logic-facet-grid" style="margin-top:.85rem">${grouped}</div>
+    <div class="logic-ontology-workspace">
+      <aside class="logic-ontology-index logic-panel">
+        <div class="logic-card-title">Categories</div>
+        <input class="logic-input" value="${escHtml(_logicOntologySearch)}" placeholder="Filter visible cards..." oninput="setLogicOntologySearch(this.value)">
+        <div style="margin-top:.65rem">${(filled.length ? filled : categoriesWithCounts).map(categoryButton).join('')}</div>
+        ${empty.length ? `<details style="margin-top:.65rem"><summary class="logic-meta">Empty Categories</summary><div style="margin-top:.45rem">${empty.map(categoryButton).join('')}</div></details>` : ''}
+      </aside>
+      <section class="logic-ontology-group">
+        <div class="logic-card-title">${escHtml(activeLabel)}</div>
+        <div class="logic-meta">${activeItems.length} visible card${activeItems.length===1?'':'s'}${search ? ' matching filter' : ''}</div>
+        <div class="logic-report-grid" style="margin-top:.65rem">${activeItems.length ? activeItems.map(logicFacetCard).join('') : '<div class="drafts-empty">No cards in this category yet.</div>'}</div>
+      </section>
+    </div>
     ${renderManualFacetForm(entity)}
   </section>`;
 }
@@ -7643,6 +7785,7 @@ async function generateLogicForecast(forecastType='decision'){
 
 function deleteLogicForecast(id){
   _logicStore.forecasts = (_logicStore.forecasts || []).filter(item=>item.id!==id);
+  if(_logicSelectedReportKey === `forecast:${id}`) _logicSelectedReportKey = '';
   saveLogicStore();
   renderLogicMachine();
 }
@@ -7779,15 +7922,143 @@ function renderLogicRelationships(){
   return `<section><div class="logic-kicker">Relationships</div><div class="logic-title">${escHtml(entity ? entity.name : 'All Entities')} relationship map</div><section class="logic-panel"><div class="logic-card-title">What This Tab Does</div><div class="logic-card-body">Selected Only keeps the map scoped to the current entity. Influence View asks how people, factions, places, and scenes may shift that entity's tastes, risks, and future choices. Global Map shows every observed relationship.</div><div class="logic-tabs" style="margin-top:.65rem"><button class="logic-tab ${_logicRelationshipScope==='selected'?'active':''}" type="button" onclick="setLogicRelationshipScope('selected')">Selected Only</button><button class="logic-tab ${_logicRelationshipScope==='influence'?'active':''}" type="button" onclick="setLogicRelationshipScope('influence')">Influence View</button><button class="logic-tab ${_logicRelationshipScope==='global'?'active':''}" type="button" onclick="setLogicRelationshipScope('global')">Global Map</button></div></section><div class="logic-grid" style="margin-top:.85rem"><section class="logic-panel"><div class="logic-card-title">${leftTitle}</div>${leftBody}</section><section class="logic-panel"><div class="logic-card-title">${_logicRelationshipScope==='global'?'All Observed Links':'Observed Links For Selected Entity'}</div>${scopedRows.length ? scopedRows.map(row=>`<div class="logic-relationship-row"><div><b>${escHtml(row.entity ? row.entity.name : row.obs.entityName)}</b><div class="logic-meta">${escHtml(row.obs.dimension)}</div></div><div class="logic-arrow">→</div><div><b>${escHtml(row.other)}</b><div class="logic-card-body">${escHtml(row.obs.value)}</div></div></div>`).join('') : '<div class="drafts-empty">No relationship observations for this scope yet.</div>'}</section></div></section>`;
 }
 
+function logicAllReportItems(entity){
+  const entityId = entity && entity.id;
+  const dossierItems = logicDossiersForEntity(entityId).map(item=>({
+    key:`dossier:${item.id}`,
+    type:item.reportType === 'Biopsychosocial Report' ? 'biopsychosocial' : 'dossier',
+    label:item.reportType || 'Dossier',
+    title:item.title || item.reportType || 'Dossier',
+    createdAt:item.createdAt || 0,
+    summary:item.summary || '',
+    source:item
+  }));
+  const forecastItems = logicForecastsForEntity(entityId).map(item=>({
+    key:`forecast:${item.id}`,
+    type:item.forecastType === 'branch' ? 'simulation' : 'forecast',
+    label:item.forecastType === 'branch' ? 'Branch Simulation' : 'Decision Forecast',
+    title:item.title || 'Forecast',
+    createdAt:item.createdAt || 0,
+    summary:item.summary || '',
+    source:item
+  }));
+  const reportItems = (_logicStore.reports || []).map(normalizeLogicReport).filter(item=>{
+    if(!entityId) return true;
+    return !item.entityId || item.entityId === entityId;
+  }).map(item=>({
+    key:`report:${item.id}`,
+    type:/chapter/i.test(item.reportType || '') ? 'chapter-check' : 'old',
+    label:item.reportType || 'AI Report',
+    title:item.title || item.reportType || 'AI Report',
+    createdAt:item.createdAt || 0,
+    summary:item.summary || '',
+    source:item
+  }));
+  return [...dossierItems, ...forecastItems, ...reportItems].sort((a,b)=>(b.createdAt || 0) - (a.createdAt || 0));
+}
+
+function logicReportMatchesFilter(item){
+  if(_logicReportFilter === 'biopsychosocial') return item.type === 'biopsychosocial';
+  if(_logicReportFilter === 'forecasts') return item.type === 'forecast';
+  if(_logicReportFilter === 'simulations') return item.type === 'simulation';
+  if(_logicReportFilter === 'chapter-checks') return item.type === 'chapter-check';
+  if(_logicReportFilter === 'old') return item.type === 'old' || item.type === 'dossier';
+  return true;
+}
+
+function logicDeleteReportItem(key){
+  const [type,id] = String(key || '').split(':');
+  if(!id) return;
+  if(type === 'dossier') _logicStore.dossiers = (_logicStore.dossiers || []).filter(item=>item.id !== id);
+  else if(type === 'forecast') _logicStore.forecasts = (_logicStore.forecasts || []).filter(item=>item.id !== id);
+  else if(type === 'report') _logicStore.reports = (_logicStore.reports || []).filter(item=>item.id !== id);
+  if(_logicSelectedReportKey === key) _logicSelectedReportKey = '';
+  saveLogicStore();
+  saveLogicUi();
+  renderLogicMachine();
+}
+
+function logicReportSectionEntries(item){
+  if(!item) return [];
+  const source = item.source || {};
+  if(item.key.startsWith('dossier:')){
+    return Object.entries(source.sections || {}).map(([key,value])=>({
+      title:key.replace(/([A-Z])/g,' $1').replace(/^./, ch=>ch.toUpperCase()),
+      value
+    }));
+  }
+  if(item.key.startsWith('forecast:')){
+    return [
+      {title:'Likely Actions', value:source.likely || []},
+      {title:'Unlikely Actions', value:source.unlikely || []},
+      {title:'Needs Setup', value:source.needsSetup || []},
+      {title:'Narrative Consequences', value:source.consequences || []}
+    ];
+  }
+  return [
+    {title:'Findings', value:source.findings || []},
+    {title:'Suggested Fix', value:source.suggestedFix || ''},
+    {title:'Source Quote', value:source.quote || ''}
+  ].filter(section=>Array.isArray(section.value) ? section.value.length : section.value);
+}
+
+function renderLogicReportSection(section){
+  const value = section.value;
+  let body = '<p class="logic-report-paragraph">No entries.</p>';
+  if(Array.isArray(value)){
+    body = value.length ? value.map(item=>`<p class="logic-report-paragraph">${escHtml(item)}</p>`).join('') : body;
+  }else if(value && typeof value === 'object'){
+    body = Object.entries(value).map(([key,val])=>`<p class="logic-report-paragraph"><b>${escHtml(key)}:</b> ${escHtml(Array.isArray(val) ? val.join('; ') : val)}</p>`).join('');
+  }else if(value){
+    body = `<p class="logic-report-paragraph">${escHtml(value)}</p>`;
+  }
+  return `<details class="logic-reader-section" open><summary>${escHtml(section.title)}</summary>${body}</details>`;
+}
+
+function renderLogicReportReader(item){
+  if(!item) return `<section class="logic-reader"><div class="logic-reader-inner"><div class="drafts-empty">No report selected.</div></div></section>`;
+  const sections = logicReportSectionEntries(item);
+  const chips = item.key.startsWith('forecast:') ? `<div class="logic-chip-row">${Object.entries(item.source.inputs || {}).filter(([,value])=>value).slice(0,4).map(([key,value])=>`<span class="logic-chip">${escHtml(key)}: ${escHtml(value)}</span>`).join('')}</div>` : '';
+  return `<section class="logic-reader">
+    <div class="logic-reader-inner">
+      <div class="logic-actions" style="justify-content:flex-end"><button class="logic-mini-btn" type="button" onclick="setLogicReportSectionsOpen(true)">Expand All</button><button class="logic-mini-btn" type="button" onclick="setLogicReportSectionsOpen(false)">Collapse All</button><button class="logic-mini-btn danger" type="button" onclick="logicDeleteReportItem('${escHtml(item.key)}')">Delete</button></div>
+      <div class="logic-kicker">${escHtml(item.label)}</div>
+      <h2>${escHtml(item.title)}</h2>
+      <div class="logic-meta">${escHtml(authorNoteDate(item.createdAt))}</div>
+      ${chips}
+      ${item.summary ? `<p class="logic-report-paragraph">${escHtml(item.summary)}</p>` : ''}
+      ${sections.length ? `<nav class="logic-chip-row">${sections.map((section,index)=>`<button class="logic-chip" type="button" onclick="document.querySelectorAll('.logic-reader-section')[${index}]?.scrollIntoView({behavior:'smooth',block:'start'})">${escHtml(section.title)}</button>`).join('')}</nav>` : ''}
+      ${sections.length ? sections.map(renderLogicReportSection).join('') : '<div class="drafts-empty">This report has no detailed sections yet.</div>'}
+    </div>
+  </section>`;
+}
+
 function renderLogicReports(){
-  const reports = (_logicStore.reports || []).map(normalizeLogicReport).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   const entity = logicEntityById(_logicSelectedEntityId);
-  const dossiers = logicDossiersForEntity(entity && entity.id);
-  const forecasts = logicForecastsForEntity(entity && entity.id);
-  const dossierHtml = dossiers.map(dossier=>`<article class="logic-card"><div class="logic-card-title">${escHtml(dossier.title)}</div><div class="logic-meta">${escHtml(dossier.reportType)} · ${escHtml(authorNoteDate(dossier.createdAt))}</div><div class="logic-card-body">${escHtml(dossier.summary)}</div>${Object.entries(dossier.sections || {}).map(([key,items])=>`<div class="logic-infographic-row"><div class="logic-kicker">${escHtml(key)}</div><div>${Array.isArray(items) && items.length ? `<ul>${items.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : (typeof items === 'string' && items ? `<p class="logic-report-paragraph">${escHtml(items)}</p>` : '<span class="logic-meta">No entries</span>')}</div></div>`).join('')}</article>`).join('');
-  const forecastHtml = forecasts.map(item=>`<article class="logic-card"><div class="logic-card-title">${escHtml(item.title)}</div><div class="logic-meta">${escHtml(item.forecastType)} · ${escHtml(authorNoteDate(item.createdAt))}</div><div class="logic-card-body">${escHtml(item.summary)}</div><div class="logic-chip-row"><span class="logic-chip">${escHtml(item.inputs.event || 'no event')}</span><span class="logic-chip">${escHtml(item.inputs.pressure || 'no pressure')}</span></div><div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="deleteLogicForecast('${escHtml(item.id)}')">Delete</button></div></article>`).join('');
-  const oldReportHtml = reports.length ? reports.map(report=>`<article class="logic-card ${report.severity ? `logic-severity-${escHtml(report.severity)}` : ''}"><div class="logic-card-title">${escHtml(report.title)}</div><div class="logic-meta">${escHtml(report.reportType)} · ${escHtml(report.entityName || 'multi-entity')} · ${escHtml(authorNoteDate(report.createdAt))} · ${escHtml(logicConfidence(report.confidence))}</div><div class="logic-card-body">${escHtml(report.summary)}</div>${report.findings.length ? `<ul>${report.findings.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : ''}<div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="deleteLogicReport('${escHtml(report.id)}')">Delete</button></div></article>`).join('') : '';
-  return `<section><div class="logic-kicker">Reports</div><div class="logic-title">Dossiers, forecasts, simulations, and AI reports</div>${_logicStatusMessage ? `<div class="content-status" style="margin-top:.55rem">${escHtml(_logicStatusMessage)}</div>` : ''}<div class="logic-actions" style="margin-top:.7rem"><label class="logic-chip"><input id="logic-include-provisional" type="checkbox" style="vertical-align:middle"> Include provisional</label><button class="logic-mini-btn primary" type="button" onclick="generateLogicBiopsychosocialReport()">Generate Biopsychosocial Report</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Character Dossier')">Generate Character Dossier</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Relationship Report')">Generate Relationship Report</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Lifestyle & Culture Atlas')">Generate Lifestyle Report</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('forecast')">Forecast</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('simulator')">Simulate</button></div><div class="logic-report-grid" style="margin-top:.85rem">${dossierHtml}${forecastHtml}${oldReportHtml || (!dossierHtml && !forecastHtml ? '<div class="drafts-empty">No reports yet.</div>' : '')}</div></section>`;
+  const allItems = logicAllReportItems(entity);
+  const filtered = allItems.filter(logicReportMatchesFilter);
+  const selected = filtered.find(item=>item.key === _logicSelectedReportKey) || filtered[0] || null;
+  if(selected && _logicSelectedReportKey !== selected.key) _logicSelectedReportKey = selected.key;
+  const filters = [
+    ['all','All'],
+    ['biopsychosocial','Biopsychosocial'],
+    ['forecasts','Forecasts'],
+    ['simulations','Simulations'],
+    ['chapter-checks','Chapter Checks'],
+    ['old','Old Reports']
+  ];
+  const indexHtml = filtered.length ? filtered.map(item=>`<button class="logic-index-btn ${selected && selected.key===item.key?'active':''}" type="button" onclick="selectLogicReport('${escHtml(item.key)}')"><span><b>${escHtml(item.title)}</b><br><span class="logic-meta">${escHtml(item.label)} · ${escHtml(authorNoteDate(item.createdAt))}</span></span><span class="logic-meta">Open</span></button>`).join('') : '<div class="drafts-empty">No reports in this filter.</div>';
+  return `<section>
+    <div class="logic-kicker">Reports</div>
+    <div class="logic-title">Dossiers, forecasts, simulations, and AI reports</div>
+    ${_logicStatusMessage ? `<div class="content-status" style="margin-top:.55rem">${escHtml(_logicStatusMessage)}</div>` : ''}
+    <div class="logic-actions" style="margin-top:.7rem"><label class="logic-chip"><input id="logic-include-provisional" type="checkbox" style="vertical-align:middle"> Include provisional</label><button class="logic-mini-btn primary" type="button" onclick="generateLogicBiopsychosocialReport()">Generate Biopsychosocial Report</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Character Dossier')">Generate Character Dossier</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Relationship Report')">Generate Relationship Report</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Lifestyle & Culture Atlas')">Generate Lifestyle Report</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('forecast')">Forecast</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('simulator')">Simulate</button></div>
+    <div class="logic-tabs" style="margin-top:.75rem">${filters.map(([id,label])=>`<button class="logic-tab ${_logicReportFilter===id?'active':''}" type="button" onclick="setLogicReportFilter('${id}')">${label}</button>`).join('')}</div>
+    <div class="logic-report-workspace">
+      <aside class="logic-report-index logic-panel"><div class="logic-card-title">Report Index</div><div class="logic-meta">${filtered.length} visible</div><div style="margin-top:.65rem">${indexHtml}</div></aside>
+      ${renderLogicReportReader(selected)}
+    </div>
+  </section>`;
 }
 
 function renderLogicPending(){
@@ -7858,8 +8129,47 @@ function setLogicRailFilter(value){
   renderLogicMachine();
 }
 
+function setLogicOntologyCategory(id){
+  _logicOntologyCategory = id || '';
+  saveLogicUi();
+  renderLogicMachine();
+}
+
+function setLogicOntologySearch(value){
+  _logicOntologySearch = value || '';
+  saveLogicUi();
+  renderLogicMachine();
+}
+
+function setLogicTimelineFilter(value){
+  _logicTimelineFilter = ['recent','all','risks'].includes(value) ? value : 'recent';
+  saveLogicUi();
+  renderLogicMachine();
+}
+
 function setLogicTimelineOpen(open){
+  _logicTimelineCollapsed = !open;
+  saveLogicUi();
   document.querySelectorAll('.logic-timeline-item').forEach(item=>{
+    if(item.tagName === 'DETAILS') item.open = !!open;
+  });
+}
+
+function setLogicReportFilter(value){
+  _logicReportFilter = ['all','biopsychosocial','forecasts','simulations','chapter-checks','old'].includes(value) ? value : 'all';
+  _logicSelectedReportKey = '';
+  saveLogicUi();
+  renderLogicMachine();
+}
+
+function selectLogicReport(key){
+  _logicSelectedReportKey = key || '';
+  saveLogicUi();
+  renderLogicMachine();
+}
+
+function setLogicReportSectionsOpen(open){
+  document.querySelectorAll('.logic-reader-section').forEach(item=>{
     if(item.tagName === 'DETAILS') item.open = !!open;
   });
 }
@@ -8020,6 +8330,7 @@ function rejectLogicSuggestion(id){
 
 function deleteLogicReport(id){
   _logicStore.reports = (_logicStore.reports || []).filter(report=>report.id!==id);
+  if(_logicSelectedReportKey === `report:${id}`) _logicSelectedReportKey = '';
   saveLogicStore();
   renderLogicMachine();
 }
@@ -8330,6 +8641,63 @@ function validateLogicOntologyParsed(parsed){
   });
   if(!valid.length) throw new Error('No valid ontology suggestions were returned. The model returned an empty or unusable suggestions array.');
   return {suggestions:valid};
+}
+
+function logicSimilarityTokens(text=''){
+  const stop = new Set(['about','above','after','again','also','because','being','between','character','entity','from','have','into','just','like','more','most','only','over','same','some','that','their','there','these','this','through','with','would','could','should','might','which','while','where','when','what','will','within','without','onto','under','around','toward','towards']);
+  return Array.from(new Set(String(text || '').toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .split(/\s+/)
+    .map(token=>token.replace(/(ing|ed|es|s)$/,''))
+    .filter(token=>token.length > 3 && !stop.has(token))));
+}
+
+function logicTextSimilarity(a='', b=''){
+  const aTokens = logicSimilarityTokens(a);
+  const bTokens = logicSimilarityTokens(b);
+  if(!aTokens.length || !bTokens.length) return 0;
+  const aSet = new Set(aTokens);
+  const bSet = new Set(bTokens);
+  const shared = aTokens.filter(token=>bSet.has(token)).length;
+  const union = new Set([...aTokens, ...bTokens]).size || 1;
+  const jaccard = shared / union;
+  const containment = shared / Math.min(aSet.size, bSet.size);
+  return Math.max(jaccard, containment * 0.82);
+}
+
+function logicOntologyComparableText(item={}){
+  return [
+    item.category,
+    item.title,
+    item.summary,
+    item.value,
+    item.evidence,
+    item.realLifeAnalogue,
+    item.reasoningChain,
+    item.relationEffects,
+    item.inferenceBasis
+  ].filter(Boolean).join(' ');
+}
+
+function logicOntologyDuplicateMatch(suggestion, entityId){
+  const candidateText = logicOntologyComparableText(suggestion);
+  const candidateTitle = String(suggestion.title || '').trim().toLowerCase();
+  const existingFacets = logicFacetsForEntity(entityId, true).filter(item=>item.status !== 'retired');
+  const existingSuggestions = (_logicStore.ontologySuggestions || [])
+    .map(normalizeLogicOntologySuggestion)
+    .filter(item=>item.entityId === entityId && item.status !== 'rejected');
+  const existing = [
+    ...existingFacets.map(item=>({kind:'facet', category:item.category, title:item.title, text:logicOntologyComparableText(item)})),
+    ...existingSuggestions.map(item=>({kind:'suggestion', category:item.category, title:item.title, text:logicOntologyComparableText(item)}))
+  ];
+  return existing.find(item=>{
+    const titleMatch = candidateTitle && candidateTitle === String(item.title || '').trim().toLowerCase();
+    if(titleMatch) return true;
+    const sameCategory = !suggestion.category || !item.category || suggestion.category === item.category;
+    const score = logicTextSimilarity(candidateText, item.text);
+    return score >= (sameCategory ? 0.64 : 0.78);
+  }) || null;
 }
 
 async function callLogicOntologyResearchBrief(payload, options={}){
@@ -8674,10 +9042,12 @@ function logicEntityIdsFromNames(names=[]){
 
 function storeLogicOntologySuggestions(parsed, entity, model, options={}){
   const now = Date.now();
-  const suggestions = (parsed.suggestions || []).map(item=>{
+  const skipped = [];
+  const suggestions = [];
+  (parsed.suggestions || []).forEach(item=>{
     const category = LOGIC_FACET_CATEGORIES.some(cat=>cat.id===item.category) ? item.category : logicFacetCategoryFromDimension(item.category || item.title || '');
     const suggestedStatus = options.webResearch || (item.webSources || []).length ? (LOGIC_FACET_STATUSES.includes(item.suggestedStatus) ? item.suggestedStatus : 'provisional') : item.suggestedStatus;
-    return normalizeLogicOntologySuggestion({
+    const suggestion = normalizeLogicOntologySuggestion({
       entityId:entity.id,
       entityName:entity.name,
       entityType:entity.type,
@@ -8707,11 +9077,20 @@ function storeLogicOntologySuggestions(parsed, entity, model, options={}){
       model,
       createdAt:now
     });
+    const batchDuplicate = suggestions.find(existing=>logicTextSimilarity(logicOntologyComparableText(suggestion), logicOntologyComparableText(existing)) >= (existing.category === suggestion.category ? 0.64 : 0.78));
+    const duplicate = batchDuplicate || logicOntologyDuplicateMatch(suggestion, entity.id);
+    if(duplicate){
+      skipped.push({title:suggestion.title, duplicateOf:duplicate.title || duplicate.kind});
+      return;
+    }
+    suggestions.push(suggestion);
   });
   _logicStore.ontologySuggestions = _logicStore.ontologySuggestions || [];
-  _logicStore.ontologySuggestions.unshift(...suggestions);
-  saveLogicStore();
-  return suggestions.length;
+  if(suggestions.length){
+    _logicStore.ontologySuggestions.unshift(...suggestions);
+    saveLogicStore();
+  }
+  return {saved:suggestions.length, skipped:skipped.length, skippedTitles:skipped.map(item=>item.title).filter(Boolean).slice(0, 6)};
 }
 
 async function analyzeLogicOntologyEntity(mode='ontology'){
@@ -8731,9 +9110,9 @@ async function analyzeLogicOntologyEntity(mode='ontology'){
   try{
     const payload = logicEntityEvidencePayload(entity, focus, researchAngle, mode, culturalLens);
     const {model, parsed, repaired, webResearchBrief} = await callLogicOntologyOpenRouter(payload, {webResearch});
-    const count = storeLogicOntologySuggestions(parsed, entity, model, {webResearch});
+    const result = storeLogicOntologySuggestions(parsed, entity, model, {webResearch});
     _logicActiveTab = 'ontology';
-    logicSetStatus(`Generated ${count} pending ${mode === 'cultural' ? 'cultural inference' : 'ontology'} card${count===1?'':'s'} for ${entity.name}.${webResearchBrief ? ' Web research was used as a separate brief.' : ''}${repaired ? ' The first response needed one JSON repair pass.' : ''}`);
+    logicSetStatus(`Generated ${result.saved} pending ${mode === 'cultural' ? 'cultural inference' : 'ontology'} card${result.saved===1?'':'s'} for ${entity.name}.${result.skipped ? ` Skipped ${result.skipped} likely duplicate${result.skipped===1?'':'s'}${result.skippedTitles.length ? ` (${result.skippedTitles.join(', ')})` : ''}.` : ''}${webResearchBrief ? ' Web research was used as a separate brief.' : ''}${repaired ? ' The first response needed one JSON repair pass.' : ''}`);
     renderLogicMachine();
   }catch(err){
     console.error('Ontology enrichment failed:', err);
@@ -9562,6 +9941,13 @@ let _logicChapterId = '';
 let _logicDraftId = '';
 let _logicStatusMessage = '';
 let _logicAiLastRawPreview = '';
+let _logicOntologyCategory = '';
+let _logicOntologySearch = '';
+let _logicReportFilter = 'all';
+let _logicSelectedReportKey = '';
+let _logicTimelineFilter = 'recent';
+let _logicTimelineCollapsed = false;
+let _logicImageSettings = {};
 let _currentCharacterId = null;
 let _protoActiveLineId = '';
 let _protoSelectedChapterId = '';
@@ -19792,6 +20178,10 @@ Object.assign(window, {
   setLogicTab,
   setLogicFilter,
   setLogicRailFilter,
+  setLogicOntologyCategory,
+  setLogicOntologySearch,
+  setLogicTimelineFilter,
+  logicSetImageCrop,
   setLogicRelationshipScope,
   selectLogicEntity,
   openLogicEntity,
@@ -19811,6 +20201,10 @@ Object.assign(window, {
   deleteLogicForecast,
   generateLogicPsychProfile,
   setLogicTimelineOpen,
+  setLogicReportFilter,
+  selectLogicReport,
+  setLogicReportSectionsOpen,
+  logicDeleteReportItem,
   analyzeLogicOntologyEntity,
   acceptLogicOntologySuggestion,
   rejectLogicOntologySuggestion,
