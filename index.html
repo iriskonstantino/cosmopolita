@@ -4551,6 +4551,9 @@ body:not(.admin-on) #tnav-drafts{
 .drafts-workflow-hint p{
   color:#5f4d32;
 }
+.planning-lab>.drafts-workflow-hint{
+  grid-column:1 / -1;
+}
 .drafts-tour{
   border:1px solid var(--gold);
   background:#fff8e8;
@@ -4878,7 +4881,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.18.20</div>
+<div id="site-version-stamp">v2026.05.18.21</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -13332,6 +13335,7 @@ function renderPlanningLab(){
   const doc = activePlanningDoc();
   const docs = filteredPlanningDocs();
   return `<section class="planning-lab">
+    ${renderDraftContextualWorkflowHint('planning')}
     <aside class="planning-pane">
       <div class="planning-pane-head">
         <div>
@@ -14564,52 +14568,183 @@ const DRAFTS_HELP_COPY = {
     title:'Inbox',
     purpose:'Capture raw manuscript material here. Paste, upload, split, and keep fragments before they become organized ideas.',
     next:'Use the center tabs: Source for text, Preview for reading, AI Analysis to run models, Suggestions to approve, Accepted to inspect routed material, and Convert for exports.',
-    destination:'Accepted AI becomes routed ideas. Raw fragments can become chapters, Codex entries, Proto lines, author notes, or research cards.'
+    destination:'Accepted AI becomes routed ideas. Raw fragments can become chapters, Codex entries, Proto lines, author notes, or research cards.',
+    recipe:'Paste or upload text, split it into fragments, select one fragment, then move through Source → AI Analysis → Suggestions → Accepted → Idea Repository.'
   },
   layers:{
     title:'Literary Layers',
     purpose:'See the manuscript by narrative layer instead of by file order: characters, motifs, places, POV, timeline, devices, dialogue, entities, and research subjects.',
     next:'Click a layer card to focus matching fragments and routed ideas, then open the source draft or assign ideas.',
-    destination:'Layer map does not publish anything. It helps you decide what belongs in the Idea Repository or Ready Queue.'
+    destination:'Layer map does not publish anything. It helps you decide what belongs in the Idea Repository or Ready Queue.',
+    recipe:'Use this when you want to ask: where does this character, motif, faction, place, POV, or device appear across my raw material?'
   },
   ideas:{
     title:'Idea Repository',
     purpose:'This is the permanent archive of accepted AI/manual ideas, arranged by workflow stage instead of literary category.',
     next:'Move left to right: assign unassigned ideas, send research leads, mark active items working, and mark finished items used.',
-    destination:'Assigned ideas appear in the linked chapter Author Workspace. Research ideas also create Research leads/gaps.'
+    destination:'Assigned ideas appear in the linked chapter Author Workspace. Research ideas also create Research leads/gaps.',
+    recipe:'Use this after accepting AI. Unassigned ideas need a chapter; assigned ideas can become working material; used ideas are already folded into the manuscript.'
   },
   planning:{
     title:'Planning Notes',
     purpose:'Keep non-fiction thinking, craft notes, outlines, canon logic, and research thoughts outside the manuscript fragments.',
     next:'Write a planning note, highlight a passage, create a Workshop card, revise it, then import it when ready.',
-    destination:'Workshop cards can become routed ideas, research gaps, Author Workspace ideas, draft fragments, or Codex seeds.'
+    destination:'Workshop cards can become routed ideas, research gaps, Author Workspace ideas, draft fragments, or Codex seeds.',
+    recipe:'Use this for essays-to-self, theology, poetics, structure maps, research thoughts, and planning that is not yet manuscript prose.'
   },
   ready:{
     title:'Ready Queue',
     purpose:'A focused action list of material that is ready to move somewhere else.',
     next:'Use each group to decide the next action: chapter, research, Codex, Protoevangelium, or Author Workspace.',
-    destination:'Ready items are not automatically published. You choose the import/assignment action.'
+    destination:'Ready items are not automatically published. You choose the import/assignment action.',
+    recipe:'Use this as the daily worklist: these are fragments, cards, and ideas you have already marked as ready enough to act on.'
   },
   archive:{
     title:'Archive',
     purpose:'Find material you put away without losing it.',
     next:'Review archived fragments, planning notes, workshop cards, and used routed ideas.',
-    destination:'Restore items by opening their source workspace and changing status when needed.'
+    destination:'Restore items by opening their source workspace and changing status when needed.',
+    recipe:'Archive is storage, not deletion. Use it to reduce clutter while keeping source material available for backup and later recovery.'
   }
 };
 
 const DRAFTS_TOUR_STEPS = [
-  ['inbox','Capture raw fragments in the Inbox. Paste/upload/split first, then analyze only selected material.'],
-  ['inbox','Run AI Analysis on a fragment. Suggestions wait for approval; nothing becomes canon automatically.'],
-  ['ideas','Accepted suggestions become routed ideas. This is where you assign ideas to chapters or send research leads.'],
-  ['layers','Use Literary Layers to see repeated characters, motifs, places, timeline clues, dialogue, and factions across fragments.'],
-  ['planning','Use Planning Notes for non-fiction thinking and Workshop cards before importing ideas into the manuscript system.'],
-  ['ready','Use Ready Queue as the practical next-action list.'],
-  ['ideas','Assigned ideas appear in the chapter Author Workspace as Routed Ideas; research-like ideas also become Research leads.']
+  {view:'inbox', tab:'source', title:'Capture: Inbox', body:'Start here. Paste or upload raw manuscript, split it into fragments, then choose a fragment from the left list. The Source tab is where the text and metadata live.', action:'Create or select a fragment; do not worry about canon yet.', result:'You now have a source fragment that can be analyzed, tagged, routed, converted, or archived.'},
+  {view:'inbox', tab:'preview', title:'Read: Preview', body:'Preview shows the fragment as rendered prose. Use it to read the fragment without editing fields or AI cards around it.', action:'Check whether this fragment is a scene, dialogue, outline, poem, research note, or worldbuilding block.', result:'If it is real manuscript material, keep it in Inbox; if it is planning, move or copy the idea into Planning Notes.'},
+  {view:'inbox', tab:'ai', title:'Analyze: AI Analysis', body:'AI Analysis sends the selected fragment to OpenRouter and asks for dialogue, speakers, entities, motifs, themes, timeline clues, research subjects, and conversion ideas.', action:'Save the API key/model, then run Analyze Fragment on one selected fragment first.', result:'The AI report becomes pending suggestion cards. Nothing is accepted or sent anywhere yet.'},
+  {view:'inbox', tab:'suggestions', title:'Approve: Suggestions', body:'Suggestions is the review queue. Accept useful items and reject noise. Accepting is the moment an AI guess becomes part of your private working system.', action:'Accept only suggestions you actually want to track.', result:'Accepted suggestions update fragment metadata and create routed ideas.'},
+  {view:'inbox', tab:'accepted', title:'Inspect: Accepted', body:'Accepted shows what has already been approved: dialogue, entities, routed ideas, and transfer status.', action:'If it says Needs linked chapter, choose a linked chapter before expecting it in Author Workspace.', result:'Linked accepted material can appear in the chapter Author Workspace and Research board.'},
+  {view:'inbox', tab:'convert', title:'Act: Convert', body:'Convert is for turning the whole fragment into something else: a chapter, Codex entry, Proto line, character seed, author note, research card, or archive item.', action:'Use Convert only when the entire fragment has a clear destination.', result:'The fragment remains traceable with conversion history.'},
+  {view:'ideas', stage:'unassigned', title:'Route: Unassigned Ideas', body:'Unassigned ideas are accepted ideas that do not know which chapter they belong to yet.', action:'Assign each useful idea to the chapter it should influence.', result:'Assigned ideas move toward the chapter Author Workspace.'},
+  {view:'ideas', stage:'assigned', title:'Route: Assigned Ideas', body:'Assigned ideas have a chapter but are not necessarily being worked yet.', action:'Open the linked Author Workspace or mark the idea Working when it becomes active revision material.', result:'The idea becomes visible as chapter-specific private work.'},
+  {view:'ideas', stage:'research', title:'Route: Research Leads', body:'Research Leads are ideas that need verification, source work, or conceptual elaboration.', action:'Send them to Research or open the chapter Research tab to develop them.', result:'They create or connect to research gaps/cards in the linked chapter.'},
+  {view:'ideas', stage:'working', title:'Work: Working Ideas', body:'Working means the idea is actively being used in drafting or revision.', action:'Keep notes on the card or open the Author Workspace until the idea has been handled.', result:'When it has been incorporated, mark it Used.'},
+  {view:'ideas', stage:'used', title:'Finish: Used Ideas', body:'Used ideas are preserved for traceability but no longer need attention.', action:'Use this stage to audit what has already been folded into the manuscript.', result:'The archive of thinking remains intact without cluttering your active queue.'},
+  {view:'layers', title:'Map: Literary Layers', body:'Literary Layers gives a cross-manuscript map of characters, motifs, places, factions, dialogue speakers, research subjects, and devices.', action:'Click a layer to see every matching fragment, routed idea, and workshop card.', result:'Use the map to notice repetition, missing development, or material that should be assigned.'},
+  {view:'planning', title:'Workshop: Planning Notes', body:'Planning Notes is for nonfiction thinking: outlines, craft ideas, research reflections, poetics, canon logic, and meta-structure.', action:'Highlight useful passages and create Workshop cards before importing them anywhere.', result:'Workshop cards can later become routed ideas, research gaps, Codex seeds, or draft fragments.'},
+  {view:'ready', title:'Act: Ready Queue', body:'Ready Queue is the practical next-action board. It only shows items marked ready or ideas that have a linked action destination.', action:'Choose a destination group and import, open, or continue work from there.', result:'Ready items move into chapters, research, Codex, Protoevangelium, or Author Workspace.'},
+  {view:'archive', title:'Store: Archive', body:'Archive holds material you have put away, plus used ideas. It is not deletion.', action:'Return here when you need to recover older fragments, planning notes, workshop cards, or used routed ideas.', result:'Archived material remains searchable and included in backup.'}
+];
+
+const DRAFTS_WORKFLOW_STEPS = [
+  ['Capture','Put raw text into Inbox and split it into source fragments.'],
+  ['Analyze','Run local suggestions or AI on one fragment at a time.'],
+  ['Approve','Accept useful suggestions; reject noise.'],
+  ['Route','Assign accepted ideas to chapters or research.'],
+  ['Map','Use Literary Layers to see patterns across all fragments.'],
+  ['Workshop','Develop planning notes and cards before importing them.'],
+  ['Act','Use Ready Queue, Convert, Author Workspace, Research, Codex, or Archive.']
+];
+
+const DRAFTS_HELP_RECIPES = [
+  ['Accepted AI','Accepted AI appears in the Accepted tab and becomes a routed idea. If a fragment has a linked chapter, it can also show in that chapter Author Workspace.'],
+  ['Needs linked chapter','This means the idea is approved but unassigned. Pick a chapter in the linked chapter field or assign it in Idea Repository.'],
+  ['Sent to Research','Research-like ideas create or connect to research gaps/cards inside the linked chapter Research tab.'],
+  ['Working vs Used','Working means actively being developed. Used means already folded into the manuscript but kept for traceability.'],
+  ['Ready vs Archive','Ready means act on it soon. Archive means hide it from active work without deleting it.'],
+  ['Planning vs Inbox','Inbox is manuscript/source material. Planning Notes is nonfiction thinking, outlines, theory, research thoughts, and craft planning.']
+];
+
+const DRAFTS_BUTTON_GLOSSARY = [
+  {group:'Inbox: Capture', items:[
+    ['New Fragment','Creates a blank source fragment.','Use when you want to paste or write one discrete piece.','Inbox fragment list.'],
+    ['Upload .txt/.md','Imports text files from your computer.','Use for manuscript dumps, notes, or exported drafts.','Paste/Split intake, then fragments.'],
+    ['Split Into Fragments','Breaks pasted text into multiple fragments.','Use after pasting a large nonlinear document.','Inbox fragment cards.'],
+    ['Clear Intake','Clears the paste box only.','Use after a successful split or a bad paste.','Nowhere; it does not delete saved fragments.']
+  ]},
+  {group:'Inbox: Fragment Workspace', items:[
+    ['Save Fragment','Persists the selected fragment and metadata.','Use after editing title, body, tags, chapter links, or notes.','Draft Inbox IndexedDB.'],
+    ['Suggest Layers','Runs local deterministic suggestions without AI.','Use when the API is unavailable or for quick tags.','Local Suggestions in the Suggestions tab.'],
+    ['Delete','Deletes the selected fragment.','Use only for material you truly do not want.','Removed from Draft Inbox.'],
+    ['Source / Preview','Switches between editing and reading the fragment.','Use Source to edit; Preview to inspect rendered prose.','No data movement.']
+  ]},
+  {group:'AI Analysis / Suggestions', items:[
+    ['Analyze Fragment','Sends the active fragment to AI.','Use after the fragment text is clean enough to inspect.','Pending suggestion cards.'],
+    ['Analyze Selected Visible','Runs AI on checked visible fragments.','Use sparingly for a small batch.','Pending suggestions per fragment.'],
+    ['Accept','Approves one AI suggestion.','Use when the suggestion is useful enough to track.','Accepted tab + routed idea + metadata.'],
+    ['Reject','Dismisses one AI suggestion.','Use when the suggestion is wrong or noise.','Analysis history only.']
+  ]},
+  {group:'Accepted / Routing', items:[
+    ['Linked Chapter','Chooses the chapter this fragment should feed.','Use before accepting AI if you want auto-send to Author Workspace.','Chapter Author Workspace.'],
+    ['Open Linked Author Workspace','Opens the chapter connected to this fragment.','Use after accepted ideas have been sent.','Chapter editor Author Workspace.'],
+    ['Assign Chapter','Attaches a routed idea to a chapter.','Use for Unassigned ideas in Idea Repository.','Assigned stage + Author Workspace.'],
+    ['Send To Research','Creates a research lead from an idea.','Use for factions, institutions, sources, questions, or unclear concepts.','Chapter Research tab.']
+  ]},
+  {group:'Idea Repository', items:[
+    ['Unassigned','Ideas with no chapter.','Start here after accepting AI.','Assign to chapter.'],
+    ['Assigned','Ideas connected to a chapter.','Use when the idea belongs somewhere but is not active yet.','Author Workspace.'],
+    ['Research Leads','Ideas needing research work.','Use when you need sources or clarification.','Research gaps/cards.'],
+    ['Mark Working / Mark Used','Moves ideas through active and finished states.','Use Working while drafting; Used after incorporation.','Working or Used stage.']
+  ]},
+  {group:'Planning / Ready / Archive', items:[
+    ['Create Workshop Card From Selection','Turns highlighted planning text into a card.','Use when a planning paragraph becomes actionable.','Draft Workshop lane.'],
+    ['Analyze Planning Note','Uses AI to suggest workshop cards.','Use for long planning documents.','Pending workshop cards.'],
+    ['Routed Idea / Research / Codex imports','Imports ready cards into systems.','Use when a card has a clear destination.','Idea Repository, Research, or Codex.'],
+    ['Archive','Hides material from active queues.','Use to reduce clutter without deleting.','Archive view and backup.']
+  ]}
 ];
 
 function draftHelpView(){
   return DRAFTS_HELP_COPY[_draftFilter.view] || DRAFTS_HELP_COPY.inbox;
+}
+
+function renderDraftWorkflowOverview(){
+  return `<div>
+    <div class="drafts-help-section-title">Workflow Map</div>
+    <div class="drafts-help-flow">
+      ${DRAFTS_WORKFLOW_STEPS.map(step=>`<div class="drafts-help-flow-step"><b>${escHtml(step[0])}</b><p>${escHtml(step[1])}</p></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderDraftHelpRecipe(){
+  return `<div>
+    <div class="drafts-help-section-title">Where Did It Go?</div>
+    <div class="drafts-help-recipes">
+      ${DRAFTS_HELP_RECIPES.map(recipe=>`<div class="drafts-help-recipe"><b>${escHtml(recipe[0])}</b><p>${escHtml(recipe[1])}</p></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderDraftButtonGlossary(){
+  return `<div>
+    <div class="drafts-help-section-title">Button Glossary</div>
+    <div class="drafts-glossary-grid">
+      ${DRAFTS_BUTTON_GLOSSARY.map(group=>`<section class="drafts-glossary-group">
+        <b>${escHtml(group.group)}</b>
+        ${group.items.map(item=>`<div class="drafts-glossary-row">
+          <strong>${escHtml(item[0])}</strong>
+          <span>Does: ${escHtml(item[1])}</span>
+          <span>Use when: ${escHtml(item[2])}</span>
+          <span>Sends to: ${escHtml(item[3])}</span>
+        </div>`).join('')}
+      </section>`).join('')}
+    </div>
+  </div>`;
+}
+
+function draftContextualWorkflowHint(view=_draftFilter.view || 'inbox'){
+  const fragment = activeDraft();
+  const counts = draftContextCounts(fragment);
+  if(view === 'inbox'){
+    const tabLabels = {source:'Capture / edit source text', preview:'Read the rendered fragment', ai:'Analyze the active fragment', suggestions:'Approve or reject suggestions', accepted:'Inspect accepted intelligence', convert:'Move the whole fragment somewhere'};
+    const next = counts.pending ? 'Review pending suggestions.' : !counts.lastAi ? 'Run AI Analysis or Suggest Layers.' : counts.accepted && !fragment?.linkedChapterId ? 'Link this fragment to a chapter.' : 'Open Idea Repository or Convert when ready.';
+    return {step:`Inbox · ${tabLabels[_draftInboxTab] || 'Capture'}`, next};
+  }
+  if(view === 'ideas'){
+    const stageLabels = {all:'Scan all idea stages', unassigned:'Assign ideas to chapters', assigned:'Open chapter workspaces or mark working', research:'Send or review research leads', working:'Develop active ideas', used:'Audit completed ideas'};
+    return {step:`Idea Repository · ${stageLabels[_draftIdeaStage] || 'Route accepted ideas'}`, next:'Use the primary action on each card, then move ideas toward Working or Used.'};
+  }
+  if(view === 'layers') return {step:'Literary Layers · Map patterns', next:'Click a layer to focus matching fragments, ideas, and workshop cards.'};
+  if(view === 'planning') return {step:'Planning Notes · Workshop nonfiction thinking', next:'Highlight useful text, create Workshop cards, then import only ready cards.'};
+  if(view === 'ready') return {step:'Ready Queue · Act on prepared material', next:'Choose a destination group and use the card action to continue.'};
+  if(view === 'archive') return {step:'Archive · Recover stored material', next:'Open source material when you need to restore, audit, or reuse it.'};
+  return {step:'Drafts Workflow', next:'Capture, analyze, approve, route, map, workshop, then act.'};
+}
+
+function renderDraftContextualWorkflowHint(view=_draftFilter.view || 'inbox'){
+  const hint = draftContextualWorkflowHint(view);
+  return `<div class="drafts-workflow-hint"><b>Current step: ${escHtml(hint.step)}</b><p><strong>Next action:</strong> ${escHtml(hint.next)}</p></div>`;
 }
 
 function renderDraftsHelp(){
@@ -14631,8 +14766,12 @@ function renderDraftsHelp(){
         </div>
       </div>
       ${tour ? `<div class="drafts-tour">
-        <div class="drafts-tour-step">Step ${_draftTourStep + 1} of ${DRAFTS_TOUR_STEPS.length} · ${escHtml(DRAFTS_HELP_COPY[tour[0]]?.title || 'Drafts')}</div>
-        <div class="workflow-card-body">${escHtml(tour[1])}</div>
+        <div class="drafts-tour-step">Step ${_draftTourStep + 1} of ${DRAFTS_TOUR_STEPS.length} · ${escHtml(tour.title || 'Drafts')}</div>
+        <div class="workflow-card-body">
+          <p>${escHtml(tour.body || '')}</p>
+          <p><b>Do next:</b> ${escHtml(tour.action || '')}</p>
+          <p><b>Result:</b> ${escHtml(tour.result || '')}</p>
+        </div>
         <div class="drafts-actions">
           <button class="tiny-btn" type="button" onclick="advanceDraftsTour(-1)">Previous</button>
           <button class="tiny-btn" type="button" onclick="advanceDraftsTour(1)">${_draftTourStep === DRAFTS_TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</button>
@@ -14643,6 +14782,10 @@ function renderDraftsHelp(){
         <div class="drafts-help-block"><b>What to do next</b><p>${escHtml(help.next)}</p></div>
         <div class="drafts-help-block"><b>Where it goes</b><p>${escHtml(help.destination)}</p></div>
       </div>
+      <div class="drafts-help-block"><b>Practical recipe</b><p>${escHtml(help.recipe || '')}</p></div>
+      ${renderDraftWorkflowOverview()}
+      ${renderDraftHelpRecipe()}
+      ${renderDraftButtonGlossary()}
     </div>`;
 }
 
@@ -14656,7 +14799,14 @@ function startDraftsTour(){
   _draftTourStep = 0;
   _draftHelpOpen = true;
   try{ localStorage.setItem(DRAFTS_TUTORIAL_SEEN_KEY, '1'); }catch(e){}
-  updateDraftFilter('view', DRAFTS_TOUR_STEPS[0][0]);
+  const step = DRAFTS_TOUR_STEPS[0];
+  if(step.tab) _draftInboxTab = step.tab;
+  if(step.stage) _draftIdeaStage = step.stage;
+  try{
+    if(step.tab) localStorage.setItem(DRAFTS_INBOX_TAB_KEY, _draftInboxTab);
+    if(step.stage) localStorage.setItem(DRAFTS_IDEA_STAGE_KEY, _draftIdeaStage);
+  }catch(e){}
+  updateDraftFilter('view', step.view);
 }
 
 function advanceDraftsTour(delta=1){
@@ -14670,7 +14820,14 @@ function advanceDraftsTour(delta=1){
     return;
   }
   _draftTourStep = next;
-  updateDraftFilter('view', DRAFTS_TOUR_STEPS[_draftTourStep][0]);
+  const step = DRAFTS_TOUR_STEPS[_draftTourStep];
+  if(step.tab) _draftInboxTab = step.tab;
+  if(step.stage) _draftIdeaStage = step.stage;
+  try{
+    if(step.tab) localStorage.setItem(DRAFTS_INBOX_TAB_KEY, _draftInboxTab);
+    if(step.stage) localStorage.setItem(DRAFTS_IDEA_STAGE_KEY, _draftIdeaStage);
+  }catch(e){}
+  updateDraftFilter('view', step.view);
 }
 
 function maybeStartDraftsTour(){
@@ -14680,6 +14837,9 @@ function maybeStartDraftsTour(){
   }catch(e){}
   _draftTourStep = 0;
   _draftHelpOpen = true;
+  const step = DRAFTS_TOUR_STEPS[0];
+  if(step.tab) _draftInboxTab = step.tab;
+  if(step.stage) _draftIdeaStage = step.stage;
 }
 
 function layerFocusKey(group, value){
@@ -14760,6 +14920,7 @@ function renderLayerMap(){
         ${focus ? `<button class="cm-btn secondary" type="button" onclick="setDraftLayerFocus('')">Clear Focus</button>` : ''}
       </div>
     </div>
+    ${renderDraftContextualWorkflowHint('layers')}
     ${focus ? `<section class="workflow-card">
       <div class="workflow-card-title">${escHtml(focus.group)} · ${escHtml(focus.value)}</div>
       <div class="workflow-card-meta">${focusFragments.length} fragments · ${focusIdeas.length} routed ideas · ${focusCards.length} workshop cards</div>
@@ -14826,6 +14987,7 @@ function renderReadyQueue(){
         <div class="drafts-title">Next Actions</div>
       </div>
     </div>
+    ${renderDraftContextualWorkflowHint('ready')}
     <div class="ready-queue-grid">
       ${renderReadyGroup('Chapter', q.chapter, renderReadyFragment)}
       ${renderReadyGroup('Research', q.research, item=>item.idea ? renderIdeaCard(item) : renderReadyCard(item))}
@@ -14848,6 +15010,7 @@ function renderArchiveView(){
         <div class="drafts-title">Stored Material</div>
       </div>
     </div>
+    ${renderDraftContextualWorkflowHint('archive')}
     <div class="archive-grid">
       ${renderReadyGroup('Archived Fragments', archivedFragments, renderReadyFragment)}
       ${renderReadyGroup('Planning Notes', archivedDocs, doc=>`<article class="workflow-card"><div>${workflowBadge('Planning note')}</div><div class="workflow-card-title">${escHtml(doc.title)}</div><div class="workflow-card-meta">${escHtml(doc.type)} · ${draftDate(doc.updatedAt)}</div><button class="tiny-btn" type="button" onclick="selectPlanningDoc('${escHtml(doc.id)}');updateDraftFilter('view','planning')">Open Planning</button></article>`)}
@@ -15121,6 +15284,7 @@ function renderDraftIdeaRepository(){
         <button class="cm-btn secondary" type="button" onclick="clearRoutedIdeaSelection()">Clear</button>
       </div>
     </div>
+    ${renderDraftContextualWorkflowHint('ideas')}
     <div class="idea-stage-tabs">${stageTabs}</div>
     <div class="idea-repository-controls">
       <select class="drafts-select" onchange="updateDraftIdeaFilter('section',this.value)">
@@ -15251,6 +15415,7 @@ function renderDraftInboxWorkspace(fragment){
         <button class="cm-btn secondary danger" type="button" onclick="draftDelete('${escHtml(fragment.id)}')">Delete</button>
       </div>
     </div>
+    ${renderDraftContextualWorkflowHint('inbox')}
     <div class="inbox-workspace-tabs">${tabs}</div>
     <div class="inbox-workspace-body">${body}</div>
   </section>`;
