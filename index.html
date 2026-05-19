@@ -5144,7 +5144,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.04</div>
+<div id="site-version-stamp">v2026.05.19.05</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -7954,8 +7954,8 @@ async function callLogicOntologyOpenRouter(payload, options={}){
   const body = {
     model,
     messages:[
-      {role:'system', content:'You are a literary ontology analyst for a long novel. Generate private, approval-first ontology insights for the selected entity. Use evidence from the provided chapters/drafts/facets, and when web research is available use it only for real-world aesthetic, psychology, fashion, food, alcohol, consumer, cultural, and trend analogies. Do not canonize anything. Return schema-valid JSON only.'},
-      {role:'user', content:'Generate pending ontology insights for this selected entity. Include relationship-aware inference, change over time, lifestyle/aesthetic patterns, likely future behavior, and contradictions. Use category ids exactly from the provided categories. Web-sourced or speculative insights should suggest provisional status. Text-grounded observations can suggest observed or inferred.\\n\\n' + JSON.stringify(payload)}
+      {role:'system', content:'Return ONLY valid JSON. Do not write markdown, prose, headings, bullets, or commentary. You are a literary ontology analyst for a long novel. Generate private, approval-first ontology insights for the selected entity. Use evidence from the provided chapters/drafts/facets, and when web research is available use it only for real-world aesthetic, psychology, fashion, food, alcohol, consumer, cultural, and trend analogies. Do not canonize anything.'},
+      {role:'user', content:'Return exactly this JSON shape: {"suggestions":[{"category":"psyche","title":"short title","summary":"specific insight","evidence":"supporting text or empty","inferenceBasis":"why this follows","timelinePhase":"early/current/emerging/unknown","relatedEntityNames":[],"relatedPlaceNames":[],"sourceChapterTitles":[],"sourceDraftTitles":[],"webSources":[],"confidence":0.5,"suggestedStatus":"provisional"}]}. Generate pending ontology insights for this selected entity. Include relationship-aware inference, change over time, lifestyle/aesthetic patterns, likely future behavior, and contradictions. Use category ids exactly from the provided categories. Web-sourced or speculative insights should suggest provisional status. Text-grounded observations can suggest observed or inferred.\\n\\n' + JSON.stringify(payload)}
     ],
     response_format:{
       type:'json_schema',
@@ -7988,7 +7988,11 @@ async function callLogicOntologyOpenRouter(payload, options={}){
   }
   const output = openRouterOutputText(data);
   if(!output) throw new Error('OpenRouter returned no ontology enrichment text.');
-  return {model, parsed:parseOpenRouterJsonOutput(output, 'Ontology enrichment')};
+  try{
+    return {model, parsed:parseOpenRouterJsonOutput(output, 'Ontology enrichment')};
+  }catch(err){
+    return {model, parsed:parseOntologyProseFallback(output, payload, model), recoveredFromProse:true};
+  }
 }
 
 function storeLogicAiReport(parsed, source, model){
@@ -8116,10 +8120,10 @@ async function analyzeLogicOntologyEntity(){
   renderLogicMachine();
   try{
     const payload = logicEntityEvidencePayload(entity, focus);
-    const {model, parsed} = await callLogicOntologyOpenRouter(payload, {webResearch});
+    const {model, parsed, recoveredFromProse} = await callLogicOntologyOpenRouter(payload, {webResearch});
     const count = storeLogicOntologySuggestions(parsed, entity, model, {webResearch});
     _logicActiveTab = 'ontology';
-    logicSetStatus(`Generated ${count} pending ontology insight${count===1?'':'s'} for ${entity.name}.`);
+    logicSetStatus(`Generated ${count} pending ontology insight${count===1?'':'s'} for ${entity.name}.${recoveredFromProse ? ' The model returned prose, so I recovered provisional cards from it.' : ''}`);
     renderLogicMachine();
   }catch(err){
     console.error('Ontology enrichment failed:', err);
@@ -15965,6 +15969,72 @@ function parseOpenRouterJsonOutput(output, label='AI response'){
     try{ return JSON.parse(text.slice(firstArr, lastArr + 1)); }catch(e){}
   }
   throw new Error(`${label} was not valid JSON. First characters: ${text.slice(0, 120)}`);
+}
+
+function ontologyCategoryFromText(text=''){
+  const lower = String(text || '').toLowerCase();
+  if(/psyche|psych|personality|duality|temperament/.test(lower)) return 'psyche';
+  if(/desire|want|motivation|drive|ambition/.test(lower)) return 'desire';
+  if(/fear|anxiety|dread|avoid/.test(lower)) return 'fear';
+  if(/wound|trauma|defense|shame/.test(lower)) return 'wound';
+  if(/habit|routine|pattern/.test(lower)) return 'habit';
+  if(/stress|pressure|crisis/.test(lower)) return 'stress';
+  if(/trigger|provokes|when/.test(lower)) return 'trigger';
+  if(/moral|ethic|belief|value/.test(lower)) return 'moral';
+  if(/speech|voice|dialogue/.test(lower)) return 'speech';
+  if(/body|gesture|posture/.test(lower)) return 'body';
+  if(/fashion|clothing|clothes|style|wear/.test(lower)) return 'fashion';
+  if(/food|meal|eat/.test(lower)) return 'food';
+  if(/alcohol|drink|wine|beer|liquor/.test(lower)) return 'alcohol';
+  if(/art|music|media|book|film/.test(lower)) return 'art';
+  if(/ritual|ceremony|practice/.test(lower)) return 'ritual';
+  if(/venue|bar|restaurant|cafe|place/.test(lower)) return 'venue';
+  if(/consumer|taste|interest|hobby/.test(lower)) return 'consumer';
+  if(/class|status|wealth/.test(lower)) return 'class';
+  if(/faction|loyalty|organization/.test(lower)) return 'faction';
+  if(/culture|code|custom/.test(lower)) return 'culture';
+  if(/relationship|friend|lover|rival|spends time/.test(lower)) return 'relationship';
+  if(/contradiction|inconsistent|risk/.test(lower)) return 'contradiction';
+  if(/future|likely|decision|behavior|choice/.test(lower)) return 'future';
+  return 'psyche';
+}
+
+function parseOntologyProseFallback(output, payload={}, model=''){
+  const text = String(output || '').trim();
+  const entity = payload.selectedEntity || {};
+  const chunks = text
+    .replace(/^sure[,\s\S]*?(?=###|\*\*|- |\* )/i, '')
+    .split(/\n(?=#{2,4}\s|\*\s+\*\*|- \*\*|- [A-Z][^:\n]{2,40}:)/)
+    .map(chunk=>chunk.trim())
+    .filter(Boolean)
+    .slice(0, 18);
+  const suggestions = (chunks.length ? chunks : [text]).map((chunk,index)=>{
+    const heading = (chunk.match(/#{2,4}\s*([^\n]+)/) || chunk.match(/\*\*([^*]+)\*\*/) || chunk.match(/^- ([^:\n]+):/m) || [])[1] || `Ontology Insight ${index + 1}`;
+    const summary = chunk
+      .replace(/#{2,4}\s*[^\n]+\n?/, '')
+      .replace(/^\*+\s*/, '')
+      .replace(/\*\*/g, '')
+      .trim()
+      .slice(0, 1400);
+    const category = ontologyCategoryFromText(`${heading}\n${summary}`);
+    return {
+      category,
+      title:heading.trim().slice(0, 120) || logicFacetCategoryLabel(category),
+      summary:summary || chunk.slice(0, 1400),
+      evidence:'',
+      inferenceBasis:'Recovered from a prose AI response because the model did not return JSON. Review before canonizing.',
+      timelinePhase:'',
+      relatedEntityNames:[],
+      relatedPlaceNames:[],
+      sourceChapterTitles:[],
+      sourceDraftTitles:[],
+      webSources:[],
+      confidence:0.45,
+      suggestedStatus:'provisional',
+      model
+    };
+  });
+  return {suggestions};
 }
 
 async function callDraftOpenRouterFromBrowser(fragment){
