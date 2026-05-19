@@ -5144,7 +5144,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.07</div>
+<div id="site-version-stamp">v2026.05.19.08</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -6714,6 +6714,13 @@ function normalizeLogicFacetHistory(value={}){
   };
 }
 
+function isFakeRecoveredOntologySuggestion(value={}){
+  const title = String(value.title || '').trim().toLowerCase();
+  const summary = String(value.summary || '').trim().toLowerCase();
+  const basis = String(value.inferenceBasis || '').trim().toLowerCase();
+  return /^ontology insight \d+$/.test(title) && (/no suggestions|no valid suggestions|nothing found/.test(summary) || basis.includes('recovered from a prose ai response'));
+}
+
 function normalizeLogicStore(value={}){
   return {
     version:2,
@@ -6722,7 +6729,7 @@ function normalizeLogicStore(value={}){
     reports:Array.isArray(value.reports) ? value.reports.map(normalizeLogicReport) : [],
     suggestions:Array.isArray(value.suggestions) ? value.suggestions.map(normalizeLogicSuggestion) : [],
     facets:Array.isArray(value.facets) ? value.facets.map(normalizeLogicFacet) : [],
-    ontologySuggestions:Array.isArray(value.ontologySuggestions) ? value.ontologySuggestions.map(normalizeLogicOntologySuggestion) : [],
+    ontologySuggestions:Array.isArray(value.ontologySuggestions) ? value.ontologySuggestions.filter(item=>!isFakeRecoveredOntologySuggestion(item)).map(normalizeLogicOntologySuggestion) : [],
     forecasts:Array.isArray(value.forecasts) ? value.forecasts.map(normalizeLogicForecast) : [],
     dossiers:Array.isArray(value.dossiers) ? value.dossiers.map(normalizeLogicDossier) : [],
     facetHistory:Array.isArray(value.facetHistory) ? value.facetHistory.map(normalizeLogicFacetHistory) : []
@@ -7204,6 +7211,31 @@ function renderLogicOntologySuggestionCard(raw){
   </article>`;
 }
 
+function renderLogicAiSettings(){
+  const modelValue = _draftAiSettings.openRouterModel || _draftAiSettings.geminiModel || 'openai/gpt-4o-mini';
+  const keyHint = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey) ? 'Saved in this browser' : 'No key saved';
+  const presets = (typeof OPENROUTER_MODEL_PRESETS !== 'undefined' ? OPENROUTER_MODEL_PRESETS : [
+    {id:'openai/gpt-4o-mini', label:'GPT-4o Mini'},
+    {id:'google/gemini-2.5-flash-lite', label:'Gemini 2.5 Flash Lite'},
+    {id:'openrouter/auto', label:'Auto Router'}
+  ]);
+  return `<section class="logic-panel" style="margin-top:.75rem">
+    <div class="logic-card-title">Logic AI Settings</div>
+    <div class="logic-card-body">Logic Machine uses OpenRouter directly from this browser. Structured-output models work best; if a model ignores JSON, no fake ontology cards will be saved.</div>
+    <div class="logic-form-grid" style="margin-top:.65rem">
+      <label class="logic-field"><span>OpenRouter API Key</span><input id="logic-ai-key" class="logic-input" type="password" value="${escHtml(_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '')}" placeholder="${escHtml(keyHint)}"></label>
+      <label class="logic-field"><span>Model</span><input id="logic-ai-model" class="logic-input" value="${escHtml(modelValue)}" placeholder="openai/gpt-4o-mini"></label>
+    </div>
+    <div class="logic-actions" style="margin-top:.65rem">
+      ${presets.map(preset=>`<button class="logic-mini-btn" type="button" onclick="setLogicAiModelPreset('${escHtml(preset.id)}')">${escHtml(preset.label)}</button>`).join('')}
+      <button class="logic-mini-btn primary" type="button" onclick="saveLogicAiSettings()">Save Logic AI</button>
+      <button class="logic-mini-btn" type="button" onclick="testLogicAiConnection()">Test Logic AI</button>
+    </div>
+    <div class="logic-meta" style="margin-top:.45rem">Current model: ${escHtml(modelValue)} · Structured output required for ontology cards.</div>
+    ${_logicAiLastRawPreview ? `<details class="logic-ontology-source" style="margin-top:.65rem"><summary>Last Raw AI Preview</summary><pre style="white-space:pre-wrap;max-height:12rem;overflow:auto">${escHtml(_logicAiLastRawPreview)}</pre></details>` : ''}
+  </section>`;
+}
+
 function renderLogicProfiles(){
   const entity = logicEntityById(_logicSelectedEntityId);
   if(!entity) return `<div class="drafts-empty">Create or select an entity to begin tracking logic.</div>`;
@@ -7299,6 +7331,7 @@ function renderLogicOntology(){
       <div class="logic-card-title">How Ontology Enrichment Works</div>
       <div class="logic-card-body">This is for research-backed inference, not just observation. Chapter/draft evidence anchors the character; web research can add cultural, consumer, fashion, food, alcohol, microculture, and aesthetic context. Cultural Inference must add new hypotheses rather than rewrite existing notes. Results stay pending until you accept them.</div>
     </section>
+    ${renderLogicAiSettings()}
     ${_logicStatusMessage ? `<div class="content-status" style="margin-top:.55rem">${escHtml(_logicStatusMessage)}</div>` : ''}
     ${pendingOntology.length ? `<section class="logic-panel" style="margin-top:.85rem"><div class="logic-card-title">Pending Ontology For ${escHtml(entity.name)}</div><div class="logic-report-grid">${pendingOntology.map(renderLogicOntologySuggestionCard).join('')}</div></section>` : ''}
     <div class="logic-facet-grid" style="margin-top:.85rem">${grouped}</div>
@@ -7856,29 +7889,37 @@ function editLogicOntologySuggestion(id){
   renderLogicMachine();
 }
 
+function logicStringSchema(description=''){
+  return description ? {type:'string', description} : {type:'string'};
+}
+
+function logicStringArraySchema(description=''){
+  return {type:'array', description, items:{type:'string'}};
+}
+
 function logicOntologySchema(){
   return {
     type:'object',
     required:['suggestions'],
     properties:{
-      suggestions:{type:'array',items:{type:'object',required:['category','title','summary','inferenceBasis','confidence','suggestedStatus'],properties:{
-        category:{type:'string'},
-        suggestionType:{type:'string'},
-        title:{type:'string'},
-        summary:{type:'string'},
-        evidence:{type:'string'},
-        realLifeAnalogue:{type:'string'},
-        reasoningChain:{type:'string'},
-        relationEffects:{type:'string'},
-        inferenceBasis:{type:'string'},
-        timelinePhase:{type:'string'},
-        relatedEntityNames:{type:'array',items:{type:'string'}},
-        relatedPlaceNames:{type:'array',items:{type:'string'}},
-        sourceChapterTitles:{type:'array',items:{type:'string'}},
-        sourceDraftTitles:{type:'array',items:{type:'string'}},
-        webSources:{type:'array',items:{type:'object',required:['title','url','note'],properties:{title:{type:'string'},url:{type:'string'},note:{type:'string'}}}},
-        confidence:{type:'number'},
-        suggestedStatus:{type:'string'}
+      suggestions:{type:'array',description:'Pending ontology suggestions for human approval. Return an empty array if no valid new suggestions exist.',items:{type:'object',required:['category','suggestionType','title','summary','evidence','realLifeAnalogue','reasoningChain','relationEffects','inferenceBasis','timelinePhase','relatedEntityNames','relatedPlaceNames','sourceChapterTitles','sourceDraftTitles','webSources','confidence','suggestedStatus'],properties:{
+        category:logicStringSchema('One category id from the provided categories list, such as psyche, fashion, food, alcohol, venue, relationship, contradiction, or future.'),
+        suggestionType:logicStringSchema('One of: text-grounded observation, research-backed inference, subculture analogue, lifestyle hypothesis, relationship influence, future behavior forecast.'),
+        title:logicStringSchema('Short specific title for the new insight.'),
+        summary:logicStringSchema('Specific new insight or hypothesis. Must not paraphrase known facets.'),
+        evidence:logicStringSchema('Supporting chapter/draft quote or empty string.'),
+        realLifeAnalogue:logicStringSchema('Concrete real-world analogue, taste world, subculture, store, venue type, food/drink, music/media, or empty string.'),
+        reasoningChain:logicStringSchema('Explain known character trait plus cultural pattern leading to this inference.'),
+        relationEffects:logicStringSchema('How a related person, place, faction, venue, or culture may shift this entity, or empty string.'),
+        inferenceBasis:logicStringSchema('Name whether this is text-grounded, research-backed, speculative, or relationship-driven.'),
+        timelinePhase:logicStringSchema('early, current, emerging, future, unknown, or empty string.'),
+        relatedEntityNames:logicStringArraySchema('Names of related characters/entities.'),
+        relatedPlaceNames:logicStringArraySchema('Names of related places/venues.'),
+        sourceChapterTitles:logicStringArraySchema('Chapter titles used as evidence.'),
+        sourceDraftTitles:logicStringArraySchema('Draft titles used as evidence.'),
+        webSources:{type:'array',description:'Web sources used for research-backed claims. Empty array when none.',items:{type:'object',required:['title','url','note'],properties:{title:logicStringSchema('Source title or label'),url:logicStringSchema('Source URL or empty string'),note:logicStringSchema('What this source supports')}}},
+        confidence:{type:'number',description:'0 to 1 confidence score.'},
+        suggestedStatus:logicStringSchema('observed, inferred, provisional, canon, contradicted, or retired.')
       }}}
     }
   };
@@ -8022,6 +8063,119 @@ function logicEntityEvidencePayload(entity, focus='full', researchAngle='balance
   };
 }
 
+function logicOntologyInstruction(payload){
+  const modeLabel = payload.mode === 'cultural' ? `Cultural Inference lens: ${payload.culturalLens}` : `Ontology focus: ${payload.focus}`;
+  return [
+    'Return ONLY valid JSON matching the schema. No markdown, headings, bullets, explanations, or prose outside JSON.',
+    modeLabel,
+    'Generate approval-first ontology cards for the selected entity.',
+    'Do not repeat, paraphrase, summarize, or lightly rewrite anything in doNotRepeat.',
+    'Each suggestion must add a new inferred taste, behavior, relation, aesthetic, venue, purchase pattern, contradiction, or future behavior forecast.',
+    'For cultural inference, use the selected entity as a filter for plausible real-world analogues: subcultures, consumer tastes, fashion, music/media, food, alcohol, venues, online/IRL scenes, social habits, relationship influence, and future behavior.',
+    'If there is not enough evidence for a category, omit it instead of inventing a weak card.',
+    'All required string fields may be empty strings only when genuinely unknown. Arrays may be empty.'
+  ].join('\n');
+}
+
+function validateLogicOntologyParsed(parsed){
+  if(!parsed || !Array.isArray(parsed.suggestions)) throw new Error('Ontology response did not contain a suggestions array.');
+  const valid = parsed.suggestions.filter(item=>{
+    const title = String(item && item.title || '').trim();
+    const summary = String(item && item.summary || '').trim();
+    const reasoning = String(item && item.reasoningChain || '').trim();
+    const combined = `${title} ${summary} ${reasoning}`.toLowerCase();
+    if(/no suggestions|no valid suggestions|nothing found|not enough information|no insights found/.test(combined)) return false;
+    return title && (summary || reasoning);
+  });
+  if(!valid.length) throw new Error('No valid ontology suggestions were returned. The model returned an empty or unusable suggestions array.');
+  return {suggestions:valid};
+}
+
+async function callLogicOntologyResearchBrief(payload, options={}){
+  if(!options.webResearch) return '';
+  const key = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '').trim();
+  if(!key) throw new Error('Paste an OpenRouter API key in Logic AI Settings first.');
+  const model = (_draftAiSettings.openRouterModel || _draftAiSettings.geminiModel || 'openai/gpt-4o-mini').trim();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 90000);
+  logicSetStatus(`Running web research brief for ${payload.selectedEntity && payload.selectedEntity.name ? payload.selectedEntity.name : 'selected entity'} (${payload.culturalLens || payload.researchAngle || 'balanced'})...`);
+  renderLogicMachine();
+  const briefPayload = {
+    selectedEntity:payload.selectedEntity,
+    culturalLens:payload.culturalLens,
+    mode:payload.mode,
+    acceptedFacets:payload.acceptedFacets,
+    observations:payload.observations,
+    relatedEntities:payload.relatedEntities,
+    doNotRepeat:payload.doNotRepeat
+  };
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method:'POST',
+    headers:openRouterAuthHeaders('COSMOPOLITA Logic Machine'),
+    signal:controller.signal,
+    body:JSON.stringify({
+      model,
+      messages:[
+        {role:'system', content:'You are a concise cultural research assistant for a fiction ontology tool. Use web search if useful. Return a short research brief, not JSON.'},
+        {role:'user', content:'Research plausible real-world analogues, taste worlds, consumer patterns, venues, fashion/music/food/drink references, and microcultures for this selected entity and lens. Do not repeat existing facts; focus on useful new hypotheses and cite URLs when available.\n\n' + JSON.stringify(briefPayload)}
+      ],
+      tools:[{type:'openrouter:web_search', parameters:{max_results:5, max_total_results:10, search_context_size:'low'}}]
+    })
+  }).catch(err=>{
+    if(err && err.name === 'AbortError') throw new Error('OpenRouter web research timed out after 90 seconds.');
+    throw err;
+  }).finally(()=>clearTimeout(timer));
+  const text = await res.text();
+  _logicAiLastRawPreview = text.slice(0, 3000);
+  let data = null;
+  try{ data = JSON.parse(text); }catch(e){}
+  if(!res.ok){
+    const message = (data && data.error && (data.error.message || data.error)) || text || `OpenRouter web research failed with HTTP ${res.status}`;
+    if(/No endpoints found/i.test(String(message))) throw new Error(openRouterNoEndpointMessage(model));
+    throw new Error(message);
+  }
+  const brief = openRouterOutputText(data).slice(0, 8000);
+  logicSetStatus('Web research brief complete. Requesting structured ontology cards...');
+  renderLogicMachine();
+  return brief;
+}
+
+async function repairLogicOntologyJson(rawOutput, payload, model){
+  const key = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '').trim();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 60000);
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method:'POST',
+    headers:openRouterAuthHeaders('COSMOPOLITA Logic Machine'),
+    signal:controller.signal,
+    body:JSON.stringify({
+      model,
+      provider:{require_parameters:true},
+      messages:[
+        {role:'system', content:'Return ONLY valid JSON matching the schema. Convert the supplied malformed/prose ontology response into the schema. Do not add commentary.'},
+        {role:'user', content:'Repair this ontology response into valid schema JSON. If it contains no usable suggestions, return {"suggestions":[]}.\n\nMalformed response:\n' + String(rawOutput || '').slice(0, 12000) + '\n\nSelected entity context:\n' + JSON.stringify({selectedEntity:payload.selectedEntity, categories:payload.categories, suggestionTypes:payload.suggestionTypes, statuses:payload.statuses})}
+      ],
+      response_format:{
+        type:'json_schema',
+        json_schema:{name:'logic_ontology_repair', strict:true, schema:strictJsonSchema(logicOntologySchema())}
+      }
+    })
+  }).catch(err=>{
+    if(err && err.name === 'AbortError') throw new Error('OpenRouter ontology repair timed out after 60 seconds.');
+    throw err;
+  }).finally(()=>clearTimeout(timer));
+  const text = await res.text();
+  _logicAiLastRawPreview = text.slice(0, 3000);
+  let data = null;
+  try{ data = JSON.parse(text); }catch(e){}
+  if(!res.ok){
+    const message = (data && data.error && (data.error.message || data.error)) || text || `OpenRouter ontology repair failed with HTTP ${res.status}`;
+    throw new Error(message);
+  }
+  const output = openRouterOutputText(data);
+  return validateLogicOntologyParsed(parseOpenRouterJsonOutput(output, 'Ontology repair'));
+}
+
 async function callLogicOpenRouter(payload, label='Logic Machine'){
   const key = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '').trim();
   if(!key) throw new Error('Paste an OpenRouter API key in Draft Inbox AI or Author Workspace first.');
@@ -8039,6 +8193,7 @@ async function callLogicOpenRouter(payload, label='Logic Machine'){
     signal:controller.signal,
     body:JSON.stringify({
       model,
+      provider:{require_parameters:true},
       messages:[
         {role:'system', content:'You are an in-universe continuity and character logic analyst for a literary novel. Return schema-valid JSON only. Extract observations about characters, factions, nations, regions, venues, institutions, cultures, desires, fears, wounds, habits, speech, body language, fashion, food, alcohol, art/media, rituals, tastes, triggers, relationships, contradictions, and world logic. Do not rewrite prose. Suggestions are private and require human approval.'},
         {role:'user', content:`Analyze this ${label} for the in-universe logic machine.\n\n` + JSON.stringify(payload)}
@@ -8068,24 +8223,24 @@ async function callLogicOpenRouter(payload, label='Logic Machine'){
 
 async function callLogicOntologyOpenRouter(payload, options={}){
   const key = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '').trim();
-  if(!key) throw new Error('Paste an OpenRouter API key in Draft Inbox AI or Author Workspace first.');
+  if(!key) throw new Error('Paste an OpenRouter API key in Logic AI Settings first.');
   const model = (_draftAiSettings.openRouterModel || _draftAiSettings.geminiModel || 'openai/gpt-4o-mini').trim();
+  const researchBrief = await callLogicOntologyResearchBrief(payload, options);
+  const enrichedPayload = Object.assign({}, payload, {researchBrief});
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), 160000);
   const body = {
     model,
+    provider:{require_parameters:true},
     messages:[
       {role:'system', content:'Return ONLY valid JSON. Do not write markdown, prose, headings, bullets, or commentary. You are a literary cultural inference analyst for a long novel. Your job is not to summarize existing observations. Your job is to use the selected entity as a filter to explore plausible real-life analogues: subcultures, consumer tastes, fashion, music/media, food, alcohol, venues, online/IRL scenes, social habits, relationship influence, and future behavior. Do not canonize anything.'},
-      {role:'user', content:'Return exactly this JSON shape: {"suggestions":[{"category":"fashion","suggestionType":"subculture analogue","title":"short title","summary":"new inferred taste or behavior","evidence":"supporting text or empty","realLifeAnalogue":"real-world subculture/store/band/food/drink/venue/scene analogue","reasoningChain":"known trait + cultural pattern => inferred hypothesis","relationEffects":"how other characters/places/factions may shift this","inferenceBasis":"name text evidence versus real-life research inference","timelinePhase":"early/current/emerging/unknown","relatedEntityNames":[],"relatedPlaceNames":[],"sourceChapterTitles":[],"sourceDraftTitles":[],"webSources":[],"confidence":0.5,"suggestedStatus":"provisional"}]}. NOVELTY REQUIREMENT: do not repeat, rephrase, summarize, or lightly rewrite anything in doNotRepeat. Each suggestion must add a new inferred taste, behavior, relation, aesthetic, store, band, food, alcohol, venue, purchase pattern, contradiction, or future behavior forecast. If the selected entity were mall-goth, infer things like likely clothing stores, food court habits, bands, drinks, nightlife, online scenes, and relationship effects. Apply that same kind of cultural reasoning to the provided selected entity.\\n\\n' + JSON.stringify(payload)}
+      {role:'user', content:logicOntologyInstruction(enrichedPayload) + '\n\nReturn exactly this JSON shape: {"suggestions":[{"category":"fashion","suggestionType":"subculture analogue","title":"short title","summary":"new inferred taste or behavior","evidence":"supporting text or empty","realLifeAnalogue":"real-world subculture/store/band/food/drink/venue/scene analogue","reasoningChain":"known trait + cultural pattern => inferred hypothesis","relationEffects":"how other characters/places/factions may shift this","inferenceBasis":"name text evidence versus real-life research inference","timelinePhase":"early/current/emerging/unknown","relatedEntityNames":[],"relatedPlaceNames":[],"sourceChapterTitles":[],"sourceDraftTitles":[],"webSources":[],"confidence":0.5,"suggestedStatus":"provisional"}]}.\n\n' + JSON.stringify(enrichedPayload)}
     ],
     response_format:{
       type:'json_schema',
       json_schema:{name:'logic_ontology_enrichment', strict:true, schema:strictJsonSchema(logicOntologySchema())}
     }
   };
-  if(options.webResearch){
-    body.tools = [{type:'openrouter:web_search', parameters:{max_results:5, max_total_results:10, search_context_size:'low'}}];
-  }
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method:'POST',
     headers:{
@@ -8101,6 +8256,7 @@ async function callLogicOntologyOpenRouter(payload, options={}){
     throw err;
   }).finally(()=>clearTimeout(timer));
   const text = await res.text();
+  _logicAiLastRawPreview = text.slice(0, 3000);
   let data = null;
   try{ data = JSON.parse(text); }catch(e){}
   if(!res.ok){
@@ -8110,9 +8266,14 @@ async function callLogicOntologyOpenRouter(payload, options={}){
   const output = openRouterOutputText(data);
   if(!output) throw new Error('OpenRouter returned no ontology enrichment text.');
   try{
-    return {model, parsed:parseOpenRouterJsonOutput(output, 'Ontology enrichment')};
+    return {model, parsed:validateLogicOntologyParsed(parseOpenRouterJsonOutput(output, 'Ontology enrichment')), webResearchBrief:researchBrief};
   }catch(err){
-    return {model, parsed:parseOntologyProseFallback(output, payload, model), recoveredFromProse:true};
+    try{
+      const repaired = await repairLogicOntologyJson(output, enrichedPayload, model);
+      return {model, parsed:repaired, repaired:true, webResearchBrief:researchBrief};
+    }catch(repairErr){
+      throw new Error(`AI returned prose instead of structured ontology JSON. Try a structured-output model or run Test Logic AI. First characters: ${String(output || '').slice(0, 160)}`);
+    }
   }
 }
 
@@ -8247,10 +8408,10 @@ async function analyzeLogicOntologyEntity(mode='ontology'){
   renderLogicMachine();
   try{
     const payload = logicEntityEvidencePayload(entity, focus, researchAngle, mode, culturalLens);
-    const {model, parsed, recoveredFromProse} = await callLogicOntologyOpenRouter(payload, {webResearch});
+    const {model, parsed, repaired, webResearchBrief} = await callLogicOntologyOpenRouter(payload, {webResearch});
     const count = storeLogicOntologySuggestions(parsed, entity, model, {webResearch});
     _logicActiveTab = 'ontology';
-    logicSetStatus(`Generated ${count} pending ${mode === 'cultural' ? 'cultural inference' : 'ontology'} card${count===1?'':'s'} for ${entity.name}.${recoveredFromProse ? ' The model returned prose, so I recovered provisional cards from it.' : ''}`);
+    logicSetStatus(`Generated ${count} pending ${mode === 'cultural' ? 'cultural inference' : 'ontology'} card${count===1?'':'s'} for ${entity.name}.${webResearchBrief ? ' Web research was used as a separate brief.' : ''}${repaired ? ' The first response needed one JSON repair pass.' : ''}`);
     renderLogicMachine();
   }catch(err){
     console.error('Ontology enrichment failed:', err);
@@ -9071,6 +9232,7 @@ let _logicRelationshipScope = 'selected';
 let _logicChapterId = '';
 let _logicDraftId = '';
 let _logicStatusMessage = '';
+let _logicAiLastRawPreview = '';
 let _currentCharacterId = null;
 let _protoActiveLineId = '';
 let _protoSelectedChapterId = '';
@@ -15071,6 +15233,82 @@ function openRouterNoEndpointMessage(model){
   return `OpenRouter has no active endpoint for "${model}" right now. Free model slugs can disappear or run out of capacity; choose another model preset such as openrouter/auto, openai/gpt-4o-mini, or remove ":free" from the model id if OpenRouter lists a paid endpoint.`;
 }
 
+function openRouterAuthHeaders(title='COSMOPOLITA'){
+  const key = (_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey || '').trim();
+  return {
+    'Content-Type':'application/json',
+    'Authorization':`Bearer ${key}`,
+    'HTTP-Referer':location.origin && location.origin !== 'null' ? location.origin : 'file://cosmopolita-local',
+    'X-Title':title
+  };
+}
+
+function saveLogicAiSettings(){
+  const key = document.getElementById('logic-ai-key')?.value || _draftAiSettings.openRouterKey || '';
+  const model = document.getElementById('logic-ai-model')?.value || _draftAiSettings.openRouterModel || 'openai/gpt-4o-mini';
+  _draftAiSettings = {provider:'openrouter-browser', openRouterKey:key.trim(), openRouterModel:model.trim() || 'openai/gpt-4o-mini'};
+  try{ localStorage.setItem(DRAFTS_AI_SETTINGS_KEY, JSON.stringify(_draftAiSettings)); }catch(e){}
+  logicSetStatus(_draftAiSettings.openRouterKey ? `Logic AI key saved for ${_draftAiSettings.openRouterModel}.` : 'Logic AI key cleared.');
+  renderLogicMachine();
+}
+
+function setLogicAiModelPreset(value){
+  const input = document.getElementById('logic-ai-model');
+  if(input && value) input.value = value;
+  saveLogicAiSettings();
+}
+
+async function testLogicAiConnection(){
+  if(!requireAdmin()) return;
+  saveLogicAiSettings();
+  const key = (_draftAiSettings.openRouterKey || '').trim();
+  if(!key){ logicSetStatus('Paste an OpenRouter API key before testing Logic AI.'); renderLogicMachine(); return; }
+  const model = (_draftAiSettings.openRouterModel || 'openai/gpt-4o-mini').trim();
+  logicSetStatus(`Testing Logic AI structured output with ${model}...`);
+  renderLogicMachine();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 45000);
+  try{
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method:'POST',
+      headers:openRouterAuthHeaders('COSMOPOLITA Logic Machine'),
+      signal:controller.signal,
+      body:JSON.stringify({
+        model,
+        provider:{require_parameters:true},
+        messages:[
+          {role:'system', content:'Return only valid JSON matching the schema.'},
+          {role:'user', content:'Return {"ok":true,"message":"structured output works"}.'}
+        ],
+        response_format:{
+          type:'json_schema',
+          json_schema:{name:'logic_ai_test', strict:true, schema:strictJsonSchema({
+            type:'object',
+            required:['ok','message'],
+            properties:{ok:{type:'boolean'},message:{type:'string'}}
+          })}
+        }
+      })
+    }).finally(()=>clearTimeout(timer));
+    const text = await res.text();
+    _logicAiLastRawPreview = text.slice(0, 2000);
+    let data = null;
+    try{ data = JSON.parse(text); }catch(e){}
+    if(!res.ok){
+      const message = (data && data.error && (data.error.message || data.error)) || text || `OpenRouter test failed with HTTP ${res.status}`;
+      if(/No endpoints found/i.test(String(message))) throw new Error(openRouterNoEndpointMessage(model));
+      throw new Error(message);
+    }
+    const output = openRouterOutputText(data);
+    parseOpenRouterJsonOutput(output, 'Logic AI test');
+    logicSetStatus(`Logic AI structured output works for ${model}.`);
+  }catch(err){
+    if(err && err.name === 'AbortError') logicSetStatus('Logic AI test timed out after 45 seconds.');
+    else logicSetStatus('Logic AI test failed: ' + (err.message || err));
+  }
+  renderLogicMachine();
+}
+
 function draftId(){
   if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
   return 'draft-' + Date.now() + '-' + Math.random().toString(36).slice(2);
@@ -16103,76 +16341,6 @@ function parseOpenRouterJsonOutput(output, label='AI response'){
     try{ return JSON.parse(text.slice(firstArr, lastArr + 1)); }catch(e){}
   }
   throw new Error(`${label} was not valid JSON. First characters: ${text.slice(0, 120)}`);
-}
-
-function ontologyCategoryFromText(text=''){
-  const lower = String(text || '').toLowerCase();
-  if(/psyche|psych|personality|duality|temperament/.test(lower)) return 'psyche';
-  if(/desire|want|motivation|drive|ambition/.test(lower)) return 'desire';
-  if(/fear|anxiety|dread|avoid/.test(lower)) return 'fear';
-  if(/wound|trauma|defense|shame/.test(lower)) return 'wound';
-  if(/habit|routine|pattern/.test(lower)) return 'habit';
-  if(/stress|pressure|crisis/.test(lower)) return 'stress';
-  if(/trigger|provokes|when/.test(lower)) return 'trigger';
-  if(/moral|ethic|belief|value/.test(lower)) return 'moral';
-  if(/speech|voice|dialogue/.test(lower)) return 'speech';
-  if(/body|gesture|posture/.test(lower)) return 'body';
-  if(/fashion|clothing|clothes|style|wear/.test(lower)) return 'fashion';
-  if(/food|meal|eat/.test(lower)) return 'food';
-  if(/alcohol|drink|wine|beer|liquor/.test(lower)) return 'alcohol';
-  if(/art|music|media|book|film/.test(lower)) return 'art';
-  if(/ritual|ceremony|practice/.test(lower)) return 'ritual';
-  if(/venue|bar|restaurant|cafe|place/.test(lower)) return 'venue';
-  if(/consumer|taste|interest|hobby/.test(lower)) return 'consumer';
-  if(/class|status|wealth/.test(lower)) return 'class';
-  if(/faction|loyalty|organization/.test(lower)) return 'faction';
-  if(/culture|code|custom/.test(lower)) return 'culture';
-  if(/relationship|friend|lover|rival|spends time/.test(lower)) return 'relationship';
-  if(/contradiction|inconsistent|risk/.test(lower)) return 'contradiction';
-  if(/future|likely|decision|behavior|choice/.test(lower)) return 'future';
-  return 'psyche';
-}
-
-function parseOntologyProseFallback(output, payload={}, model=''){
-  const text = String(output || '').trim();
-  const entity = payload.selectedEntity || {};
-  const chunks = text
-    .replace(/^sure[,\s\S]*?(?=###|\*\*|- |\* )/i, '')
-    .split(/\n(?=#{2,4}\s|\*\s+\*\*|- \*\*|- [A-Z][^:\n]{2,40}:)/)
-    .map(chunk=>chunk.trim())
-    .filter(Boolean)
-    .slice(0, 18);
-  const suggestions = (chunks.length ? chunks : [text]).map((chunk,index)=>{
-    const heading = (chunk.match(/#{2,4}\s*([^\n]+)/) || chunk.match(/\*\*([^*]+)\*\*/) || chunk.match(/^- ([^:\n]+):/m) || [])[1] || `Ontology Insight ${index + 1}`;
-    const summary = chunk
-      .replace(/#{2,4}\s*[^\n]+\n?/, '')
-      .replace(/^\*+\s*/, '')
-      .replace(/\*\*/g, '')
-      .trim()
-      .slice(0, 1400);
-    const category = ontologyCategoryFromText(`${heading}\n${summary}`);
-    return {
-      category,
-      suggestionType:'lifestyle hypothesis',
-      title:heading.trim().slice(0, 120) || logicFacetCategoryLabel(category),
-      summary:summary || chunk.slice(0, 1400),
-      evidence:'',
-      realLifeAnalogue:'',
-      reasoningChain:'Recovered from prose; review and refine the reasoning before accepting.',
-      relationEffects:'',
-      inferenceBasis:'Recovered from a prose AI response because the model did not return JSON. Review before canonizing.',
-      timelinePhase:'',
-      relatedEntityNames:[],
-      relatedPlaceNames:[],
-      sourceChapterTitles:[],
-      sourceDraftTitles:[],
-      webSources:[],
-      confidence:0.45,
-      suggestedStatus:'provisional',
-      model
-    };
-  });
-  return {suggestions};
 }
 
 async function callDraftOpenRouterFromBrowser(fragment){
@@ -19303,6 +19471,9 @@ Object.assign(window, {
   addManualLogicEntity,
   saveManualLogicObservation,
   saveManualLogicFacet,
+  saveLogicAiSettings,
+  setLogicAiModelPreset,
+  testLogicAiConnection,
   logicSetFacetStatus,
   logicUpdateFacet,
   generateLogicDossier,
