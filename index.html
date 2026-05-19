@@ -4756,6 +4756,58 @@ body:not(.admin-on) #tnav-drafts{
   gap:0.65rem;
 }
 .logic-field.wide{grid-column:1 / -1}
+.logic-facet-grid,.logic-forecast-columns{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0.7rem;
+}
+.logic-ontology-group{
+  border:1px solid var(--border);
+  background:#fbf8f3;
+  padding:0.75rem;
+}
+.logic-facet-card{
+  border:1px solid var(--border);
+  background:var(--white);
+  padding:0.7rem;
+  display:grid;
+  gap:0.35rem;
+}
+.logic-facet-status{
+  display:inline-flex;
+  width:max-content;
+  border:1px solid var(--border);
+  background:#f5eee5;
+  color:#5d5147;
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  padding:0.2rem 0.38rem;
+}
+.logic-facet-status.canon{background:#f8e7b7;color:#5a3a08;border-color:var(--gold)}
+.logic-facet-status.contradicted{background:#f8d9d5;color:var(--red);border-color:var(--red)}
+.logic-facet-status.retired{opacity:0.55}
+.logic-infographic-row{
+  display:grid;
+  grid-template-columns:10rem minmax(0,1fr);
+  gap:0.65rem;
+  align-items:start;
+  border-top:1px solid var(--border);
+  padding-top:0.55rem;
+  margin-top:0.55rem;
+}
+.logic-risk-meter{
+  height:0.7rem;
+  border:1px solid var(--border);
+  background:#eee4d8;
+  overflow:hidden;
+}
+.logic-risk-meter span{
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,var(--gold),var(--red));
+}
 .logic-pending-card.accepted{opacity:0.65}
 .logic-pending-card.rejected{opacity:0.45}
 .logic-severity-high{border-left:4px solid var(--red)}
@@ -4789,9 +4841,9 @@ body:not(.admin-on) #tnav-drafts{
   .planning-pane{max-height:none;}
   .planning-body{min-height:40vh;}
   .drafts-help-grid,.drafts-help-flow,.drafts-help-recipes,.drafts-glossary-grid{grid-template-columns:1fr;}
-  .logic-shell,.logic-grid,.logic-matrix-grid,.logic-report-grid,.logic-form-grid,.logic-stat-grid,.author-logic-summary{grid-template-columns:1fr;}
+  .logic-shell,.logic-grid,.logic-matrix-grid,.logic-report-grid,.logic-form-grid,.logic-stat-grid,.author-logic-summary,.logic-facet-grid,.logic-forecast-columns{grid-template-columns:1fr;}
   .logic-rail{position:relative;top:auto;max-height:none;}
-  .logic-timeline-item{grid-template-columns:1fr;}
+  .logic-timeline-item,.logic-infographic-row{grid-template-columns:1fr;}
   .drafts-field.wide{grid-column:auto;}
   .assets-wrap{grid-template-columns:1fr;}
   #assets-view .side-panel{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
@@ -5069,7 +5121,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.01</div>
+<div id="site-version-stamp">v2026.05.19.02</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -5941,15 +5993,45 @@ const LOGIC_ENTITY_TYPES = [
   'character','faction','nation','region','city','venue','restaurant','bar','organization','institution','religion','government','culture','object','technology','metaphysical system','motif','custom'
 ];
 const LOGIC_DIMENSIONS = [
-  'personality','motivation','habit','speech','fashion','food/drink','consumer taste','art/music','belief','relationship','faction loyalty','culture marker','region marker','trigger','contradiction','continuity note'
+  'personality','motivation','desire','fear','wound','habit','stress response','trigger','moral logic','speech','body language','fashion','food/drink','alcohol','consumer taste','art/music','ritual','venue','class marker','belief','relationship','faction loyalty','culture marker','region marker','contradiction','continuity note'
+];
+const LOGIC_FACET_STATUSES = ['observed','inferred','provisional','canon','contradicted','retired'];
+const LOGIC_FACET_CATEGORIES = [
+  {id:'psyche', label:'Psyche'},
+  {id:'desire', label:'Desire / Motivation'},
+  {id:'fear', label:'Fear'},
+  {id:'wound', label:'Wound / Defense'},
+  {id:'habit', label:'Habits'},
+  {id:'stress', label:'Stress Response'},
+  {id:'trigger', label:'Triggers'},
+  {id:'moral', label:'Moral Logic'},
+  {id:'speech', label:'Speech'},
+  {id:'body', label:'Body Language'},
+  {id:'fashion', label:'Fashion'},
+  {id:'food', label:'Food'},
+  {id:'alcohol', label:'Alcohol'},
+  {id:'art', label:'Art / Media'},
+  {id:'ritual', label:'Rituals'},
+  {id:'venue', label:'Venues'},
+  {id:'consumer', label:'Consumer Taste'},
+  {id:'class', label:'Class Markers'},
+  {id:'faction', label:'Faction Ties'},
+  {id:'culture', label:'Cultural Codes'},
+  {id:'relationship', label:'Relationships'},
+  {id:'contradiction', label:'Contradictions'}
 ];
 const LOGIC_SUGGESTION_KINDS = ['observation','report','consistency'];
-const LOGIC_REPORT_TYPES = ['Entity Extraction Report','Character Trend Report','Faction/Culture Logic Report','Chapter Consistency Report','Interaction Report'];
+const LOGIC_REPORT_TYPES = ['Entity Extraction Report','Character Trend Report','Faction/Culture Logic Report','Chapter Consistency Report','Interaction Report','Character Dossier','Decision Forecast','Branch Simulation','Lifestyle & Culture Atlas','Relationship Report'];
 const LOGIC_TABS = [
   {id:'profiles', label:'Entity Profiles'},
+  {id:'ontology', label:'Ontology'},
+  {id:'psych', label:'Psych Profile'},
+  {id:'forecast', label:'Decision Forecast'},
+  {id:'simulator', label:'Branch Simulator'},
+  {id:'lifestyle', label:'Lifestyle Atlas'},
+  {id:'relationships', label:'Relationships'},
   {id:'consistency', label:'Chapter Consistency'},
-  {id:'matrix', label:'Trend Matrix'},
-  {id:'relationships', label:'Relationship Map'},
+  {id:'risks', label:'Continuity Risks'},
   {id:'reports', label:'Reports'},
   {id:'pending', label:'Pending AI'}
 ];
@@ -6457,13 +6539,95 @@ function normalizeLogicSuggestion(value={}){
   };
 }
 
+function logicFacetCategoryLabel(id){
+  return (LOGIC_FACET_CATEGORIES.find(item=>item.id===id) || {}).label || 'Logic Facet';
+}
+
+function normalizeLogicFacet(value={}){
+  const now = Date.now();
+  const category = LOGIC_FACET_CATEGORIES.some(item=>item.id===value.category) ? value.category : 'psyche';
+  const status = LOGIC_FACET_STATUSES.includes(value.status) ? value.status : 'observed';
+  return {
+    id:String(value.id || logicId('facet')),
+    entityId:String(value.entityId || ''),
+    entityName:String(value.entityName || ''),
+    entityType:String(value.entityType || 'custom'),
+    category,
+    title:String(value.title || logicFacetCategoryLabel(category)),
+    value:String(value.value || value.summary || ''),
+    evidence:String(value.evidence || value.quote || ''),
+    sourceObservationIds:Array.isArray(value.sourceObservationIds) ? value.sourceObservationIds.map(String) : [],
+    sourceKind:String(value.sourceKind || ''),
+    sourceId:String(value.sourceId || ''),
+    sourceTitle:String(value.sourceTitle || ''),
+    confidence:Number(value.confidence || 0),
+    status,
+    notes:String(value.notes || ''),
+    tags:Array.isArray(value.tags) ? value.tags.map(String) : splitTagText(value.tags || ''),
+    createdAt:value.createdAt || now,
+    updatedAt:value.updatedAt || value.createdAt || now
+  };
+}
+
+function normalizeLogicForecast(value={}){
+  const now = Date.now();
+  return {
+    id:String(value.id || logicId('forecast')),
+    forecastType:String(value.forecastType || 'decision'),
+    entityId:String(value.entityId || ''),
+    entityName:String(value.entityName || ''),
+    title:String(value.title || 'Decision Forecast'),
+    inputs:Object.assign({event:'', location:'', pressure:'', interactingEntity:'', stakes:'', emotionalState:''}, value.inputs || {}),
+    likely:Array.isArray(value.likely) ? value.likely.map(String) : [],
+    unlikely:Array.isArray(value.unlikely) ? value.unlikely.map(String) : [],
+    needsSetup:Array.isArray(value.needsSetup) ? value.needsSetup.map(String) : [],
+    consequences:Array.isArray(value.consequences) ? value.consequences.map(String) : [],
+    summary:String(value.summary || ''),
+    createdAt:value.createdAt || now,
+    updatedAt:value.updatedAt || value.createdAt || now
+  };
+}
+
+function normalizeLogicDossier(value={}){
+  const now = Date.now();
+  return {
+    id:String(value.id || logicId('dossier')),
+    reportType:LOGIC_REPORT_TYPES.includes(value.reportType) ? value.reportType : 'Character Dossier',
+    entityId:String(value.entityId || ''),
+    entityName:String(value.entityName || ''),
+    title:String(value.title || 'Logic Dossier'),
+    summary:String(value.summary || ''),
+    sections:value.sections && typeof value.sections === 'object' ? value.sections : {},
+    includeProvisional:!!value.includeProvisional,
+    createdAt:value.createdAt || now,
+    updatedAt:value.updatedAt || value.createdAt || now
+  };
+}
+
+function normalizeLogicFacetHistory(value={}){
+  return {
+    id:String(value.id || logicId('facet-history')),
+    facetId:String(value.facetId || ''),
+    entityId:String(value.entityId || ''),
+    action:String(value.action || 'updated'),
+    fromStatus:String(value.fromStatus || ''),
+    toStatus:String(value.toStatus || ''),
+    note:String(value.note || ''),
+    at:value.at || Date.now()
+  };
+}
+
 function normalizeLogicStore(value={}){
   return {
-    version:1,
+    version:2,
     entities:Array.isArray(value.entities) ? value.entities.map(normalizeLogicEntity) : [],
     observations:Array.isArray(value.observations) ? value.observations.map(normalizeLogicObservation) : [],
     reports:Array.isArray(value.reports) ? value.reports.map(normalizeLogicReport) : [],
-    suggestions:Array.isArray(value.suggestions) ? value.suggestions.map(normalizeLogicSuggestion) : []
+    suggestions:Array.isArray(value.suggestions) ? value.suggestions.map(normalizeLogicSuggestion) : [],
+    facets:Array.isArray(value.facets) ? value.facets.map(normalizeLogicFacet) : [],
+    forecasts:Array.isArray(value.forecasts) ? value.forecasts.map(normalizeLogicForecast) : [],
+    dossiers:Array.isArray(value.dossiers) ? value.dossiers.map(normalizeLogicDossier) : [],
+    facetHistory:Array.isArray(value.facetHistory) ? value.facetHistory.map(normalizeLogicFacetHistory) : []
   };
 }
 
@@ -6558,6 +6722,113 @@ function logicReportsForEntity(entityId){
   return (_logicStore.reports || []).filter(report=>!entityId || report.entityId===entityId).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
 }
 
+function logicFacetsForEntity(entityId, includeRetired=false){
+  return (_logicStore.facets || [])
+    .map(normalizeLogicFacet)
+    .filter(facet=>(!entityId || facet.entityId===entityId) && (includeRetired || facet.status !== 'retired'))
+    .sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+}
+
+function logicForecastsForEntity(entityId){
+  return (_logicStore.forecasts || []).map(normalizeLogicForecast).filter(item=>!entityId || item.entityId===entityId).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+}
+
+function logicDossiersForEntity(entityId){
+  return (_logicStore.dossiers || []).map(normalizeLogicDossier).filter(item=>!entityId || item.entityId===entityId).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+}
+
+function logicFacetCategoryFromDimension(dimension=''){
+  const dim = String(dimension || '').toLowerCase();
+  if(dim.includes('motivation')) return 'desire';
+  if(dim.includes('desire')) return 'desire';
+  if(dim.includes('fear')) return 'fear';
+  if(dim.includes('wound')) return 'wound';
+  if(dim.includes('habit')) return 'habit';
+  if(dim.includes('stress')) return 'stress';
+  if(dim.includes('speech')) return 'speech';
+  if(dim.includes('body')) return 'body';
+  if(dim.includes('fashion')) return 'fashion';
+  if(dim.includes('food')) return 'food';
+  if(dim.includes('drink') || dim.includes('alcohol')) return 'alcohol';
+  if(dim.includes('consumer')) return 'consumer';
+  if(dim.includes('art') || dim.includes('music') || dim.includes('media')) return 'art';
+  if(dim.includes('belief') || dim.includes('moral')) return 'moral';
+  if(dim.includes('ritual')) return 'ritual';
+  if(dim.includes('venue')) return 'venue';
+  if(dim.includes('class')) return 'class';
+  if(dim.includes('relationship')) return 'relationship';
+  if(dim.includes('faction')) return 'faction';
+  if(dim.includes('culture')) return 'culture';
+  if(dim.includes('trigger')) return 'trigger';
+  if(dim.includes('contradiction') || dim.includes('continuity')) return 'contradiction';
+  if(dim.includes('region')) return 'venue';
+  return 'psyche';
+}
+
+function logicFacetFromObservation(obs, overrides={}){
+  const category = overrides.category || logicFacetCategoryFromDimension(obs.dimension);
+  return normalizeLogicFacet(Object.assign({
+    entityId:obs.entityId,
+    entityName:obs.entityName,
+    entityType:obs.entityType,
+    category,
+    title:logicFacetCategoryLabel(category),
+    value:obs.value,
+    evidence:obs.quote,
+    sourceObservationIds:[obs.id],
+    sourceKind:obs.sourceKind,
+    sourceId:obs.sourceId,
+    sourceTitle:obs.sourceTitle,
+    confidence:obs.confidence,
+    status:obs.origin === 'ai' ? 'inferred' : 'observed',
+    tags:obs.tags
+  }, overrides));
+}
+
+function logicRecordFacetHistory(facet, action, fromStatus='', note=''){
+  _logicStore.facetHistory = _logicStore.facetHistory || [];
+  _logicStore.facetHistory.unshift(normalizeLogicFacetHistory({
+    facetId:facet.id,
+    entityId:facet.entityId,
+    action,
+    fromStatus,
+    toStatus:facet.status,
+    note
+  }));
+}
+
+function ensureFacetForObservation(obs, overrides={}){
+  _logicStore.facets = _logicStore.facets || [];
+  const existing = _logicStore.facets.find(facet=>(facet.sourceObservationIds || []).includes(obs.id));
+  if(existing) return normalizeLogicFacet(existing);
+  const facet = logicFacetFromObservation(obs, overrides);
+  _logicStore.facets.unshift(facet);
+  logicRecordFacetHistory(facet, 'promoted-from-observation', '', obs.dimension);
+  return facet;
+}
+
+function logicSetFacetStatus(id, status){
+  const facet = (_logicStore.facets || []).find(item=>item.id===id);
+  if(!facet || !LOGIC_FACET_STATUSES.includes(status)) return;
+  const fromStatus = facet.status;
+  facet.status = status;
+  facet.updatedAt = Date.now();
+  logicRecordFacetHistory(normalizeLogicFacet(facet), 'status-change', fromStatus);
+  saveLogicStore();
+  renderLogicMachine();
+  renderAuthorLogicBoard();
+}
+
+function logicUpdateFacet(id, field, value){
+  const facet = (_logicStore.facets || []).find(item=>item.id===id);
+  if(!facet) return;
+  if(field === 'category' && !LOGIC_FACET_CATEGORIES.some(item=>item.id===value)) return;
+  if(field === 'status' && !LOGIC_FACET_STATUSES.includes(value)) return;
+  facet[field] = value;
+  facet.updatedAt = Date.now();
+  saveLogicStore();
+}
+
 function logicSetStatus(message){
   _logicStatusMessage = message || '';
   const el = document.getElementById('logic-status');
@@ -6577,9 +6848,15 @@ function saveLogicUi(){
   try{ localStorage.setItem(LOGIC_UI_STORAGE_KEY, JSON.stringify({tab:_logicActiveTab, entityId:_logicSelectedEntityId, filter:_logicFilter, chapterId:_logicChapterId, draftId:_logicDraftId})); }catch(e){}
 }
 
+function normalizeLogicTabId(tab){
+  if(tab === 'matrix') return 'ontology';
+  if(tab === 'profile') return 'profiles';
+  return LOGIC_TABS.some(item=>item.id===tab) ? tab : 'profiles';
+}
+
 function logicInitUi(){
   const ui = loadLogicUi();
-  _logicActiveTab = LOGIC_TABS.some(tab=>tab.id===ui.tab) ? ui.tab : (_logicActiveTab || 'profiles');
+  _logicActiveTab = normalizeLogicTabId(ui.tab || _logicActiveTab || 'profiles');
   _logicFilter = ui.filter || _logicFilter || '';
   _logicChapterId = ui.chapterId || _logicChapterId || (chapters[0] && chapters[0].id) || '';
   _logicDraftId = ui.draftId || _logicDraftId || '';
@@ -6598,7 +6875,8 @@ function logicConfidence(value){
 
 function logicEntitySearchText(entity){
   const observations = logicObservationsForEntity(entity.id);
-  return [entity.name, entity.type, entity.aliases.join(' '), entity.tags.join(' '), observations.map(obs=>[obs.dimension, obs.value, obs.trigger, obs.quote, obs.relatedEntities.join(' ')].join(' ')).join(' ')].join(' ').toLowerCase();
+  const facets = logicFacetsForEntity(entity.id, true);
+  return [entity.name, entity.type, entity.aliases.join(' '), entity.tags.join(' '), observations.map(obs=>[obs.dimension, obs.value, obs.trigger, obs.quote, obs.relatedEntities.join(' ')].join(' ')).join(' '), facets.map(facet=>[facet.category, facet.status, facet.title, facet.value, facet.evidence, facet.tags.join(' ')].join(' ')).join(' ')].join(' ').toLowerCase();
 }
 
 function filteredLogicEntities(){
@@ -6632,7 +6910,7 @@ function renderLogicRail(){
   const selected = logicEntityById(_logicSelectedEntityId);
   return `<div class="logic-kicker">In-Universe Logic</div>
     <div class="logic-title">Logic Machine</div>
-    <div class="logic-meta">${logicEntities().length} entities · ${(_logicStore.observations || []).length} observations · ${pending} pending</div>
+    <div class="logic-meta">${logicEntities().length} entities · ${(_logicStore.facets || []).length} facets · ${(_logicStore.observations || []).length} observations · ${pending} pending</div>
     <div class="logic-filter-row" style="margin-top:.8rem">
       <input class="logic-input" value="${escHtml(_logicFilter)}" placeholder="Search entities, traits, factions..." oninput="setLogicFilter(this.value)">
     </div>
@@ -6644,7 +6922,7 @@ function renderLogicRail(){
       ${entities.length ? entities.map(entity=>`
         <button class="logic-entity-btn ${entity.id===_logicSelectedEntityId?'active':''}" type="button" onclick="selectLogicEntity('${escHtml(entity.id)}')">
           <span class="logic-entity-name">${escHtml(entity.name)}</span>
-          <span class="logic-meta">${escHtml(logicTypeLabel(entity.type))} · ${logicObservationsForEntity(entity.id).length} obs</span>
+          <span class="logic-meta">${escHtml(logicTypeLabel(entity.type))} · ${logicFacetsForEntity(entity.id).length} facets · ${logicObservationsForEntity(entity.id).length} obs</span>
         </button>`).join('') : '<div class="drafts-empty">No matching entities.</div>'}
     </div>
     ${selected ? `<div class="logic-panel" style="margin-top:.8rem"><div class="logic-kicker">Selected</div><div class="logic-card-title">${escHtml(selected.name)}</div><div class="logic-card-body">${escHtml(selected.notes || selected.aliases.join(', ') || 'No profile notes yet.')}</div></div>` : ''}`;
@@ -6667,10 +6945,11 @@ function logicObservationCard(obs){
 
 function logicEntityStats(entity){
   const obs = logicObservationsForEntity(entity.id);
+  const facets = logicFacetsForEntity(entity.id, true);
   const dimensions = new Set(obs.map(item=>item.dimension));
-  const flags = obs.filter(item=>item.dimension === 'contradiction' || item.tags.includes('contradiction')).length;
+  const flags = obs.filter(item=>item.dimension === 'contradiction' || item.tags.includes('contradiction')).length + facets.filter(item=>item.status === 'contradicted' || item.category === 'contradiction').length;
   const relationships = obs.reduce((sum,item)=>sum + (item.relatedEntities || []).length, 0);
-  return {observations:obs.length, dimensions:dimensions.size, flags, relationships};
+  return {observations:obs.length, facets:facets.length, dimensions:dimensions.size, flags, relationships};
 }
 
 function renderManualObservationForm(entity){
@@ -6687,6 +6966,51 @@ function renderManualObservationForm(entity){
     </div>
     <div class="logic-actions" style="margin-top:.65rem"><button class="logic-mini-btn primary" type="button" onclick="saveManualLogicObservation()">Save Observation</button></div>
   </section>`;
+}
+
+function logicFacetStatusOptions(selected='observed'){
+  return LOGIC_FACET_STATUSES.map(status=>`<option value="${escHtml(status)}" ${status===selected?'selected':''}>${escHtml(status)}</option>`).join('');
+}
+
+function logicFacetCategoryOptions(selected='psyche'){
+  return LOGIC_FACET_CATEGORIES.map(category=>`<option value="${escHtml(category.id)}" ${category.id===selected?'selected':''}>${escHtml(category.label)}</option>`).join('');
+}
+
+function renderManualFacetForm(entity){
+  if(!entity) return '';
+  return `<section class="logic-panel">
+    <div class="logic-card-title">Add Ontology Facet</div>
+    <div class="logic-form-grid">
+      <label class="logic-field"><span>Category</span><select id="logic-facet-category" class="logic-select">${logicFacetCategoryOptions('psyche')}</select></label>
+      <label class="logic-field"><span>Status</span><select id="logic-facet-status" class="logic-select">${logicFacetStatusOptions('observed')}</select></label>
+      <label class="logic-field"><span>Title</span><input id="logic-facet-title" class="logic-input" placeholder="e.g. Stress response"></label>
+      <label class="logic-field"><span>Tags</span><input id="logic-facet-tags" class="logic-input" placeholder="comma separated"></label>
+      <label class="logic-field wide"><span>Facet</span><textarea id="logic-facet-value" class="logic-textarea" placeholder="Stable trait, taste, trigger, cultural code, contradiction, or working inference."></textarea></label>
+      <label class="logic-field wide"><span>Evidence / Notes</span><textarea id="logic-facet-evidence" class="logic-textarea" placeholder="Quote, chapter context, or author reasoning."></textarea></label>
+    </div>
+    <div class="logic-actions" style="margin-top:.65rem"><button class="logic-mini-btn primary" type="button" onclick="saveManualLogicFacet()">Save Facet</button></div>
+  </section>`;
+}
+
+function logicFacetCard(facet, editable=true){
+  facet = normalizeLogicFacet(facet);
+  return `<article class="logic-facet-card">
+    <div class="logic-actions">
+      <span class="logic-facet-status ${escHtml(facet.status)}">${escHtml(facet.status)}</span>
+      <span class="logic-chip">${escHtml(logicFacetCategoryLabel(facet.category))}</span>
+    </div>
+    <div class="logic-card-title">${escHtml(facet.title || logicFacetCategoryLabel(facet.category))}</div>
+    <div class="logic-card-body">${escHtml(facet.value || 'No facet text recorded.')}</div>
+    ${facet.evidence ? `<div class="logic-quote">${escHtml(facet.evidence)}</div>` : ''}
+    <div class="logic-meta">${escHtml(logicSourceLabel(facet.sourceKind, facet.sourceId, facet.sourceTitle))} · ${escHtml(logicConfidence(facet.confidence))}</div>
+    ${facet.tags.length ? `<div class="logic-chip-row">${facet.tags.map(tag=>`<span class="logic-chip">${escHtml(tag)}</span>`).join('')}</div>` : ''}
+    ${editable ? `<div class="logic-actions">
+      <select class="logic-select" onchange="logicSetFacetStatus('${escHtml(facet.id)}', this.value)">${logicFacetStatusOptions(facet.status)}</select>
+      <button class="logic-mini-btn" type="button" onclick="logicSetFacetStatus('${escHtml(facet.id)}','canon')">Canon</button>
+      <button class="logic-mini-btn" type="button" onclick="logicSetFacetStatus('${escHtml(facet.id)}','contradicted')">Contradict</button>
+      <button class="logic-mini-btn" type="button" onclick="logicSetFacetStatus('${escHtml(facet.id)}','retired')">Retire</button>
+    </div>` : ''}
+  </article>`;
 }
 
 function renderLogicProfiles(){
@@ -6708,10 +7032,11 @@ function renderLogicProfiles(){
       ${entity.sourceKind === 'character' ? `<button class="logic-mini-btn" type="button" onclick="showCharDetail('${escHtml(entity.sourceId)}')">Open Character</button>` : ''}
       ${entity.sourceKind === 'codex' ? `<button class="logic-mini-btn" type="button" onclick="showCodexEntry('${escHtml(entity.sourceId)}')">Open Codex</button>` : ''}
       <button class="logic-mini-btn" type="button" onclick="analyzeLogicEntityAcrossText()">Analyze Entity</button>
+      <button class="logic-mini-btn" type="button" onclick="setLogicTab('ontology')">Open Ontology</button>
     </div>
     <div class="logic-stat-grid">
       <div class="logic-stat"><b>${stats.observations}</b><div class="logic-stat-label">Observations</div></div>
-      <div class="logic-stat"><b>${stats.dimensions}</b><div class="logic-stat-label">Dimensions</div></div>
+      <div class="logic-stat"><b>${stats.facets}</b><div class="logic-stat-label">Ontology Facets</div></div>
       <div class="logic-stat"><b>${stats.relationships}</b><div class="logic-stat-label">Links</div></div>
       <div class="logic-stat"><b>${stats.flags}</b><div class="logic-stat-label">Flags</div></div>
     </div>
@@ -6724,6 +7049,197 @@ function renderLogicProfiles(){
       </div>
     </section>
   </section>`;
+}
+
+function logicFacetList(entityId, categories=[], includeProvisional=true){
+  return logicFacetsForEntity(entityId).filter(facet=>{
+    if(categories.length && !categories.includes(facet.category)) return false;
+    if(!includeProvisional && ['provisional','inferred'].includes(facet.status)) return false;
+    return true;
+  });
+}
+
+function renderLogicOntology(){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return `<div class="drafts-empty">Select an entity to edit its ontology.</div>`;
+  const facets = logicFacetsForEntity(entity.id, true);
+  const grouped = LOGIC_FACET_CATEGORIES.map(category=>{
+    const items = facets.filter(facet=>facet.category===category.id);
+    return `<section class="logic-ontology-group">
+      <div class="logic-card-title">${escHtml(category.label)}</div>
+      <div class="logic-meta">${items.length} facet${items.length===1?'':'s'}</div>
+      <div class="logic-timeline">${items.length ? items.map(logicFacetCard).join('') : '<div class="drafts-empty">No facets in this category.</div>'}</div>
+    </section>`;
+  }).join('');
+  return `<section>
+    <div class="logic-kicker">Unified Ontology</div>
+    <div class="logic-title">${escHtml(entity.name)}</div>
+    <div class="logic-meta">Promote observations into stable facts, inferences, canon, contradictions, or retired ideas.</div>
+    <div class="logic-actions" style="margin-top:.7rem">
+      <button class="logic-mini-btn primary" type="button" onclick="generateLogicDossier('Character Dossier')">Generate Dossier</button>
+      <button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Lifestyle & Culture Atlas')">Generate Lifestyle Report</button>
+      <button class="logic-mini-btn" type="button" onclick="setLogicTab('pending')">Review Pending AI</button>
+    </div>
+    <div class="logic-facet-grid" style="margin-top:.85rem">${grouped}</div>
+    ${renderManualFacetForm(entity)}
+  </section>`;
+}
+
+function renderLogicPsychProfile(){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return `<div class="drafts-empty">Select an entity for a psych profile.</div>`;
+  const cats = ['psyche','desire','fear','wound','stress','trigger','moral','habit','speech','body','contradiction'];
+  const facets = logicFacetList(entity.id, cats);
+  const rows = cats.map(cat=>{
+    const items = facets.filter(item=>item.category===cat);
+    return `<div class="logic-infographic-row">
+      <div><div class="logic-card-title">${escHtml(logicFacetCategoryLabel(cat))}</div><div class="logic-meta">${items.length} signals</div></div>
+      <div>${items.length ? items.map(item=>logicFacetCard(item, false)).join('') : '<div class="drafts-empty">No accepted signal yet.</div>'}</div>
+    </div>`;
+  }).join('');
+  const contradictions = facets.filter(item=>item.status==='contradicted' || item.category==='contradiction').length;
+  const risk = Math.min(100, contradictions * 25);
+  return `<section>
+    <div class="logic-kicker">Psych Profile</div>
+    <div class="logic-title">${escHtml(entity.name)}</div>
+    <div class="logic-stat-grid">
+      <div class="logic-stat"><b>${facets.filter(item=>item.status==='canon').length}</b><div class="logic-stat-label">Canon Facets</div></div>
+      <div class="logic-stat"><b>${facets.filter(item=>item.status==='inferred').length}</b><div class="logic-stat-label">Inferred</div></div>
+      <div class="logic-stat"><b>${contradictions}</b><div class="logic-stat-label">Contradictions</div></div>
+      <div class="logic-stat"><b>${facets.length}</b><div class="logic-stat-label">Psych Signals</div></div>
+    </div>
+    <section class="logic-panel"><div class="logic-card-title">Continuity Risk Meter</div><div class="logic-risk-meter"><span style="width:${risk}%"></span></div><div class="logic-meta">${risk}% based on contradicted psych facets</div></section>
+    <section class="logic-panel">${rows}</section>
+  </section>`;
+}
+
+function logicFacetBullets(entityId, categories=[], statusFilter=null){
+  const items = logicFacetList(entityId, categories).filter(item=>!statusFilter || statusFilter.includes(item.status));
+  return items.map(item=>`${logicFacetCategoryLabel(item.category)}: ${item.value}`).slice(0, 8);
+}
+
+function generateLogicDossier(reportType='Character Dossier'){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return;
+  const sections = {
+    psyche:logicFacetBullets(entity.id, ['psyche','desire','fear','wound','stress','trigger','moral']),
+    lifestyle:logicFacetBullets(entity.id, ['fashion','food','alcohol','art','media','ritual','venue','consumer','class','culture']),
+    relationships:logicFacetBullets(entity.id, ['relationship','faction']),
+    continuity:logicFacetBullets(entity.id, ['contradiction'], null)
+  };
+  const dossier = normalizeLogicDossier({
+    reportType,
+    entityId:entity.id,
+    entityName:entity.name,
+    title:`${entity.name} · ${reportType}`,
+    summary:`Generated from ${logicFacetsForEntity(entity.id).length} accepted ontology facets. Treat this as a working dossier, not deterministic canon.`,
+    sections
+  });
+  _logicStore.dossiers.unshift(dossier);
+  saveLogicStore();
+  _logicActiveTab = 'reports';
+  logicSetStatus(`${reportType} generated from ontology facets.`);
+  renderLogicMachine();
+}
+
+function logicForecastFromInputs(forecastType='decision'){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return null;
+  const inputs = {
+    event:document.getElementById('logic-forecast-event')?.value || '',
+    location:document.getElementById('logic-forecast-location')?.value || '',
+    pressure:document.getElementById('logic-forecast-pressure')?.value || '',
+    interactingEntity:document.getElementById('logic-forecast-interacting')?.value || '',
+    stakes:document.getElementById('logic-forecast-stakes')?.value || '',
+    emotionalState:document.getElementById('logic-forecast-emotion')?.value || ''
+  };
+  const likely = logicFacetBullets(entity.id, ['desire','habit','moral','relationship','faction','culture']).map(item=>`Likely to follow: ${item}`);
+  const unlikely = logicFacetBullets(entity.id, ['fear','wound','stress','contradiction']).map(item=>`Unlikely without pressure/setup: ${item}`);
+  const needsSetup = logicFacetsForEntity(entity.id).filter(item=>['provisional','inferred','contradicted'].includes(item.status)).slice(0, 6).map(item=>`${logicFacetCategoryLabel(item.category)} needs setup: ${item.value}`);
+  return normalizeLogicForecast({
+    forecastType,
+    entityId:entity.id,
+    entityName:entity.name,
+    title:`${entity.name} · ${forecastType === 'branch' ? 'Branch Simulation' : 'Decision Forecast'}`,
+    inputs,
+    likely:likely.length ? likely : ['No stable likely actions yet. Add canon or observed desire, habit, moral, faction, or relationship facets.'],
+    unlikely:unlikely.length ? unlikely : ['No strong unlikely actions yet. Add fear, wound, stress, or contradiction facets.'],
+    needsSetup:needsSetup.length ? needsSetup : ['No obvious setup gaps from current facets.'],
+    consequences:[inputs.stakes ? `Narrative stakes: ${inputs.stakes}` : 'Add stakes to sharpen consequences.', inputs.pressure ? `Pressure tested: ${inputs.pressure}` : 'Add pressure to test consistency.'],
+    summary:`Forecast generated from accepted ontology facets for ${entity.name}.`
+  });
+}
+
+function generateLogicForecast(forecastType='decision'){
+  const forecast = logicForecastFromInputs(forecastType);
+  if(!forecast) return;
+  _logicStore.forecasts.unshift(forecast);
+  saveLogicStore();
+  logicSetStatus(`${forecast.title} saved.`);
+  renderLogicMachine();
+}
+
+function renderLogicForecastForm(kind='decision'){
+  const title = kind === 'branch' ? 'Branch Simulation Inputs' : 'Decision Forecast Inputs';
+  return `<section class="logic-panel">
+    <div class="logic-card-title">${escHtml(title)}</div>
+    <div class="logic-form-grid">
+      <label class="logic-field"><span>Event / Choice</span><input id="logic-forecast-event" class="logic-input" placeholder="What happens?"></label>
+      <label class="logic-field"><span>Location</span><input id="logic-forecast-location" class="logic-input" placeholder="Where?"></label>
+      <label class="logic-field"><span>Pressure</span><input id="logic-forecast-pressure" class="logic-input" placeholder="Threat, desire, social pressure..."></label>
+      <label class="logic-field"><span>Interacting Entity</span><input id="logic-forecast-interacting" class="logic-input" placeholder="Person/faction/venue involved"></label>
+      <label class="logic-field"><span>Stakes</span><input id="logic-forecast-stakes" class="logic-input" placeholder="What can be lost?"></label>
+      <label class="logic-field"><span>Emotional State</span><input id="logic-forecast-emotion" class="logic-input" placeholder="Fear, hunger, shame, zeal..."></label>
+    </div>
+    <div class="logic-actions" style="margin-top:.65rem"><button class="logic-mini-btn primary" type="button" onclick="generateLogicForecast('${kind}')">${kind === 'branch' ? 'Run Branch Simulation' : 'Generate Forecast'}</button></div>
+  </section>`;
+}
+
+function renderLogicForecastCards(kind='decision'){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  const forecasts = logicForecastsForEntity(entity && entity.id).filter(item=>item.forecastType===kind);
+  return `<div class="logic-report-grid">${forecasts.length ? forecasts.map(item=>`<article class="logic-card">
+    <div class="logic-card-title">${escHtml(item.title)}</div>
+    <div class="logic-meta">${escHtml(authorNoteDate(item.createdAt))} · ${escHtml(item.inputs.event || 'no event')}</div>
+    <div class="logic-forecast-columns">
+      <div><div class="logic-kicker">Likely</div><ul>${item.likely.map(row=>`<li>${escHtml(row)}</li>`).join('')}</ul></div>
+      <div><div class="logic-kicker">Unlikely</div><ul>${item.unlikely.map(row=>`<li>${escHtml(row)}</li>`).join('')}</ul></div>
+      <div><div class="logic-kicker">Needs Setup</div><ul>${item.needsSetup.map(row=>`<li>${escHtml(row)}</li>`).join('')}</ul></div>
+    </div>
+    <div class="logic-card-body">${escHtml(item.consequences.join(' '))}</div>
+  </article>`).join('') : '<div class="drafts-empty">No saved forecasts yet.</div>'}</div>`;
+}
+
+function renderLogicForecast(){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return `<div class="drafts-empty">Select an entity to forecast decisions.</div>`;
+  return `<section><div class="logic-kicker">Decision Forecast</div><div class="logic-title">${escHtml(entity.name)}</div><div class="logic-meta">Consistency forecast from accepted ontology facets.</div>${renderLogicForecastForm('decision')}${renderLogicForecastCards('decision')}</section>`;
+}
+
+function renderLogicBranchSimulator(){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return `<div class="drafts-empty">Select an entity to simulate branches.</div>`;
+  return `<section><div class="logic-kicker">Branch Simulator</div><div class="logic-title">${escHtml(entity.name)}</div><div class="logic-meta">Test hypothetical events against the current ontology.</div>${renderLogicForecastForm('branch')}${renderLogicForecastCards('branch')}</section>`;
+}
+
+function renderLogicLifestyleAtlas(){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return `<div class="drafts-empty">Select an entity for lifestyle patterns.</div>`;
+  const cats = ['fashion','food','alcohol','art','media','ritual','venue','consumer','class','culture'];
+  const rows = cats.map(cat=>{
+    const items = logicFacetList(entity.id, [cat]);
+    return `<article class="logic-card"><div class="logic-card-title">${escHtml(logicFacetCategoryLabel(cat))}</div>${items.length ? items.map(item=>`<p class="logic-card-body">${escHtml(item.value)}</p>`).join('') : '<div class="logic-meta">No pattern yet</div>'}</article>`;
+  }).join('');
+  return `<section><div class="logic-kicker">Lifestyle Atlas</div><div class="logic-title">${escHtml(entity.name)}</div><div class="logic-meta">Fashion, food, alcohol, venues, art, media, rituals, status markers, and taste.</div><div class="logic-matrix-grid" style="margin-top:.85rem">${rows}</div></section>`;
+}
+
+function renderLogicContinuityRisks(){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return `<div class="drafts-empty">Select an entity to inspect continuity risks.</div>`;
+  const riskFacets = logicFacetsForEntity(entity.id, true).filter(item=>item.status==='contradicted' || item.category==='contradiction');
+  const riskObs = logicObservationsForEntity(entity.id).filter(item=>item.dimension==='contradiction' || /contradict|inconsistent|sudden|needs setup/i.test(item.value + ' ' + item.trigger));
+  const risk = Math.min(100, (riskFacets.length + riskObs.length) * 18);
+  return `<section><div class="logic-kicker">Continuity Risks</div><div class="logic-title">${escHtml(entity.name)}</div><section class="logic-panel"><div class="logic-card-title">Risk Meter</div><div class="logic-risk-meter"><span style="width:${risk}%"></span></div><div class="logic-meta">${risk}% from contradicted facets and contradiction observations</div></section><div class="logic-report-grid">${riskFacets.map(item=>logicFacetCard(item)).join('')}${riskObs.map(logicObservationCard).join('') || '<div class="drafts-empty">No continuity risks accepted yet.</div>'}</div></section>`;
 }
 
 function renderLogicConsistency(){
@@ -6774,12 +7290,20 @@ function renderLogicRelationships(){
     const entity = logicEntityById(obs.entityId);
     return (obs.relatedEntities || []).map(other=>({entity, obs, other}));
   });
-  return `<section><div class="logic-kicker">Relationship Map</div><div class="logic-title">Interactions, affiliations, pressure lines</div><section class="logic-panel" style="margin-top:.85rem">${rows.length ? rows.map(row=>`<div class="logic-relationship-row"><div><b>${escHtml(row.entity ? row.entity.name : row.obs.entityName)}</b><div class="logic-meta">${escHtml(row.obs.dimension)}</div></div><div class="logic-arrow">→</div><div><b>${escHtml(row.other)}</b><div class="logic-card-body">${escHtml(row.obs.value)}</div></div></div>`).join('') : '<div class="drafts-empty">No relationship observations yet.</div>'}</section></section>`;
+  const entity = logicEntityById(_logicSelectedEntityId);
+  const relationshipFacets = entity ? logicFacetList(entity.id, ['relationship','faction','culture']) : [];
+  return `<section><div class="logic-kicker">Relationships</div><div class="logic-title">Interactions, affiliations, rivalries, dependencies</div><div class="logic-grid" style="margin-top:.85rem"><section class="logic-panel"><div class="logic-card-title">Selected Entity Dynamics</div>${relationshipFacets.length ? relationshipFacets.map(logicFacetCard).join('') : '<div class="drafts-empty">No relationship/faction/culture facets yet.</div>'}</section><section class="logic-panel"><div class="logic-card-title">Observed Links</div>${rows.length ? rows.map(row=>`<div class="logic-relationship-row"><div><b>${escHtml(row.entity ? row.entity.name : row.obs.entityName)}</b><div class="logic-meta">${escHtml(row.obs.dimension)}</div></div><div class="logic-arrow">→</div><div><b>${escHtml(row.other)}</b><div class="logic-card-body">${escHtml(row.obs.value)}</div></div></div>`).join('') : '<div class="drafts-empty">No relationship observations yet.</div>'}</section></div></section>`;
 }
 
 function renderLogicReports(){
   const reports = (_logicStore.reports || []).map(normalizeLogicReport).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-  return `<section><div class="logic-kicker">Reports</div><div class="logic-title">AI and manual logic reports</div><div class="logic-report-grid" style="margin-top:.85rem">${reports.length ? reports.map(report=>`<article class="logic-card ${report.severity ? `logic-severity-${escHtml(report.severity)}` : ''}"><div class="logic-card-title">${escHtml(report.title)}</div><div class="logic-meta">${escHtml(report.reportType)} · ${escHtml(report.entityName || 'multi-entity')} · ${escHtml(authorNoteDate(report.createdAt))} · ${escHtml(logicConfidence(report.confidence))}</div><div class="logic-card-body">${escHtml(report.summary)}</div>${report.findings.length ? `<ul>${report.findings.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : ''}<div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="deleteLogicReport('${escHtml(report.id)}')">Delete</button></div></article>`).join('') : '<div class="drafts-empty">No reports yet.</div>'}</div></section>`;
+  const entity = logicEntityById(_logicSelectedEntityId);
+  const dossiers = logicDossiersForEntity(entity && entity.id);
+  const forecasts = logicForecastsForEntity(entity && entity.id);
+  const dossierHtml = dossiers.map(dossier=>`<article class="logic-card"><div class="logic-card-title">${escHtml(dossier.title)}</div><div class="logic-meta">${escHtml(dossier.reportType)} · ${escHtml(authorNoteDate(dossier.createdAt))}</div><div class="logic-card-body">${escHtml(dossier.summary)}</div>${Object.entries(dossier.sections || {}).map(([key,items])=>`<div class="logic-infographic-row"><div class="logic-kicker">${escHtml(key)}</div><div>${Array.isArray(items) && items.length ? `<ul>${items.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : '<span class="logic-meta">No entries</span>'}</div></div>`).join('')}</article>`).join('');
+  const forecastHtml = forecasts.map(item=>`<article class="logic-card"><div class="logic-card-title">${escHtml(item.title)}</div><div class="logic-meta">${escHtml(item.forecastType)} · ${escHtml(authorNoteDate(item.createdAt))}</div><div class="logic-card-body">${escHtml(item.summary)}</div><div class="logic-chip-row"><span class="logic-chip">${escHtml(item.inputs.event || 'no event')}</span><span class="logic-chip">${escHtml(item.inputs.pressure || 'no pressure')}</span></div></article>`).join('');
+  const oldReportHtml = reports.length ? reports.map(report=>`<article class="logic-card ${report.severity ? `logic-severity-${escHtml(report.severity)}` : ''}"><div class="logic-card-title">${escHtml(report.title)}</div><div class="logic-meta">${escHtml(report.reportType)} · ${escHtml(report.entityName || 'multi-entity')} · ${escHtml(authorNoteDate(report.createdAt))} · ${escHtml(logicConfidence(report.confidence))}</div><div class="logic-card-body">${escHtml(report.summary)}</div>${report.findings.length ? `<ul>${report.findings.map(item=>`<li>${escHtml(item)}</li>`).join('')}</ul>` : ''}<div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="deleteLogicReport('${escHtml(report.id)}')">Delete</button></div></article>`).join('') : '';
+  return `<section><div class="logic-kicker">Reports</div><div class="logic-title">Dossiers, forecasts, simulations, and AI reports</div><div class="logic-actions" style="margin-top:.7rem"><button class="logic-mini-btn primary" type="button" onclick="generateLogicDossier('Character Dossier')">Generate Character Dossier</button><button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Relationship Report')">Generate Relationship Report</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('forecast')">Forecast</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('simulator')">Simulate</button></div><div class="logic-report-grid" style="margin-top:.85rem">${dossierHtml}${forecastHtml}${oldReportHtml || (!dossierHtml && !forecastHtml ? '<div class="drafts-empty">No reports yet.</div>' : '')}</div></section>`;
 }
 
 function renderLogicPending(){
@@ -6789,7 +7313,13 @@ function renderLogicPending(){
 
 function renderLogicMain(){
   let body = '';
-  if(_logicActiveTab === 'consistency') body = renderLogicConsistency();
+  if(_logicActiveTab === 'ontology') body = renderLogicOntology();
+  else if(_logicActiveTab === 'psych') body = renderLogicPsychProfile();
+  else if(_logicActiveTab === 'forecast') body = renderLogicForecast();
+  else if(_logicActiveTab === 'simulator') body = renderLogicBranchSimulator();
+  else if(_logicActiveTab === 'lifestyle') body = renderLogicLifestyleAtlas();
+  else if(_logicActiveTab === 'risks') body = renderLogicContinuityRisks();
+  else if(_logicActiveTab === 'consistency') body = renderLogicConsistency();
   else if(_logicActiveTab === 'matrix') body = renderLogicMatrix();
   else if(_logicActiveTab === 'relationships') body = renderLogicRelationships();
   else if(_logicActiveTab === 'reports') body = renderLogicReports();
@@ -6810,7 +7340,7 @@ function renderLogicMachine(){
 
 function showLogicMachine(tab='profiles', entityId=''){
   if(!requireAdmin()) return;
-  if(LOGIC_TABS.some(item=>item.id===tab)) _logicActiveTab = tab;
+  _logicActiveTab = normalizeLogicTabId(tab);
   if(entityId) _logicSelectedEntityId = entityId;
   _pushNav('logic-view');
   const view = document.getElementById('logic-view');
@@ -6824,7 +7354,7 @@ function showLogicMachine(tab='profiles', entityId=''){
 }
 
 function setLogicTab(tab){
-  if(LOGIC_TABS.some(item=>item.id===tab)) _logicActiveTab = tab;
+  _logicActiveTab = normalizeLogicTabId(tab);
   saveLogicUi();
   renderLogicMachine();
 }
@@ -6894,6 +7424,31 @@ function saveManualLogicObservation(){
   renderLogicMachine();
 }
 
+function saveManualLogicFacet(){
+  const entity = logicEntityById(_logicSelectedEntityId);
+  if(!entity) return;
+  const category = document.getElementById('logic-facet-category')?.value || 'psyche';
+  const facet = normalizeLogicFacet({
+    entityId:entity.id,
+    entityName:entity.name,
+    entityType:entity.type,
+    category,
+    status:document.getElementById('logic-facet-status')?.value || 'observed',
+    title:document.getElementById('logic-facet-title')?.value || logicFacetCategoryLabel(category),
+    value:document.getElementById('logic-facet-value')?.value || '',
+    evidence:document.getElementById('logic-facet-evidence')?.value || '',
+    tags:splitTagText(document.getElementById('logic-facet-tags')?.value || ''),
+    sourceKind:'manual',
+    confidence:1
+  });
+  if(!facet.value.trim()){ logicSetStatus('Add a facet before saving.'); return; }
+  _logicStore.facets.unshift(facet);
+  logicRecordFacetHistory(facet, 'manual-create', '', facet.category);
+  saveLogicStore();
+  logicSetStatus('Ontology facet saved.');
+  renderLogicMachine();
+}
+
 function logicSuggestionToObservation(suggestion){
   const entity = ensureLogicEntity(suggestion.entityName || suggestion.title, suggestion.entityType || 'custom', {tags:suggestion.tags});
   return normalizeLogicObservation({
@@ -6936,12 +7491,16 @@ function logicSuggestionToReport(suggestion){
 function acceptLogicSuggestion(id){
   const item = (_logicStore.suggestions || []).find(suggestion=>suggestion.id===id);
   if(!item) return;
-  if(item.kind === 'observation' || item.kind === 'consistency') _logicStore.observations.unshift(logicSuggestionToObservation(item));
+  if(item.kind === 'observation' || item.kind === 'consistency'){
+    const obs = logicSuggestionToObservation(item);
+    _logicStore.observations.unshift(obs);
+    ensureFacetForObservation(obs, {status:item.kind === 'consistency' ? 'contradicted' : 'inferred'});
+  }
   if(item.kind === 'report' || item.kind === 'consistency') _logicStore.reports.unshift(logicSuggestionToReport(item));
   item.status = 'accepted';
   item.decidedAt = Date.now();
   saveLogicStore();
-  logicSetStatus('Logic suggestion accepted into the machine.');
+  logicSetStatus('Logic suggestion accepted into observations and ontology facets.');
   renderLogicMachine();
 }
 
@@ -7052,7 +7611,7 @@ async function callLogicOpenRouter(payload, label='Logic Machine'){
     body:JSON.stringify({
       model,
       messages:[
-        {role:'system', content:'You are an in-universe continuity and character logic analyst for a literary novel. Return schema-valid JSON only. Extract observations about characters, factions, nations, regions, venues, institutions, cultures, habits, tastes, triggers, relationships, contradictions, and world logic. Do not rewrite prose. Suggestions are private and require human approval.'},
+        {role:'system', content:'You are an in-universe continuity and character logic analyst for a literary novel. Return schema-valid JSON only. Extract observations about characters, factions, nations, regions, venues, institutions, cultures, desires, fears, wounds, habits, speech, body language, fashion, food, alcohol, art/media, rituals, tastes, triggers, relationships, contradictions, and world logic. Do not rewrite prose. Suggestions are private and require human approval.'},
         {role:'user', content:`Analyze this ${label} for the in-universe logic machine.\n\n` + JSON.stringify(payload)}
       ],
       response_format:{
@@ -7469,6 +8028,9 @@ async function buildFullBackupPayload(){
       workshopCards:workshopCards.length,
       logicEntities:logicEntities().length,
       logicObservations:logicMachine.observations.length,
+      logicFacets:logicMachine.facets.length,
+      logicForecasts:logicMachine.forecasts.length,
+      logicDossiers:logicMachine.dossiers.length,
       logicReports:logicMachine.reports.length
     },
     content:{
@@ -7691,7 +8253,7 @@ function backupPlanningHtml(docs=[], cards=[]){
 function backupLogicMachineHtml(store={}){
   const logic = normalizeLogicStore(store || {});
   const entities = logicEntities();
-  if(!entities.length && !logic.observations.length && !logic.reports.length) return '<p class="muted">No logic machine data</p>';
+  if(!entities.length && !logic.observations.length && !logic.facets.length && !logic.reports.length && !logic.dossiers.length && !logic.forecasts.length) return '<p class="muted">No logic machine data</p>';
   const obsByEntity = logic.observations.reduce((acc, raw)=>{
     const obs = normalizeLogicObservation(raw);
     const key = obs.entityId || obs.entityName || '_unassigned';
@@ -7699,6 +8261,32 @@ function backupLogicMachineHtml(store={}){
     acc[key].push(obs);
     return acc;
   }, {});
+  const facetsByEntity = logic.facets.reduce((acc, raw)=>{
+    const facet = normalizeLogicFacet(raw);
+    const key = facet.entityId || facet.entityName || '_unassigned';
+    if(!acc[key]) acc[key] = [];
+    acc[key].push(facet);
+    return acc;
+  }, {});
+  const dossierHtml = logic.dossiers.length ? logic.dossiers.map(raw=>{
+    const dossier = normalizeLogicDossier(raw);
+    return `<article class="source">
+      <h5>${backupEscapeHtml(dossier.reportType)} · ${backupEscapeHtml(dossier.title)}</h5>
+      <p><b>Entity:</b> ${backupEscapeHtml(dossier.entityName)}</p>
+      <p>${backupEscapeHtml(dossier.summary)}</p>
+      ${Object.entries(dossier.sections || {}).map(([key,items])=>`<p><b>${backupEscapeHtml(key)}:</b> ${backupEscapeHtml(Array.isArray(items) ? items.join(' | ') : '')}</p>`).join('')}
+    </article>`;
+  }).join('') : '<p class="muted">No dossiers</p>';
+  const forecastHtml = logic.forecasts.length ? logic.forecasts.map(raw=>{
+    const forecast = normalizeLogicForecast(raw);
+    return `<article class="source">
+      <h5>${backupEscapeHtml(forecast.forecastType)} · ${backupEscapeHtml(forecast.title)}</h5>
+      <p><b>Entity:</b> ${backupEscapeHtml(forecast.entityName)} · <b>Event:</b> ${backupEscapeHtml(forecast.inputs.event)}</p>
+      <p><b>Likely:</b> ${backupEscapeHtml(forecast.likely.join(' | '))}</p>
+      <p><b>Unlikely:</b> ${backupEscapeHtml(forecast.unlikely.join(' | '))}</p>
+      <p><b>Needs setup:</b> ${backupEscapeHtml(forecast.needsSetup.join(' | '))}</p>
+    </article>`;
+  }).join('') : '<p class="muted">No forecasts or branch simulations</p>';
   const reportHtml = logic.reports.length ? logic.reports.map(raw=>{
     const report = normalizeLogicReport(raw);
     return `<article class="source">
@@ -7710,10 +8298,16 @@ function backupLogicMachineHtml(store={}){
   }).join('') : '<p class="muted">No reports</p>';
   const entityHtml = entities.map(entity=>{
     const observations = obsByEntity[entity.id] || [];
+    const facets = facetsByEntity[entity.id] || [];
     return `<article class="chapter">
       <h3>${backupEscapeHtml(entity.name)}</h3>
-      <div class="meta">${backupEscapeHtml(entity.type)} · ${backupEscapeHtml(entity.sourceKind)} · ${observations.length} observations</div>
+      <div class="meta">${backupEscapeHtml(entity.type)} · ${backupEscapeHtml(entity.sourceKind)} · ${facets.length} ontology facets · ${observations.length} observations</div>
       <p><b>Tags:</b> ${backupEscapeHtml(entity.tags.join(', '))}</p>
+      ${facets.length ? `<h4>Ontology Facets</h4>${facets.map(facet=>`<article class="source">
+        <h5>${backupEscapeHtml(logicFacetCategoryLabel(facet.category))} · ${backupEscapeHtml(facet.status)} · ${backupEscapeHtml(facet.title)}</h5>
+        <p>${backupEscapeHtml(facet.value)}</p>
+        ${facet.evidence ? `<p><b>Evidence:</b> ${backupEscapeHtml(facet.evidence)}</p>` : ''}
+      </article>`).join('')}` : '<p class="muted">No ontology facets for this entity</p>'}
       ${observations.length ? observations.map(obs=>`<article class="source">
         <h5>${backupEscapeHtml(obs.dimension)} · ${backupEscapeHtml(logicSourceLabel(obs.sourceKind, obs.sourceId, obs.sourceTitle))}</h5>
         <p>${backupEscapeHtml(obs.value)}</p>
@@ -7723,7 +8317,7 @@ function backupLogicMachineHtml(store={}){
       </article>`).join('') : '<p class="muted">No observations for this entity</p>'}
     </article>`;
   }).join('');
-  return `<section class="author-box"><h3>Logic Reports</h3>${reportHtml}</section>${entityHtml}`;
+  return `<section class="author-box"><h3>Logic Dossiers</h3>${dossierHtml}</section><section class="author-box"><h3>Decision Forecasts & Branch Simulations</h3>${forecastHtml}</section><section class="author-box"><h3>Logic Reports</h3>${reportHtml}</section>${entityHtml}`;
 }
 
 function backupHtmlDocument(payload){
@@ -11567,8 +12161,11 @@ function renderAuthorLogicBoard(){
   const body = String(data.body || '');
   const mentioned = logicEntities().filter(entity=>entity.name && body.toLowerCase().includes(entity.name.toLowerCase()));
   const observations = mentioned.flatMap(entity=>logicObservationsForEntity(entity.id).map(obs=>({entity, obs})));
+  const facets = mentioned.flatMap(entity=>logicFacetsForEntity(entity.id).map(facet=>({entity, facet})));
   const pending = (_logicStore.suggestions || []).filter(item=>item.sourceId===chapterId && item.status==='pending');
   const flags = observations.filter(row=>row.obs.dimension === 'contradiction' || /contradict|inconsistent|needs setup|sudden/i.test(row.obs.value + ' ' + row.obs.trigger));
+  const facetFlags = facets.filter(row=>row.facet.status === 'contradicted' || row.facet.category === 'contradiction');
+  const decisionSignals = facets.filter(row=>['desire','fear','trigger','stress','moral','habit','relationship','faction'].includes(row.facet.category)).slice(0, 8);
   board.innerHTML = `
     <section class="author-research-card">
       <div class="author-research-card-head">
@@ -11583,8 +12180,8 @@ function renderAuthorLogicBoard(){
       </div>
       <div class="author-logic-summary">
         <div class="logic-stat"><b>${mentioned.length}</b><div class="logic-stat-label">Mentioned Entities</div></div>
-        <div class="logic-stat"><b>${observations.length}</b><div class="logic-stat-label">Known Observations</div></div>
-        <div class="logic-stat"><b>${flags.length + pending.length}</b><div class="logic-stat-label">Flags / Pending</div></div>
+        <div class="logic-stat"><b>${facets.length}</b><div class="logic-stat-label">Ontology Facets</div></div>
+        <div class="logic-stat"><b>${flags.length + facetFlags.length + pending.length}</b><div class="logic-stat-label">Flags / Pending</div></div>
       </div>
       <div id="aw-logic-status" class="file-vault-status">${escHtml(_logicStatusMessage || 'Ready. AI results go to Pending AI before becoming accepted logic.')}</div>
     </section>
@@ -11593,8 +12190,13 @@ function renderAuthorLogicBoard(){
       ${mentioned.length ? mentioned.map(entity=>`<article class="logic-card"><div class="logic-card-title">${escHtml(entity.name)}</div><div class="logic-meta">${escHtml(logicTypeLabel(entity.type))} · ${logicObservationsForEntity(entity.id).length} observations</div><div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="openLogicEntity('${escHtml(entity.id)}')">Open Profile</button></div></article>`).join('') : '<div class="author-research-empty">No tracked entity names matched the chapter text.</div>'}
     </section>
     <section class="author-research-card">
+      <div class="author-research-title">Relevant Ontology / Decision Signals</div>
+      ${decisionSignals.length ? decisionSignals.map(row=>`<article class="logic-card"><div class="logic-card-title">${escHtml(row.entity.name)} · ${escHtml(logicFacetCategoryLabel(row.facet.category))}</div><div class="logic-meta">${escHtml(row.facet.status)} · ${escHtml(logicConfidence(row.facet.confidence))}</div><div class="logic-card-body">${escHtml(row.facet.value)}</div></article>`).join('') : '<div class="author-research-empty">No decision-relevant ontology facets matched this chapter yet.</div>'}
+    </section>
+    <section class="author-research-card">
       <div class="author-research-title">Possible Consistency Flags</div>
-      ${flags.length ? flags.map(row=>logicObservationCard(row.obs)).join('') : '<div class="author-research-empty">No accepted contradiction flags matched locally.</div>'}
+      ${facetFlags.length ? facetFlags.map(row=>logicFacetCard(row.facet, false)).join('') : ''}
+      ${flags.length ? flags.map(row=>logicObservationCard(row.obs)).join('') : (!facetFlags.length ? '<div class="author-research-empty">No accepted contradiction flags matched locally.</div>' : '')}
       ${pending.length ? `<div class="author-research-subhead"><span>Pending AI Flags</span></div>${pending.map(item=>`<article class="logic-card"><div class="logic-card-title">${escHtml(item.title)}</div><div class="logic-card-body">${escHtml(item.summary)}</div>${item.quote ? `<div class="logic-quote">${escHtml(item.quote)}</div>` : ''}<div class="logic-actions"><button class="logic-mini-btn primary" type="button" onclick="acceptLogicSuggestion('${escHtml(item.id)}');renderAuthorLogicBoard()">Accept</button><button class="logic-mini-btn" type="button" onclick="rejectLogicSuggestion('${escHtml(item.id)}');renderAuthorLogicBoard()">Reject</button></div></article>`).join('')}` : ''}
     </section>`;
 }
@@ -18017,6 +18619,11 @@ Object.assign(window, {
   setLogicDraft,
   addManualLogicEntity,
   saveManualLogicObservation,
+  saveManualLogicFacet,
+  logicSetFacetStatus,
+  logicUpdateFacet,
+  generateLogicDossier,
+  generateLogicForecast,
   analyzeLogicChapter,
   analyzeLogicDraft,
   analyzeSelectedDraftsForLogic,
