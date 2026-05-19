@@ -4729,25 +4729,47 @@ body:not(.admin-on) #tnav-drafts{
   filter:none;
 }
 .logic-hero::after{
-  display:none;
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(18,11,8,0.58) 0%,rgba(18,11,8,0.3) 38%,rgba(18,11,8,0.04) 76%),
+    linear-gradient(0deg,rgba(18,11,8,0.46) 0%,rgba(18,11,8,0.08) 54%,rgba(18,11,8,0.18) 100%);
+  pointer-events:none;
 }
 .logic-hero-content{
   position:relative;
   z-index:1;
   max-width:760px;
-  background:rgba(24,20,16,0.74);
-  border:1px solid rgba(255,255,255,0.24);
-  padding:0.75rem 0.85rem;
+  background:transparent;
+  border:0;
+  padding:0;
+  text-shadow:0 2px 14px rgba(0,0,0,0.86),0 1px 2px rgba(0,0,0,0.92);
 }
 .logic-hero .logic-title{color:var(--white);font-size:clamp(1.75rem,4vw,3.1rem)}
-.logic-hero .logic-meta{color:#eadfcf}
+.logic-hero .logic-kicker{color:#f6d690;text-shadow:0 2px 10px rgba(0,0,0,0.9)}
+.logic-hero .logic-meta{color:#fff4e5;font-weight:700}
 .logic-image-controls{
-  display:flex;
-  flex-wrap:wrap;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:0.45rem;
   align-items:center;
   margin:0.55rem 0 0.85rem;
 }
+.logic-image-controls .logic-kicker{grid-column:1/-1}
+.logic-crop-slider{
+  display:flex;
+  align-items:center;
+  gap:0.45rem;
+  border:1px solid var(--border);
+  background:#fbf8f3;
+  padding:0.42rem 0.5rem;
+  font-size:0.72rem;
+  font-family:var(--mono);
+  color:var(--muted);
+  text-transform:uppercase;
+}
+.logic-crop-slider input{width:100%;accent-color:var(--red)}
 .logic-gauge-card{
   border:1px solid var(--border);
   background:#fbf8f3;
@@ -5012,6 +5034,7 @@ body:not(.admin-on) #tnav-drafts{
   .logic-shell,.logic-grid,.logic-matrix-grid,.logic-report-grid,.logic-form-grid,.logic-stat-grid,.author-logic-summary,.logic-facet-grid,.logic-forecast-columns,.logic-ontology-workspace,.logic-report-workspace{grid-template-columns:1fr;}
   .logic-rail{position:relative;top:auto;max-height:none;}
   .logic-ontology-index,.logic-report-index{position:relative;top:auto;max-height:none}
+  .logic-image-controls{grid-template-columns:1fr;}
   .logic-timeline-item,.logic-infographic-row,.logic-timeline-summary{grid-template-columns:1fr;}
   .drafts-field.wide{grid-column:auto;}
   .assets-wrap{grid-template-columns:1fr;}
@@ -5290,7 +5313,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.11</div>
+<div id="site-version-stamp">v2026.05.19.12</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -7201,21 +7224,56 @@ function logicEntityImage(entity){
 }
 
 function logicImageSetting(entityId){
-  const defaults = {position:'center center', zoom:100};
+  const defaults = {x:50, y:50, zoom:100};
   const saved = (_logicImageSettings && _logicImageSettings[entityId]) || {};
-  return Object.assign(defaults, saved);
+  const merged = Object.assign({}, defaults, saved);
+  if(saved.position && (saved.x === undefined || saved.y === undefined)){
+    const parts = String(saved.position).split(/\s+/);
+    const xMap = {left:20, center:50, right:80};
+    const yMap = {top:20, center:50, bottom:80};
+    merged.x = xMap[parts[0]] !== undefined ? xMap[parts[0]] : defaults.x;
+    merged.y = yMap[parts[1]] !== undefined ? yMap[parts[1]] : (yMap[parts[0]] !== undefined ? yMap[parts[0]] : defaults.y);
+  }
+  merged.x = Math.max(0, Math.min(100, Number(merged.x || defaults.x)));
+  merged.y = Math.max(0, Math.min(100, Number(merged.y || defaults.y)));
+  merged.zoom = Math.max(100, Math.min(220, Number(merged.zoom || defaults.zoom)));
+  merged.position = `${merged.x}% ${merged.y}%`;
+  return merged;
 }
 
-function logicSetImageCrop(position='', zoom=''){
+function logicSetImageCrop(field='', value=''){
   const entity = logicEntityById(_logicSelectedEntityId);
   if(!entity) return;
   const current = logicImageSetting(entity.id);
-  _logicImageSettings[entity.id] = {
-    position:position || current.position,
-    zoom:zoom === '' ? current.zoom : Number(zoom || 100)
-  };
+  const next = {x:current.x, y:current.y, zoom:current.zoom};
+  if(field === 'x') next.x = Number(value);
+  else if(field === 'y') next.y = Number(value);
+  else if(field === 'zoom') next.zoom = Number(value);
+  else if(field){
+    const parts = String(field).split(/\s+/);
+    const xMap = {left:20, center:50, right:80};
+    const yMap = {top:20, center:50, bottom:80};
+    if(xMap[parts[0]] !== undefined) next.x = xMap[parts[0]];
+    if(yMap[parts[1]] !== undefined) next.y = yMap[parts[1]];
+    else if(yMap[parts[0]] !== undefined) next.y = yMap[parts[0]];
+  }
+  next.x = Math.max(0, Math.min(100, Number(next.x || 50)));
+  next.y = Math.max(0, Math.min(100, Number(next.y || 50)));
+  next.zoom = Math.max(100, Math.min(220, Number(next.zoom || 100)));
+  next.position = `${next.x}% ${next.y}%`;
+  _logicImageSettings[entity.id] = next;
   saveLogicUi();
-  renderLogicMachine();
+  const img = document.querySelector('.logic-hero-img');
+  if(img){
+    img.style.objectPosition = next.position;
+    img.style.transform = `scale(${next.zoom / 100})`;
+  }
+  const xLabel = document.getElementById('logic-crop-x-value');
+  const yLabel = document.getElementById('logic-crop-y-value');
+  const zoomLabel = document.getElementById('logic-crop-zoom-value');
+  if(xLabel) xLabel.textContent = `${Math.round(next.x)}%`;
+  if(yLabel) yLabel.textContent = `${Math.round(next.y)}%`;
+  if(zoomLabel) zoomLabel.textContent = `${Math.round(next.zoom)}%`;
 }
 
 function logicGaugeCard(label, value, hint=''){
@@ -7467,7 +7525,15 @@ function renderLogicProfiles(){
       <button class="logic-mini-btn" type="button" onclick="setLogicTab('ontology')">Open Ontology</button>
     </div>
     <div class="logic-meta" style="margin-top:.45rem">Scan Text For Entity scans chapters and draft fragments for this entity, then sends matching excerpts to Pending AI as observations. Ontology generation is separate.</div>
-    ${image ? `<div class="logic-image-controls"><span class="logic-kicker">Image Crop</span>${[['left center','Left'],['center top','Top'],['center center','Center'],['center bottom','Bottom'],['right center','Right']].map(([pos,label])=>`<button class="logic-mini-btn ${imageSetting.position===pos?'primary':''}" type="button" onclick="logicSetImageCrop('${pos}')">${label}</button>`).join('')}<label class="logic-chip">Zoom <input type="range" min="100" max="180" value="${escHtml(imageSetting.zoom)}" oninput="logicSetImageCrop('', this.value)" style="vertical-align:middle;width:7rem"></label></div>` : ''}
+    ${image ? `<div class="logic-image-controls">
+      <span class="logic-kicker">Image Crop</span>
+      <label class="logic-crop-slider">Horizontal <input type="range" min="0" max="100" value="${escHtml(imageSetting.x)}" oninput="logicSetImageCrop('x', this.value)"> <span id="logic-crop-x-value">${Math.round(imageSetting.x)}%</span></label>
+      <label class="logic-crop-slider">Vertical <input type="range" min="0" max="100" value="${escHtml(imageSetting.y)}" oninput="logicSetImageCrop('y', this.value)"> <span id="logic-crop-y-value">${Math.round(imageSetting.y)}%</span></label>
+      <label class="logic-crop-slider">Zoom <input type="range" min="100" max="220" value="${escHtml(imageSetting.zoom)}" oninput="logicSetImageCrop('zoom', this.value)"> <span id="logic-crop-zoom-value">${Math.round(imageSetting.zoom)}%</span></label>
+      <button class="logic-mini-btn" type="button" onclick="logicSetImageCrop('center center')">Center</button>
+      <button class="logic-mini-btn" type="button" onclick="logicSetImageCrop('center top')">Face Higher</button>
+      <button class="logic-mini-btn" type="button" onclick="logicSetImageCrop('center bottom')">Lower</button>
+    </div>` : ''}
     <div class="logic-stat-grid">
       <div class="logic-stat"><b>${stats.observations}</b><div class="logic-stat-label">Observations</div></div>
       <div class="logic-stat"><b>${stats.facets}</b><div class="logic-stat-label">Ontology Facets</div></div>
