@@ -8195,13 +8195,30 @@ async function analyzeSelectedDraftsForLogic(){
 async function analyzeLogicEntityAcrossText(){
   if(!requireAdmin()) return;
   const entity = logicEntityById(_logicSelectedEntityId);
-  if(!entity) return;
-  const matchingChapters = chapters.filter(ch=>String(ch.body || '').toLowerCase().includes(entity.name.toLowerCase())).slice(0, 8);
-  const body = matchingChapters.map(ch=>`# ${ch.chapter || ch.id}\n${ch.body}`).join('\n\n').slice(0, 70000);
-  if(!body){ logicSetStatus('No chapter text currently mentions this entity by name.'); return; }
-  logicSetStatus(`Analyzing ${entity.name} across ${matchingChapters.length} chapter${matchingChapters.length===1?'':'s'}...`);
+  if(!entity){ logicSetStatus('Select an entity before running Analyze Entity.'); renderLogicMachine(); return; }
+  if(!_draftFragments || !_draftFragments.length){
+    await draftRefreshCache().catch(()=>{});
+  }
+  const terms = [entity.name, ...(entity.aliases || [])].map(term=>String(term || '').trim().toLowerCase()).filter(Boolean);
+  const textMentionsEntity = text => {
+    const haystack = String(text || '').toLowerCase();
+    return terms.some(term=>haystack.includes(term));
+  };
+  const matchingChapters = chapters.filter(ch=>textMentionsEntity([ch.chapter, ch.book, ch.body].join('\n'))).slice(0, 8);
+  const matchingDrafts = (_draftFragments || []).filter(fragment=>textMentionsEntity([fragment.title, fragment.body, (fragment.characters || []).join(' '), (fragment.tags || []).join(' ')].join('\n'))).slice(0, 6);
+  const body = [
+    ...matchingChapters.map(ch=>`# Chapter: ${ch.chapter || ch.id}\n${ch.body}`),
+    ...matchingDrafts.map(fragment=>`# Draft: ${fragment.title || fragment.id}\n${fragment.body}`)
+  ].join('\n\n').slice(0, 70000);
+  if(!body){
+    logicSetStatus(`No chapter or draft text currently mentions ${entity.name} or its aliases. Add text, add aliases, or use Generate Ontology Insights from existing facets.`);
+    renderLogicMachine();
+    return;
+  }
+  logicSetStatus(`Analyzing ${entity.name} across ${matchingChapters.length} chapter${matchingChapters.length===1?'':'s'} and ${matchingDrafts.length} draft${matchingDrafts.length===1?'':'s'}...`);
+  renderLogicMachine();
   try{
-    const payload = {sourceKind:'entity-scan', sourceId:entity.id, sourceTitle:entity.name, targetEntity:entity, body, known:logicAiKnownContext()};
+    const payload = {sourceKind:'entity-scan', sourceId:entity.id, sourceTitle:entity.name, targetEntity:entity, body, matchingChapterIds:matchingChapters.map(ch=>ch.id), matchingDraftIds:matchingDrafts.map(fragment=>fragment.id), known:logicAiKnownContext()};
     const {model, parsed} = await callLogicOpenRouter(payload, 'entity scan');
     const count = storeLogicAiReport(parsed, {sourceKind:'entity-scan', sourceId:entity.id, sourceTitle:entity.name}, model);
     _logicActiveTab = 'pending';
@@ -8209,6 +8226,7 @@ async function analyzeLogicEntityAcrossText(){
     renderLogicMachine();
   }catch(err){
     logicSetStatus('Entity scan failed: ' + (err.message || err));
+    renderLogicMachine();
   }
 }
 
