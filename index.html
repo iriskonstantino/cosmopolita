@@ -5144,7 +5144,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.06</div>
+<div id="site-version-stamp">v2026.05.19.07</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -6044,6 +6044,18 @@ const LOGIC_FACET_CATEGORIES = [
   {id:'contradiction', label:'Contradictions'},
   {id:'future', label:'Future Behavior'}
 ];
+const LOGIC_ONTOLOGY_SUGGESTION_TYPES = ['text-grounded observation','research-backed inference','subculture analogue','lifestyle hypothesis','relationship influence','future behavior forecast'];
+const LOGIC_CULTURAL_INFERENCE_LENSES = [
+  {id:'fashion', label:'Fashion'},
+  {id:'food-alcohol', label:'Food / Alcohol'},
+  {id:'music-media', label:'Music / Media'},
+  {id:'online-microcultures', label:'Online Microcultures'},
+  {id:'irl-scenes', label:'IRL Scenes'},
+  {id:'venues', label:'Venues'},
+  {id:'consumer-habits', label:'Consumer Habits'},
+  {id:'relationship-influence', label:'Relationship Influence'},
+  {id:'future-decisions', label:'Future Decisions'}
+];
 const LOGIC_CHARACTER_TYPES = ['character'];
 const LOGIC_WORLD_ENTITY_TYPES = LOGIC_ENTITY_TYPES.filter(type=>!LOGIC_CHARACTER_TYPES.includes(type));
 const LOGIC_SUGGESTION_KINDS = ['observation','report','consistency'];
@@ -6061,6 +6073,11 @@ const LOGIC_TABS = [
   {id:'reports', label:'Reports'},
   {id:'pending', label:'Pending AI'}
 ];
+
+function normalizeLogicSuggestionType(value){
+  const clean = String(value || '').trim().toLowerCase();
+  return LOGIC_ONTOLOGY_SUGGESTION_TYPES.includes(clean) ? clean : 'lifestyle hypothesis';
+}
 
 const CH1_BODY = `The [[port-actual|Port of Port-Actual]] was not, in any meaningful sense, a single port. By the time [[elzbieta|Elzbieta Vorn]] arrived on the 14th of Drymonth aboard the *Catechism of Tides*—a mid-displacement packet vessel flagged alternately to four jurisdictions depending on which was least inconvenient at any given moment—the port had achieved the administrative character of a small nation-state operating inside the body of a larger one, its [[compact|Compact authorities]] maintaining seventeen separate arrival counters and an unknown number of informal ones, staffed by officials whose authority derived from documents no one had verified in living memory.
 
@@ -6590,6 +6607,10 @@ function normalizeLogicFacet(value={}){
     status,
     notes:String(value.notes || ''),
     tags:Array.isArray(value.tags) ? value.tags.map(String) : splitTagText(value.tags || ''),
+    suggestionType:value.suggestionType ? normalizeLogicSuggestionType(value.suggestionType) : '',
+    realLifeAnalogue:String(value.realLifeAnalogue || ''),
+    reasoningChain:String(value.reasoningChain || ''),
+    relationEffects:String(value.relationEffects || ''),
     inferenceBasis:String(value.inferenceBasis || ''),
     timelinePhase:String(value.timelinePhase || ''),
     relatedEntityIds:Array.isArray(value.relatedEntityIds) ? value.relatedEntityIds.map(String) : [],
@@ -6611,15 +6632,20 @@ function normalizeLogicOntologySuggestion(value={}){
   const category = LOGIC_FACET_CATEGORIES.some(item=>item.id===value.category) ? value.category : 'psyche';
   const status = ['pending','accepted','rejected'].includes(value.status) ? value.status : 'pending';
   const suggestedStatus = LOGIC_FACET_STATUSES.includes(value.suggestedStatus) ? value.suggestedStatus : 'inferred';
+  const suggestionType = normalizeLogicSuggestionType(value.suggestionType);
   return {
     id:String(value.id || logicId('ontology-suggestion')),
     entityId:String(value.entityId || ''),
     entityName:String(value.entityName || ''),
     entityType:String(value.entityType || 'custom'),
     category,
+    suggestionType,
     title:String(value.title || logicFacetCategoryLabel(category)),
     summary:String(value.summary || value.value || ''),
     evidence:String(value.evidence || value.quote || ''),
+    realLifeAnalogue:String(value.realLifeAnalogue || ''),
+    reasoningChain:String(value.reasoningChain || ''),
+    relationEffects:String(value.relationEffects || ''),
     inferenceBasis:String(value.inferenceBasis || ''),
     timelinePhase:String(value.timelinePhase || ''),
     relatedEntityIds:Array.isArray(value.relatedEntityIds) ? value.relatedEntityIds.map(String) : [],
@@ -6892,6 +6918,10 @@ function logicOntologySuggestionToFacet(suggestion, statusOverride=''){
     confidence:suggestion.confidence,
     status:statusOverride || suggestion.suggestedStatus,
     tags:['ontology-enrichment'],
+    suggestionType:suggestion.suggestionType,
+    realLifeAnalogue:suggestion.realLifeAnalogue,
+    reasoningChain:suggestion.reasoningChain,
+    relationEffects:suggestion.relationEffects,
     inferenceBasis:suggestion.inferenceBasis,
     timelinePhase:suggestion.timelinePhase,
     relatedEntityIds:suggestion.relatedEntityIds,
@@ -6964,7 +6994,7 @@ function logicInitUi(){
   _logicActiveTab = normalizeLogicTabId(ui.tab || _logicActiveTab || 'profiles');
   _logicFilter = ui.filter || _logicFilter || '';
   _logicRailFilter = ['all','characters','world'].includes(ui.railFilter) ? ui.railFilter : (_logicRailFilter || 'all');
-  _logicRelationshipScope = ['selected','global'].includes(ui.relationshipScope) ? ui.relationshipScope : (_logicRelationshipScope || 'selected');
+  _logicRelationshipScope = ['selected','influence','global'].includes(ui.relationshipScope) ? ui.relationshipScope : (_logicRelationshipScope || 'selected');
   _logicChapterId = ui.chapterId || _logicChapterId || (chapters[0] && chapters[0].id) || '';
   _logicDraftId = ui.draftId || _logicDraftId || '';
   const entities = logicEntities();
@@ -6978,6 +7008,19 @@ function logicTypeLabel(type){
 function logicConfidence(value){
   const num = Number(value || 0);
   return num ? `${Math.round(num * 100)}%` : 'unscored';
+}
+
+function logicFacetInferencePriority(item){
+  if(!item) return 0;
+  let score = 0;
+  if(item.suggestionType === 'research-backed inference') score += 8;
+  if(item.suggestionType === 'subculture analogue') score += 6;
+  if(item.suggestionType === 'relationship influence') score += 5;
+  if(item.realLifeAnalogue) score += 4;
+  if(item.webSources && item.webSources.length) score += 4;
+  if(item.status === 'canon') score += 3;
+  if(item.status === 'observed') score += 2;
+  return score;
 }
 
 function logicEntitySearchText(entity){
@@ -7125,6 +7168,9 @@ function logicFacetCard(facet, editable=true){
     <div class="logic-card-title">${escHtml(facet.title || logicFacetCategoryLabel(facet.category))}</div>
     <div class="logic-card-body">${escHtml(facet.value || 'No facet text recorded.')}</div>
     ${facet.evidence ? `<div class="logic-quote">${escHtml(facet.evidence)}</div>` : ''}
+    ${facet.realLifeAnalogue ? `<div class="logic-ontology-source"><b>Analogue:</b> ${escHtml(facet.realLifeAnalogue)}</div>` : ''}
+    ${facet.reasoningChain ? `<div class="logic-ontology-source"><b>Reasoning:</b> ${escHtml(facet.reasoningChain)}</div>` : ''}
+    ${facet.relationEffects ? `<div class="logic-ontology-source"><b>Relation Effects:</b> ${escHtml(facet.relationEffects)}</div>` : ''}
     ${facet.inferenceBasis ? `<div class="logic-ontology-source"><b>Basis:</b> ${escHtml(facet.inferenceBasis)}</div>` : ''}
     <div class="logic-meta">${escHtml(logicSourceLabel(facet.sourceKind, facet.sourceId, facet.sourceTitle))} · ${escHtml(facet.timelinePhase || 'no phase')} · ${escHtml(logicConfidence(facet.confidence))}</div>
     ${webSources.length ? `<div class="logic-ontology-source"><b>Web:</b> ${webSources.map(source=>source.url ? `<a href="${escHtml(source.url)}" target="_blank" rel="noopener">${escHtml(source.title || source.url)}</a>` : escHtml(source.title || source.note)).join(' · ')}</div>` : ''}
@@ -7142,11 +7188,14 @@ function renderLogicOntologySuggestionCard(raw){
   const item = normalizeLogicOntologySuggestion(raw);
   const webSources = item.webSources || [];
   return `<article class="logic-card logic-ontology-suggestion ${escHtml(item.status)}">
-    <div class="logic-actions"><span class="logic-chip">${escHtml(logicFacetCategoryLabel(item.category))}</span><span class="logic-facet-status ${escHtml(item.suggestedStatus)}">${escHtml(item.suggestedStatus)}</span></div>
+    <div class="logic-actions"><span class="logic-chip">${escHtml(logicFacetCategoryLabel(item.category))}</span><span class="logic-chip">${escHtml(item.suggestionType)}</span><span class="logic-facet-status ${escHtml(item.suggestedStatus)}">${escHtml(item.suggestedStatus)}</span></div>
     <div class="logic-card-title">${escHtml(item.title)}</div>
     <div class="logic-meta">${escHtml(item.entityName || 'Entity')} · ${escHtml(item.timelinePhase || 'no phase')} · ${escHtml(logicConfidence(item.confidence))}</div>
     <div class="logic-card-body">${escHtml(item.summary)}</div>
     ${item.evidence ? `<div class="logic-quote">${escHtml(item.evidence)}</div>` : ''}
+    ${item.realLifeAnalogue ? `<div class="logic-ontology-source"><b>Analogue:</b> ${escHtml(item.realLifeAnalogue)}</div>` : ''}
+    ${item.reasoningChain ? `<div class="logic-ontology-source"><b>Reasoning:</b> ${escHtml(item.reasoningChain)}</div>` : ''}
+    ${item.relationEffects ? `<div class="logic-ontology-source"><b>Relation Effects:</b> ${escHtml(item.relationEffects)}</div>` : ''}
     ${item.inferenceBasis ? `<div class="logic-ontology-source"><b>Basis:</b> ${escHtml(item.inferenceBasis)}</div>` : ''}
     ${webSources.length ? `<div class="logic-ontology-source"><b>Web:</b> ${webSources.map(source=>source.url ? `<a href="${escHtml(source.url)}" target="_blank" rel="noopener">${escHtml(source.title || source.url)}</a>` : escHtml(source.title || source.note)).join(' · ')}</div>` : ''}
     <div class="logic-actions">
@@ -7238,13 +7287,17 @@ function renderLogicOntology(){
         <option value="consumer-interests">Consumer tastes / interests</option>
         <option value="online-irl-scenes">Online and IRL scenes</option>
       </select>
+      <select id="logic-cultural-lens" class="logic-select" style="max-width:15rem">
+        ${LOGIC_CULTURAL_INFERENCE_LENSES.map(lens=>`<option value="${escHtml(lens.id)}">${escHtml(lens.label)}</option>`).join('')}
+      </select>
+      <button class="logic-mini-btn primary" type="button" onclick="analyzeLogicOntologyEntity('cultural')">Generate Cultural Inference</button>
       <button class="logic-mini-btn primary" type="button" onclick="generateLogicDossier('Character Dossier')">Generate Dossier</button>
       <button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Lifestyle & Culture Atlas')">Generate Lifestyle Report</button>
       <button class="logic-mini-btn" type="button" onclick="setLogicTab('pending')">Review Pending AI</button>
     </div>
     <section class="logic-panel" style="margin-top:.75rem">
       <div class="logic-card-title">How Ontology Enrichment Works</div>
-      <div class="logic-card-body">This is for research-backed inference, not just observation. Chapter/draft evidence anchors the character; web research can add cultural, consumer, fashion, food, alcohol, microculture, and aesthetic context. Results stay pending until you accept them.</div>
+      <div class="logic-card-body">This is for research-backed inference, not just observation. Chapter/draft evidence anchors the character; web research can add cultural, consumer, fashion, food, alcohol, microculture, and aesthetic context. Cultural Inference must add new hypotheses rather than rewrite existing notes. Results stay pending until you accept them.</div>
     </section>
     ${_logicStatusMessage ? `<div class="content-status" style="margin-top:.55rem">${escHtml(_logicStatusMessage)}</div>` : ''}
     ${pendingOntology.length ? `<section class="logic-panel" style="margin-top:.85rem"><div class="logic-card-title">Pending Ontology For ${escHtml(entity.name)}</div><div class="logic-report-grid">${pendingOntology.map(renderLogicOntologySuggestionCard).join('')}</div></section>` : ''}
@@ -7286,8 +7339,16 @@ function logicFacetBullets(entityId, categories=[], statusFilter=null, includePr
     if(statusFilter && !statusFilter.includes(item.status)) return false;
     if(!includeProvisional && item.status === 'provisional') return false;
     return item.status !== 'retired';
-  });
+  }).sort((a,b)=>logicFacetInferencePriority(b) - logicFacetInferencePriority(a));
   return items.map(item=>`${logicFacetCategoryLabel(item.category)}: ${item.value}`).slice(0, 8);
+}
+
+function logicFacetBulletsByPredicate(entityId, predicate, includeProvisional=false){
+  return logicFacetsForEntity(entityId).filter(item=>{
+    if(!includeProvisional && item.status === 'provisional') return false;
+    if(item.status === 'retired') return false;
+    return predicate(item);
+  }).sort((a,b)=>logicFacetInferencePriority(b) - logicFacetInferencePriority(a)).map(item=>`${item.title}: ${item.value}`).slice(0, 8);
 }
 
 function logicIncludeProvisionalReports(){
@@ -7310,10 +7371,11 @@ function generateLogicDossier(reportType='Character Dossier'){
   const includeProvisional = logicIncludeProvisionalReports();
   const emptyLine = 'No accepted ontology facets in this section yet. Add facets manually or accept Logic AI suggestions first.';
   let sections = {
-    psyche:logicFacetBullets(entity.id, ['psyche','desire','fear','wound','stress','trigger','moral'], null, includeProvisional),
-    lifestyle:logicFacetBullets(entity.id, ['fashion','food','alcohol','art','media','ritual','venue','consumer','class','culture'], null, includeProvisional),
-    relationships:logicFacetBullets(entity.id, ['relationship','faction','culture'], null, includeProvisional),
-    continuity:logicFacetBullets(entity.id, ['contradiction'], null, includeProvisional)
+    observedCanon:logicFacetBulletsByPredicate(entity.id, item=>['observed','canon'].includes(item.status), includeProvisional),
+    inferredLifestyle:logicFacetBulletsByPredicate(entity.id, item=>['fashion','food','alcohol','art','media','ritual','venue','consumer','class','culture'].includes(item.category) && ['inferred','provisional','canon','observed'].includes(item.status), includeProvisional),
+    culturalAnalogues:logicFacetBulletsByPredicate(entity.id, item=>['subculture analogue','research-backed inference','lifestyle hypothesis'].includes(item.suggestionType) || item.realLifeAnalogue, includeProvisional),
+    relationshipDrivenChanges:logicFacetBulletsByPredicate(entity.id, item=>item.suggestionType === 'relationship influence' || item.relationEffects || item.category === 'relationship', includeProvisional),
+    openQuestions:logicFacetBulletsByPredicate(entity.id, item=>['provisional','contradicted'].includes(item.status), true)
   };
   if(reportType === 'Lifestyle & Culture Atlas'){
     sections = {
@@ -7321,7 +7383,15 @@ function generateLogicDossier(reportType='Character Dossier'){
       foodAlcohol:logicFacetBullets(entity.id, ['food','alcohol'], null, includeProvisional),
       artMedia:logicFacetBullets(entity.id, ['art','media'], null, includeProvisional),
       venuesRituals:logicFacetBullets(entity.id, ['venue','ritual'], null, includeProvisional),
-      tasteClassCulture:logicFacetBullets(entity.id, ['consumer','class','culture'], null, includeProvisional)
+      tasteClassCulture:logicFacetBullets(entity.id, ['consumer','class','culture'], null, includeProvisional),
+      culturalAnalogues:logicFacetBulletsByPredicate(entity.id, item=>item.suggestionType === 'subculture analogue' || item.realLifeAnalogue, includeProvisional)
+    };
+  }else if(reportType === 'Relationship Report'){
+    sections = {
+      selectedEntityDynamics:logicFacetBullets(entity.id, ['relationship','faction','culture'], null, includeProvisional),
+      relationshipInfluence:logicFacetBulletsByPredicate(entity.id, item=>item.suggestionType === 'relationship influence' || item.relationEffects, includeProvisional),
+      tasteShiftsAroundOthers:logicFacetBulletsByPredicate(entity.id, item=>item.relationEffects && ['fashion','food','alcohol','venue','consumer','future'].includes(item.category), includeProvisional),
+      openRelationshipQuestions:logicFacetBulletsByPredicate(entity.id, item=>['relationship','faction','culture'].includes(item.category) && ['provisional','contradicted'].includes(item.status), true)
     };
   }
   Object.keys(sections).forEach(key=>{ if(!sections[key].length) sections[key] = [emptyLine]; });
@@ -7427,7 +7497,7 @@ function renderLogicLifestyleAtlas(){
   if(!entity) return `<div class="drafts-empty">Select an entity for lifestyle patterns.</div>`;
   const cats = ['fashion','food','alcohol','art','media','ritual','venue','consumer','class','culture'];
   const rows = cats.map(cat=>{
-    const items = logicFacetList(entity.id, [cat]);
+    const items = logicFacetList(entity.id, [cat]).sort((a,b)=>logicFacetInferencePriority(b) - logicFacetInferencePriority(a));
     return `<article class="logic-card"><div class="logic-card-title">${escHtml(logicFacetCategoryLabel(cat))}</div>${items.length ? items.map(item=>`<p class="logic-card-body">${escHtml(item.value)}</p>`).join('') : '<div class="logic-meta">No pattern yet</div>'}</article>`;
   }).join('');
   return `<section><div class="logic-kicker">Lifestyle Atlas</div><div class="logic-title">${escHtml(entity.name)}</div><div class="logic-meta">Fashion, food, alcohol, venues, art, media, rituals, status markers, and taste.</div><div class="logic-matrix-grid" style="margin-top:.85rem">${rows}</div></section>`;
@@ -7499,7 +7569,15 @@ function renderLogicRelationships(){
     return selectedTerms.some(term=>subject === term || object === term || subject.includes(term) || object.includes(term));
   });
   const relationshipFacets = entity ? logicFacetList(entity.id, ['relationship','faction','culture']) : [];
-  return `<section><div class="logic-kicker">Relationships</div><div class="logic-title">${escHtml(entity ? entity.name : 'All Entities')} relationship map</div><section class="logic-panel"><div class="logic-card-title">What This Tab Does</div><div class="logic-card-body">By default this shows only relationships where the selected entity is the subject or target. Switch to Global Map when you want every observed relationship in the machine.</div><div class="logic-tabs" style="margin-top:.65rem"><button class="logic-tab ${_logicRelationshipScope==='selected'?'active':''}" type="button" onclick="setLogicRelationshipScope('selected')">Selected Only</button><button class="logic-tab ${_logicRelationshipScope==='global'?'active':''}" type="button" onclick="setLogicRelationshipScope('global')">Global Map</button></div></section><div class="logic-grid" style="margin-top:.85rem"><section class="logic-panel"><div class="logic-card-title">Selected Entity Dynamics</div>${relationshipFacets.length ? relationshipFacets.map(logicFacetCard).join('') : '<div class="drafts-empty">No relationship/faction/culture facets yet.</div>'}</section><section class="logic-panel"><div class="logic-card-title">${_logicRelationshipScope==='global'?'All Observed Links':'Observed Links For Selected Entity'}</div>${scopedRows.length ? scopedRows.map(row=>`<div class="logic-relationship-row"><div><b>${escHtml(row.entity ? row.entity.name : row.obs.entityName)}</b><div class="logic-meta">${escHtml(row.obs.dimension)}</div></div><div class="logic-arrow">→</div><div><b>${escHtml(row.other)}</b><div class="logic-card-body">${escHtml(row.obs.value)}</div></div></div>`).join('') : '<div class="drafts-empty">No relationship observations for this scope yet.</div>'}</section></div></section>`;
+  const influenceFacets = entity ? logicFacetsForEntity(entity.id).filter(item=>{
+    if(item.status === 'retired') return false;
+    return item.suggestionType === 'relationship influence' || item.relationEffects || ['relationship','faction','culture','venue','consumer','fashion','food','alcohol','future'].includes(item.category);
+  }).sort((a,b)=>logicFacetInferencePriority(b) - logicFacetInferencePriority(a)) : [];
+  const leftTitle = _logicRelationshipScope === 'influence' ? 'Influence View' : 'Selected Entity Dynamics';
+  const leftBody = _logicRelationshipScope === 'influence'
+    ? (influenceFacets.length ? influenceFacets.map(logicFacetCard).join('') : '<div class="drafts-empty">No relationship-influence facets yet. Run Cultural Inference with the Relationship Influence lens.</div>')
+    : (relationshipFacets.length ? relationshipFacets.map(logicFacetCard).join('') : '<div class="drafts-empty">No relationship/faction/culture facets yet.</div>');
+  return `<section><div class="logic-kicker">Relationships</div><div class="logic-title">${escHtml(entity ? entity.name : 'All Entities')} relationship map</div><section class="logic-panel"><div class="logic-card-title">What This Tab Does</div><div class="logic-card-body">Selected Only keeps the map scoped to the current entity. Influence View asks how people, factions, places, and scenes may shift that entity's tastes, risks, and future choices. Global Map shows every observed relationship.</div><div class="logic-tabs" style="margin-top:.65rem"><button class="logic-tab ${_logicRelationshipScope==='selected'?'active':''}" type="button" onclick="setLogicRelationshipScope('selected')">Selected Only</button><button class="logic-tab ${_logicRelationshipScope==='influence'?'active':''}" type="button" onclick="setLogicRelationshipScope('influence')">Influence View</button><button class="logic-tab ${_logicRelationshipScope==='global'?'active':''}" type="button" onclick="setLogicRelationshipScope('global')">Global Map</button></div></section><div class="logic-grid" style="margin-top:.85rem"><section class="logic-panel"><div class="logic-card-title">${leftTitle}</div>${leftBody}</section><section class="logic-panel"><div class="logic-card-title">${_logicRelationshipScope==='global'?'All Observed Links':'Observed Links For Selected Entity'}</div>${scopedRows.length ? scopedRows.map(row=>`<div class="logic-relationship-row"><div><b>${escHtml(row.entity ? row.entity.name : row.obs.entityName)}</b><div class="logic-meta">${escHtml(row.obs.dimension)}</div></div><div class="logic-arrow">→</div><div><b>${escHtml(row.other)}</b><div class="logic-card-body">${escHtml(row.obs.value)}</div></div></div>`).join('') : '<div class="drafts-empty">No relationship observations for this scope yet.</div>'}</section></div></section>`;
 }
 
 function renderLogicReports(){
@@ -7582,7 +7660,7 @@ function setLogicRailFilter(value){
 }
 
 function setLogicRelationshipScope(value){
-  _logicRelationshipScope = ['selected','global'].includes(value) ? value : 'selected';
+  _logicRelationshipScope = ['selected','influence','global'].includes(value) ? value : 'selected';
   saveLogicUi();
   renderLogicMachine();
 }
@@ -7785,9 +7863,13 @@ function logicOntologySchema(){
     properties:{
       suggestions:{type:'array',items:{type:'object',required:['category','title','summary','inferenceBasis','confidence','suggestedStatus'],properties:{
         category:{type:'string'},
+        suggestionType:{type:'string'},
         title:{type:'string'},
         summary:{type:'string'},
         evidence:{type:'string'},
+        realLifeAnalogue:{type:'string'},
+        reasoningChain:{type:'string'},
+        relationEffects:{type:'string'},
         inferenceBasis:{type:'string'},
         timelinePhase:{type:'string'},
         relatedEntityNames:{type:'array',items:{type:'string'}},
@@ -7876,7 +7958,7 @@ function logicDraftPayload(fragment){
   };
 }
 
-function logicEntityEvidencePayload(entity, focus='full', researchAngle='balanced'){
+function logicEntityEvidencePayload(entity, focus='full', researchAngle='balanced', mode='ontology', culturalLens='balanced'){
   const name = String(entity.name || '').toLowerCase();
   const chapterMatches = chapters.filter(ch=>String(ch.body || '').toLowerCase().includes(name)).slice(0, 12).map(ch=>({
     id:ch.id,
@@ -7914,10 +7996,17 @@ function logicEntityEvidencePayload(entity, focus='full', researchAngle='balance
     facets:logicFacetsForEntity(item.id).slice(0, 10).map(facet=>({category:facet.category, title:facet.title, value:facet.value, status:facet.status}))
   }));
   const worldContext = logicEntities().filter(item=>LOGIC_WORLD_ENTITY_TYPES.includes(item.type)).slice(0, 200).map(item=>({id:item.id, name:item.name, type:item.type, aliases:item.aliases, tags:item.tags}));
+  const doNotRepeat = [
+    ...facets.map(facet=>`${facet.title}: ${facet.value}`),
+    ...observations.map(obs=>`${obs.dimension}: ${obs.value}`)
+  ].map(item=>String(item || '').slice(0, 400)).filter(Boolean).slice(0, 80);
   return {
     focus,
+    mode,
+    culturalLens,
     researchAngle,
-    researchInstructions:'Use real-life research and broad cultural knowledge to infer plausible lifestyle, consumer, fashion, food, alcohol, aesthetic, online/IRL microculture, and social-scene patterns. Separate text-grounded evidence from research-backed inference. Web-backed claims must include webSources and should default to provisional.',
+    noveltyRequirement:'Do not repeat or paraphrase existing facets/observations. Each suggestion must add a new inferred taste, behavior, relation, aesthetic, place, purchase pattern, contradiction, or future behavior forecast. If it sounds like a rewrite of doNotRepeat, omit it.',
+    researchInstructions:'Use real-life research and broad cultural knowledge to infer plausible lifestyle, consumer, fashion, food, alcohol, aesthetic, music/media, online/IRL microculture, venue, purchase, and social-scene patterns. Separate text-grounded evidence from research-backed inference. Web-backed claims must include webSources and should default to provisional.',
     selectedEntity:{id:entity.id, name:entity.name, type:entity.type, aliases:entity.aliases, tags:entity.tags, notes:entity.notes},
     acceptedFacets:facets.map(facet=>({id:facet.id, category:facet.category, title:facet.title, value:facet.value, status:facet.status, inferenceBasis:facet.inferenceBasis, timelinePhase:facet.timelinePhase})),
     observations:observations.map(obs=>({id:obs.id, dimension:obs.dimension, value:obs.value, trigger:obs.trigger, sourceKind:obs.sourceKind, sourceTitle:obs.sourceTitle, quote:obs.quote, confidence:obs.confidence})),
@@ -7925,7 +8014,10 @@ function logicEntityEvidencePayload(entity, focus='full', researchAngle='balance
     drafts:draftMatches,
     relatedEntities:related,
     worldContext,
+    doNotRepeat,
     categories:LOGIC_FACET_CATEGORIES,
+    suggestionTypes:LOGIC_ONTOLOGY_SUGGESTION_TYPES,
+    culturalLenses:LOGIC_CULTURAL_INFERENCE_LENSES,
     statuses:LOGIC_FACET_STATUSES
   };
 }
@@ -7983,8 +8075,8 @@ async function callLogicOntologyOpenRouter(payload, options={}){
   const body = {
     model,
     messages:[
-      {role:'system', content:'Return ONLY valid JSON. Do not write markdown, prose, headings, bullets, or commentary. You are a literary ontology analyst for a long novel. Generate private, approval-first ontology insights for the selected entity. Use evidence from the provided chapters/drafts/facets, and when web research is available use it for real-world aesthetic, psychology, fashion, food, alcohol, consumer, cultural, online microculture, IRL scene, and trend analogies. Separate textual evidence from research-backed inference. Do not canonize anything.'},
-      {role:'user', content:'Return exactly this JSON shape: {"suggestions":[{"category":"psyche","title":"short title","summary":"specific insight","evidence":"supporting text or empty","inferenceBasis":"why this follows, naming text evidence versus real-life research inference","timelinePhase":"early/current/emerging/unknown","relatedEntityNames":[],"relatedPlaceNames":[],"sourceChapterTitles":[],"sourceDraftTitles":[],"webSources":[],"confidence":0.5,"suggestedStatus":"provisional"}]}. Generate pending ontology insights for this selected entity. Include relationship-aware inference, change over time, lifestyle/aesthetic patterns, likely future behavior, food, alcohol, fashion, interests, consumer taste, online and IRL microcultures, and contradictions. Use category ids exactly from the provided categories. Web-sourced or speculative insights should suggest provisional status. Text-grounded observations can suggest observed or inferred.\\n\\n' + JSON.stringify(payload)}
+      {role:'system', content:'Return ONLY valid JSON. Do not write markdown, prose, headings, bullets, or commentary. You are a literary cultural inference analyst for a long novel. Your job is not to summarize existing observations. Your job is to use the selected entity as a filter to explore plausible real-life analogues: subcultures, consumer tastes, fashion, music/media, food, alcohol, venues, online/IRL scenes, social habits, relationship influence, and future behavior. Do not canonize anything.'},
+      {role:'user', content:'Return exactly this JSON shape: {"suggestions":[{"category":"fashion","suggestionType":"subculture analogue","title":"short title","summary":"new inferred taste or behavior","evidence":"supporting text or empty","realLifeAnalogue":"real-world subculture/store/band/food/drink/venue/scene analogue","reasoningChain":"known trait + cultural pattern => inferred hypothesis","relationEffects":"how other characters/places/factions may shift this","inferenceBasis":"name text evidence versus real-life research inference","timelinePhase":"early/current/emerging/unknown","relatedEntityNames":[],"relatedPlaceNames":[],"sourceChapterTitles":[],"sourceDraftTitles":[],"webSources":[],"confidence":0.5,"suggestedStatus":"provisional"}]}. NOVELTY REQUIREMENT: do not repeat, rephrase, summarize, or lightly rewrite anything in doNotRepeat. Each suggestion must add a new inferred taste, behavior, relation, aesthetic, store, band, food, alcohol, venue, purchase pattern, contradiction, or future behavior forecast. If the selected entity were mall-goth, infer things like likely clothing stores, food court habits, bands, drinks, nightlife, online scenes, and relationship effects. Apply that same kind of cultural reasoning to the provided selected entity.\\n\\n' + JSON.stringify(payload)}
     ],
     response_format:{
       type:'json_schema',
@@ -8110,6 +8202,10 @@ function storeLogicOntologySuggestions(parsed, entity, model, options={}){
       title:item.title,
       summary:item.summary,
       evidence:item.evidence,
+      suggestionType:item.suggestionType,
+      realLifeAnalogue:item.realLifeAnalogue,
+      reasoningChain:item.reasoningChain,
+      relationEffects:item.relationEffects,
       inferenceBasis:item.inferenceBasis,
       timelinePhase:item.timelinePhase,
       relatedEntityIds:logicEntityIdsFromNames(item.relatedEntityNames || []),
@@ -8135,7 +8231,7 @@ function storeLogicOntologySuggestions(parsed, entity, model, options={}){
   return suggestions.length;
 }
 
-async function analyzeLogicOntologyEntity(){
+async function analyzeLogicOntologyEntity(mode='ontology'){
   if(!requireAdmin()) return;
   const entity = logicSelectedOrFirstEntity();
   if(!entity){ logicSetStatus('Create or select an entity before generating ontology insights.'); renderLogicMachine(); return; }
@@ -8146,14 +8242,15 @@ async function analyzeLogicOntologyEntity(){
   const webResearch = !!document.getElementById('logic-ontology-web')?.checked;
   const focus = document.getElementById('logic-ontology-focus')?.value || 'full';
   const researchAngle = document.getElementById('logic-ontology-research-angle')?.value || 'balanced';
-  logicSetStatus(`Generating ontology insights for ${entity.name}${webResearch ? ' with web research' : ''} (${researchAngle})...`);
+  const culturalLens = document.getElementById('logic-cultural-lens')?.value || 'balanced';
+  logicSetStatus(`Generating ${mode === 'cultural' ? 'cultural inference' : 'ontology insights'} for ${entity.name}${webResearch ? ' with web research' : ''} (${mode === 'cultural' ? culturalLens : researchAngle})...`);
   renderLogicMachine();
   try{
-    const payload = logicEntityEvidencePayload(entity, focus, researchAngle);
+    const payload = logicEntityEvidencePayload(entity, focus, researchAngle, mode, culturalLens);
     const {model, parsed, recoveredFromProse} = await callLogicOntologyOpenRouter(payload, {webResearch});
     const count = storeLogicOntologySuggestions(parsed, entity, model, {webResearch});
     _logicActiveTab = 'ontology';
-    logicSetStatus(`Generated ${count} pending ontology insight${count===1?'':'s'} for ${entity.name}.${recoveredFromProse ? ' The model returned prose, so I recovered provisional cards from it.' : ''}`);
+    logicSetStatus(`Generated ${count} pending ${mode === 'cultural' ? 'cultural inference' : 'ontology'} card${count===1?'':'s'} for ${entity.name}.${recoveredFromProse ? ' The model returned prose, so I recovered provisional cards from it.' : ''}`);
     renderLogicMachine();
   }catch(err){
     console.error('Ontology enrichment failed:', err);
@@ -8746,9 +8843,12 @@ function backupLogicMachineHtml(store={}){
   const ontologySuggestionHtml = logic.ontologySuggestions.length ? logic.ontologySuggestions.map(raw=>{
     const item = normalizeLogicOntologySuggestion(raw);
     return `<article class="source">
-      <h5>${backupEscapeHtml(logicFacetCategoryLabel(item.category))} · ${backupEscapeHtml(item.status)} · ${backupEscapeHtml(item.title)}</h5>
+      <h5>${backupEscapeHtml(logicFacetCategoryLabel(item.category))} · ${backupEscapeHtml(item.suggestionType)} · ${backupEscapeHtml(item.status)} · ${backupEscapeHtml(item.title)}</h5>
       <p><b>Entity:</b> ${backupEscapeHtml(item.entityName)} · <b>Suggested status:</b> ${backupEscapeHtml(item.suggestedStatus)} · <b>Confidence:</b> ${backupEscapeHtml(item.confidence ? Math.round(item.confidence * 100) + '%' : 'unscored')}</p>
       <p>${backupEscapeHtml(item.summary)}</p>
+      ${item.realLifeAnalogue ? `<p><b>Analogue:</b> ${backupEscapeHtml(item.realLifeAnalogue)}</p>` : ''}
+      ${item.reasoningChain ? `<p><b>Reasoning:</b> ${backupEscapeHtml(item.reasoningChain)}</p>` : ''}
+      ${item.relationEffects ? `<p><b>Relation Effects:</b> ${backupEscapeHtml(item.relationEffects)}</p>` : ''}
       ${item.inferenceBasis ? `<p><b>Basis:</b> ${backupEscapeHtml(item.inferenceBasis)}</p>` : ''}
       ${item.webSources.length ? `<p><b>Web sources:</b> ${backupEscapeHtml(item.webSources.map(source=>source.url || source.title).join(' | '))}</p>` : ''}
     </article>`;
@@ -8789,9 +8889,12 @@ function backupLogicMachineHtml(store={}){
       <div class="meta">${backupEscapeHtml(entity.type)} · ${backupEscapeHtml(entity.sourceKind)} · ${facets.length} ontology facets · ${observations.length} observations</div>
       <p><b>Tags:</b> ${backupEscapeHtml(entity.tags.join(', '))}</p>
       ${facets.length ? `<h4>Ontology Facets</h4>${facets.map(facet=>`<article class="source">
-        <h5>${backupEscapeHtml(logicFacetCategoryLabel(facet.category))} · ${backupEscapeHtml(facet.status)} · ${backupEscapeHtml(facet.title)}</h5>
+        <h5>${backupEscapeHtml(logicFacetCategoryLabel(facet.category))} · ${backupEscapeHtml(facet.suggestionType || 'facet')} · ${backupEscapeHtml(facet.status)} · ${backupEscapeHtml(facet.title)}</h5>
         <p>${backupEscapeHtml(facet.value)}</p>
         ${facet.evidence ? `<p><b>Evidence:</b> ${backupEscapeHtml(facet.evidence)}</p>` : ''}
+        ${facet.realLifeAnalogue ? `<p><b>Analogue:</b> ${backupEscapeHtml(facet.realLifeAnalogue)}</p>` : ''}
+        ${facet.reasoningChain ? `<p><b>Reasoning:</b> ${backupEscapeHtml(facet.reasoningChain)}</p>` : ''}
+        ${facet.relationEffects ? `<p><b>Relation Effects:</b> ${backupEscapeHtml(facet.relationEffects)}</p>` : ''}
       </article>`).join('')}` : '<p class="muted">No ontology facets for this entity</p>'}
       ${observations.length ? observations.map(obs=>`<article class="source">
         <h5>${backupEscapeHtml(obs.dimension)} · ${backupEscapeHtml(logicSourceLabel(obs.sourceKind, obs.sourceId, obs.sourceTitle))}</h5>
@@ -16050,9 +16153,13 @@ function parseOntologyProseFallback(output, payload={}, model=''){
     const category = ontologyCategoryFromText(`${heading}\n${summary}`);
     return {
       category,
+      suggestionType:'lifestyle hypothesis',
       title:heading.trim().slice(0, 120) || logicFacetCategoryLabel(category),
       summary:summary || chunk.slice(0, 1400),
       evidence:'',
+      realLifeAnalogue:'',
+      reasoningChain:'Recovered from prose; review and refine the reasoning before accepting.',
+      relationEffects:'',
       inferenceBasis:'Recovered from a prose AI response because the model did not return JSON. Review before canonizing.',
       timelinePhase:'',
       relatedEntityNames:[],
