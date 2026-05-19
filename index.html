@@ -7941,7 +7941,7 @@ async function callLogicOpenRouter(payload, label='Logic Machine'){
   }
   const output = openRouterOutputText(data);
   if(!output) throw new Error('OpenRouter returned no logic report text.');
-  const parsed = JSON.parse(output);
+  const parsed = parseOpenRouterJsonOutput(output, 'Logic report');
   return {model, parsed};
 }
 
@@ -7988,7 +7988,7 @@ async function callLogicOntologyOpenRouter(payload, options={}){
   }
   const output = openRouterOutputText(data);
   if(!output) throw new Error('OpenRouter returned no ontology enrichment text.');
-  return {model, parsed:JSON.parse(output)};
+  return {model, parsed:parseOpenRouterJsonOutput(output, 'Ontology enrichment')};
 }
 
 function storeLogicAiReport(parsed, source, model){
@@ -15944,6 +15944,27 @@ function openRouterOutputText(data){
     return content.map(part=>typeof part === 'string' ? part : (part && (part.text || part.content)) || '').join('\n').trim();
   }
   return String(content || '').trim();
+}
+
+function parseOpenRouterJsonOutput(output, label='AI response'){
+  const text = String(output || '').trim();
+  if(!text) throw new Error(`${label} was empty.`);
+  try{ return JSON.parse(text); }catch(e){}
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if(fenced && fenced[1]){
+    try{ return JSON.parse(fenced[1].trim()); }catch(e){}
+  }
+  const firstObj = text.indexOf('{');
+  const lastObj = text.lastIndexOf('}');
+  if(firstObj !== -1 && lastObj > firstObj){
+    try{ return JSON.parse(text.slice(firstObj, lastObj + 1)); }catch(e){}
+  }
+  const firstArr = text.indexOf('[');
+  const lastArr = text.lastIndexOf(']');
+  if(firstArr !== -1 && lastArr > firstArr){
+    try{ return JSON.parse(text.slice(firstArr, lastArr + 1)); }catch(e){}
+  }
+  throw new Error(`${label} was not valid JSON. First characters: ${text.slice(0, 120)}`);
 }
 
 async function callDraftOpenRouterFromBrowser(fragment){
