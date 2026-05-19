@@ -4750,13 +4750,22 @@ body:not(.admin-on) #tnav-drafts{
 .logic-hero .logic-kicker{color:#f6d690;text-shadow:0 2px 10px rgba(0,0,0,0.9)}
 .logic-hero .logic-meta{color:#fff4e5;font-weight:700}
 .logic-image-controls{
+  margin:0.55rem 0 0.85rem;
+}
+.logic-image-controls summary{
+  display:inline-flex;
+  width:max-content;
+  list-style:none;
+  cursor:pointer;
+}
+.logic-image-controls summary::-webkit-details-marker{display:none}
+.logic-image-controls[open] summary{margin-bottom:0.5rem}
+.logic-crop-panel{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:0.45rem;
   align-items:center;
-  margin:0.55rem 0 0.85rem;
 }
-.logic-image-controls .logic-kicker{grid-column:1/-1}
 .logic-crop-slider{
   display:flex;
   align-items:center;
@@ -5034,7 +5043,7 @@ body:not(.admin-on) #tnav-drafts{
   .logic-shell,.logic-grid,.logic-matrix-grid,.logic-report-grid,.logic-form-grid,.logic-stat-grid,.author-logic-summary,.logic-facet-grid,.logic-forecast-columns,.logic-ontology-workspace,.logic-report-workspace{grid-template-columns:1fr;}
   .logic-rail{position:relative;top:auto;max-height:none;}
   .logic-ontology-index,.logic-report-index{position:relative;top:auto;max-height:none}
-  .logic-image-controls{grid-template-columns:1fr;}
+  .logic-crop-panel{grid-template-columns:1fr;}
   .logic-timeline-item,.logic-infographic-row,.logic-timeline-summary{grid-template-columns:1fr;}
   .drafts-field.wide{grid-column:auto;}
   .assets-wrap{grid-template-columns:1fr;}
@@ -5313,7 +5322,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.12</div>
+<div id="site-version-stamp">v2026.05.19.14</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -6893,6 +6902,7 @@ function isFakeRecoveredOntologySuggestion(value={}){
 function normalizeLogicStore(value={}){
   return {
     version:2,
+    hiddenEntityIds:Array.isArray(value.hiddenEntityIds) ? value.hiddenEntityIds.map(String) : [],
     entities:Array.isArray(value.entities) ? value.entities.map(normalizeLogicEntity) : [],
     observations:Array.isArray(value.observations) ? value.observations.map(normalizeLogicObservation) : [],
     reports:Array.isArray(value.reports) ? value.reports.map(normalizeLogicReport) : [],
@@ -6947,10 +6957,11 @@ function logicDerivedEntities(){
 
 function logicEntities(){
   const map = new Map();
-  logicDerivedEntities().forEach(entity=>map.set(entity.id, entity));
+  const hidden = new Set((_logicStore.hiddenEntityIds || []).map(String));
+  logicDerivedEntities().forEach(entity=>{ if(!hidden.has(entity.id)) map.set(entity.id, entity); });
   (_logicStore.entities || []).forEach(raw=>{
     const entity = normalizeLogicEntity(raw);
-    map.set(entity.id, Object.assign({}, map.get(entity.id) || {}, entity));
+    if(!hidden.has(entity.id)) map.set(entity.id, Object.assign({}, map.get(entity.id) || {}, entity));
   });
   return Array.from(map.values()).sort((a,b)=>a.name.localeCompare(b.name));
 }
@@ -6974,6 +6985,42 @@ function ensureLogicEntity(name, type='custom', data={}){
   _logicStore.entities.unshift(entity);
   saveLogicStore();
   return entity;
+}
+
+function deleteLogicEntity(id){
+  if(!requireAdmin()) return;
+  const entity = logicEntityById(id);
+  if(!entity) return;
+  const ok = confirm(`Delete ${entity.name} from the Logic Machine?\n\nThis removes its private observations, ontology facets, pending AI, forecasts, dossiers, and image crop settings. If it came from Characters or Codex, the public source entry is not deleted; it is only hidden from Logic Machine.`);
+  if(!ok) return;
+  const entityName = String(entity.name || '').toLowerCase();
+  _logicStore.hiddenEntityIds = Array.from(new Set([...(Array.isArray(_logicStore.hiddenEntityIds) ? _logicStore.hiddenEntityIds : []), id].map(String)));
+  _logicStore.entities = (_logicStore.entities || []).filter(item=>item.id !== id);
+  _logicStore.observations = (_logicStore.observations || []).filter(item=>item.entityId !== id).map(item=>{
+    item.relatedEntities = (item.relatedEntities || []).filter(name=>String(name || '').toLowerCase() !== entityName);
+    return item;
+  });
+  _logicStore.reports = (_logicStore.reports || []).filter(item=>item.entityId !== id);
+  _logicStore.suggestions = (_logicStore.suggestions || []).filter(item=>String(item.entityName || '').toLowerCase() !== entityName);
+  _logicStore.facets = (_logicStore.facets || []).filter(item=>item.entityId !== id).map(item=>{
+    item.relatedEntityIds = (item.relatedEntityIds || []).filter(relatedId=>relatedId !== id);
+    item.relatedPlaceIds = (item.relatedPlaceIds || []).filter(relatedId=>relatedId !== id);
+    return item;
+  });
+  _logicStore.ontologySuggestions = (_logicStore.ontologySuggestions || []).filter(item=>item.entityId !== id).map(item=>{
+    item.relatedEntityIds = (item.relatedEntityIds || []).filter(relatedId=>relatedId !== id);
+    item.relatedPlaceIds = (item.relatedPlaceIds || []).filter(relatedId=>relatedId !== id);
+    return item;
+  });
+  _logicStore.forecasts = (_logicStore.forecasts || []).filter(item=>item.entityId !== id);
+  _logicStore.dossiers = (_logicStore.dossiers || []).filter(item=>item.entityId !== id);
+  _logicStore.facetHistory = (_logicStore.facetHistory || []).filter(item=>item.entityId !== id);
+  if(_logicImageSettings && _logicImageSettings[id]) delete _logicImageSettings[id];
+  _logicSelectedEntityId = (logicEntities()[0] && logicEntities()[0].id) || '';
+  saveLogicStore();
+  saveLogicUi();
+  logicSetStatus(`${entity.name} deleted from Logic Machine.`);
+  renderLogicMachine();
 }
 
 function logicSourceLabel(kind, id, fallback=''){
@@ -7352,7 +7399,7 @@ function renderLogicRail(){
       ${_logicRailFilter !== 'world' ? renderGroup('Characters', characters) : ''}
       ${_logicRailFilter !== 'characters' ? renderGroup('World Entities', worldEntities) : ''}
     </div>
-    ${selected ? `<div class="logic-panel" style="margin-top:.8rem"><div class="logic-kicker">Selected</div><div class="logic-card-title">${escHtml(selected.name)}</div><div class="logic-meta">${escHtml(logicTypeLabel(selected.type))} · ${logicFacetsForEntity(selected.id).length} facets · ${logicObservationsForEntity(selected.id).length} observations · ${logicOntologySuggestionsForEntity(selected.id).length} pending ontology</div><div class="logic-card-body">${escHtml(selected.notes || selected.aliases.join(', ') || 'No profile notes yet.')}</div><div class="logic-actions" style="margin-top:.55rem"><button class="logic-mini-btn primary" type="button" onclick="setLogicTab('ontology')">Ontology</button><button class="logic-mini-btn" type="button" onclick="analyzeLogicOntologyEntity()">Generate Insights</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('reports')">Reports</button></div></div>` : ''}`;
+    ${selected ? `<div class="logic-panel" style="margin-top:.8rem"><div class="logic-kicker">Selected</div><div class="logic-card-title">${escHtml(selected.name)}</div><div class="logic-meta">${escHtml(logicTypeLabel(selected.type))} · ${logicFacetsForEntity(selected.id).length} facets · ${logicObservationsForEntity(selected.id).length} observations · ${logicOntologySuggestionsForEntity(selected.id).length} pending ontology</div><div class="logic-card-body">${escHtml(selected.notes || selected.aliases.join(', ') || 'No profile notes yet.')}</div><div class="logic-actions" style="margin-top:.55rem"><button class="logic-mini-btn primary" type="button" onclick="setLogicTab('ontology')">Ontology</button><button class="logic-mini-btn" type="button" onclick="analyzeLogicOntologyEntity()">Generate Insights</button><button class="logic-mini-btn" type="button" onclick="setLogicTab('reports')">Reports</button><button class="logic-mini-btn danger" type="button" onclick="deleteLogicEntity('${escHtml(selected.id)}')">Delete</button></div><div class="logic-meta" style="margin-top:.4rem">Delete removes this private Logic Machine profile only; Characters/Codex source entries stay intact.</div></div>` : ''}`;
 }
 
 function renderLogicTabs(){
@@ -7525,15 +7572,17 @@ function renderLogicProfiles(){
       <button class="logic-mini-btn" type="button" onclick="setLogicTab('ontology')">Open Ontology</button>
     </div>
     <div class="logic-meta" style="margin-top:.45rem">Scan Text For Entity scans chapters and draft fragments for this entity, then sends matching excerpts to Pending AI as observations. Ontology generation is separate.</div>
-    ${image ? `<div class="logic-image-controls">
-      <span class="logic-kicker">Image Crop</span>
-      <label class="logic-crop-slider">Horizontal <input type="range" min="0" max="100" value="${escHtml(imageSetting.x)}" oninput="logicSetImageCrop('x', this.value)"> <span id="logic-crop-x-value">${Math.round(imageSetting.x)}%</span></label>
-      <label class="logic-crop-slider">Vertical <input type="range" min="0" max="100" value="${escHtml(imageSetting.y)}" oninput="logicSetImageCrop('y', this.value)"> <span id="logic-crop-y-value">${Math.round(imageSetting.y)}%</span></label>
-      <label class="logic-crop-slider">Zoom <input type="range" min="100" max="220" value="${escHtml(imageSetting.zoom)}" oninput="logicSetImageCrop('zoom', this.value)"> <span id="logic-crop-zoom-value">${Math.round(imageSetting.zoom)}%</span></label>
-      <button class="logic-mini-btn" type="button" onclick="logicSetImageCrop('center center')">Center</button>
-      <button class="logic-mini-btn" type="button" onclick="logicSetImageCrop('center top')">Face Higher</button>
-      <button class="logic-mini-btn" type="button" onclick="logicSetImageCrop('center bottom')">Lower</button>
-    </div>` : ''}
+    ${image ? `<details class="logic-image-controls">
+      <summary class="logic-mini-btn" role="button">Image Crop</summary>
+      <div class="logic-crop-panel">
+        <label class="logic-crop-slider">Horizontal <input type="range" min="0" max="100" value="${escHtml(imageSetting.x)}" oninput="logicSetImageCrop('x', this.value)"> <span id="logic-crop-x-value">${Math.round(imageSetting.x)}%</span></label>
+        <label class="logic-crop-slider">Vertical <input type="range" min="0" max="100" value="${escHtml(imageSetting.y)}" oninput="logicSetImageCrop('y', this.value)"> <span id="logic-crop-y-value">${Math.round(imageSetting.y)}%</span></label>
+        <label class="logic-crop-slider">Zoom <input type="range" min="100" max="220" value="${escHtml(imageSetting.zoom)}" oninput="logicSetImageCrop('zoom', this.value)"> <span id="logic-crop-zoom-value">${Math.round(imageSetting.zoom)}%</span></label>
+        <button class="logic-mini-btn" type="button" onclick="logicSetImageCrop('center center')">Center</button>
+        <button class="logic-mini-btn" type="button" onclick="logicSetImageCrop('center top')">Face Higher</button>
+        <button class="logic-mini-btn" type="button" onclick="logicSetImageCrop('center bottom')">Lower</button>
+      </div>
+    </details>` : ''}
     <div class="logic-stat-grid">
       <div class="logic-stat"><b>${stats.observations}</b><div class="logic-stat-label">Observations</div></div>
       <div class="logic-stat"><b>${stats.facets}</b><div class="logic-stat-label">Ontology Facets</div></div>
@@ -20251,6 +20300,7 @@ Object.assign(window, {
   setLogicRelationshipScope,
   selectLogicEntity,
   openLogicEntity,
+  deleteLogicEntity,
   setLogicChapter,
   setLogicDraft,
   addManualLogicEntity,
