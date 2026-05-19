@@ -5144,7 +5144,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.05</div>
+<div id="site-version-stamp">v2026.05.19.06</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -6056,8 +6056,8 @@ const LOGIC_TABS = [
   {id:'simulator', label:'Branch Simulator'},
   {id:'lifestyle', label:'Lifestyle Atlas'},
   {id:'relationships', label:'Relationships'},
-  {id:'consistency', label:'Chapter Consistency'},
-  {id:'risks', label:'Continuity Risks'},
+  {id:'consistency', label:'Chapter Logic Check'},
+  {id:'risks', label:'Entity Risk Ledger'},
   {id:'reports', label:'Reports'},
   {id:'pending', label:'Pending AI'}
 ];
@@ -6950,7 +6950,7 @@ function loadLogicUi(){
 }
 
 function saveLogicUi(){
-  try{ localStorage.setItem(LOGIC_UI_STORAGE_KEY, JSON.stringify({tab:_logicActiveTab, entityId:_logicSelectedEntityId, filter:_logicFilter, railFilter:_logicRailFilter, chapterId:_logicChapterId, draftId:_logicDraftId})); }catch(e){}
+  try{ localStorage.setItem(LOGIC_UI_STORAGE_KEY, JSON.stringify({tab:_logicActiveTab, entityId:_logicSelectedEntityId, filter:_logicFilter, railFilter:_logicRailFilter, relationshipScope:_logicRelationshipScope, chapterId:_logicChapterId, draftId:_logicDraftId})); }catch(e){}
 }
 
 function normalizeLogicTabId(tab){
@@ -6964,6 +6964,7 @@ function logicInitUi(){
   _logicActiveTab = normalizeLogicTabId(ui.tab || _logicActiveTab || 'profiles');
   _logicFilter = ui.filter || _logicFilter || '';
   _logicRailFilter = ['all','characters','world'].includes(ui.railFilter) ? ui.railFilter : (_logicRailFilter || 'all');
+  _logicRelationshipScope = ['selected','global'].includes(ui.relationshipScope) ? ui.relationshipScope : (_logicRelationshipScope || 'selected');
   _logicChapterId = ui.chapterId || _logicChapterId || (chapters[0] && chapters[0].id) || '';
   _logicDraftId = ui.draftId || _logicDraftId || '';
   const entities = logicEntities();
@@ -7224,14 +7225,27 @@ function renderLogicOntology(){
         <option value="full">Full Profile</option>
         <option value="psychology">Psychology</option>
         <option value="lifestyle">Lifestyle / Aesthetic</option>
+        <option value="research-backed-lifestyle">Research-Backed Lifestyle</option>
+        <option value="microcultures">Online / IRL Microcultures</option>
         <option value="relationships">Relationships</option>
         <option value="future">Future Behavior</option>
         <option value="contradictions">Contradictions</option>
+      </select>
+      <select id="logic-ontology-research-angle" class="logic-select" style="max-width:15rem">
+        <option value="balanced">Balanced research lens</option>
+        <option value="food-alcohol">Food / alcohol / nightlife</option>
+        <option value="fashion-aesthetic">Fashion / aesthetic signals</option>
+        <option value="consumer-interests">Consumer tastes / interests</option>
+        <option value="online-irl-scenes">Online and IRL scenes</option>
       </select>
       <button class="logic-mini-btn primary" type="button" onclick="generateLogicDossier('Character Dossier')">Generate Dossier</button>
       <button class="logic-mini-btn" type="button" onclick="generateLogicDossier('Lifestyle & Culture Atlas')">Generate Lifestyle Report</button>
       <button class="logic-mini-btn" type="button" onclick="setLogicTab('pending')">Review Pending AI</button>
     </div>
+    <section class="logic-panel" style="margin-top:.75rem">
+      <div class="logic-card-title">How Ontology Enrichment Works</div>
+      <div class="logic-card-body">This is for research-backed inference, not just observation. Chapter/draft evidence anchors the character; web research can add cultural, consumer, fashion, food, alcohol, microculture, and aesthetic context. Results stay pending until you accept them.</div>
+    </section>
     ${_logicStatusMessage ? `<div class="content-status" style="margin-top:.55rem">${escHtml(_logicStatusMessage)}</div>` : ''}
     ${pendingOntology.length ? `<section class="logic-panel" style="margin-top:.85rem"><div class="logic-card-title">Pending Ontology For ${escHtml(entity.name)}</div><div class="logic-report-grid">${pendingOntology.map(renderLogicOntologySuggestionCard).join('')}</div></section>` : ''}
     <div class="logic-facet-grid" style="margin-top:.85rem">${grouped}</div>
@@ -7425,7 +7439,7 @@ function renderLogicContinuityRisks(){
   const riskFacets = logicFacetsForEntity(entity.id, true).filter(item=>item.status==='contradicted' || item.category==='contradiction');
   const riskObs = logicObservationsForEntity(entity.id).filter(item=>item.dimension==='contradiction' || /contradict|inconsistent|sudden|needs setup/i.test(item.value + ' ' + item.trigger));
   const risk = Math.min(100, (riskFacets.length + riskObs.length) * 18);
-  return `<section><div class="logic-kicker">Continuity Risks</div><div class="logic-title">${escHtml(entity.name)}</div><section class="logic-panel"><div class="logic-card-title">Risk Meter</div><div class="logic-risk-meter"><span style="width:${risk}%"></span></div><div class="logic-meta">${risk}% from contradicted facets and contradiction observations</div></section><div class="logic-report-grid">${riskFacets.map(item=>logicFacetCard(item)).join('')}${riskObs.map(logicObservationCard).join('') || '<div class="drafts-empty">No continuity risks accepted yet.</div>'}</div></section>`;
+  return `<section><div class="logic-kicker">Entity Risk Ledger</div><div class="logic-title">${escHtml(entity.name)}</div><section class="logic-panel"><div class="logic-card-title">What This Tab Does</div><div class="logic-card-body">This is the selected entity's private ledger of contradictions, sudden changes, missing setup, and continuity warnings. It does not analyze a whole chapter; it asks, “what risks are attached to this person/place/faction over time?”</div></section><section class="logic-panel"><div class="logic-card-title">Risk Meter</div><div class="logic-risk-meter"><span style="width:${risk}%"></span></div><div class="logic-meta">${risk}% from contradicted facets and contradiction observations</div></section><div class="logic-report-grid">${riskFacets.map(item=>logicFacetCard(item)).join('')}${riskObs.map(logicObservationCard).join('') || '<div class="drafts-empty">No continuity risks accepted yet.</div>'}</div></section>`;
 }
 
 function renderLogicConsistency(){
@@ -7435,8 +7449,9 @@ function renderLogicConsistency(){
   const relevant = mentioned.flatMap(entity=>logicObservationsForEntity(entity.id).map(obs=>({entity, obs})));
   const flags = relevant.filter(row=>row.obs.dimension === 'contradiction' || /inconsistent|contradict|changed|trigger/i.test(row.obs.value + ' ' + row.obs.trigger));
   return `<section>
-    <div class="logic-kicker">Chapter Consistency</div>
-    <div class="logic-title">Compare chapter against entity logic</div>
+    <div class="logic-kicker">Chapter Logic Check</div>
+    <div class="logic-title">Compare one chapter against known ontology</div>
+    <section class="logic-panel"><div class="logic-card-title">What This Tab Does</div><div class="logic-card-body">This checks a selected chapter or draft against the Logic Machine. It finds which tracked entities appear in the text, shows their known observations/facets, and flags actions or details that may need setup. Use this while revising a chapter.</div></section>
     <div class="logic-filter-row" style="margin:.8rem 0">
       <select class="logic-select" onchange="setLogicChapter(this.value)">${logicChapterOptions(chapter && chapter.id)}</select>
       <button class="logic-mini-btn primary" type="button" onclick="analyzeLogicChapter()">Analyze Chapter</button>
@@ -7452,7 +7467,7 @@ function renderLogicConsistency(){
     </div>
     <div class="logic-grid">
       <section class="logic-panel"><div class="logic-card-title">Entities In This Chapter</div>${mentioned.length ? mentioned.map(entity=>`<button class="logic-entity-btn" type="button" onclick="openLogicEntity('${escHtml(entity.id)}')"><span class="logic-entity-name">${escHtml(entity.name)}</span><span class="logic-meta">${escHtml(logicTypeLabel(entity.type))} · ${logicObservationsForEntity(entity.id).length} observations</span></button>`).join('') : '<div class="drafts-empty">No tracked entity names matched this chapter text yet.</div>'}</section>
-      <section class="logic-panel"><div class="logic-card-title">Consistency Flags</div>${flags.length ? flags.map(row=>logicObservationCard(row.obs)).join('') : '<div class="drafts-empty">No local consistency flags from accepted observations. Run AI analysis for deeper checks.</div>'}</section>
+      <section class="logic-panel"><div class="logic-card-title">Chapter Logic Flags</div>${flags.length ? flags.map(row=>logicObservationCard(row.obs)).join('') : '<div class="drafts-empty">No local consistency flags from accepted observations. Run AI analysis for deeper checks.</div>'}</section>
     </div>
   </section>`;
 }
@@ -7477,8 +7492,14 @@ function renderLogicRelationships(){
     return (obs.relatedEntities || []).map(other=>({entity, obs, other}));
   });
   const entity = logicEntityById(_logicSelectedEntityId);
+  const selectedTerms = entity ? [entity.name, ...(entity.aliases || [])].map(term=>String(term || '').toLowerCase()).filter(Boolean) : [];
+  const scopedRows = _logicRelationshipScope === 'global' || !entity ? rows : rows.filter(row=>{
+    const subject = String((row.entity && row.entity.name) || row.obs.entityName || '').toLowerCase();
+    const object = String(row.other || '').toLowerCase();
+    return selectedTerms.some(term=>subject === term || object === term || subject.includes(term) || object.includes(term));
+  });
   const relationshipFacets = entity ? logicFacetList(entity.id, ['relationship','faction','culture']) : [];
-  return `<section><div class="logic-kicker">Relationships</div><div class="logic-title">Interactions, affiliations, rivalries, dependencies</div><div class="logic-grid" style="margin-top:.85rem"><section class="logic-panel"><div class="logic-card-title">Selected Entity Dynamics</div>${relationshipFacets.length ? relationshipFacets.map(logicFacetCard).join('') : '<div class="drafts-empty">No relationship/faction/culture facets yet.</div>'}</section><section class="logic-panel"><div class="logic-card-title">Observed Links</div>${rows.length ? rows.map(row=>`<div class="logic-relationship-row"><div><b>${escHtml(row.entity ? row.entity.name : row.obs.entityName)}</b><div class="logic-meta">${escHtml(row.obs.dimension)}</div></div><div class="logic-arrow">→</div><div><b>${escHtml(row.other)}</b><div class="logic-card-body">${escHtml(row.obs.value)}</div></div></div>`).join('') : '<div class="drafts-empty">No relationship observations yet.</div>'}</section></div></section>`;
+  return `<section><div class="logic-kicker">Relationships</div><div class="logic-title">${escHtml(entity ? entity.name : 'All Entities')} relationship map</div><section class="logic-panel"><div class="logic-card-title">What This Tab Does</div><div class="logic-card-body">By default this shows only relationships where the selected entity is the subject or target. Switch to Global Map when you want every observed relationship in the machine.</div><div class="logic-tabs" style="margin-top:.65rem"><button class="logic-tab ${_logicRelationshipScope==='selected'?'active':''}" type="button" onclick="setLogicRelationshipScope('selected')">Selected Only</button><button class="logic-tab ${_logicRelationshipScope==='global'?'active':''}" type="button" onclick="setLogicRelationshipScope('global')">Global Map</button></div></section><div class="logic-grid" style="margin-top:.85rem"><section class="logic-panel"><div class="logic-card-title">Selected Entity Dynamics</div>${relationshipFacets.length ? relationshipFacets.map(logicFacetCard).join('') : '<div class="drafts-empty">No relationship/faction/culture facets yet.</div>'}</section><section class="logic-panel"><div class="logic-card-title">${_logicRelationshipScope==='global'?'All Observed Links':'Observed Links For Selected Entity'}</div>${scopedRows.length ? scopedRows.map(row=>`<div class="logic-relationship-row"><div><b>${escHtml(row.entity ? row.entity.name : row.obs.entityName)}</b><div class="logic-meta">${escHtml(row.obs.dimension)}</div></div><div class="logic-arrow">→</div><div><b>${escHtml(row.other)}</b><div class="logic-card-body">${escHtml(row.obs.value)}</div></div></div>`).join('') : '<div class="drafts-empty">No relationship observations for this scope yet.</div>'}</section></div></section>`;
 }
 
 function renderLogicReports(){
@@ -7556,6 +7577,12 @@ function setLogicFilter(value){
 
 function setLogicRailFilter(value){
   _logicRailFilter = ['all','characters','world'].includes(value) ? value : 'all';
+  saveLogicUi();
+  renderLogicMachine();
+}
+
+function setLogicRelationshipScope(value){
+  _logicRelationshipScope = ['selected','global'].includes(value) ? value : 'selected';
   saveLogicUi();
   renderLogicMachine();
 }
@@ -7849,7 +7876,7 @@ function logicDraftPayload(fragment){
   };
 }
 
-function logicEntityEvidencePayload(entity, focus='full'){
+function logicEntityEvidencePayload(entity, focus='full', researchAngle='balanced'){
   const name = String(entity.name || '').toLowerCase();
   const chapterMatches = chapters.filter(ch=>String(ch.body || '').toLowerCase().includes(name)).slice(0, 12).map(ch=>({
     id:ch.id,
@@ -7889,6 +7916,8 @@ function logicEntityEvidencePayload(entity, focus='full'){
   const worldContext = logicEntities().filter(item=>LOGIC_WORLD_ENTITY_TYPES.includes(item.type)).slice(0, 200).map(item=>({id:item.id, name:item.name, type:item.type, aliases:item.aliases, tags:item.tags}));
   return {
     focus,
+    researchAngle,
+    researchInstructions:'Use real-life research and broad cultural knowledge to infer plausible lifestyle, consumer, fashion, food, alcohol, aesthetic, online/IRL microculture, and social-scene patterns. Separate text-grounded evidence from research-backed inference. Web-backed claims must include webSources and should default to provisional.',
     selectedEntity:{id:entity.id, name:entity.name, type:entity.type, aliases:entity.aliases, tags:entity.tags, notes:entity.notes},
     acceptedFacets:facets.map(facet=>({id:facet.id, category:facet.category, title:facet.title, value:facet.value, status:facet.status, inferenceBasis:facet.inferenceBasis, timelinePhase:facet.timelinePhase})),
     observations:observations.map(obs=>({id:obs.id, dimension:obs.dimension, value:obs.value, trigger:obs.trigger, sourceKind:obs.sourceKind, sourceTitle:obs.sourceTitle, quote:obs.quote, confidence:obs.confidence})),
@@ -7954,8 +7983,8 @@ async function callLogicOntologyOpenRouter(payload, options={}){
   const body = {
     model,
     messages:[
-      {role:'system', content:'Return ONLY valid JSON. Do not write markdown, prose, headings, bullets, or commentary. You are a literary ontology analyst for a long novel. Generate private, approval-first ontology insights for the selected entity. Use evidence from the provided chapters/drafts/facets, and when web research is available use it only for real-world aesthetic, psychology, fashion, food, alcohol, consumer, cultural, and trend analogies. Do not canonize anything.'},
-      {role:'user', content:'Return exactly this JSON shape: {"suggestions":[{"category":"psyche","title":"short title","summary":"specific insight","evidence":"supporting text or empty","inferenceBasis":"why this follows","timelinePhase":"early/current/emerging/unknown","relatedEntityNames":[],"relatedPlaceNames":[],"sourceChapterTitles":[],"sourceDraftTitles":[],"webSources":[],"confidence":0.5,"suggestedStatus":"provisional"}]}. Generate pending ontology insights for this selected entity. Include relationship-aware inference, change over time, lifestyle/aesthetic patterns, likely future behavior, and contradictions. Use category ids exactly from the provided categories. Web-sourced or speculative insights should suggest provisional status. Text-grounded observations can suggest observed or inferred.\\n\\n' + JSON.stringify(payload)}
+      {role:'system', content:'Return ONLY valid JSON. Do not write markdown, prose, headings, bullets, or commentary. You are a literary ontology analyst for a long novel. Generate private, approval-first ontology insights for the selected entity. Use evidence from the provided chapters/drafts/facets, and when web research is available use it for real-world aesthetic, psychology, fashion, food, alcohol, consumer, cultural, online microculture, IRL scene, and trend analogies. Separate textual evidence from research-backed inference. Do not canonize anything.'},
+      {role:'user', content:'Return exactly this JSON shape: {"suggestions":[{"category":"psyche","title":"short title","summary":"specific insight","evidence":"supporting text or empty","inferenceBasis":"why this follows, naming text evidence versus real-life research inference","timelinePhase":"early/current/emerging/unknown","relatedEntityNames":[],"relatedPlaceNames":[],"sourceChapterTitles":[],"sourceDraftTitles":[],"webSources":[],"confidence":0.5,"suggestedStatus":"provisional"}]}. Generate pending ontology insights for this selected entity. Include relationship-aware inference, change over time, lifestyle/aesthetic patterns, likely future behavior, food, alcohol, fashion, interests, consumer taste, online and IRL microcultures, and contradictions. Use category ids exactly from the provided categories. Web-sourced or speculative insights should suggest provisional status. Text-grounded observations can suggest observed or inferred.\\n\\n' + JSON.stringify(payload)}
     ],
     response_format:{
       type:'json_schema',
@@ -8116,10 +8145,11 @@ async function analyzeLogicOntologyEntity(){
   }
   const webResearch = !!document.getElementById('logic-ontology-web')?.checked;
   const focus = document.getElementById('logic-ontology-focus')?.value || 'full';
-  logicSetStatus(`Generating ontology insights for ${entity.name}${webResearch ? ' with web research' : ''}...`);
+  const researchAngle = document.getElementById('logic-ontology-research-angle')?.value || 'balanced';
+  logicSetStatus(`Generating ontology insights for ${entity.name}${webResearch ? ' with web research' : ''} (${researchAngle})...`);
   renderLogicMachine();
   try{
-    const payload = logicEntityEvidencePayload(entity, focus);
+    const payload = logicEntityEvidencePayload(entity, focus, researchAngle);
     const {model, parsed, recoveredFromProse} = await callLogicOntologyOpenRouter(payload, {webResearch});
     const count = storeLogicOntologySuggestions(parsed, entity, model, {webResearch});
     _logicActiveTab = 'ontology';
@@ -8934,6 +8964,7 @@ let _logicActiveTab = 'profiles';
 let _logicSelectedEntityId = '';
 let _logicFilter = '';
 let _logicRailFilter = 'all';
+let _logicRelationshipScope = 'selected';
 let _logicChapterId = '';
 let _logicDraftId = '';
 let _logicStatusMessage = '';
@@ -19157,6 +19188,7 @@ Object.assign(window, {
   setLogicTab,
   setLogicFilter,
   setLogicRailFilter,
+  setLogicRelationshipScope,
   selectLogicEntity,
   openLogicEntity,
   setLogicChapter,
