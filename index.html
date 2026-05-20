@@ -5415,7 +5415,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.20.01</div>
+<div id="site-version-stamp">v2026.05.20.02</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -7409,7 +7409,8 @@ function logicInitUi(){
   _logicRelationshipScope = ['selected','groups','places','influence','risks','global'].includes(ui.relationshipScope) ? ui.relationshipScope : (_logicRelationshipScope || 'selected');
   _logicRelationshipTarget = ui.relationshipTarget || _logicRelationshipTarget || '';
   _logicChapterCheckEntity = ui.chapterCheckEntity || _logicChapterCheckEntity || '';
-  _logicChapterId = ui.chapterId || _logicChapterId || (chapters[0] && chapters[0].id) || '';
+  const firstOrderedChapter = orderedChapters(chapters || [])[0] || null;
+  _logicChapterId = ui.chapterId || _logicChapterId || (firstOrderedChapter && firstOrderedChapter.id) || '';
   _logicDraftId = ui.draftId || _logicDraftId || '';
   _logicOntologyCategory = ui.ontologyCategory || _logicOntologyCategory || '';
   _logicOntologySearch = ui.ontologySearch || _logicOntologySearch || '';
@@ -7546,7 +7547,7 @@ function logicEntityOptions(selected=''){
 }
 
 function logicChapterOptions(selected=''){
-  return chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${ch.id===selected?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
+  return orderedChapters(chapters || []).map(ch=>`<option value="${escHtml(ch.id)}" ${ch.id===selected?'selected':''}>${escHtml(ch.num ? `${ch.num} · ` : '')}${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
 }
 
 function logicDraftOptions(selected=''){
@@ -8249,7 +8250,7 @@ function renderLogicChapterPending(chapterId){
 }
 
 function renderLogicConsistency(){
-  const chapter = chapters.find(ch=>ch.id===_logicChapterId) || chapters[0];
+  const chapter = chapters.find(ch=>ch.id===_logicChapterId) || orderedChapters(chapters || [])[0];
   const body = chapter ? String(chapter.body || '') : '';
   const mentioned = logicEntities().filter(entity=>entity.name && body.toLowerCase().includes(entity.name.toLowerCase()));
   const comparisons = mentioned.map(entity=>logicChapterEntityComparison(chapter, entity));
@@ -9125,7 +9126,7 @@ function logicDraftPayload(fragment){
 
 function logicEntityEvidencePayload(entity, focus='full', researchAngle='balanced', mode='ontology', culturalLens='balanced'){
   const name = String(entity.name || '').toLowerCase();
-  const chapterMatches = chapters.filter(ch=>String(ch.body || '').toLowerCase().includes(name)).slice(0, 12).map(ch=>({
+  const chapterMatches = orderedChapters(chapters || []).filter(ch=>String(ch.body || '').toLowerCase().includes(name)).slice(0, 12).map(ch=>({
     id:ch.id,
     title:ch.chapter || ch.book || ch.id,
     hierarchy:[ch.novel, ch.act, ch.book, ch.volume, ch.subvolume, ch.part].filter(Boolean).join(' / '),
@@ -9915,7 +9916,7 @@ async function generateLogicRelationshipProfile(){
 
 async function analyzeLogicChapter(id=_logicChapterId){
   if(!requireAdmin()) return;
-  const chapter = chapters.find(ch=>ch.id===id) || chapters[0];
+  const chapter = chapters.find(ch=>ch.id===id) || orderedChapters(chapters || [])[0];
   if(!chapter){ logicSetStatus('No chapter available to analyze.'); return; }
   logicSetStatus('Analyzing chapter logic...');
   try{
@@ -9990,7 +9991,7 @@ async function analyzeLogicEntityAcrossText(){
     const haystack = String(text || '').toLowerCase();
     return terms.some(term=>haystack.includes(term));
   };
-  const matchingChapters = chapters.filter(ch=>textMentionsEntity([ch.chapter, ch.book, ch.body].join('\n'))).slice(0, 8);
+  const matchingChapters = orderedChapters(chapters || []).filter(ch=>textMentionsEntity([ch.chapter, ch.book, ch.body].join('\n'))).slice(0, 8);
   const matchingDrafts = (_draftFragments || []).filter(fragment=>textMentionsEntity([fragment.title, fragment.body, (fragment.characters || []).join(' '), (fragment.tags || []).join(' ')].join('\n'))).slice(0, 6);
   const body = [
     ...matchingChapters.map(ch=>`# Chapter: ${ch.chapter || ch.id}\n${ch.body}`),
@@ -10087,7 +10088,7 @@ function loadChapters(){
 
 function saveChapters(chs, options={}){
   try {
-    localStorage.setItem(CHAPTERS_STORAGE_KEY, JSON.stringify(chs));
+    localStorage.setItem(CHAPTERS_STORAGE_KEY, JSON.stringify(orderedChapters(chs || [])));
     if(!options.localOnly){
       setContentStatus('Draft saved in this browser. Admin saves also sync to Supabase for GitHub Pages readers.');
     }
@@ -10096,7 +10097,7 @@ function saveChapters(chs, options={}){
 
 async function loadPublishedChapters(force=false){
   if(!force && hasChapterDraft()){
-    chapters = normalizeChapterList(loadChapters());
+      chapters = orderedChapters(normalizeChapterList(loadChapters()));
     renderTOC();
     setContentStatus('Using browser draft chapters. Click Reload Published only when you want to replace this draft.');
     return;
@@ -10104,7 +10105,7 @@ async function loadPublishedChapters(force=false){
   try{
     const res = await fetch(CHAPTERS_DATA_URL, {cache:'no-store'});
     if(!res.ok) throw new Error('Could not load ' + CHAPTERS_DATA_URL);
-    chapters = normalizeChapterList(await res.json());
+    chapters = orderedChapters(normalizeChapterList(await res.json()));
     if(force) localStorage.removeItem(CHAPTERS_STORAGE_KEY);
     renderTOC();
     setContentStatus(force ? 'Published chapters reloaded. Browser draft cleared.' : 'Loaded published chapters from data/chapters.json.');
@@ -10140,7 +10141,7 @@ function importChapters(event){
   const reader = new FileReader();
   reader.onload = () => {
     try{
-      chapters = normalizeChapterList(JSON.parse(reader.result));
+      chapters = orderedChapters(normalizeChapterList(JSON.parse(reader.result)));
       saveChapters(chapters);
       renderTOC();
       setContentStatus('Imported chapters into this browser draft. Save chapters as admin to sync them to Supabase.');
@@ -10228,7 +10229,7 @@ async function buildFullBackupPayload(){
   const draftFragments = await (typeof draftGetAll === 'function' ? draftGetAll() : Promise.resolve([])).catch(()=>[]);
   const planningDocs = await (typeof planningGetAll === 'function' ? planningGetAll() : Promise.resolve([])).catch(()=>[]);
   const workshopCards = await (typeof workshopGetAll === 'function' ? workshopGetAll() : Promise.resolve([])).catch(()=>[]);
-  const normalizedChapters = normalizeChapterList(chapters || []);
+  const normalizedChapters = orderedChapters(normalizeChapterList(chapters || []));
   const logicMachine = normalizeLogicStore(_logicStore || {});
   return {
     backupType:'cosmopolita-full-offline-backup',
@@ -10718,7 +10719,7 @@ async function exportFullBackup(){
   }
 }
 
-let chapters = normalizeChapterList(loadChapters());
+let chapters = orderedChapters(normalizeChapterList(loadChapters()));
 let _editingChapterId = null;
 let _chapterEditorBaseId = null;
 let _chapterEditorDraftTimer = null;
@@ -11226,7 +11227,7 @@ function deleteProtoLine(id){
 }
 
 function renderProtoLinkSource(){
-  const ch = chapters.find(c=>c.id===_protoSelectedChapterId) || chapters[0];
+  const ch = chapters.find(c=>c.id===_protoSelectedChapterId) || orderedChapters(chapters || [])[0];
   if(ch && !_protoSelectedChapterId) _protoSelectedChapterId = ch.id;
   return `<textarea id="proto-link-source" rows="9" readonly>${escHtml(ch ? ch.body : '')}</textarea>`;
 }
@@ -11282,7 +11283,7 @@ function renderProtoAdmin(){
   if(!panel) return;
   if(!isAdmin()){ panel.innerHTML = ''; return; }
   const lineOptions = protoevangelium.lines.map(line=>`<option value="${escHtml(line.id)}" ${line.id===_protoActiveLineId?'selected':''}>${escHtml(line.number)} · ${escHtml(line.text.slice(0,70))}</option>`).join('');
-  const chapterOptions = chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${ch.id===_protoSelectedChapterId?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
+  const chapterOptions = orderedChapters(chapters || []).map(ch=>`<option value="${escHtml(ch.id)}" ${ch.id===_protoSelectedChapterId?'selected':''}>${escHtml(ch.num ? `${ch.num} · ` : '')}${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
   const sectionOptions = (selectedId)=>protoevangelium.sections.map(section=>`<option value="${escHtml(section.id)}" ${section.id===selectedId?'selected':''}>${escHtml(section.title)}</option>`).join('');
   const motifOptions = Object.entries(PROTO_LAYER_LABELS).filter(([key])=>key !== 'meter' && key !== 'links').map(([key,label])=>`<option value="${escHtml(key)}">${escHtml(label)}</option>`).join('');
   const sectionsHtml = protoevangelium.sections.map(section=>`
@@ -11503,7 +11504,8 @@ function parseBody(raw){
 function renderChapter(ch){
   updateAdminUI();
   _currentChapterId = ch.id;
-  const idx = chapters.findIndex(c=>c.id===ch.id);
+  const ordered = orderedChapters(chapters || []);
+  const idx = ordered.findIndex(c=>c.id===ch.id);
 
   // Header
   const headerLeft = document.getElementById('cv-header-left');
@@ -11544,8 +11546,8 @@ function renderChapter(ch){
   const parsed = parseBody(ch.body);
   
   // Bottom navigation button
-  const prevCh = idx > 0 ? chapters[idx-1] : null;
-  const nextCh = idx < chapters.length-1 ? chapters[idx+1] : null;
+  const prevCh = idx > 0 ? ordered[idx-1] : null;
+  const nextCh = idx >= 0 && idx < ordered.length-1 ? ordered[idx+1] : null;
   const navBtns = `
     <div class="chapter-bottom-nav">
       ${nextCh
@@ -11596,11 +11598,13 @@ function renderChapter(ch){
 // TOC RENDER
 // ════════════════════════════════════════════════════════
 function getFirstChapter(){
-  return chapters && chapters.length ? chapters[0] : null;
+  const ordered = orderedChapters(chapters || []);
+  return ordered.length ? ordered[0] : null;
 }
 
 function getLatestChapter(){
-  return chapters && chapters.length ? chapters[chapters.length - 1] : null;
+  const ordered = orderedChapters(chapters || []);
+  return ordered.length ? ordered[ordered.length - 1] : null;
 }
 
 function chapterHierarchyLabel(ch){
@@ -11611,7 +11615,7 @@ function chapterHierarchyLabel(ch){
 
 function groupChaptersForTOC(list){
   const groups = [];
-  (list || []).forEach((ch, index)=>{
+  orderedChapters(list || []).forEach((ch, index)=>{
     const volumeName = tocVolumeName(ch);
     const bookName = tocActName(ch) || 'Untitled Act';
     const partName = tocSubvolumeName(ch);
@@ -11867,15 +11871,79 @@ function tocSubvolumeName(ch){
   return ch && (ch.subvolume || ch.part) ? (ch.subvolume || ch.part) : 'Main Sequence';
 }
 
+function romanToNumber(value=''){
+  const match = String(value || '').toUpperCase().match(/\b[IVXLCDM]+\b/);
+  const text = match ? match[0] : '';
+  if(!text) return null;
+  const map = {I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
+  let total = 0;
+  let prev = 0;
+  for(let i=text.length - 1;i>=0;i--){
+    const current = map[text[i]] || 0;
+    total += current < prev ? -current : current;
+    prev = Math.max(prev, current);
+  }
+  return total || null;
+}
+
+function chapterOrderNumber(ch){
+  const raw = String(ch && ch.num || '').trim();
+  if(!raw) return Number.POSITIVE_INFINITY;
+  const digit = raw.match(/\d+/);
+  if(digit) return Number(digit[0]);
+  const roman = romanToNumber(raw);
+  return roman || Number.POSITIVE_INFINITY;
+}
+
+function architectureIndex(list=[], title=''){
+  const key = normalizeBookTitleKey(title || '');
+  const index = list.findIndex(item=>normalizeBookTitleKey(item.title || item.label || item.name || '') === key);
+  return index >= 0 ? index : Number.POSITIVE_INFINITY;
+}
+
+function chapterArchitectureOrder(ch){
+  const novelName = tocNovelName(ch);
+  const actName = tocActName(ch);
+  const volumeName = tocVolumeName(ch);
+  const subvolumeName = tocSubvolumeName(ch);
+  const novelIndex = architectureIndex(bookArchitecture.novels || [], novelName);
+  const novel = getBookArchNovel(novelName) || {acts:[]};
+  const actIndex = architectureIndex(novel.acts || [], actName);
+  const act = getBookArchAct(novelName, actName) || {volumes:[]};
+  const volumeIndex = architectureIndex(act.volumes || [], volumeName);
+  const volume = Number.isFinite(volumeIndex) ? act.volumes[volumeIndex] : {subvolumes:[]};
+  const subvolumeIndex = architectureIndex(volume.subvolumes || [], subvolumeName);
+  return {novelIndex, actIndex, volumeIndex, subvolumeIndex};
+}
+
+function orderedChapters(list=chapters){
+  return [...(list || [])].sort((a,b)=>{
+    const ai = chapters.indexOf(a);
+    const bi = chapters.indexOf(b);
+    const ao = chapterArchitectureOrder(a);
+    const bo = chapterArchitectureOrder(b);
+    return (ao.novelIndex - bo.novelIndex)
+      || String(tocNovelName(a)).localeCompare(String(tocNovelName(b)))
+      || (ao.actIndex - bo.actIndex)
+      || String(tocActName(a)).localeCompare(String(tocActName(b)))
+      || (ao.volumeIndex - bo.volumeIndex)
+      || String(tocVolumeName(a)).localeCompare(String(tocVolumeName(b)))
+      || (ao.subvolumeIndex - bo.subvolumeIndex)
+      || String(tocSubvolumeName(a)).localeCompare(String(tocSubvolumeName(b)))
+      || (chapterOrderNumber(a) - chapterOrderNumber(b))
+      || ai - bi;
+  });
+}
+
 function groupChaptersForBooks(){
   const names = bookArchitecture.novels.map(novel=>novel.title);
-  (chapters || []).forEach(ch=>{
+  orderedChapters(chapters || []).forEach(ch=>{
     const name = tocNovelName(ch);
     if(!names.some(existing=>normalizeBookTitleKey(existing) === normalizeBookTitleKey(name))) names.push(name);
   });
   return names.map(name=>{
     const arch = getBookArchNovel(name) || {title:name, blurb:''};
-    const novelChapters = (chapters || []).filter(ch=>tocNovelName(ch) === name);
+    const novelChapters = orderedChapters(chapters || []).filter(ch=>tocNovelName(ch) === name);
     return {
       name,
       blurb: arch.blurb || 'A planned novel architecture awaiting its formal abstract.',
@@ -11886,7 +11954,7 @@ function groupChaptersForBooks(){
 
 function getTOCVolumeSlots(novelName, actName){
   const archAct = getBookArchAct(novelName, actName);
-  const actChapters = (chapters || []).filter(ch=>
+  const actChapters = orderedChapters(chapters || []).filter(ch=>
     tocNovelName(ch) === novelName && tocActName(ch) === actName
   );
   return Array.from({length:Math.max(TOC_BOOK_VOLUME_COUNT, archAct.volumes.length)}, (_,i)=>{
@@ -11916,7 +11984,8 @@ function getTOCBookSubvolumes(volumeSlot){
     bannerPalette: normalizeBannerPalette(sub.bannerPalette),
     chapters: []
   }));
-  const volumeChapters = volumeSlot ? volumeSlot.chapters : [];
+  const volumeChapters = orderedChapters(volumeSlot ? volumeSlot.chapters : []);
+  const allOrdered = orderedChapters(chapters || []);
   (volumeChapters || []).forEach((ch, index)=>{
     const name = tocSubvolumeName(ch);
     let group = groups.find(g=>g.name === name);
@@ -11924,7 +11993,7 @@ function getTOCBookSubvolumes(volumeSlot){
       group = {name, blurb:'', chapters:[]};
       groups.push(group);
     }
-    group.chapters.push({chapter:ch, index:chapters.indexOf(ch) >= 0 ? chapters.indexOf(ch) : index});
+    group.chapters.push({chapter:ch, index:allOrdered.indexOf(ch) >= 0 ? allOrdered.indexOf(ch) : index});
   });
   return groups;
 }
@@ -12336,8 +12405,8 @@ function renderTOCBooksBreadcrumb(){
 function tocBooksMetaText(chapterTotal){
   const s = _tocBooksState;
   const scopeChapters = s.novel
-    ? (chapters || []).filter(ch=>tocNovelName(ch) === s.novel && (!s.act || tocActName(ch) === s.act))
-    : (chapters || []);
+    ? orderedChapters(chapters || []).filter(ch=>tocNovelName(ch) === s.novel && (!s.act || tocActName(ch) === s.act))
+    : orderedChapters(chapters || []);
   const words = formatWordCount(chapterWordCountTotal(scopeChapters));
   if(s.novel && s.act){
     const act = getBookArchAct(s.novel, s.act);
@@ -12512,7 +12581,7 @@ function editorialChapterScope(ch){
 function editorialScopeOptions(selected='all'){
   const seen = new Set();
   const options = [`<option value="all" ${selected === 'all' ? 'selected' : ''}>All Books / Acts</option>`];
-  (chapters || []).forEach(ch=>{
+  orderedChapters(chapters || []).forEach(ch=>{
     const scope = editorialChapterScope(ch);
     if(seen.has(scope.key)) return;
     seen.add(scope.key);
@@ -12548,7 +12617,7 @@ function editorialChapterRows(){
   const drafts = editorialDraftMap();
   const statusFilter = _editorialDashboardFilters.status || 'all';
   const scopeFilter = _editorialDashboardFilters.scope || 'all';
-  return (chapters || []).map((ch,index)=>{
+  return orderedChapters(chapters || []).map((ch,index)=>{
     const notes = editorialSavedNotes(ch);
     const review = authorReviewStats(notes);
     const gaps = editorialResearchGaps(ch);
@@ -12668,7 +12737,7 @@ function editorialProgressGroups(){
     group.reviewDone += review.done;
     group.reviewTotal += review.total;
   }
-  (chapters || []).forEach(ch=>{
+  orderedChapters(chapters || []).forEach(ch=>{
     const ctx = getChapterReadingContext(ch);
     add('Novel', ctx.novel || 'Untitled Novel', ch);
     add('Act', ctx.act || 'Untitled Act', ch);
@@ -12690,14 +12759,14 @@ function editorialUpdateFilter(field, value){
 function renderEditorialDashboard(){
   const rows = editorialChapterRows();
   const drafts = editorialDraftRows();
-  const allRows = (chapters || []).map(ch=>({ch, notes:editorialSavedNotes(ch), review:editorialReviewStats(ch)}));
+  const allRows = orderedChapters(chapters || []).map(ch=>({ch, notes:editorialSavedNotes(ch), review:editorialReviewStats(ch)}));
   const statuses = ['draft','revising','ready','canonical','needs-work'];
   const statusCounts = statuses.map(status=>({status, count:allRows.filter(row=>row.notes.status === status).length}));
-  const totalWords = chapterWordCountTotal(chapters || []);
+  const totalWords = chapterWordCountTotal(orderedChapters(chapters || []));
   const reviewDone = allRows.reduce((sum,row)=>sum + row.review.done, 0);
   const reviewTotal = allRows.reduce((sum,row)=>sum + row.review.total, 0);
   const reviewPct = reviewTotal ? Math.round((reviewDone / reviewTotal) * 100) : 0;
-  const gapRows = (chapters || []).flatMap(ch=>editorialResearchGaps(ch).map(gap=>({ch,gap})));
+  const gapRows = orderedChapters(chapters || []).flatMap(ch=>editorialResearchGaps(ch).map(gap=>({ch,gap})));
   const progressGroups = editorialProgressGroups().slice(0, 10);
   const attentionLabel = _editorialDashboardFilters.attentionOnly ? 'Needs attention' : 'All chapters';
 
@@ -12822,11 +12891,12 @@ function renderTOC(){
   renderTOCDashboard();
   const container = document.getElementById('toc-entries');
   if(!container) return;
-  if(chapters.length === 0){
+  const ordered = orderedChapters(chapters || []);
+  if(ordered.length === 0){
     container.innerHTML = '<p style="color:#aaa;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.08em;padding:1rem 0">No chapters yet. Add one below.</p>';
     return;
   }
-  container.innerHTML = groupChaptersForTOC(chapters).map(volume=>`
+  container.innerHTML = groupChaptersForTOC(ordered).map(volume=>`
     <section class="toc-volume">
       <div class="toc-volume-title">${escHtml(volume.name)}</div>
       ${volume.books.map(book=>`
@@ -13165,7 +13235,7 @@ function showLanding(){
 
 // ── Show chapter by id ──
 function showChapter(id){
-  const ch = chapters.find(c=>c.id===id) || chapters[0];
+  const ch = chapters.find(c=>c.id===id) || orderedChapters(chapters || [])[0];
   if(!ch) return;
   _pushNav('chapter-view');
   document.getElementById('chapter-view').style.display='block';
@@ -13175,8 +13245,9 @@ function showChapter(id){
 }
 
 function nextChapter(){
-  const idx = chapters.findIndex(c=>c.id===_currentChapterId);
-  if(idx >= 0 && idx < chapters.length - 1) showChapter(chapters[idx+1].id);
+  const ordered = orderedChapters(chapters || []);
+  const idx = ordered.findIndex(c=>c.id===_currentChapterId);
+  if(idx >= 0 && idx < ordered.length - 1) showChapter(ordered[idx+1].id);
 }
 
 // ── Hide others ──
@@ -13924,10 +13995,11 @@ function clearChapterEditorDraft(id){
 }
 
 function blankChapterEditorData(){
-  const last = chapters.length ? chapters[chapters.length - 1] : {};
+  const ordered = orderedChapters(chapters || []);
+  const last = ordered.length ? ordered[ordered.length - 1] : {};
   return {
     id:'',
-    num:toRoman(chapters.length + 1),
+    num:toRoman(ordered.length + 1),
     novel:last.novel || '',
     act:last.act || '',
     book:last.book || '',
@@ -15336,20 +15408,22 @@ function updateChapterEditorTitle(data){
 }
 
 function chapterEditorCurrentIndex(){
-  return _editingChapterId ? chapters.findIndex(ch=>ch.id === _editingChapterId) : -1;
+  const ordered = orderedChapters(chapters || []);
+  return _editingChapterId ? ordered.findIndex(ch=>ch.id === _editingChapterId) : -1;
 }
 
 function updateChapterEditorNavButtons(){
   const idx = chapterEditorCurrentIndex();
+  const ordered = orderedChapters(chapters || []);
   const prev = document.getElementById('ce-prev-chapter-btn');
   const next = document.getElementById('ce-next-chapter-btn');
   if(prev){
     prev.disabled = idx <= 0;
-    const prevCh = idx > 0 ? chapters[idx - 1] : null;
+    const prevCh = idx > 0 ? ordered[idx - 1] : null;
     prev.title = prevCh ? `Edit ${prevCh.chapter || prevCh.book || 'previous chapter'}` : 'No previous chapter';
   }
   if(next){
-    const nextCh = idx >= 0 && idx < chapters.length - 1 ? chapters[idx + 1] : null;
+    const nextCh = idx >= 0 && idx < ordered.length - 1 ? ordered[idx + 1] : null;
     next.disabled = false;
     next.textContent = nextCh ? 'Edit Next' : 'Start New Chapter';
     next.title = nextCh ? `Edit ${nextCh.chapter || nextCh.book || 'next chapter'}` : 'Start a new chapter from here';
@@ -15483,7 +15557,8 @@ function openAdjacentChapterEditor(direction){
   if(!requireAdmin()) return;
   const idx = chapterEditorCurrentIndex();
   if(idx < 0 && direction < 0) return;
-  const next = chapters[idx + (direction < 0 ? -1 : 1)];
+  const ordered = orderedChapters(chapters || []);
+  const next = ordered[idx + (direction < 0 ? -1 : 1)];
   persistCurrentChapterEditorDraft();
   if(next) openChapterEditor(next.id);
   else openChapterEditor(null);
@@ -15664,6 +15739,7 @@ async function saveChapter(){
   } else {
     chapters.push(chData);
   }
+  chapters = orderedChapters(chapters);
 
   saveChapters(chapters);
   try{
@@ -15686,7 +15762,7 @@ async function saveChapter(){
 async function deleteChapter(id){
   if(!requireAdmin()) return;
   if(!confirm('Delete this chapter? This cannot be undone.')) return;
-  chapters = chapters.filter(c=>c.id!==id);
+  chapters = orderedChapters(chapters.filter(c=>c.id!==id));
   saveChapters(chapters);
   try{
     await deleteChapterFromSupabase(id);
@@ -16092,7 +16168,7 @@ async function syncChaptersToSupabase(){
   const client = notesClient();
   if(!client || !isAdmin()) return;
   const now = new Date().toISOString();
-  const rows = chapters.map((chapter, position)=>({
+  const rows = orderedChapters(chapters || []).map((chapter, position)=>({
     id:chapter.id,
     position,
     data:chapter,
@@ -16993,7 +17069,7 @@ function draftSelectOptions(values, selected, emptyLabel){
 }
 
 function draftChapterOptions(selected=''){
-  return `<option value="">No chapter linked</option>` + chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${ch.id===selected?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
+  return `<option value="">No chapter linked</option>` + orderedChapters(chapters || []).map(ch=>`<option value="${escHtml(ch.id)}" ${ch.id===selected?'selected':''}>${escHtml(ch.num ? `${ch.num} · ` : '')}${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
 }
 
 function draftProtoOptions(selected=''){
@@ -19345,11 +19421,11 @@ function renderArchiveView(){
 function draftIdeaChapterOptions(selected=''){
   return `<option value="all" ${selected==='all'?'selected':''}>All Chapters</option>
     <option value="unassigned" ${selected==='unassigned'?'selected':''}>Unassigned</option>` +
-    chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${selected===ch.id?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
+    orderedChapters(chapters || []).map(ch=>`<option value="${escHtml(ch.id)}" ${selected===ch.id?'selected':''}>${escHtml(ch.num ? `${ch.num} · ` : '')}${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
 }
 
 function draftIdeaAssignmentOptions(selected=''){
-  return `<option value="">Unassigned</option>` + chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${selected===ch.id?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
+  return `<option value="">Unassigned</option>` + orderedChapters(chapters || []).map(ch=>`<option value="${escHtml(ch.id)}" ${selected===ch.id?'selected':''}>${escHtml(ch.num ? `${ch.num} · ` : '')}${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('');
 }
 
 function updateDraftIdeaFilter(key, value){
@@ -19623,7 +19699,7 @@ function renderDraftIdeaRepository(){
       </select>
       <select class="drafts-select" onchange="updateDraftIdeaFilter('bulkChapter',this.value)">
         <option value="">Bulk Assign Chapter</option>
-        ${chapters.map(ch=>`<option value="${escHtml(ch.id)}" ${_draftIdeaFilter.bulkChapter===ch.id?'selected':''}>${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('')}
+        ${orderedChapters(chapters || []).map(ch=>`<option value="${escHtml(ch.id)}" ${_draftIdeaFilter.bulkChapter===ch.id?'selected':''}>${escHtml(ch.num ? `${ch.num} · ` : '')}${escHtml(ch.chapter || ch.book || ch.id)}</option>`).join('')}
       </select>
       <button class="cm-btn secondary" type="button" onclick="bulkAssignRoutedIdeas()">Assign Selected</button>
       <button class="cm-btn secondary" type="button" onclick="bulkSetRoutedIdeasStatus('working')">Mark Working</button>
@@ -20171,10 +20247,11 @@ async function convertDraftToChapter(){
   if(!fragment || !requireAdmin()) return;
   await persistActiveDraftFromEditor({silent:true});
   const latest = activeDraft() || fragment;
-  const last = chapters.length ? chapters[chapters.length - 1] : {};
+  const ordered = orderedChapters(chapters || []);
+  const last = ordered.length ? ordered[ordered.length - 1] : {};
   const chapter = normalizeChapterList([{
     id:'ch-' + Date.now(),
-    num:toRoman(chapters.length + 1),
+    num:toRoman(ordered.length + 1),
     novel:last.novel || '',
     act:last.act || '',
     book:last.book || 'Imported Drafts',
@@ -20201,7 +20278,7 @@ async function appendDraftToChapter(){
   if(!fragment || !requireAdmin()) return;
   await persistActiveDraftFromEditor({silent:true});
   const latest = activeDraft() || fragment;
-  const chapter = chapters.find(ch=>ch.id===latest.linkedChapterId) || chapters[0];
+  const chapter = chapters.find(ch=>ch.id===latest.linkedChapterId) || orderedChapters(chapters || [])[0];
   if(!chapter){ alert('No chapter exists to append to yet.'); return; }
   chapter.body = `${chapter.body || ''}\n\n===Draft Fragment: ${latest.title}===\n\n${latest.body}`.trim();
   chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
@@ -20281,7 +20358,7 @@ async function convertDraftToAuthorNote(){
   if(!fragment || !requireAdmin()) return;
   await persistActiveDraftFromEditor({silent:true});
   const latest = activeDraft() || fragment;
-  const chapter = chapters.find(ch=>ch.id===latest.linkedChapterId) || chapters[0];
+  const chapter = chapters.find(ch=>ch.id===latest.linkedChapterId) || orderedChapters(chapters || [])[0];
   if(!chapter){ alert('No chapter exists for this author note.'); return; }
   chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
   chapter.authorNotes.notes.unshift({id:authorNoteId('note'), body:`${latest.title}\n\n${latest.body}`, createdAt:Date.now(), updatedAt:Date.now()});
@@ -20298,7 +20375,7 @@ async function convertDraftToResearch(kind='source'){
   if(!fragment || !requireAdmin()) return;
   await persistActiveDraftFromEditor({silent:true});
   const latest = activeDraft() || fragment;
-  const chapter = chapters.find(ch=>ch.id===latest.linkedChapterId) || chapters[0];
+  const chapter = chapters.find(ch=>ch.id===latest.linkedChapterId) || orderedChapters(chapters || [])[0];
   if(!chapter){ alert('No chapter exists for this research card.'); return; }
   chapter.authorNotes = normalizeAuthorNotes(chapter.authorNotes || {});
   const research = chapter.authorNotes.research = normalizeResearch(chapter.authorNotes.research || {});
