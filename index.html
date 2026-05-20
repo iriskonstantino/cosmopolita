@@ -4595,6 +4595,75 @@ body:not(.admin-on) #tnav-drafts{
   padding:0.75rem;
   margin-bottom:0.85rem;
 }
+.drafts-logic-intake{
+  border:1px solid var(--ink);
+  background:#fbf8f3;
+  padding:0.85rem;
+  margin-bottom:0.85rem;
+  display:grid;
+  gap:0.65rem;
+}
+.drafts-logic-intake-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:0.8rem;
+  flex-wrap:wrap;
+}
+.drafts-logic-intake-title{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:1rem;
+  color:var(--ink);
+}
+.drafts-logic-intake-copy{
+  font-family:var(--serif);
+  font-size:0.86rem;
+  line-height:1.45;
+  color:#5f554b;
+  max-width:760px;
+}
+.logic-packet-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:0.55rem;
+  margin:0.8rem 0;
+}
+.logic-packet-stat{
+  border:1px solid var(--border);
+  background:#fbf8f3;
+  padding:0.65rem;
+}
+.logic-packet-stat b{
+  display:block;
+  font-family:var(--display);
+  font-size:1.15rem;
+  color:var(--red);
+}
+.logic-packet-card{
+  border:1px solid var(--border);
+  background:#fbf8f3;
+  padding:0.6rem;
+  margin-bottom:0.45rem;
+  cursor:pointer;
+}
+.logic-packet-card.active{
+  background:var(--white);
+  border-color:var(--red);
+  box-shadow:inset 3px 0 0 var(--red);
+}
+.logic-source-count{
+  display:inline-flex;
+  width:max-content;
+  border:1px solid var(--border);
+  background:#f8efdf;
+  color:#6b4b1f;
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  padding:0.18rem 0.35rem;
+}
 .logic-wrap{
   min-height:100vh;
   background:var(--paper);
@@ -5064,7 +5133,7 @@ body:not(.admin-on) #tnav-drafts{
   .planning-pane{max-height:none;}
   .planning-body{min-height:40vh;}
   .drafts-help-grid,.drafts-help-flow,.drafts-help-recipes,.drafts-glossary-grid{grid-template-columns:1fr;}
-  .logic-shell,.logic-grid,.logic-matrix-grid,.logic-report-grid,.logic-form-grid,.logic-stat-grid,.author-logic-summary,.logic-facet-grid,.logic-forecast-columns,.logic-ontology-workspace,.logic-report-workspace{grid-template-columns:1fr;}
+  .logic-shell,.logic-grid,.logic-matrix-grid,.logic-report-grid,.logic-form-grid,.logic-stat-grid,.author-logic-summary,.logic-facet-grid,.logic-forecast-columns,.logic-ontology-workspace,.logic-report-workspace,.logic-packet-summary{grid-template-columns:1fr;}
   .logic-rail{position:relative;top:auto;max-height:none;}
   .logic-ontology-index,.logic-report-index{position:relative;top:auto;max-height:none}
   .logic-crop-panel{grid-template-columns:1fr;}
@@ -5346,7 +5415,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.16</div>
+<div id="site-version-stamp">v2026.05.20.01</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -5912,6 +5981,21 @@ body:not(.admin-on) #tnav-drafts{
       <div id="draft-split-panel" class="drafts-split-panel">
         <div class="drafts-pane-title">Paste / Split Manuscript</div>
         <textarea id="draft-intake-text" class="drafts-textarea drafts-manuscript-box" placeholder="Paste raw nonlinear manuscript material here, then split it into fragments."></textarea>
+        <section class="drafts-logic-intake">
+          <div class="drafts-logic-intake-head">
+            <div>
+              <div class="drafts-logic-intake-title">One-Step Logic Intake</div>
+              <div class="drafts-logic-intake-copy">Import text or an existing chapter, run AI analysis, and create one deduped Logic Review Packet. This keeps fragments internal and sends usable material to Pending AI for Ontology processing.</div>
+            </div>
+            <button class="cm-btn primary" type="button" onclick="draftImportPastedToLogic()">Import + Analyze To Logic</button>
+          </div>
+          <div class="drafts-filter-grid">
+            <select id="draft-logic-chapter-source" class="drafts-select"></select>
+            <button class="cm-btn secondary" type="button" onclick="draftImportSelectedChapterToLogic()">Analyze Existing Chapter To Logic</button>
+            <button class="cm-btn secondary" type="button" onclick="document.getElementById('draft-logic-upload-input').click()">Upload + Analyze To Logic</button>
+            <input id="draft-logic-upload-input" type="file" accept=".txt,.md,text/plain,text/markdown" multiple hidden onchange="draftUploadAnalyzeToLogic(event)">
+          </div>
+        </section>
         <div class="drafts-filter-grid">
           <select id="draft-split-mode" class="drafts-select">
             <option value="heading">Headings / chapter markers</option>
@@ -6766,6 +6850,13 @@ function normalizeLogicReport(value={}){
 }
 
 function normalizeLogicSuggestion(value={}){
+  const sourceRefs = Array.isArray(value.sourceRefs) ? value.sourceRefs.map(ref=>({
+    sourceKind:String(ref.sourceKind || value.sourceKind || ''),
+    sourceId:String(ref.sourceId || value.sourceId || ''),
+    sourceTitle:String(ref.sourceTitle || value.sourceTitle || ''),
+    quote:String(ref.quote || ''),
+    at:ref.at || Date.now()
+  })) : [];
   return {
     id:String(value.id || logicId('sug')),
     kind:LOGIC_SUGGESTION_KINDS.includes(value.kind) ? value.kind : 'observation',
@@ -6789,6 +6880,18 @@ function normalizeLogicSuggestion(value={}){
     confidence:Number(value.confidence || 0),
     status:['pending','accepted','rejected'].includes(value.status) ? value.status : 'pending',
     model:String(value.model || ''),
+    reviewPacketId:String(value.reviewPacketId || ''),
+    targetTab:String(value.targetTab || ''),
+    targetLayer:String(value.targetLayer || ''),
+    fingerprint:String(value.fingerprint || ''),
+    duplicateOf:String(value.duplicateOf || ''),
+    sourceRefs:sourceRefs.length ? sourceRefs : (value.sourceKind || value.sourceId || value.sourceTitle ? [{
+      sourceKind:String(value.sourceKind || ''),
+      sourceId:String(value.sourceId || ''),
+      sourceTitle:String(value.sourceTitle || ''),
+      quote:String(value.quote || ''),
+      at:Date.now()
+    }] : []),
     createdAt:value.createdAt || Date.now(),
     decidedAt:value.decidedAt || null
   };
@@ -6875,8 +6978,35 @@ function normalizeLogicOntologySuggestion(value={}){
     model:String(value.model || ''),
     targetTab:String(value.targetTab || ''),
     targetLayer:String(value.targetLayer || ''),
+    reviewPacketId:String(value.reviewPacketId || ''),
+    fingerprint:String(value.fingerprint || ''),
+    duplicateOf:String(value.duplicateOf || ''),
+    sourceRefs:Array.isArray(value.sourceRefs) ? value.sourceRefs.map(ref=>({
+      sourceKind:String(ref.sourceKind || ''),
+      sourceId:String(ref.sourceId || ''),
+      sourceTitle:String(ref.sourceTitle || ''),
+      quote:String(ref.quote || ''),
+      at:ref.at || now
+    })) : [],
     createdAt:value.createdAt || now,
     decidedAt:value.decidedAt || null
+  };
+}
+
+function normalizeLogicReviewPacket(value={}){
+  const now = Date.now();
+  return {
+    id:String(value.id || logicId('packet')),
+    sourceKind:String(value.sourceKind || ''),
+    sourceId:String(value.sourceId || ''),
+    sourceTitle:String(value.sourceTitle || 'Untitled Source'),
+    wordCount:Number(value.wordCount || 0),
+    status:String(value.status || 'pending'),
+    entityNames:Array.isArray(value.entityNames) ? value.entityNames.map(String) : [],
+    counts:Object.assign({ontology:0,psych:0,lifestyle:0,relationships:0,consistency:0,observations:0,reports:0,duplicates:0}, value.counts || {}),
+    createdAt:value.createdAt || now,
+    updatedAt:value.updatedAt || value.createdAt || now,
+    lastAnalyzedAt:value.lastAnalyzedAt || value.createdAt || now
   };
 }
 
@@ -6893,6 +7023,20 @@ function normalizeLogicForecast(value={}){
     unlikely:Array.isArray(value.unlikely) ? value.unlikely.map(String) : [],
     needsSetup:Array.isArray(value.needsSetup) ? value.needsSetup.map(String) : [],
     consequences:Array.isArray(value.consequences) ? value.consequences.map(String) : [],
+    decisionDrivers:Array.isArray(value.decisionDrivers) ? value.decisionDrivers.map(String) : [],
+    evidenceUsed:Array.isArray(value.evidenceUsed) ? value.evidenceUsed.map(String) : [],
+    relationshipPressure:String(value.relationshipPressure || ''),
+    lifestyleInfluence:String(value.lifestyleInfluence || ''),
+    narrativeWeight:String(value.narrativeWeight || ''),
+    branchPaths:Array.isArray(value.branchPaths) ? value.branchPaths.map(path=>({
+      title:String(path.title || 'Branch'),
+      action:String(path.action || ''),
+      emotionalLogic:String(path.emotionalLogic || ''),
+      relationshipEffect:String(path.relationshipEffect || ''),
+      escalationRisk:String(path.escalationRisk || ''),
+      narrativeUse:String(path.narrativeUse || ''),
+      confidence:Number(path.confidence || 0)
+    })) : [],
     summary:String(value.summary || ''),
     createdAt:value.createdAt || now,
     updatedAt:value.updatedAt || value.createdAt || now
@@ -6945,6 +7089,7 @@ function normalizeLogicStore(value={}){
     suggestions:Array.isArray(value.suggestions) ? value.suggestions.map(normalizeLogicSuggestion) : [],
     facets:Array.isArray(value.facets) ? value.facets.map(normalizeLogicFacet) : [],
     ontologySuggestions:Array.isArray(value.ontologySuggestions) ? value.ontologySuggestions.filter(item=>!isFakeRecoveredOntologySuggestion(item)).map(normalizeLogicOntologySuggestion) : [],
+    reviewPackets:Array.isArray(value.reviewPackets) ? value.reviewPackets.map(normalizeLogicReviewPacket) : [],
     forecasts:Array.isArray(value.forecasts) ? value.forecasts.map(normalizeLogicForecast) : [],
     dossiers:Array.isArray(value.dossiers) ? value.dossiers.map(normalizeLogicDossier) : [],
     facetHistory:Array.isArray(value.facetHistory) ? value.facetHistory.map(normalizeLogicFacetHistory) : []
@@ -7196,6 +7341,14 @@ function ensureFacetForObservation(obs, overrides={}){
   const existing = _logicStore.facets.find(facet=>(facet.sourceObservationIds || []).includes(obs.id));
   if(existing) return normalizeLogicFacet(existing);
   const facet = logicFacetFromObservation(obs, overrides);
+  const duplicate = logicOntologyDuplicateMatch({
+    entityId:facet.entityId,
+    title:facet.title,
+    summary:facet.value,
+    evidence:facet.evidence,
+    category:facet.category
+  }, facet.entityId);
+  if(duplicate && duplicate.kind === 'facet') return normalizeLogicFacet(_logicStore.facets.find(item=>item.title === duplicate.title && item.category === duplicate.category) || facet);
   _logicStore.facets.unshift(facet);
   logicRecordFacetHistory(facet, 'promoted-from-observation', '', obs.dimension);
   return facet;
@@ -7239,7 +7392,7 @@ function loadLogicUi(){
 }
 
 function saveLogicUi(){
-  try{ localStorage.setItem(LOGIC_UI_STORAGE_KEY, JSON.stringify({tab:_logicActiveTab, entityId:_logicSelectedEntityId, filter:_logicFilter, railFilter:_logicRailFilter, relationshipScope:_logicRelationshipScope, relationshipTarget:_logicRelationshipTarget, chapterCheckEntity:_logicChapterCheckEntity, chapterId:_logicChapterId, draftId:_logicDraftId, ontologyCategory:_logicOntologyCategory, ontologySearch:_logicOntologySearch, psychCategory:_logicPsychCategory, lifestyleLayer:_logicLifestyleLayer, reportFilter:_logicReportFilter, selectedReport:_logicSelectedReportKey, timelineFilter:_logicTimelineFilter, timelineCollapsed:_logicTimelineCollapsed, imageSettings:_logicImageSettings})); }catch(e){}
+  try{ localStorage.setItem(LOGIC_UI_STORAGE_KEY, JSON.stringify({tab:_logicActiveTab, entityId:_logicSelectedEntityId, filter:_logicFilter, railFilter:_logicRailFilter, relationshipScope:_logicRelationshipScope, relationshipTarget:_logicRelationshipTarget, chapterCheckEntity:_logicChapterCheckEntity, chapterId:_logicChapterId, draftId:_logicDraftId, ontologyCategory:_logicOntologyCategory, ontologySearch:_logicOntologySearch, psychCategory:_logicPsychCategory, lifestyleLayer:_logicLifestyleLayer, reportFilter:_logicReportFilter, selectedReport:_logicSelectedReportKey, pendingPacket:_logicPendingPacketId, timelineFilter:_logicTimelineFilter, timelineCollapsed:_logicTimelineCollapsed, imageSettings:_logicImageSettings})); }catch(e){}
 }
 
 function normalizeLogicTabId(tab){
@@ -7264,6 +7417,7 @@ function logicInitUi(){
   _logicLifestyleLayer = LOGIC_LIFESTYLE_SECTIONS.some(item=>item.id===ui.lifestyleLayer) ? ui.lifestyleLayer : (_logicLifestyleLayer || 'fashion');
   _logicReportFilter = ['all','biopsychosocial','forecasts','simulations','chapter-checks','old'].includes(ui.reportFilter) ? ui.reportFilter : (_logicReportFilter || 'all');
   _logicSelectedReportKey = ui.selectedReport || _logicSelectedReportKey || '';
+  _logicPendingPacketId = ui.pendingPacket || _logicPendingPacketId || '';
   _logicTimelineFilter = ['recent','all','risks'].includes(ui.timelineFilter) ? ui.timelineFilter : (_logicTimelineFilter || 'recent');
   _logicTimelineCollapsed = typeof ui.timelineCollapsed === 'boolean' ? ui.timelineCollapsed : _logicTimelineCollapsed;
   _logicImageSettings = ui.imageSettings && typeof ui.imageSettings === 'object' ? ui.imageSettings : (_logicImageSettings || {});
@@ -7951,6 +8105,12 @@ async function generateLogicForecast(forecastType='decision'){
       unlikely:parsed.unlikely,
       needsSetup:parsed.needsSetup,
       consequences:parsed.consequences,
+      decisionDrivers:parsed.decisionDrivers,
+      evidenceUsed:parsed.evidenceUsed,
+      relationshipPressure:parsed.relationshipPressure,
+      lifestyleInfluence:parsed.lifestyleInfluence,
+      narrativeWeight:parsed.narrativeWeight,
+      branchPaths:parsed.branchPaths,
       summary:parsed.summary
     });
     _logicStore.forecasts.unshift(forecast);
@@ -7997,6 +8157,10 @@ function renderLogicForecastCards(kind='decision'){
       <div><div class="logic-kicker">Unlikely</div><ul>${item.unlikely.map(row=>`<li>${escHtml(row)}</li>`).join('')}</ul></div>
       <div><div class="logic-kicker">Needs Setup</div><ul>${item.needsSetup.map(row=>`<li>${escHtml(row)}</li>`).join('')}</ul></div>
     </div>
+    ${item.decisionDrivers.length ? `<div class="logic-card-body"><b>Drivers:</b> ${escHtml(item.decisionDrivers.join(' · '))}</div>` : ''}
+    ${item.relationshipPressure || item.lifestyleInfluence || item.narrativeWeight ? `<div class="logic-card-body"><b>Pressure:</b> ${escHtml([item.relationshipPressure, item.lifestyleInfluence, item.narrativeWeight].filter(Boolean).join(' '))}</div>` : ''}
+    ${item.branchPaths.length ? `<div class="logic-report-grid" style="margin-top:.65rem">${item.branchPaths.map(path=>`<article class="logic-facet-card"><div class="logic-card-title">${escHtml(path.title)}</div><div class="logic-card-body"><b>Action:</b> ${escHtml(path.action)}</div><div class="logic-card-body"><b>Emotional Logic:</b> ${escHtml(path.emotionalLogic)}</div><div class="logic-card-body"><b>Relationship:</b> ${escHtml(path.relationshipEffect)}</div><div class="logic-card-body"><b>Risk:</b> ${escHtml(path.escalationRisk)}</div><div class="logic-card-body"><b>Narrative Use:</b> ${escHtml(path.narrativeUse)}</div></article>`).join('')}</div>` : ''}
+    ${item.evidenceUsed.length ? `<div class="logic-ontology-source">Evidence: ${escHtml(item.evidenceUsed.join(' · '))}</div>` : ''}
     <div class="logic-card-body">${escHtml(item.consequences.join(' '))}</div>
     <div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="deleteLogicForecast('${escHtml(item.id)}')">Delete</button></div>
   </article>`).join('') : '<div class="drafts-empty">No saved forecasts yet.</div>'}</div>`;
@@ -8345,12 +8509,73 @@ function renderLogicReports(){
   </section>`;
 }
 
+function renderLogicPendingSuggestionCard(item){
+  const sourceCount = (item.sourceRefs || []).length;
+  return `<article class="logic-card logic-pending-card ${escHtml(item.status)}">
+    <div>${workflowBadge(item.kind || 'ontology')} ${item.status!=='pending' ? workflowBadge(item.status) : ''} ${sourceCount > 1 ? `<span class="logic-source-count">sources: ${sourceCount}</span>` : ''}</div>
+    <div class="logic-card-title">${escHtml(item.title)}</div>
+    <div class="logic-meta">${escHtml(item.entityName || 'No entity')} · ${escHtml(item.dimension || item.category || item.reportType || item.targetLayer || 'logic')} · ${escHtml(logicConfidence(item.confidence))}</div>
+    <div class="logic-card-body">${escHtml(item.summary || item.value || '')}</div>
+    ${item.quote || item.evidence ? `<div class="logic-quote">${escHtml(item.quote || item.evidence)}</div>` : ''}
+    ${item.suggestedFix ? `<div class="logic-card-body"><b>Fix:</b> ${escHtml(item.suggestedFix)}</div>` : ''}
+    ${sourceCount ? `<div class="logic-ontology-source">Sources: ${(item.sourceRefs || []).slice(0, 4).map(ref=>escHtml(ref.sourceTitle || ref.sourceId || ref.sourceKind)).join(' · ')}</div>` : ''}
+    <div class="logic-actions">${item.status==='pending'
+      ? (item.category !== undefined
+        ? `<button class="logic-mini-btn primary" type="button" onclick="acceptLogicOntologySuggestion('${escHtml(item.id)}')">Accept</button><button class="logic-mini-btn" type="button" onclick="rejectLogicOntologySuggestion('${escHtml(item.id)}')">Reject</button>`
+        : `<button class="logic-mini-btn primary" type="button" onclick="acceptLogicSuggestion('${escHtml(item.id)}')">Accept</button><button class="logic-mini-btn" type="button" onclick="rejectLogicSuggestion('${escHtml(item.id)}')">Reject</button>`)
+      : ''}</div>
+  </article>`;
+}
+
 function renderLogicPending(){
   const pending = (_logicStore.suggestions || []).map(normalizeLogicSuggestion).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   const ontology = (_logicStore.ontologySuggestions || []).map(normalizeLogicOntologySuggestion).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-  return `<section><div class="logic-kicker">Pending AI</div><div class="logic-title">Approve before canon</div>
-    <section class="logic-panel"><div class="logic-card-title">Pending Ontology</div><div class="logic-report-grid">${ontology.length ? ontology.map(renderLogicOntologySuggestionCard).join('') : '<div class="drafts-empty">No pending ontology suggestions.</div>'}</div></section>
-    <section class="logic-panel"><div class="logic-card-title">Pending Observations / Reports</div><div class="logic-report-grid">${pending.length ? pending.map(item=>`<article class="logic-card logic-pending-card ${escHtml(item.status)}"><div>${workflowBadge(item.kind)} ${item.status!=='pending' ? workflowBadge(item.status) : ''}</div><div class="logic-card-title">${escHtml(item.title)}</div><div class="logic-meta">${escHtml(item.entityName || 'No entity')} · ${escHtml(item.dimension || item.reportType || 'logic')} · ${escHtml(logicConfidence(item.confidence))}</div><div class="logic-card-body">${escHtml(item.summary)}</div>${item.quote ? `<div class="logic-quote">${escHtml(item.quote)}</div>` : ''}${item.suggestedFix ? `<div class="logic-card-body"><b>Fix:</b> ${escHtml(item.suggestedFix)}</div>` : ''}<div class="logic-actions">${item.status==='pending' ? `<button class="logic-mini-btn primary" type="button" onclick="acceptLogicSuggestion('${escHtml(item.id)}')">Accept</button><button class="logic-mini-btn" type="button" onclick="rejectLogicSuggestion('${escHtml(item.id)}')">Reject</button>` : ''}</div></article>`).join('') : '<div class="drafts-empty">No pending AI suggestions.</div>'}</div></section></section>`;
+  const packets = (_logicStore.reviewPackets || []).map(normalizeLogicReviewPacket).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  const loosePacket = normalizeLogicReviewPacket({id:'loose', sourceTitle:'Loose / Older AI Cards', sourceKind:'legacy'});
+  const allCards = [
+    ...ontology.map(item=>Object.assign({}, item, {kind:'ontology'})),
+    ...pending
+  ];
+  const visiblePackets = packets.length ? packets : (allCards.length ? [loosePacket] : []);
+  const selectedId = _logicPendingPacketId && visiblePackets.some(packet=>packet.id===_logicPendingPacketId) ? _logicPendingPacketId : (visiblePackets[0] && visiblePackets[0].id) || '';
+  const selectedPacket = visiblePackets.find(packet=>packet.id===selectedId);
+  const cards = selectedId === 'loose'
+    ? allCards.filter(item=>!item.reviewPacketId)
+    : allCards.filter(item=>item.reviewPacketId === selectedId);
+  const stats = {
+    packets:visiblePackets.length,
+    pending:allCards.filter(item=>item.status === 'pending').length,
+    merged:allCards.filter(item=>(item.sourceRefs || []).length > 1).length,
+    accepted:allCards.filter(item=>item.status === 'accepted').length
+  };
+  const index = visiblePackets.map(packet=>{
+    const packetCards = packet.id === 'loose' ? allCards.filter(item=>!item.reviewPacketId) : allCards.filter(item=>item.reviewPacketId === packet.id);
+    const pendingCount = packetCards.filter(item=>item.status === 'pending').length;
+    return `<button class="logic-packet-card ${packet.id===selectedId?'active':''}" type="button" onclick="selectLogicPendingPacket('${escHtml(packet.id)}')">
+      <div class="logic-card-title">${escHtml(packet.sourceTitle)}</div>
+      <div class="logic-meta">${escHtml(packet.sourceKind || 'source')} · ${pendingCount} pending · ${packet.counts?.duplicates || 0} merged</div>
+    </button>`;
+  }).join('');
+  return `<section>
+    <div class="logic-kicker">Pending AI</div>
+    <div class="logic-title">Logic Review Packets</div>
+    <div class="logic-meta">AI output is grouped by import/chapter source. Repeated ideas merge into one card with multiple sources.</div>
+    <div class="logic-packet-summary">
+      <div class="logic-packet-stat"><b>${stats.packets}</b><div class="logic-meta">Packets</div></div>
+      <div class="logic-packet-stat"><b>${stats.pending}</b><div class="logic-meta">Pending</div></div>
+      <div class="logic-packet-stat"><b>${stats.merged}</b><div class="logic-meta">Merged duplicates</div></div>
+      <div class="logic-packet-stat"><b>${stats.accepted}</b><div class="logic-meta">Accepted</div></div>
+    </div>
+    <div class="logic-actions"><button class="logic-mini-btn" type="button" onclick="rejectLogicDuplicateBatch()">Reject Duplicate Batch</button></div>
+    <div class="logic-ontology-workspace">
+      <aside class="logic-ontology-index logic-panel"><div class="logic-card-title">Review Packets</div>${index || '<div class="drafts-empty">No review packets yet.</div>'}</aside>
+      <section class="logic-ontology-group">
+        <div class="logic-card-title">${escHtml(selectedPacket ? selectedPacket.sourceTitle : 'No Packet Selected')}</div>
+        <div class="logic-meta">${selectedPacket ? `${escHtml(selectedPacket.sourceKind)} · ${Number(selectedPacket.wordCount || 0).toLocaleString()} words · ${escHtml(authorNoteDate(selectedPacket.updatedAt))}` : ''}</div>
+        <div class="logic-report-grid" style="margin-top:.75rem">${cards.length ? cards.map(renderLogicPendingSuggestionCard).join('') : '<div class="drafts-empty">No cards in this packet.</div>'}</div>
+      </section>
+    </div>
+  </section>`;
 }
 
 function renderLogicMain(){
@@ -8482,6 +8707,24 @@ function setLogicReportSectionsOpen(open){
   document.querySelectorAll('.logic-reader-section').forEach(item=>{
     if(item.tagName === 'DETAILS') item.open = !!open;
   });
+}
+
+function selectLogicPendingPacket(id){
+  _logicPendingPacketId = id || '';
+  saveLogicUi();
+  renderLogicMachine();
+}
+
+function rejectLogicDuplicateBatch(){
+  const pending = (_logicStore.suggestions || []).filter(item=>item.status === 'pending' && (item.sourceRefs || []).length > 1);
+  const ontology = (_logicStore.ontologySuggestions || []).filter(item=>item.status === 'pending' && (item.sourceRefs || []).length > 1);
+  pending.concat(ontology).forEach(item=>{
+    item.status = 'rejected';
+    item.decidedAt = Date.now();
+  });
+  saveLogicStore();
+  logicSetStatus(`Rejected ${pending.length + ontology.length} duplicate/merged pending card${pending.length + ontology.length === 1 ? '' : 's'}.`);
+  renderLogicMachine();
 }
 
 function setLogicRelationshipScope(value){
@@ -8765,14 +9008,28 @@ function logicAiSchema(){
 function logicForecastSchema(){
   return {
     type:'object',
-    required:['title','summary','likely','unlikely','needsSetup','consequences'],
+    required:['title','summary','likely','unlikely','needsSetup','consequences','decisionDrivers','evidenceUsed','relationshipPressure','lifestyleInfluence','narrativeWeight','branchPaths'],
     properties:{
       title:{type:'string'},
       summary:{type:'string'},
       likely:{type:'array',items:{type:'string'}},
       unlikely:{type:'array',items:{type:'string'}},
       needsSetup:{type:'array',items:{type:'string'}},
-      consequences:{type:'array',items:{type:'string'}}
+      consequences:{type:'array',items:{type:'string'}},
+      decisionDrivers:{type:'array',items:{type:'string'}},
+      evidenceUsed:{type:'array',items:{type:'string'}},
+      relationshipPressure:{type:'string'},
+      lifestyleInfluence:{type:'string'},
+      narrativeWeight:{type:'string'},
+      branchPaths:{type:'array',items:{type:'object',required:['title','action','emotionalLogic','relationshipEffect','escalationRisk','narrativeUse','confidence'],properties:{
+        title:{type:'string'},
+        action:{type:'string'},
+        emotionalLogic:{type:'string'},
+        relationshipEffect:{type:'string'},
+        escalationRisk:{type:'string'},
+        narrativeUse:{type:'string'},
+        confidence:{type:'number'}
+      }}}
     }
   };
 }
@@ -8810,15 +9067,48 @@ function logicAiKnownContext(){
   };
 }
 
+function logicEntitiesMentionedInText(text=''){
+  const lower = String(text || '').toLowerCase();
+  return logicEntities().filter(entity=>{
+    const names = [entity.name, ...(entity.aliases || [])].map(name=>String(name || '').trim().toLowerCase()).filter(name=>name.length > 2);
+    return names.some(name=>lower.includes(name));
+  }).slice(0, 30);
+}
+
+function logicComparisonContextForText(text=''){
+  return logicEntitiesMentionedInText(text).map(entity=>({
+    id:entity.id,
+    name:entity.name,
+    type:entity.type,
+    ontology:logicFacetsForEntity(entity.id, true).slice(0, 60).map(facet=>({
+      category:facet.category,
+      title:facet.title,
+      value:facet.value,
+      status:facet.status,
+      evidence:facet.evidence
+    })),
+    observations:logicObservationsForEntity(entity.id).slice(0, 40).map(obs=>({
+      dimension:obs.dimension,
+      value:obs.value,
+      trigger:obs.trigger,
+      quote:obs.quote,
+      relatedEntities:obs.relatedEntities
+    }))
+  }));
+}
+
 function logicChapterPayload(chapter){
+  const body = String(chapter.body || '');
   return {
     sourceKind:'chapter',
     sourceId:chapter.id,
     sourceTitle:chapter.chapter || chapter.book || chapter.id,
     hierarchy:[chapter.novel, chapter.act, chapter.book, chapter.subvolume, chapter.part].filter(Boolean).join(' / '),
     meta:chapter.meta || {},
-    body:String(chapter.body || '').slice(0, 70000),
-    known:logicAiKnownContext()
+    body:body.slice(0, 70000),
+    known:logicAiKnownContext(),
+    comparisonMode:'Compare this chapter against accepted entity ontology, psych profile, relationships, lifestyle/culture expectations, and existing risks. Do not create a loose pile of source notes. Return capped, grouped flags only where the chapter changes, supports, contradicts, or lacks setup for known logic.',
+    mentionedLogic:logicComparisonContextForText(body)
   };
 }
 
@@ -8977,6 +9267,112 @@ function logicTextSimilarity(a='', b=''){
   return Math.max(jaccard, containment * 0.82);
 }
 
+function logicNormalizeFingerprintText(text=''){
+  return String(text || '')
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .split(/\s+/)
+    .filter(token=>token.length > 2)
+    .slice(0, 42)
+    .join(' ')
+    .trim();
+}
+
+function logicReviewPacketId(source={}){
+  const kind = String(source.sourceKind || 'source').replace(/[^a-z0-9-]+/gi, '-').toLowerCase();
+  const id = String(source.sourceId || source.sourceTitle || 'untitled').replace(/[^a-z0-9-]+/gi, '-').toLowerCase().slice(0, 80);
+  return `packet:${kind}:${id || 'source'}`;
+}
+
+function ensureLogicReviewPacket(source={}, data={}){
+  _logicStore.reviewPackets = _logicStore.reviewPackets || [];
+  const id = data.id || logicReviewPacketId(source);
+  let packet = _logicStore.reviewPackets.find(item=>item.id === id);
+  const now = Date.now();
+  if(!packet){
+    packet = normalizeLogicReviewPacket(Object.assign({}, data, {
+      id,
+      sourceKind:source.sourceKind,
+      sourceId:source.sourceId,
+      sourceTitle:source.sourceTitle,
+      createdAt:now
+    }));
+    _logicStore.reviewPackets.unshift(packet);
+  }
+  packet.sourceKind = String(source.sourceKind || packet.sourceKind || '');
+  packet.sourceId = String(source.sourceId || packet.sourceId || '');
+  packet.sourceTitle = String(source.sourceTitle || packet.sourceTitle || 'Untitled Source');
+  packet.wordCount = Number(data.wordCount || packet.wordCount || 0);
+  packet.updatedAt = now;
+  packet.lastAnalyzedAt = now;
+  return packet;
+}
+
+function logicSuggestionFingerprint(item={}){
+  const entity = String(item.entityName || item.entityId || '').toLowerCase().trim();
+  const target = String(item.targetTab || item.kind || item.reportType || '').toLowerCase();
+  const layer = String(item.targetLayer || item.dimension || item.category || '').toLowerCase();
+  const body = logicNormalizeFingerprintText([item.title, item.summary, item.value, item.quote, item.evidence, item.suggestedFix].filter(Boolean).join(' '));
+  return [entity, target, layer, body].filter(Boolean).join('|');
+}
+
+function logicSourceRefFromSuggestion(item={}){
+  return {
+    sourceKind:String(item.sourceKind || ''),
+    sourceId:String(item.sourceId || ''),
+    sourceTitle:String(item.sourceTitle || ''),
+    quote:String(item.quote || item.evidence || ''),
+    at:Date.now()
+  };
+}
+
+function mergeLogicSourceRefs(existing=[], next=[]){
+  const out = [];
+  const seen = new Set();
+  [...(Array.isArray(existing) ? existing : []), ...(Array.isArray(next) ? next : [])].forEach(ref=>{
+    const normalized = {
+      sourceKind:String(ref.sourceKind || ''),
+      sourceId:String(ref.sourceId || ''),
+      sourceTitle:String(ref.sourceTitle || ''),
+      quote:String(ref.quote || ''),
+      at:ref.at || Date.now()
+    };
+    const key = `${normalized.sourceKind}|${normalized.sourceId}|${normalized.sourceTitle}|${logicNormalizeFingerprintText(normalized.quote).slice(0, 80)}`;
+    if(seen.has(key)) return;
+    seen.add(key);
+    out.push(normalized);
+  });
+  return out;
+}
+
+function mergeLogicSuggestionDuplicate(existing, incoming){
+  existing.sourceRefs = mergeLogicSourceRefs(existing.sourceRefs, incoming.sourceRefs && incoming.sourceRefs.length ? incoming.sourceRefs : [logicSourceRefFromSuggestion(incoming)]);
+  existing.confidence = Math.max(Number(existing.confidence || 0), Number(incoming.confidence || 0));
+  existing.updatedAt = Date.now();
+  if(existing.status === 'rejected' && incoming.status === 'pending') existing.status = 'pending';
+  if(!existing.reviewPacketId && incoming.reviewPacketId) existing.reviewPacketId = incoming.reviewPacketId;
+  return existing;
+}
+
+function logicFindSuggestionDuplicate(collection=[], incoming){
+  const fingerprint = incoming.fingerprint || logicSuggestionFingerprint(incoming);
+  if(fingerprint){
+    const exact = collection.find(item=>item.fingerprint && item.fingerprint === fingerprint && item.status !== 'rejected');
+    if(exact) return exact;
+  }
+  const incomingText = [incoming.title, incoming.summary, incoming.quote, incoming.suggestedFix].filter(Boolean).join(' ');
+  return collection.find(item=>{
+    if(item.status === 'rejected') return false;
+    const sameEntity = String(item.entityName || '').toLowerCase() === String(incoming.entityName || '').toLowerCase();
+    const sameTarget = String(item.targetTab || item.kind || item.reportType || '') === String(incoming.targetTab || incoming.kind || incoming.reportType || '');
+    const sameLayer = String(item.targetLayer || item.dimension || '') === String(incoming.targetLayer || incoming.dimension || '');
+    if(!sameEntity || !sameTarget || !sameLayer) return false;
+    const itemText = [item.title, item.summary, item.quote, item.suggestedFix].filter(Boolean).join(' ');
+    return logicTextSimilarity(incomingText, itemText) >= 0.72;
+  }) || null;
+}
+
 function logicOntologyComparableText(item={}){
   return [
     item.category,
@@ -9000,7 +9396,7 @@ function logicOntologyDuplicateMatch(suggestion, entityId){
     .filter(item=>item.entityId === entityId && item.status !== 'rejected');
   const existing = [
     ...existingFacets.map(item=>({kind:'facet', category:item.category, title:item.title, text:logicOntologyComparableText(item)})),
-    ...existingSuggestions.map(item=>({kind:'suggestion', category:item.category, title:item.title, text:logicOntologyComparableText(item)}))
+    ...existingSuggestions.map(item=>({kind:'suggestion', id:item.id, status:item.status, sourceRefs:item.sourceRefs, category:item.category, title:item.title, text:logicOntologyComparableText(item), ref:item}))
   ];
   return existing.find(item=>{
     const titleMatch = candidateTitle && candidateTitle === String(item.title || '').trim().toLowerCase();
@@ -9115,8 +9511,8 @@ async function callLogicOpenRouter(payload, label='Logic Machine'){
       model,
       provider:{require_parameters:true},
       messages:[
-        {role:'system', content:'You are an in-universe continuity and character logic analyst for a literary novel. Return schema-valid JSON only. Extract observations about characters, factions, nations, regions, venues, institutions, cultures, desires, fears, wounds, habits, speech, body language, fashion, food, alcohol, art/media, rituals, tastes, triggers, relationships, contradictions, and world logic. Do not rewrite prose. Suggestions are private and require human approval.'},
-        {role:'user', content:`Analyze this ${label} for the in-universe logic machine.\n\n` + JSON.stringify(payload)}
+        {role:'system', content:'You are an in-universe continuity and character logic analyst for a literary novel. Return schema-valid JSON only. Extract only distinct, useful observations about characters, factions, places, culture, dialogue, desires, fears, wounds, habits, tastes, triggers, relationships, contradictions, and world logic. Do not rewrite prose. Do not repeat the same idea in multiple phrasings. Suggestions are private and require human approval.'},
+        {role:'user', content:`Analyze this ${label} for the in-universe logic machine. Keep output compact: at most 10 observations, 4 reports, and 8 consistency flags. If source text includes mentionedLogic, compare against it and focus on Consistent / Changed With Trigger / Needs Setup / Possible Contradiction / Not Enough Data.\n\n` + JSON.stringify(payload)}
       ],
       response_format:{
         type:'json_schema',
@@ -9216,7 +9612,7 @@ async function callLogicForecastOpenRouter(entity, inputs, forecastType='decisio
       provider:{require_parameters:true},
       messages:[
         {role:'system', content:'Return only valid JSON matching the schema. You are a literary character-logic forecaster. Use ontology, psych profile, cultural inference, relationships, and narrative weight. Do not add prose outside JSON.'},
-        {role:'user', content:modeText + '\n\n' + JSON.stringify(payload)}
+        {role:'user', content:modeText + '\n\nVagueness is invalid. Every answer must name concrete actions, trigger conditions, psychological drivers, ontology evidence, relationship pressure, lifestyle/cultural influence, and narrative consequence. For branch simulations, return 3 to 5 branchPaths with distinct possible responses.\n\n' + JSON.stringify(payload)}
       ],
       response_format:{
         type:'json_schema',
@@ -9280,8 +9676,9 @@ async function callLogicDossierOpenRouter(entity){
 
 function storeLogicAiReport(parsed, source, model){
   const now = Date.now();
+  const packet = ensureLogicReviewPacket(source || {}, {wordCount:source && source.wordCount});
   const suggestions = [];
-  (parsed.observations || []).forEach(item=>{
+  (parsed.observations || []).slice(0, 10).forEach(item=>{
     suggestions.push(normalizeLogicSuggestion({
       kind:'observation',
       title:`${item.entityName || 'Entity'} · ${item.dimension || 'logic'}`,
@@ -9289,6 +9686,8 @@ function storeLogicAiReport(parsed, source, model){
       entityName:item.entityName,
       entityType:item.entityType,
       dimension:item.dimension,
+      targetTab:logicSuggestionTargetTab('observation', item.dimension),
+      targetLayer:logicFacetCategoryFromDimension(item.dimension || item.summary || ''),
       trigger:item.trigger,
       quote:item.quote,
       context:item.context,
@@ -9298,11 +9697,12 @@ function storeLogicAiReport(parsed, source, model){
       sourceKind:source.sourceKind,
       sourceId:source.sourceId,
       sourceTitle:source.sourceTitle,
+      reviewPacketId:packet.id,
       model,
       createdAt:now
     }));
   });
-  (parsed.reports || []).forEach(item=>{
+  (parsed.reports || []).slice(0, 4).forEach(item=>{
     suggestions.push(normalizeLogicSuggestion({
       kind:'report',
       title:item.title,
@@ -9316,11 +9716,14 @@ function storeLogicAiReport(parsed, source, model){
       sourceKind:source.sourceKind,
       sourceId:source.sourceId,
       sourceTitle:source.sourceTitle,
+      targetTab:'reports',
+      targetLayer:item.reportType || '',
+      reviewPacketId:packet.id,
       model,
       createdAt:now
     }));
   });
-  (parsed.consistencyFlags || []).forEach(item=>{
+  (parsed.consistencyFlags || []).slice(0, 8).forEach(item=>{
     suggestions.push(normalizeLogicSuggestion({
       kind:'consistency',
       title:`Consistency: ${item.entityName || 'Entity'}`,
@@ -9337,18 +9740,53 @@ function storeLogicAiReport(parsed, source, model){
       sourceKind:source.sourceKind,
       sourceId:source.sourceId,
       sourceTitle:source.sourceTitle,
+      targetTab:'consistency',
+      targetLayer:item.dimension || 'contradiction',
+      reviewPacketId:packet.id,
       reportType:'Chapter Consistency Report',
       model,
       createdAt:now
     }));
   });
-  _logicStore.suggestions.unshift(...suggestions);
+  const saved = [];
+  let merged = 0;
+  _logicStore.suggestions = _logicStore.suggestions || [];
+  suggestions.forEach(raw=>{
+    const suggestion = normalizeLogicSuggestion(raw);
+    suggestion.fingerprint = suggestion.fingerprint || logicSuggestionFingerprint(suggestion);
+    suggestion.sourceRefs = mergeLogicSourceRefs(suggestion.sourceRefs, [logicSourceRefFromSuggestion(suggestion)]);
+    const duplicate = logicFindSuggestionDuplicate([...saved, ..._logicStore.suggestions], suggestion);
+    if(duplicate){
+      mergeLogicSuggestionDuplicate(duplicate, suggestion);
+      merged += 1;
+      return;
+    }
+    saved.push(suggestion);
+  });
+  if(saved.length) _logicStore.suggestions.unshift(...saved);
+  const entityNames = Array.from(new Set(saved.concat(suggestions).map(item=>item.entityName).filter(Boolean))).slice(0, 80);
+  packet.entityNames = Array.from(new Set([...(packet.entityNames || []), ...entityNames]));
+  packet.counts = Object.assign({}, packet.counts || {}, {
+    observations:(packet.counts?.observations || 0) + saved.filter(item=>item.kind === 'observation').length,
+    reports:(packet.counts?.reports || 0) + saved.filter(item=>item.kind === 'report').length,
+    consistency:(packet.counts?.consistency || 0) + saved.filter(item=>item.kind === 'consistency').length,
+    duplicates:(packet.counts?.duplicates || 0) + merged
+  });
   saveLogicStore();
-  return suggestions.length;
+  return saved.length;
 }
 
 function logicEntityIdsFromNames(names=[]){
   return (Array.isArray(names) ? names : []).map(name=>logicFindEntityByName(name)).filter(Boolean).map(entity=>entity.id);
+}
+
+function logicSuggestionTargetTab(kind='observation', dimension=''){
+  const category = logicFacetCategoryFromDimension(dimension || '');
+  if(kind === 'consistency' || category === 'contradiction') return 'consistency';
+  if(['psyche','desire','fear','wound','stress','trigger','moral'].includes(category)) return 'psych';
+  if(['fashion','food','alcohol','art','ritual','venue','consumer','class','culture'].includes(category)) return 'lifestyle';
+  if(category === 'relationship') return 'relationships';
+  return 'ontology';
 }
 
 function storeLogicOntologySuggestions(parsed, entity, model, options={}){
@@ -9388,11 +9826,25 @@ function storeLogicOntologySuggestions(parsed, entity, model, options={}){
       model,
       targetTab:options.targetTab || '',
       targetLayer:options.targetLayer || '',
+      reviewPacketId:options.reviewPacketId || '',
+      sourceRefs:options.sourceRef ? [options.sourceRef] : [],
       createdAt:now
+    });
+    suggestion.fingerprint = suggestion.fingerprint || logicSuggestionFingerprint({
+      entityName:suggestion.entityName,
+      title:suggestion.title,
+      summary:suggestion.summary,
+      quote:suggestion.evidence,
+      targetTab:suggestion.targetTab || 'ontology',
+      targetLayer:suggestion.targetLayer || suggestion.category,
+      dimension:suggestion.category
     });
     const batchDuplicate = suggestions.find(existing=>logicTextSimilarity(logicOntologyComparableText(suggestion), logicOntologyComparableText(existing)) >= (existing.category === suggestion.category ? 0.64 : 0.78));
     const duplicate = batchDuplicate || logicOntologyDuplicateMatch(suggestion, entity.id);
     if(duplicate){
+      if(duplicate.ref){
+        duplicate.ref.sourceRefs = mergeLogicSourceRefs(duplicate.ref.sourceRefs || [], suggestion.sourceRefs || []);
+      }
       skipped.push({title:suggestion.title, duplicateOf:duplicate.title || duplicate.kind});
       return;
     }
@@ -9401,8 +9853,8 @@ function storeLogicOntologySuggestions(parsed, entity, model, options={}){
   _logicStore.ontologySuggestions = _logicStore.ontologySuggestions || [];
   if(suggestions.length){
     _logicStore.ontologySuggestions.unshift(...suggestions);
-    saveLogicStore();
   }
+  if(suggestions.length || skipped.length) saveLogicStore();
   return {saved:suggestions.length, skipped:skipped.length, skippedTitles:skipped.map(item=>item.title).filter(Boolean).slice(0, 6)};
 }
 
@@ -9469,7 +9921,7 @@ async function analyzeLogicChapter(id=_logicChapterId){
   try{
     const payload = logicChapterPayload(chapter);
     const {model, parsed} = await callLogicOpenRouter(payload, 'chapter');
-    const count = storeLogicAiReport(parsed, {sourceKind:'chapter', sourceId:chapter.id, sourceTitle:chapter.chapter || chapter.book || chapter.id}, model);
+    const count = storeLogicAiReport(parsed, {sourceKind:'chapter', sourceId:chapter.id, sourceTitle:chapter.chapter || chapter.book || chapter.id, wordCount:String(chapter.body || '').trim().split(/\s+/).filter(Boolean).length}, model);
     _logicActiveTab = 'consistency';
     saveLogicUi();
     logicSetStatus(`Logic analysis complete: ${count} pending suggestion${count===1?'':'s'} created.`);
@@ -9492,7 +9944,7 @@ async function analyzeLogicDraft(id=_logicDraftId){
   try{
     const payload = logicDraftPayload(fragment);
     const {model, parsed} = await callLogicOpenRouter(payload, 'draft fragment');
-    const count = storeLogicAiReport(parsed, {sourceKind:'draft', sourceId:fragment.id, sourceTitle:fragment.title || fragment.id}, model);
+    const count = storeLogicAiReport(parsed, {sourceKind:'draft', sourceId:fragment.id, sourceTitle:fragment.title || fragment.id, wordCount:draftWordCount(fragment)}, model);
     _logicActiveTab = 'pending';
     logicSetStatus(`Draft logic analysis complete: ${count} pending suggestion${count===1?'':'s'} created.`);
     renderLogicMachine();
@@ -9515,7 +9967,7 @@ async function analyzeSelectedDraftsForLogic(){
       draftStatus(`Logic-analyzing ${fragment.title || id}...`);
       const payload = logicDraftPayload(fragment);
       const {model, parsed} = await callLogicOpenRouter(payload, 'selected draft fragment');
-      total += storeLogicAiReport(parsed, {sourceKind:'draft', sourceId:fragment.id, sourceTitle:fragment.title || fragment.id}, model);
+      total += storeLogicAiReport(parsed, {sourceKind:'draft', sourceId:fragment.id, sourceTitle:fragment.title || fragment.id, wordCount:draftWordCount(fragment)}, model);
     }
     draftStatus(`Logic analysis complete: ${total} pending Logic Machine suggestion${total===1?'':'s'} created.`);
     logicSetStatus(`Draft batch logic analysis complete: ${total} pending suggestion${total===1?'':'s'} created.`);
@@ -9804,6 +10256,7 @@ async function buildFullBackupPayload(){
       logicObservations:logicMachine.observations.length,
       logicFacets:logicMachine.facets.length,
       logicOntologySuggestions:logicMachine.ontologySuggestions.length,
+      logicReviewPackets:logicMachine.reviewPackets.length,
       logicForecasts:logicMachine.forecasts.length,
       logicDossiers:logicMachine.dossiers.length,
       logicReports:logicMachine.reports.length
@@ -10056,6 +10509,14 @@ function backupLogicMachineHtml(store={}){
       ${item.webSources.length ? `<p><b>Web sources:</b> ${backupEscapeHtml(item.webSources.map(source=>source.url || source.title).join(' | '))}</p>` : ''}
     </article>`;
   }).join('') : '<p class="muted">No ontology suggestions</p>';
+  const reviewPacketHtml = (logic.reviewPackets || []).length ? logic.reviewPackets.map(raw=>{
+    const packet = normalizeLogicReviewPacket(raw);
+    return `<article class="source">
+      <h5>${backupEscapeHtml(packet.sourceTitle)}</h5>
+      <p><b>Source:</b> ${backupEscapeHtml(packet.sourceKind)} · <b>Words:</b> ${backupEscapeHtml(String(packet.wordCount || 0))} · <b>Entities:</b> ${backupEscapeHtml((packet.entityNames || []).join(', '))}</p>
+      <p><b>Counts:</b> ${backupEscapeHtml(JSON.stringify(packet.counts || {}))}</p>
+    </article>`;
+  }).join('') : '<p class="muted">No review packets</p>';
   const dossierHtml = logic.dossiers.length ? logic.dossiers.map(raw=>{
     const dossier = normalizeLogicDossier(raw);
     return `<article class="source">
@@ -10108,7 +10569,7 @@ function backupLogicMachineHtml(store={}){
       </article>`).join('') : '<p class="muted">No observations for this entity</p>'}
     </article>`;
   }).join('');
-  return `<section class="author-box"><h3>Pending Ontology Suggestions</h3>${ontologySuggestionHtml}</section><section class="author-box"><h3>Logic Dossiers</h3>${dossierHtml}</section><section class="author-box"><h3>Decision Forecasts & Branch Simulations</h3>${forecastHtml}</section><section class="author-box"><h3>Logic Reports</h3>${reportHtml}</section>${entityHtml}`;
+  return `<section class="author-box"><h3>Logic Review Packets</h3>${reviewPacketHtml}</section><section class="author-box"><h3>Pending Ontology Suggestions</h3>${ontologySuggestionHtml}</section><section class="author-box"><h3>Logic Dossiers</h3>${dossierHtml}</section><section class="author-box"><h3>Decision Forecasts & Branch Simulations</h3>${forecastHtml}</section><section class="author-box"><h3>Logic Reports</h3>${reportHtml}</section>${entityHtml}`;
 }
 
 function backupHtmlDocument(payload){
@@ -10214,6 +10675,7 @@ a{color:#8b3a1e}
     <div class="stat"><b>${payload.counts.logicEntities}</b> Logic Entities</div>
     <div class="stat"><b>${payload.counts.logicObservations}</b> Logic Observations</div>
     <div class="stat"><b>${payload.counts.logicReports}</b> Logic Reports</div>
+    <div class="stat"><b>${payload.counts.logicReviewPackets}</b> Logic Packets</div>
   </section>
   <section id="chapters"><h2>Chapters</h2>${chaptersHtml}</section>
   <section id="drafts"><h2>Draft Inbox</h2>${draftsHtml}</section>
@@ -10283,6 +10745,7 @@ let _logicRelationshipTarget = '';
 let _logicChapterCheckEntity = '';
 let _logicReportFilter = 'all';
 let _logicSelectedReportKey = '';
+let _logicPendingPacketId = '';
 let _logicTimelineFilter = 'recent';
 let _logicTimelineCollapsed = false;
 let _logicImageSettings = {};
@@ -14021,7 +14484,7 @@ async function analyzeLogicChapterFromEditor(data){
   try{
     const payload = logicChapterPayload(data);
     const {model, parsed} = await callLogicOpenRouter(payload, 'chapter editor draft');
-    const count = storeLogicAiReport(parsed, {sourceKind:'chapter', sourceId:data.id, sourceTitle:data.chapter || data.book || 'Chapter draft'}, model);
+    const count = storeLogicAiReport(parsed, {sourceKind:'chapter', sourceId:data.id, sourceTitle:data.chapter || data.book || 'Chapter draft', wordCount:String(data.body || '').trim().split(/\s+/).filter(Boolean).length}, model);
     logicSetStatus(`Chapter logic analysis complete: ${count} pending suggestion${count===1?'':'s'} created.`);
     renderAuthorLogicBoard();
     updateAuthorWorkspaceStatsOnly();
@@ -17477,6 +17940,22 @@ function draftAiSuggestionFromReport(report){
   return out;
 }
 
+function draftAiSuggestionFingerprint(item={}){
+  return [item.group, item.kind, logicNormalizeFingerprintText([item.title, item.summary].filter(Boolean).join(' '))].join('|');
+}
+
+function mergeDraftAiSuggestions(existing=[], incoming=[]){
+  const out = Array.isArray(existing) ? [...existing] : [];
+  const seen = new Set(out.map(draftAiSuggestionFingerprint));
+  incoming.forEach(item=>{
+    const key = draftAiSuggestionFingerprint(item);
+    if(seen.has(key)) return;
+    seen.add(key);
+    out.unshift(item);
+  });
+  return out;
+}
+
 async function callDraftAiFunction(fragment){
   if(_draftAiSettings.openRouterKey || _draftAiSettings.geminiKey) return callDraftOpenRouterFromBrowser(fragment);
   const data = await draftAiDirectFunctionProbe(fragment, {timeoutMs:90000});
@@ -17555,7 +18034,7 @@ async function analyzeDraftWithAi(id){
     fragment.aiAnalyses = fragment.aiAnalyses || [];
     fragment.aiSuggestions = fragment.aiSuggestions || [];
     fragment.aiAnalyses.unshift({id:draftId(), createdAt:Date.now(), report});
-    fragment.aiSuggestions.unshift(...suggestions);
+    fragment.aiSuggestions = mergeDraftAiSuggestions(fragment.aiSuggestions, suggestions);
     fragment.updatedAt = Date.now();
     await draftPut(fragment);
     draftStatus(suggestions.length
@@ -17631,6 +18110,7 @@ function renderDraftAiPanel(fragment){
     <div class="drafts-ai-actions">
       <button class="cm-btn secondary" type="button" onclick="saveDraftAiSettings()">Save Key</button>
       <button class="cm-btn secondary" type="button" onclick="handleAnalyzeFragmentClick()">Analyze Fragment</button>
+      <button class="cm-btn primary" type="button" onclick="activeDraft() ? analyzeDraftToLogicReview(activeDraft()).then(()=>showLogicMachine('pending')).catch(err=>draftStatus('Logic intake failed: ' + (err.message || err))) : draftStatus('Select a fragment first.')">Analyze + Send To Logic</button>
       <button class="cm-btn secondary" type="button" onclick="analyzeSelectedDraftsWithAi()">Analyze Selected Visible</button>
       <button class="cm-btn secondary" type="button" onclick="analyzeSelectedDraftsForLogic()">Analyze Selected For Logic</button>
       <button class="cm-btn secondary" type="button" onclick="testDraftAiConnection()">Test AI Connection</button>
@@ -19407,6 +19887,7 @@ async function renderDraftsView(options={}){
   const viewSel = document.getElementById('draft-filter-view');
   const layerSel = document.getElementById('draft-filter-layer');
   const search = document.getElementById('draft-search');
+  const logicChapterSource = document.getElementById('draft-logic-chapter-source');
   const isPlanning = _draftFilter.view === 'planning';
   const isLayers = _draftFilter.view === 'layers';
   const isReady = _draftFilter.view === 'ready';
@@ -19428,6 +19909,7 @@ async function renderDraftsView(options={}){
   if(viewSel) viewSel.value = _draftFilter.view || 'inbox';
   if(layerSel) layerSel.innerHTML = draftLayerOptions();
   if(search) search.value = _draftFilter.search || '';
+  if(logicChapterSource) logicChapterSource.innerHTML = draftChapterOptions(logicChapterSource.value || '');
   if(list) list.innerHTML = fullWorkspace ? '<div class="drafts-empty">This workflow has its own workspace in the main panel.</div>' : (visible.length ? visible.map(draftFragmentCard).join('') : '<div class="drafts-empty">No fragments match this view.</div>');
   if(stats) stats.innerHTML = renderDraftStats();
   if(editor && (fullWorkspace || !options.keepEditor)){
@@ -19516,6 +19998,122 @@ async function draftCreateFragmentsFromText(text, sourceFilename='', mode='headi
     }));
   }
   return parts.length;
+}
+
+async function draftCreateSingleSourceFragment(text, sourceFilename='', title=''){
+  const body = String(text || '').trim();
+  if(!body) return null;
+  const now = Date.now();
+  const item = normalizeDraftFragment({
+    id:draftId(),
+    title:title || draftTitleFromBody(body, sourceFilename || 'Imported Source'),
+    body,
+    type:'scene',
+    status:'inbox',
+    sourceFilename,
+    suggestions:draftSuggestionCandidates({title:title || draftTitleFromBody(body), body, tags:[], characters:[], motifs:[], locations:[], narrativeDevices:[]}),
+    createdAt:now,
+    updatedAt:now
+  });
+  await draftPut(item);
+  _activeDraftId = item.id;
+  _draftFragments.unshift(item);
+  return item;
+}
+
+async function analyzeDraftToLogicReview(fragment, options={}){
+  if(!fragment) return 0;
+  let draftSuggestionCount = 0;
+  try{
+    draftStatus(`Draft AI pass for "${fragment.title}"...`);
+    const report = await callDraftAiFunction(fragment);
+    const suggestions = draftAiSuggestionFromReport(report);
+    fragment.aiAnalyses = fragment.aiAnalyses || [];
+    fragment.aiSuggestions = fragment.aiSuggestions || [];
+    fragment.aiAnalyses.unshift({id:draftId(), createdAt:Date.now(), report});
+    fragment.aiSuggestions = mergeDraftAiSuggestions(fragment.aiSuggestions, suggestions);
+    fragment.updatedAt = Date.now();
+    await draftPut(fragment);
+    draftSuggestionCount = suggestions.length;
+  }catch(err){
+    console.warn('Draft AI pass failed during Logic intake:', err);
+    draftStatus(`Draft AI pass failed, continuing with Logic analysis: ${err.message || err}`);
+  }
+  draftStatus(`Logic pass for "${fragment.title}"...`);
+  const payload = logicDraftPayload(fragment);
+  const {model, parsed} = await callLogicOpenRouter(payload, 'draft intake packet');
+  const count = storeLogicAiReport(parsed, {
+    sourceKind:'draft',
+    sourceId:fragment.id,
+    sourceTitle:fragment.title || fragment.id,
+    wordCount:draftWordCount(fragment)
+  }, model);
+  _logicPendingPacketId = logicReviewPacketId({sourceKind:'draft', sourceId:fragment.id, sourceTitle:fragment.title || fragment.id});
+  logicSetStatus(`Logic Review Packet created for ${fragment.title}: ${count} new pending card${count===1?'':'s'}${draftSuggestionCount ? ` plus ${draftSuggestionCount} Draft AI suggestion${draftSuggestionCount===1?'':'s'}` : ''}.`);
+  return count;
+}
+
+async function draftImportPastedToLogic(){
+  if(!requireAdmin()) return;
+  const text = document.getElementById('draft-intake-text')?.value || '';
+  if(!String(text).trim()){ draftStatus('Paste chapter or manuscript text first.'); return; }
+  try{
+    draftStatus('Creating source packet from pasted text...');
+    const fragment = await draftCreateSingleSourceFragment(text, 'Pasted Logic Intake');
+    document.getElementById('draft-intake-text').value = '';
+    await analyzeDraftToLogicReview(fragment);
+    await renderDraftsView({keepCache:false});
+    showLogicMachine('pending');
+  }catch(err){
+    console.error('Import + Analyze To Logic failed:', err);
+    draftStatus('Import + Analyze To Logic failed: ' + (err.message || err));
+  }
+}
+
+async function draftUploadAnalyzeToLogic(event){
+  if(!requireAdmin()) return;
+  const files = Array.from(event.target.files || []);
+  if(!files.length) return;
+  let total = 0;
+  try{
+    for(const file of files){
+      const text = await file.text();
+      const fragment = await draftCreateSingleSourceFragment(text, file.name, file.name.replace(/\.(txt|md)$/i,''));
+      if(fragment) total += await analyzeDraftToLogicReview(fragment);
+    }
+    event.target.value = '';
+    await renderDraftsView({keepCache:false});
+    showLogicMachine('pending');
+    draftStatus(`Upload + Logic analysis complete: ${total} new pending Logic card${total===1?'':'s'}.`);
+  }catch(err){
+    console.error('Upload + Analyze To Logic failed:', err);
+    draftStatus('Upload + Analyze To Logic failed: ' + (err.message || err));
+  }
+}
+
+async function draftImportSelectedChapterToLogic(){
+  if(!requireAdmin()) return;
+  const id = document.getElementById('draft-logic-chapter-source')?.value || '';
+  const chapter = chapters.find(ch=>ch.id===id);
+  if(!chapter){ draftStatus('Choose an existing chapter first.'); return; }
+  try{
+    draftStatus(`Analyzing chapter "${chapter.chapter || chapter.book || chapter.id}" into Logic...`);
+    const payload = logicChapterPayload(chapter);
+    const {model, parsed} = await callLogicOpenRouter(payload, 'existing chapter intake packet');
+    const source = {
+      sourceKind:'chapter',
+      sourceId:chapter.id,
+      sourceTitle:chapter.chapter || chapter.book || chapter.id,
+      wordCount:String(chapter.body || '').trim().split(/\s+/).filter(Boolean).length
+    };
+    const count = storeLogicAiReport(parsed, source, model);
+    _logicPendingPacketId = logicReviewPacketId(source);
+    logicSetStatus(`Logic Review Packet created for ${source.sourceTitle}: ${count} new pending card${count===1?'':'s'}.`);
+    showLogicMachine('pending');
+  }catch(err){
+    console.error('Chapter import to Logic failed:', err);
+    draftStatus('Chapter import to Logic failed: ' + (err.message || err));
+  }
 }
 
 async function draftSplitIntake(){
@@ -20550,6 +21148,8 @@ Object.assign(window, {
   setLogicReportFilter,
   selectLogicReport,
   setLogicReportSectionsOpen,
+  selectLogicPendingPacket,
+  rejectLogicDuplicateBatch,
   logicDeleteReportItem,
   analyzeLogicOntologyEntity,
   acceptLogicOntologySuggestion,
@@ -20568,6 +21168,10 @@ Object.assign(window, {
   persistActiveDraftFromEditor,
   queueDraftEditorSave,
   draftSplitIntake,
+  draftImportPastedToLogic,
+  draftImportSelectedChapterToLogic,
+  draftUploadAnalyzeToLogic,
+  analyzeDraftToLogicReview,
   draftClearIntake,
   draftUploadFromInput,
   attachDraftControlHandlers,
