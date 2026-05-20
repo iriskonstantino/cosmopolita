@@ -5322,7 +5322,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.19.14</div>
+<div id="site-version-stamp">v2026.05.19.15</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -7538,6 +7538,20 @@ function renderLogicAiSettings(){
   </section>`;
 }
 
+function renderLogicEntityHero(entity){
+  if(!entity) return '';
+  const image = logicEntityImage(entity);
+  const imageSetting = logicImageSetting(entity.id);
+  return `<div class="logic-hero">
+    ${image ? `<img class="logic-hero-img" src="${escHtml(image)}" alt="${escHtml(entity.name)}" style="object-position:${escHtml(imageSetting.position)};transform:scale(${Number(imageSetting.zoom || 100) / 100})" onerror="this.remove()">` : ''}
+    <div class="logic-hero-content">
+      <div class="logic-kicker">${escHtml(LOGIC_TABS.find(tab=>tab.id===_logicActiveTab)?.label || 'Logic Machine')}</div>
+      <div class="logic-title">${escHtml(entity.name)}</div>
+      <div class="logic-meta">${escHtml(logicTypeLabel(entity.type))} · ${escHtml(entity.sourceKind)} · ${escHtml(entity.tags.join(', ') || 'no tags')}</div>
+    </div>
+  </div>`;
+}
+
 function renderLogicProfiles(){
   const entity = logicEntityById(_logicSelectedEntityId);
   if(!entity) return `<div class="drafts-empty">Create or select an entity to begin tracking logic.</div>`;
@@ -7557,14 +7571,6 @@ function renderLogicProfiles(){
     logicGaugeCard('Psych Signal', countCats(['psyche','body','speech','moral','habit']) * 14, 'psyche, speech, body, habit, moral logic')
   ].join('');
   return `<section>
-    <div class="logic-hero">
-      ${image ? `<img class="logic-hero-img" src="${escHtml(image)}" alt="${escHtml(entity.name)}" style="object-position:${escHtml(imageSetting.position)};transform:scale(${Number(imageSetting.zoom || 100) / 100})" onerror="this.remove()">` : ''}
-      <div class="logic-hero-content">
-        <div class="logic-kicker">Entity Profile</div>
-        <div class="logic-title">${escHtml(entity.name)}</div>
-        <div class="logic-meta">${escHtml(logicTypeLabel(entity.type))} · ${escHtml(entity.sourceKind)} · ${escHtml(entity.tags.join(', ') || 'no tags')}</div>
-      </div>
-    </div>
     <div class="logic-actions" style="margin-top:.7rem">
       ${entity.sourceKind === 'character' ? `<button class="logic-mini-btn" type="button" onclick="showCharDetail('${escHtml(entity.sourceId)}')">Open Character</button>` : ''}
       ${entity.sourceKind === 'codex' ? `<button class="logic-mini-btn" type="button" onclick="showCodexEntry('${escHtml(entity.sourceId)}')">Open Codex</button>` : ''}
@@ -8186,6 +8192,8 @@ function renderLogicPending(){
 
 function renderLogicMain(){
   let body = '';
+  const selectedEntity = logicEntityById(_logicSelectedEntityId);
+  const sharedHero = selectedEntity ? renderLogicEntityHero(selectedEntity) : '';
   if(_logicActiveTab === 'ontology') body = renderLogicOntology();
   else if(_logicActiveTab === 'psych') body = renderLogicPsychProfile();
   else if(_logicActiveTab === 'forecast') body = renderLogicForecast();
@@ -8198,7 +8206,7 @@ function renderLogicMain(){
   else if(_logicActiveTab === 'reports') body = renderLogicReports();
   else if(_logicActiveTab === 'pending') body = renderLogicPending();
   else body = renderLogicProfiles();
-  return `${renderLogicTabs()}${body}`;
+  return `${renderLogicTabs()}${sharedHero}${body}`;
 }
 
 function renderLogicMachine(){
