@@ -5415,7 +5415,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.20.02</div>
+<div id="site-version-stamp">v2026.05.20.03</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -10720,6 +10720,7 @@ async function exportFullBackup(){
 }
 
 let chapters = normalizeChapterList(loadChapters());
+let _bookArchitectureReady = false;
 let _editingChapterId = null;
 let _chapterEditorBaseId = null;
 let _chapterEditorDraftTimer = null;
@@ -11816,6 +11817,7 @@ function saveBookArchitecture(){
 }
 
 let bookArchitecture = loadBookArchitecture();
+_bookArchitectureReady = true;
 saveBookArchitecture();
 
 function getBookArchNovel(title){
@@ -11901,11 +11903,37 @@ function architectureIndex(list=[], title=''){
   return index >= 0 ? index : Number.POSITIVE_INFINITY;
 }
 
+function chapterOrderLabels(ch){
+  if(_bookArchitectureReady){
+    return {
+      novel:tocNovelName(ch),
+      act:tocActName(ch),
+      volume:tocVolumeName(ch),
+      subvolume:tocSubvolumeName(ch)
+    };
+  }
+  return {
+    novel:canonicalNovelTitle(ch && ch.novel ? ch.novel : 'WILL OF AN ARCHITECT'),
+    act:ch && (ch.act || ch.volume) ? (ch.act || ch.volume) : '',
+    volume:ch && (ch.volume || ch.book) ? (ch.volume || ch.book) : '',
+    subvolume:ch && (ch.subvolume || ch.part) ? (ch.subvolume || ch.part) : 'Main Sequence'
+  };
+}
+
 function chapterArchitectureOrder(ch){
-  const novelName = tocNovelName(ch);
-  const actName = tocActName(ch);
-  const volumeName = tocVolumeName(ch);
-  const subvolumeName = tocSubvolumeName(ch);
+  const labels = chapterOrderLabels(ch);
+  if(!_bookArchitectureReady){
+    return {
+      novelIndex:Number.POSITIVE_INFINITY,
+      actIndex:Number.POSITIVE_INFINITY,
+      volumeIndex:Number.POSITIVE_INFINITY,
+      subvolumeIndex:Number.POSITIVE_INFINITY
+    };
+  }
+  const novelName = labels.novel;
+  const actName = labels.act;
+  const volumeName = labels.volume;
+  const subvolumeName = labels.subvolume;
   const novelIndex = architectureIndex(bookArchitecture.novels || [], novelName);
   const novel = getBookArchNovel(novelName) || {acts:[]};
   const actIndex = architectureIndex(novel.acts || [], actName);
@@ -11922,14 +11950,16 @@ function orderedChapters(list=chapters){
     const bi = chapters.indexOf(b);
     const ao = chapterArchitectureOrder(a);
     const bo = chapterArchitectureOrder(b);
+    const al = chapterOrderLabels(a);
+    const bl = chapterOrderLabels(b);
     return (ao.novelIndex - bo.novelIndex)
-      || String(tocNovelName(a)).localeCompare(String(tocNovelName(b)))
+      || String(al.novel).localeCompare(String(bl.novel))
       || (ao.actIndex - bo.actIndex)
-      || String(tocActName(a)).localeCompare(String(tocActName(b)))
+      || String(al.act).localeCompare(String(bl.act))
       || (ao.volumeIndex - bo.volumeIndex)
-      || String(tocVolumeName(a)).localeCompare(String(tocVolumeName(b)))
+      || String(al.volume).localeCompare(String(bl.volume))
       || (ao.subvolumeIndex - bo.subvolumeIndex)
-      || String(tocSubvolumeName(a)).localeCompare(String(tocSubvolumeName(b)))
+      || String(al.subvolume).localeCompare(String(bl.subvolume))
       || (chapterOrderNumber(a) - chapterOrderNumber(b))
       || ai - bi;
   });
