@@ -5144,23 +5144,134 @@ body:not(.admin-on) #tnav-drafts{
 }
 
 /* ─── MANUSCRIPT STUDIO ───────────────── */
-#manuscript-view{display:none;padding-top:48px;background:#120f10;color:#f3eee5}
-.manuscript-view-header{
-  position:relative;
-  overflow:hidden;
-  border-bottom:1px solid rgba(240,228,214,0.15);
-  background:
+#manuscript-view{
+  --ms-page-bg:#120f10;
+  --ms-text:#f3eee5;
+  --ms-muted:rgba(243,238,229,0.72);
+  --ms-faint:rgba(243,238,229,0.56);
+  --ms-faint-2:rgba(243,238,229,0.52);
+  --ms-border:rgba(240,228,214,0.1);
+  --ms-border-strong:rgba(240,228,214,0.15);
+  --ms-panel-bg:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015));
+  --ms-panel-alt:rgba(14,11,12,0.82);
+  --ms-panel-alt-2:rgba(19,14,16,0.88);
+  --ms-shell-bg:
+    radial-gradient(circle at top left,rgba(200,129,10,0.07),transparent 26%),
+    linear-gradient(180deg,#181214 0%,#0f0d0e 100%);
+  --ms-header-bg:
     radial-gradient(circle at top left,rgba(200,129,10,0.22),transparent 34%),
     radial-gradient(circle at 82% 20%,rgba(184,50,50,0.18),transparent 28%),
     linear-gradient(135deg,#171113 0%,#0f0c0d 44%,#1d1718 100%);
+  --ms-header-grid-strong:rgba(255,255,255,0.04);
+  --ms-header-grid-soft:rgba(255,255,255,0.02);
+  --ms-input-bg:rgba(248,244,237,0.06);
+  --ms-input-text:#f3eee5;
+  --ms-btn-bg:rgba(248,244,237,0.06);
+  --ms-btn-text:#f3eee5;
+  --ms-btn-hover-bg:rgba(200,129,10,0.16);
+  --ms-btn-hover-border:rgba(200,129,10,0.46);
+  --ms-btn-hover-text:#fff5db;
+  --ms-btn-primary:linear-gradient(135deg,rgba(200,129,10,0.3),rgba(184,50,50,0.18));
+  --ms-btn-primary-border:rgba(200,129,10,0.4);
+  --ms-tree-bg:rgba(255,255,255,0.02);
+  --ms-tree-active-bg:linear-gradient(90deg,rgba(200,129,10,0.14),rgba(255,255,255,0.035));
+  --ms-tree-active-border:rgba(200,129,10,0.42);
+  --ms-tree-active-shadow:inset 3px 0 0 rgba(200,129,10,0.9),0 10px 24px rgba(0,0,0,0.22);
+  --ms-editor-frame-bg:linear-gradient(180deg,rgba(250,246,239,0.97),rgba(246,240,231,0.98));
+  --ms-editor-frame-border:rgba(240,228,214,0.1);
+  --ms-editor-frame-shadow:0 20px 70px rgba(0,0,0,0.35);
+  --ms-editor-title-border:rgba(24,20,20,0.12);
+  --ms-editor-title-text:#181414;
+  --ms-editor-toolbar-bg:linear-gradient(180deg,#fbf7ef,#f5efe4);
+  --ms-editor-toolbar-border:rgba(24,20,20,0.1);
+  --ms-editor-picker:#372f2f;
+  --ms-editor-text:#1d1818;
+  --ms-editor-placeholder:rgba(24,20,20,0.42);
+  --ms-stat-bg:rgba(255,255,255,0.03);
+  --ms-summary-bg:rgba(255,255,255,0.03);
+  --ms-chip-bg:rgba(255,255,255,0.04);
+  --ms-badge-bg:rgba(255,255,255,0.04);
+  --ms-badge-text:rgba(243,238,229,0.74);
+  --ms-publish-ready:rgba(200,129,10,0.26);
+  --ms-publish-ready-border:rgba(200,129,10,0.5);
+  --ms-publish-ok:rgba(56,142,96,0.22);
+  --ms-publish-ok-border:rgba(101,198,136,0.42);
+  --ms-publish-warn:rgba(184,50,50,0.2);
+  --ms-publish-warn-border:rgba(210,90,90,0.45);
+  display:none;
+  padding-top:48px;
+  background:var(--ms-page-bg);
+  color:var(--ms-text);
+}
+#manuscript-view[data-ms-theme="light"]{
+  --ms-page-bg:#f6efe4;
+  --ms-text:#221b18;
+  --ms-muted:rgba(34,27,24,0.74);
+  --ms-faint:rgba(34,27,24,0.6);
+  --ms-faint-2:rgba(34,27,24,0.5);
+  --ms-border:rgba(74,51,40,0.14);
+  --ms-border-strong:rgba(74,51,40,0.2);
+  --ms-panel-bg:linear-gradient(180deg,rgba(255,253,250,0.86),rgba(247,238,227,0.92));
+  --ms-panel-alt:rgba(255,249,242,0.82);
+  --ms-panel-alt-2:rgba(249,240,230,0.88);
+  --ms-shell-bg:
+    radial-gradient(circle at top left,rgba(200,129,10,0.14),transparent 24%),
+    radial-gradient(circle at 92% 12%,rgba(184,50,50,0.1),transparent 22%),
+    linear-gradient(180deg,#f7efe4 0%,#efe1d0 100%);
+  --ms-header-bg:
+    radial-gradient(circle at top left,rgba(200,129,10,0.18),transparent 34%),
+    radial-gradient(circle at 82% 20%,rgba(184,50,50,0.11),transparent 26%),
+    linear-gradient(135deg,#f8f1e7 0%,#e9dbc8 44%,#f2e6d8 100%);
+  --ms-header-grid-strong:rgba(91,61,46,0.08);
+  --ms-header-grid-soft:rgba(91,61,46,0.035);
+  --ms-input-bg:rgba(255,252,248,0.94);
+  --ms-input-text:#241d18;
+  --ms-btn-bg:rgba(255,251,246,0.8);
+  --ms-btn-text:#271f1a;
+  --ms-btn-hover-bg:rgba(200,129,10,0.18);
+  --ms-btn-hover-border:rgba(160,100,21,0.48);
+  --ms-btn-hover-text:#2a1a0f;
+  --ms-btn-primary:linear-gradient(135deg,rgba(200,129,10,0.22),rgba(184,50,50,0.1));
+  --ms-btn-primary-border:rgba(160,100,21,0.42);
+  --ms-tree-bg:rgba(255,252,248,0.72);
+  --ms-tree-active-bg:linear-gradient(90deg,rgba(200,129,10,0.14),rgba(255,255,255,0.45));
+  --ms-tree-active-border:rgba(160,100,21,0.34);
+  --ms-tree-active-shadow:inset 3px 0 0 rgba(160,100,21,0.88),0 10px 24px rgba(70,44,24,0.08);
+  --ms-editor-frame-bg:linear-gradient(180deg,#fffdfa,#fbf5ec);
+  --ms-editor-frame-border:rgba(74,51,40,0.14);
+  --ms-editor-frame-shadow:0 18px 52px rgba(70,44,24,0.12);
+  --ms-editor-title-border:rgba(74,51,40,0.12);
+  --ms-editor-title-text:#231b17;
+  --ms-editor-toolbar-bg:linear-gradient(180deg,#f8f1e6,#f4eadc);
+  --ms-editor-toolbar-border:rgba(74,51,40,0.1);
+  --ms-editor-picker:#4b3830;
+  --ms-editor-text:#241d18;
+  --ms-editor-placeholder:rgba(74,51,40,0.45);
+  --ms-stat-bg:rgba(255,252,248,0.74);
+  --ms-summary-bg:rgba(255,252,248,0.72);
+  --ms-chip-bg:rgba(255,251,246,0.86);
+  --ms-badge-bg:rgba(255,251,246,0.8);
+  --ms-badge-text:rgba(34,27,24,0.72);
+  --ms-publish-ready:rgba(200,129,10,0.16);
+  --ms-publish-ready-border:rgba(160,100,21,0.4);
+  --ms-publish-ok:rgba(93,149,106,0.14);
+  --ms-publish-ok-border:rgba(93,149,106,0.36);
+  --ms-publish-warn:rgba(184,50,50,0.12);
+  --ms-publish-warn-border:rgba(184,50,50,0.28);
+}
+.manuscript-view-header{
+  position:relative;
+  overflow:hidden;
+  border-bottom:1px solid var(--ms-border-strong);
+  background:var(--ms-header-bg);
 }
 .manuscript-view-header::before{
   content:'';
   position:absolute;
   inset:0;
   background:
-    linear-gradient(90deg,rgba(255,255,255,0.04) 0 1px,transparent 1px 28px),
-    linear-gradient(rgba(255,255,255,0.02) 0 1px,transparent 1px 28px);
+    linear-gradient(90deg,var(--ms-header-grid-strong) 0 1px,transparent 1px 28px),
+    linear-gradient(var(--ms-header-grid-soft) 0 1px,transparent 1px 28px);
   opacity:.22;
   pointer-events:none;
 }
@@ -5180,7 +5291,7 @@ body:not(.admin-on) #tnav-drafts{
 .manuscript-kicker{
   font-size:0.55rem;
   letter-spacing:0.22em;
-  color:rgba(243,238,229,0.62);
+  color:var(--ms-faint);
   margin-bottom:0.4rem;
 }
 .manuscript-title{
@@ -5193,16 +5304,16 @@ body:not(.admin-on) #tnav-drafts{
 .manuscript-subtitle{
   margin-top:0.55rem;
   max-width:55rem;
-  color:rgba(243,238,229,0.72);
+  color:var(--ms-muted);
   font-size:0.96rem;
   line-height:1.55;
 }
 .manuscript-header-badge{
   align-self:flex-start;
-  border:1px solid rgba(240,228,214,0.18);
-  background:rgba(255,255,255,0.04);
+  border:1px solid var(--ms-border-strong);
+  background:var(--ms-badge-bg);
   padding:0.55rem 0.72rem;
-  color:rgba(243,238,229,0.74);
+  color:var(--ms-badge-text);
   font-family:var(--mono);
   font-size:0.52rem;
   letter-spacing:0.16em;
@@ -5212,21 +5323,19 @@ body:not(.admin-on) #tnav-drafts{
   display:grid;
   grid-template-columns:340px minmax(0,1fr) 330px;
   min-height:calc(100vh - 180px);
-  background:
-    radial-gradient(circle at top left,rgba(200,129,10,0.07),transparent 26%),
-    linear-gradient(180deg,#181214 0%,#0f0d0e 100%);
+  background:var(--ms-shell-bg);
 }
 .ms-rail,.ms-right{
   min-height:0;
   padding:1.1rem;
-  background:rgba(14,11,12,0.82);
-  border-right:1px solid rgba(240,228,214,0.08);
+  background:var(--ms-panel-alt);
+  border-right:1px solid var(--ms-border);
   overflow:auto;
 }
 .ms-right{
   border-right:none;
-  border-left:1px solid rgba(240,228,214,0.08);
-  background:rgba(19,14,16,0.88);
+  border-left:1px solid var(--ms-border);
+  background:var(--ms-panel-alt-2);
 }
 .ms-center{
   min-height:0;
@@ -5234,8 +5343,8 @@ body:not(.admin-on) #tnav-drafts{
   overflow:auto;
 }
 .ms-panel{
-  border:1px solid rgba(240,228,214,0.1);
-  background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015));
+  border:1px solid var(--ms-border);
+  background:var(--ms-panel-bg);
   box-shadow:0 24px 80px rgba(0,0,0,0.28);
   backdrop-filter:blur(8px);
 }
@@ -5244,7 +5353,7 @@ body:not(.admin-on) #tnav-drafts{
 .ms-rail-kicker{
   font-size:0.5rem;
   letter-spacing:0.18em;
-  color:rgba(243,238,229,0.52);
+  color:var(--ms-faint-2);
   margin-bottom:0.55rem;
 }
 .ms-workspace-head{display:grid;gap:0.65rem}
@@ -5256,26 +5365,26 @@ body:not(.admin-on) #tnav-drafts{
 }
 .ms-select,.ms-input,.ms-node-title-input{
   width:100%;
-  border:1px solid rgba(240,228,214,0.14);
-  background:rgba(248,244,237,0.06);
-  color:#f3eee5;
+  border:1px solid var(--ms-border-strong);
+  background:var(--ms-input-bg);
+  color:var(--ms-input-text);
   font-family:var(--serif);
   font-size:0.95rem;
   padding:0.58rem 0.7rem;
 }
 .ms-select option{color:#111;background:#faf8f3}
-.ms-input::placeholder,.ms-node-title-input::placeholder{color:rgba(243,238,229,0.42)}
+.ms-input::placeholder,.ms-node-title-input::placeholder{color:var(--ms-faint-2)}
 .ms-btn,.ms-mini-btn,.ms-tree-action,.ms-icon-btn{
-  border:1px solid rgba(240,228,214,0.15);
-  background:rgba(248,244,237,0.06);
-  color:#f3eee5;
+  border:1px solid var(--ms-border-strong);
+  background:var(--ms-btn-bg);
+  color:var(--ms-btn-text);
   cursor:pointer;
   transition:background .16s,border-color .16s,transform .16s,color .16s;
 }
 .ms-btn:hover,.ms-mini-btn:hover,.ms-tree-action:hover,.ms-icon-btn:hover{
-  background:rgba(200,129,10,0.16);
-  border-color:rgba(200,129,10,0.46);
-  color:#fff5db;
+  background:var(--ms-btn-hover-bg);
+  border-color:var(--ms-btn-hover-border);
+  color:var(--ms-btn-hover-text);
   transform:translateY(-1px);
 }
 .ms-btn{
@@ -5286,20 +5395,43 @@ body:not(.admin-on) #tnav-drafts{
   padding:0.6rem 0.8rem;
 }
 .ms-btn.primary{
-  background:linear-gradient(135deg,rgba(200,129,10,0.3),rgba(184,50,50,0.18));
-  border-color:rgba(200,129,10,0.4);
+  background:var(--ms-btn-primary);
+  border-color:var(--ms-btn-primary-border);
 }
 .ms-btn-row{display:flex;flex-wrap:wrap;gap:0.45rem}
+.ms-theme-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:0.25rem;
+  padding:0.18rem;
+  border:1px solid var(--ms-border-strong);
+  background:var(--ms-chip-bg);
+}
+.ms-theme-btn{
+  border:none;
+  background:transparent;
+  color:var(--ms-btn-text);
+  cursor:pointer;
+  font-family:var(--mono);
+  font-size:0.48rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  padding:0.4rem 0.55rem;
+}
+.ms-theme-btn.active{
+  background:var(--ms-btn-primary);
+  color:var(--ms-btn-hover-text);
+}
 .ms-tree{display:grid;gap:0.38rem}
 .ms-tree-level{display:grid;gap:0.38rem}
 .ms-tree-node{
-  border:1px solid rgba(240,228,214,0.08);
-  background:rgba(255,255,255,0.02);
+  border:1px solid var(--ms-border);
+  background:var(--ms-tree-bg);
 }
 .ms-tree-node.active{
-  border-color:rgba(200,129,10,0.42);
-  box-shadow:inset 3px 0 0 rgba(200,129,10,0.9),0 10px 24px rgba(0,0,0,0.22);
-  background:linear-gradient(90deg,rgba(200,129,10,0.14),rgba(255,255,255,0.035));
+  border-color:var(--ms-tree-active-border);
+  box-shadow:var(--ms-tree-active-shadow);
+  background:var(--ms-tree-active-bg);
 }
 .ms-tree-row{
   display:grid;
@@ -5320,7 +5452,7 @@ body:not(.admin-on) #tnav-drafts{
 .ms-tree-toggle{
   border:none;
   background:transparent;
-  color:rgba(243,238,229,0.62);
+  color:var(--ms-faint);
   cursor:pointer;
 }
 .ms-tree-toggle.blank{visibility:hidden}
@@ -5329,7 +5461,7 @@ body:not(.admin-on) #tnav-drafts{
   text-align:left;
   border:none;
   background:none;
-  color:#f3eee5;
+  color:var(--ms-text);
   cursor:pointer;
 }
 .ms-tree-title{
@@ -5343,7 +5475,7 @@ body:not(.admin-on) #tnav-drafts{
 .ms-tree-meta{
   display:block;
   margin-top:0.14rem;
-  color:rgba(243,238,229,0.52);
+  color:var(--ms-faint-2);
   font-size:0.46rem;
   letter-spacing:0.11em;
 }
@@ -5356,7 +5488,7 @@ body:not(.admin-on) #tnav-drafts{
 .ms-crumbs{
   font-size:0.52rem;
   letter-spacing:0.16em;
-  color:rgba(243,238,229,0.58);
+  color:var(--ms-faint);
   margin-bottom:0.45rem;
 }
 .ms-center-title{
@@ -5367,7 +5499,7 @@ body:not(.admin-on) #tnav-drafts{
   text-transform:uppercase;
 }
 .ms-center-sub{
-  color:rgba(243,238,229,0.72);
+  color:var(--ms-muted);
   margin-top:0.45rem;
   font-size:0.95rem;
   line-height:1.55;
@@ -5379,25 +5511,37 @@ body:not(.admin-on) #tnav-drafts{
   margin-top:0.75rem;
 }
 .ms-meta-chip{
-  border:1px solid rgba(240,228,214,0.12);
-  background:rgba(255,255,255,0.04);
+  border:1px solid var(--ms-border);
+  background:var(--ms-chip-bg);
   padding:0.26rem 0.42rem;
-  color:rgba(243,238,229,0.62);
+  color:var(--ms-faint);
   font-size:0.46rem;
   letter-spacing:0.11em;
 }
+.ms-meta-chip.publish-ready{
+  background:var(--ms-publish-ready);
+  border-color:var(--ms-publish-ready-border);
+}
+.ms-meta-chip.publish-ok{
+  background:var(--ms-publish-ok);
+  border-color:var(--ms-publish-ok-border);
+}
+.ms-meta-chip.publish-warn{
+  background:var(--ms-publish-warn);
+  border-color:var(--ms-publish-warn-border);
+}
 .ms-editor-frame{
   margin-top:1rem;
-  border:1px solid rgba(240,228,214,0.1);
-  background:linear-gradient(180deg,rgba(250,246,239,0.97),rgba(246,240,231,0.98));
-  color:#181414;
-  box-shadow:0 20px 70px rgba(0,0,0,0.35);
+  border:1px solid var(--ms-editor-frame-border);
+  background:var(--ms-editor-frame-bg);
+  color:var(--ms-editor-title-text);
+  box-shadow:var(--ms-editor-frame-shadow);
 }
 .ms-node-title-input{
   border:none;
-  border-bottom:1px solid rgba(24,20,20,0.12);
+  border-bottom:1px solid var(--ms-editor-title-border);
   background:transparent;
-  color:#181414;
+  color:var(--ms-editor-title-text);
   font-family:var(--display);
   font-size:1.25rem;
   letter-spacing:0.07em;
@@ -5407,8 +5551,8 @@ body:not(.admin-on) #tnav-drafts{
 .ms-editor-host{min-height:58vh}
 .ms-editor-host .ql-toolbar.ql-snow{
   border:none;
-  border-bottom:1px solid rgba(24,20,20,0.1);
-  background:linear-gradient(180deg,#fbf7ef,#f5efe4);
+  border-bottom:1px solid var(--ms-editor-toolbar-border);
+  background:var(--ms-editor-toolbar-bg);
   padding:0.85rem 1rem;
 }
 .ms-editor-host .ql-container.ql-snow{
@@ -5420,21 +5564,24 @@ body:not(.admin-on) #tnav-drafts{
 .ms-editor-host .ql-editor{
   min-height:54vh;
   padding:1.35rem 1.6rem 2.4rem;
-  color:#1d1818;
+  color:var(--ms-editor-text);
 }
 .ms-editor-host .ql-editor.ql-blank::before{
-  color:rgba(24,20,20,0.42);
+  color:var(--ms-editor-placeholder);
   font-style:normal;
 }
-.ms-editor-host .ql-picker{color:#372f2f}
+.ms-editor-host .ql-picker{color:var(--ms-editor-picker)}
+.ms-editor-host .ql-snow .ql-stroke{stroke:var(--ms-editor-picker)}
+.ms-editor-host .ql-snow .ql-fill{fill:var(--ms-editor-picker)}
+.ms-editor-host .ql-snow .ql-picker-label{color:var(--ms-editor-picker)}
 .ms-stat-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:0.55rem;
 }
 .ms-stat{
-  border:1px solid rgba(240,228,214,0.1);
-  background:rgba(255,255,255,0.03);
+  border:1px solid var(--ms-border);
+  background:var(--ms-stat-bg);
   padding:0.7rem;
 }
 .ms-stat-value{
@@ -5448,19 +5595,19 @@ body:not(.admin-on) #tnav-drafts{
 .ms-stat-label{
   display:block;
   margin-top:0.25rem;
-  color:rgba(243,238,229,0.52);
+  color:var(--ms-faint-2);
   font-size:0.46rem;
   letter-spacing:0.11em;
 }
 .ms-summary-list,.ms-result-list,.ms-character-list{display:grid;gap:0.5rem}
 .ms-summary-item,.ms-result-card,.ms-character-card,.ms-empty-state{
-  border:1px solid rgba(240,228,214,0.08);
-  background:rgba(255,255,255,0.03);
+  border:1px solid var(--ms-border);
+  background:var(--ms-summary-bg);
   padding:0.65rem;
 }
 .ms-mini-label{
   display:block;
-  color:rgba(243,238,229,0.48);
+  color:var(--ms-faint-2);
   font-size:0.46rem;
   letter-spacing:0.1em;
   margin-bottom:0.22rem;
@@ -5472,13 +5619,13 @@ body:not(.admin-on) #tnav-drafts{
   text-transform:uppercase;
 }
 .ms-result-meta,.ms-character-meta,.ms-search-empty,.ms-status{
-  color:rgba(243,238,229,0.56);
+  color:var(--ms-faint);
   font-size:0.46rem;
   letter-spacing:0.1em;
 }
 .ms-result-snippet,.ms-character-copy,.ms-empty-copy{
   margin-top:0.28rem;
-  color:rgba(243,238,229,0.76);
+  color:var(--ms-muted);
   font-size:0.83rem;
   line-height:1.48;
 }
@@ -5819,7 +5966,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.21.01</div>
+<div id="site-version-stamp">v2026.05.21.02</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -14470,7 +14617,8 @@ function manuscriptUiDefaults(ui={}){
     navSearch:'',
     manuscriptSearch:'',
     characterSearch:'',
-    lastNodeId:''
+    lastNodeId:'',
+    theme:'light'
   }, ui || {});
 }
 
@@ -14675,6 +14823,21 @@ function manuscriptStatus(message=''){
   if(el) el.textContent = _manuscriptStatusMessage;
 }
 
+function manuscriptTheme(workspace){
+  const ui = manuscriptUi(workspace);
+  return ui.theme === 'dark' ? 'dark' : 'light';
+}
+
+function manuscriptSimpleHash(value=''){
+  let hash = 0;
+  const text = String(value || '');
+  for(let i=0;i<text.length;i++){
+    hash = ((hash << 5) - hash) + text.charCodeAt(i);
+    hash |= 0;
+  }
+  return `ms-${Math.abs(hash)}`;
+}
+
 async function syncManuscriptsToSupabase(){
   const client = notesClient();
   if(!client || !isAdmin()) return;
@@ -14703,6 +14866,186 @@ async function persistManuscriptWorkspace(workspace, options={}){
 function manuscriptUi(workspace){
   if(!workspace.ui) workspace.ui = manuscriptUiDefaults();
   return workspace.ui;
+}
+
+function manuscriptLineage(workspace, nodeId){
+  const path = manuscriptPath(workspace, nodeId);
+  return {
+    book:path.find(item=>item.type === 'book') || null,
+    act:path.find(item=>item.type === 'act') || null,
+    volume:path.find(item=>item.type === 'volume') || null,
+    subvolume:path.find(item=>item.type === 'subvolume') || null,
+    chapter:path.find(item=>item.type === 'chapter') || null,
+    subchapter:path.find(item=>item.type === 'subchapter') || null
+  };
+}
+
+function manuscriptChapterNodeForNode(workspace, node){
+  if(!workspace || !node) return null;
+  if(node.type === 'chapter') return node;
+  return manuscriptLineage(workspace, node.id).chapter || null;
+}
+
+function manuscriptSubchaptersForChapter(workspace, chapterNodeId=''){
+  return manuscriptNodeChildren(workspace, chapterNodeId).filter(node=>node.type === 'subchapter');
+}
+
+function manuscriptHtmlToChapterBody(html=''){
+  const wrap = document.createElement('div');
+  wrap.innerHTML = String(html || '');
+
+  function inlineText(node){
+    if(!node) return '';
+    if(node.nodeType === Node.TEXT_NODE) return node.textContent || '';
+    if(node.nodeType !== Node.ELEMENT_NODE) return '';
+    const tag = node.tagName.toLowerCase();
+    const text = Array.from(node.childNodes || []).map(inlineText).join('');
+    if(tag === 'strong' || tag === 'b') return text.trim() ? `**${text}**` : '';
+    if(tag === 'em' || tag === 'i') return text.trim() ? `*${text}*` : '';
+    if(tag === 'a') return text || node.getAttribute('href') || '';
+    if(tag === 'br') return '\n';
+    return text;
+  }
+
+  function blockText(node){
+    if(!node) return '';
+    if(node.nodeType === Node.TEXT_NODE) return node.textContent || '';
+    if(node.nodeType !== Node.ELEMENT_NODE) return '';
+    const tag = node.tagName.toLowerCase();
+    if(tag === 'br') return '\n';
+    if(tag === 'h1' || tag === 'h2' || tag === 'h3'){
+      const heading = inlineText(node).trim();
+      return heading ? `===${heading}===\n\n` : '';
+    }
+    if(tag === 'blockquote'){
+      const quote = Array.from(node.childNodes || []).map(blockText).join('').trim();
+      return quote ? `${quote.split('\n').map(line=>line.trim() ? `> ${line}` : '>').join('\n')}\n\n` : '';
+    }
+    if(tag === 'ul' || tag === 'ol'){
+      const ordered = tag === 'ol';
+      const items = Array.from(node.children || [])
+        .filter(child=>child.tagName && child.tagName.toLowerCase() === 'li')
+        .map((child,index)=>{
+          const content = Array.from(child.childNodes || []).map(blockText).join('').trim().replace(/\n{2,}/g, '\n');
+          return content ? `${ordered ? `${index + 1}.` : '-'} ${content}` : '';
+        })
+        .filter(Boolean);
+      return items.length ? `${items.join('\n')}\n\n` : '';
+    }
+    if(tag === 'li'){
+      return Array.from(node.childNodes || []).map(blockText).join('').trim();
+    }
+    if(tag === 'p'){
+      const text = inlineText(node).replace(/\n{2,}/g, '\n').trim();
+      return text ? `${text}\n\n` : '';
+    }
+    if(tag === 'div'){
+      const children = Array.from(node.childNodes || []);
+      const hasBlocks = children.some(child=>child.nodeType === Node.ELEMENT_NODE && /^(p|div|ul|ol|blockquote|h1|h2|h3)$/.test(child.tagName.toLowerCase()));
+      const text = children.map(child=>hasBlocks ? blockText(child) : inlineText(child)).join('');
+      return text.trim() ? `${text.trim()}\n\n` : '';
+    }
+    return Array.from(node.childNodes || []).map(blockText).join('');
+  }
+
+  return Array.from(wrap.childNodes || [])
+    .map(blockText)
+    .join('')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function manuscriptPublishPayload(workspace, chapterNodeId=''){
+  const chapterNode = (workspace?.nodes || []).find(node=>node.id === chapterNodeId && node.type === 'chapter') || null;
+  if(!workspace || !chapterNode) return null;
+  const lineage = manuscriptLineage(workspace, chapterNodeId);
+  const subchapters = manuscriptSubchaptersForChapter(workspace, chapterNodeId);
+  const sections = subchapters.map(subchapter=>{
+    const doc = workspace.documents.find(item=>item.nodeId === subchapter.id) || null;
+    const body = manuscriptHtmlToChapterBody(doc?.html || '');
+    if(!body.trim()) return null;
+    return `===${subchapter.title || 'Untitled Subchapter'}===\n\n${body}`.trim();
+  }).filter(Boolean);
+  const existing = chapterNode.meta && chapterNode.meta.tocChapterId
+    ? chapters.find(item=>item.id === chapterNode.meta.tocChapterId) || null
+    : null;
+  const body = sections.join('\n\n');
+  const payload = normalizeChapterList([{
+    id:existing?.id || chapterNode.meta?.tocChapterId || manuscriptId('ch'),
+    num:existing?.num || '',
+    novel:workspace.title || existing?.novel || '',
+    act:lineage.act?.title || existing?.act || '',
+    book:lineage.book?.title || existing?.book || '',
+    volume:lineage.volume?.title || existing?.volume || '',
+    subvolume:lineage.subvolume?.title || existing?.subvolume || '',
+    part:existing?.part || '',
+    chapter:chapterNode.title || existing?.chapter || '',
+    meta:existing?.meta || {},
+    body,
+    authorNotes:existing?.authorNotes || normalizeAuthorNotes()
+  }])[0];
+  const fingerprint = JSON.stringify({
+    workspaceTitle:workspace.title || '',
+    book:payload.book,
+    act:payload.act,
+    volume:payload.volume,
+    subvolume:payload.subvolume,
+    chapter:payload.chapter,
+    subchapters:subchapters.map(subchapter=>{
+      const doc = workspace.documents.find(item=>item.nodeId === subchapter.id) || {};
+      return {
+        id:subchapter.id,
+        title:subchapter.title,
+        order:subchapter.order,
+        html:String(doc.html || '').trim()
+      };
+    })
+  });
+  return {
+    payload,
+    body,
+    chapterNode,
+    subchapters,
+    fingerprintHash:manuscriptSimpleHash(fingerprint)
+  };
+}
+
+function buildTOCChapterFromManuscript(chapterNodeId=''){
+  const workspace = activeManuscriptWorkspace();
+  return manuscriptPublishPayload(workspace, chapterNodeId);
+}
+
+function getManuscriptChapterPublishState(chapterNodeId=''){
+  const workspace = activeManuscriptWorkspace();
+  const chapterNode = (workspace?.nodes || []).find(node=>node.id === chapterNodeId && node.type === 'chapter') || null;
+  if(!workspace || !chapterNode) return {tone:'ready', label:'Not Published', linkedChapter:null};
+  const linkedChapterId = chapterNode.meta?.tocChapterId || '';
+  const linkedChapter = linkedChapterId ? chapters.find(item=>item.id === linkedChapterId) || null : null;
+  if(!linkedChapterId || !linkedChapter){
+    return {tone:'ready', label:'Not Published', linkedChapter:null};
+  }
+  const next = manuscriptPublishPayload(workspace, chapterNodeId);
+  if(next && chapterNode.meta?.publishHash && chapterNode.meta.publishHash !== next.fingerprintHash){
+    return {tone:'warn', label:'Out of Sync', linkedChapter};
+  }
+  return {tone:'ok', label:'Published', linkedChapter};
+}
+
+function manuscriptPublishChipClass(chapterNodeId=''){
+  const tone = getManuscriptChapterPublishState(chapterNodeId).tone;
+  if(tone === 'ok') return 'publish-ok';
+  if(tone === 'warn') return 'publish-warn';
+  return 'publish-ready';
+}
+
+async function setManuscriptTheme(theme='light'){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  manuscriptUi(workspace).theme = theme === 'dark' ? 'dark' : 'light';
+  const view = document.getElementById('manuscript-view');
+  if(view) view.setAttribute('data-ms-theme', manuscriptTheme(workspace));
+  await persistManuscriptWorkspace(workspace, {silent:true, message:`Theme switched to ${manuscriptTheme(workspace)} mode.`});
+  renderManuscriptStudio();
 }
 
 function manuscriptIsExpanded(workspace, nodeId){
@@ -14794,6 +15137,12 @@ function renderManuscriptLeftRail(){
             <button class="ms-btn primary" type="button" onclick="createManuscriptWorkspace()">New Workspace</button>
           </div>
         </div>
+        <div class="ms-workspace-row">
+          <div class="ms-theme-toggle" aria-label="Manuscript Studio theme">
+            <button class="ms-theme-btn ${manuscriptTheme(workspace)==='light' ? 'active' : ''}" type="button" onclick="setManuscriptTheme('light')">Light</button>
+            <button class="ms-theme-btn ${manuscriptTheme(workspace)==='dark' ? 'active' : ''}" type="button" onclick="setManuscriptTheme('dark')">Dark</button>
+          </div>
+        </div>
         <input class="ms-input" id="ms-nav-search" type="search" value="${escHtml(ui.navSearch || '')}" placeholder="Filter the hierarchy" oninput="updateManuscriptNavSearch(this.value)">
         <div class="ms-btn-row">
           <button class="ms-btn" type="button" onclick="manuscriptAddRootBook()">Add Book</button>
@@ -14821,6 +15170,8 @@ function renderManuscriptCenter(){
   }
   const crumbs = manuscriptPath(workspace, node.id).map(item=>item.title).join(' / ');
   const childType = manuscriptChildType(node.type);
+  const chapterNode = manuscriptChapterNodeForNode(workspace, node);
+  const publishState = chapterNode ? getManuscriptChapterPublishState(chapterNode.id) : null;
   if(node.type !== 'subchapter'){
     const children = manuscriptNodeChildren(workspace, node.id);
     root.innerHTML = `
@@ -14833,12 +15184,15 @@ function renderManuscriptCenter(){
           </div>
           <div class="ms-btn-row">
             ${childType ? `<button class="ms-btn primary" type="button" onclick="manuscriptAddChild('${escHtml(node.id)}')">Add ${escHtml(MANUSCRIPT_TYPE_LABELS[childType])}</button>` : ''}
+            ${node.type === 'chapter' ? `<button class="ms-btn primary" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(node.id)}')">Publish To TOC</button>` : ''}
+            ${node.type === 'chapter' && publishState?.linkedChapter ? `<button class="ms-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(node.id)}')">Open TOC Chapter</button>` : ''}
             <button class="ms-btn" type="button" onclick="renameManuscriptNode('${escHtml(node.id)}')">Rename</button>
           </div>
         </div>
         <div class="ms-status-row">
           <span class="ms-meta-chip">${escHtml(manuscriptNodeSummary(node, workspace))}</span>
           <span class="ms-meta-chip">Workspace: ${escHtml(workspace.title)}</span>
+          ${node.type === 'chapter' ? `<span class="ms-meta-chip ${manuscriptPublishChipClass(node.id)}">${escHtml(publishState?.label || 'Not Published')}</span>` : ''}
         </div>
         <div class="ms-empty-state" style="margin-top:1rem">
           <div class="ms-empty-title">${children.length ? 'Open a child node' : `Add your first ${MANUSCRIPT_TYPE_LABELS[childType] || 'section'}`}</div>
@@ -14859,6 +15213,8 @@ function renderManuscriptCenter(){
         </div>
         <div class="ms-btn-row">
           <button class="ms-btn primary" type="button" onclick="manuscriptAddChild('${escHtml(manuscriptPath(workspace, node.id).slice(-2)[0]?.id || node.id)}')">Add Sibling</button>
+          ${chapterNode ? `<button class="ms-btn primary" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish Chapter To TOC</button>` : ''}
+          ${chapterNode && publishState?.linkedChapter ? `<button class="ms-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open TOC Chapter</button>` : ''}
           <button class="ms-btn" type="button" onclick="renameManuscriptNode('${escHtml(node.id)}')">Rename</button>
         </div>
       </div>
@@ -14866,6 +15222,7 @@ function renderManuscriptCenter(){
         <span class="ms-meta-chip">${Number(doc.wordCount || 0).toLocaleString()} words</span>
         <span class="ms-meta-chip">${manuscriptReadingMinutes(doc.wordCount)} min read</span>
         <span class="ms-meta-chip">Updated ${escHtml(new Date(doc.updatedAt || Date.now()).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}))}</span>
+        ${chapterNode ? `<span class="ms-meta-chip ${manuscriptPublishChipClass(chapterNode.id)}">${escHtml(publishState?.label || 'Not Published')}</span>` : ''}
       </div>
       <div class="ms-editor-frame">
         <input id="ms-node-title" class="ms-node-title-input" value="${escHtml(node.title)}" placeholder="Subchapter title" oninput="updateManuscriptNodeTitle(this.value)">
@@ -14917,6 +15274,8 @@ function renderManuscriptRightRail(){
   const searchResults = manuscriptSearchResults(workspace, ui.manuscriptSearch);
   const characterResults = manuscriptCharacterResults(ui.characterSearch);
   const pathText = node ? manuscriptPath(workspace, node.id).map(item=>item.title).join(' / ') : 'No active selection';
+  const chapterNode = manuscriptChapterNodeForNode(workspace, node);
+  const publishState = chapterNode ? getManuscriptChapterPublishState(chapterNode.id) : null;
   root.innerHTML = `
     <section class="ms-panel ms-rail-section">
       <div class="ms-rail-kicker">Live Stats</div>
@@ -14932,6 +15291,7 @@ function renderManuscriptRightRail(){
       <div class="ms-summary-list">
         <div class="ms-summary-item"><span class="ms-mini-label">Current path</span><div class="ms-summary-value">${escHtml(pathText)}</div></div>
         <div class="ms-summary-item"><span class="ms-mini-label">Architecture</span><div class="ms-result-snippet">${counts.book} books · ${counts.act} acts · ${counts.volume} volumes · ${counts.subvolume} subvolumes · ${counts.chapter} chapters</div></div>
+        ${chapterNode ? `<div class="ms-summary-item"><span class="ms-mini-label">TOC Publish State</span><div class="ms-summary-value">${escHtml(publishState?.label || 'Not Published')}</div><div class="ms-character-actions"><button class="ms-mini-btn" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish</button>${publishState?.linkedChapter ? `<button class="ms-mini-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open TOC</button>` : ''}</div></div>` : ''}
       </div>
     </section>
     <section class="ms-panel ms-rail-section">
@@ -15044,6 +15404,7 @@ function updateManuscriptNodeTitle(value=''){
   const doc = workspace.documents.find(item=>item.nodeId === node.id);
   if(doc) doc.title = node.title;
   renderManuscriptLeftRail();
+  renderManuscriptCenter();
   renderManuscriptRightRail();
   queueManuscriptSave({message:'Title updated.'});
 }
@@ -15236,6 +15597,44 @@ async function openManuscriptNode(id=''){
   queueManuscriptSave({silent:true});
 }
 
+async function publishManuscriptChapterToTOC(chapterNodeId=''){
+  if(!requireAdmin()) return;
+  const workspace = activeManuscriptWorkspace();
+  const built = buildTOCChapterFromManuscript(chapterNodeId);
+  if(!workspace || !built || !built.chapterNode) return;
+  if(!built.body.trim()){
+    alert('This chapter has no subchapter prose to publish yet.');
+    return;
+  }
+  const chapter = built.payload;
+  const idx = chapters.findIndex(item=>item.id === chapter.id);
+  if(idx >= 0) chapters[idx] = chapter;
+  else chapters.push(chapter);
+  chapters = orderedChapters(chapters);
+  built.chapterNode.meta = Object.assign({}, built.chapterNode.meta || {}, {
+    tocChapterId:chapter.id,
+    lastPublishedAt:Date.now(),
+    publishHash:built.fingerprintHash
+  });
+  saveChapters(chapters);
+  await persistManuscriptWorkspace(workspace, {silent:true});
+  try{
+    await syncChaptersToSupabase();
+    manuscriptStatus(`Published ${built.chapterNode.title} to the TOC.`);
+  }catch(err){
+    console.error('Manuscript publish sync failed:', err);
+    manuscriptStatus(`Published ${built.chapterNode.title} locally, but Supabase chapter sync failed.`);
+  }
+  renderTOC();
+  renderManuscriptStudio();
+}
+
+function openPublishedChapterFromManuscript(chapterNodeId=''){
+  const state = getManuscriptChapterPublishState(chapterNodeId);
+  if(!state.linkedChapter) return;
+  openChapterEditor(state.linkedChapter.id);
+}
+
 function insertCharacterIntoManuscript(id=''){
   const char = characters.find(item=>item.id === id);
   const node = activeManuscriptNode();
@@ -15271,6 +15670,8 @@ async function showManuscriptStudio(){
 function renderManuscriptStudio(){
   const view = document.getElementById('manuscript-view');
   if(!view) return;
+  const workspace = activeManuscriptWorkspace();
+  view.setAttribute('data-ms-theme', workspace ? manuscriptTheme(workspace) : 'light');
   renderManuscriptLeftRail();
   renderManuscriptCenter();
   renderManuscriptRightRail();
@@ -22675,11 +23076,14 @@ Object.assign(window, {
   deleteManuscriptNode,
   moveManuscriptNode,
   toggleManuscriptNodeExpanded,
+  setManuscriptTheme,
   updateManuscriptNavSearch,
   updateManuscriptGlobalSearch,
   updateManuscriptCharacterSearch,
   insertCharacterIntoManuscript,
   manuscriptOpenCharacter,
+  publishManuscriptChapterToTOC,
+  openPublishedChapterFromManuscript,
   queueManuscriptSave
 });
 attachPrimaryNavHandlers();
