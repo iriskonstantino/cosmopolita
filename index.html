@@ -299,6 +299,23 @@ body{
   font-weight:600;
   text-transform:uppercase;
 }
+.chdr-context{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.35rem 0.75rem;
+  align-items:center;
+  font-family:var(--mono);
+  font-size:0.56rem;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:#8d837b;
+  margin:0 0 0.45rem;
+}
+.chdr-context span+span::before{
+  content:"/";
+  color:#c4b8ae;
+  margin-right:0.75rem;
+}
 .chdr-title{
   font-family:var(--display);
   font-weight:700;
@@ -5415,7 +5432,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.20.03</div>
+<div id="site-version-stamp">v2026.05.20.05</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -11511,35 +11528,15 @@ function renderChapter(ch){
   // Header
   const headerLeft = document.getElementById('cv-header-left');
   const readingContext = getChapterReadingContext(ch);
-  let metaHtml = '';
-  const metaMap = [
-    ['Chapter', ch.chapter],
-    ['Act', readingContext.act],
-    ['Volume', readingContext.volume],
-    ['Subvolume', readingContext.subvolume],
-    ['Narrator', ch.meta.narrator],
-    ['Setting', ch.meta.setting],
-    ['Year', ch.meta.year],
-    ['Dominant Aesthetic', ch.meta.aesthetic],
-    ['Mode', ch.meta.mode]
-  ];
-  metaMap.forEach(([k,v])=>{
-    if(v) metaHtml += `<div class="meta-item"><span class="meta-key">${k}</span><span class="meta-val">${v}</span></div>`;
-  });
-  // Build subtitle: Act, then the smaller subvolume label under it.
-  const _act  = readingContext.act;
-  const _subvolume = readingContext.subvolume;
-  const subtitleHtml = [_act, _subvolume].filter(Boolean).length ? `
-    <div class="chdr-subtitle">
-      ${_act ? `<span>${escHtml(_act)}</span>` : ''}
-      ${_subvolume ? `<span class="chdr-subvolume">${escHtml(_subvolume)}</span>` : ''}
-    </div>` : '';
+  const subtitleHtml = readingContext.volume ? `<div class="chdr-subtitle">${escHtml(readingContext.volume)}</div>` : '';
+  const contextBits = [readingContext.novel, readingContext.subvolume].filter(Boolean);
+  const contextHtml = contextBits.length ? `<div class="chdr-context">${contextBits.map(bit=>`<span>${escHtml(bit)}</span>`).join('')}</div>` : '';
   headerLeft.innerHTML = `
     ${renderSubvolumeBanner(readingContext)}
-    ${readingContext.novel ? `<div class="chdr-architect">${escHtml(readingContext.novel)}</div>` : ''}
-    <div class="chdr-title">${escHtml(readingContext.volume||ch.book||'')}</div>
+    ${contextHtml}
+    ${readingContext.act ? `<div class="chdr-architect">${escHtml(readingContext.act)}</div>` : ''}
+    <div class="chdr-title">${escHtml(ch.chapter || readingContext.volume || ch.book || 'Untitled Chapter')}</div>
     ${subtitleHtml}
-    <div class="chdr-meta">${metaHtml}</div>
   `;
 
   // Body
@@ -15522,18 +15519,14 @@ function renderChapterEditorHeader(data){
   const headerLeft = document.getElementById('cv-header-left');
   if(!headerLeft) return;
   const readingContext = getChapterReadingContext(data);
-  const metaHtml = [
-    ['Chapter', data.chapter],
-    ['Act', readingContext.act],
-    ['Volume', readingContext.volume],
-    ['Subvolume', readingContext.subvolume]
-  ].filter(([,v])=>v).map(([k,v])=>`<div class="meta-item"><span class="meta-key">${k}</span><span class="meta-val">${escHtml(v)}</span></div>`).join('');
+  const contextBits = [readingContext.novel, readingContext.subvolume].filter(Boolean);
+  const contextHtml = contextBits.length ? `<div class="chdr-context">${contextBits.map(bit=>`<span>${escHtml(bit)}</span>`).join('')}</div>` : '';
   headerLeft.innerHTML = `
     ${renderSubvolumeBanner(readingContext)}
-    ${readingContext.novel ? `<div class="chdr-architect">${escHtml(readingContext.novel)}</div>` : ''}
-    <div class="chdr-title">${escHtml(readingContext.volume || data.book || 'Chapter Studio')}</div>
-    <div class="chdr-subtitle">${escHtml(data.chapter || (_editingChapterId ? 'Edit Chapter' : 'New Chapter'))}</div>
-    <div class="chdr-meta">${metaHtml}</div>
+    ${contextHtml}
+    ${readingContext.act ? `<div class="chdr-architect">${escHtml(readingContext.act)}</div>` : ''}
+    <div class="chdr-title">${escHtml(data.chapter || (_editingChapterId ? 'Edit Chapter' : 'New Chapter'))}</div>
+    ${readingContext.volume ? `<div class="chdr-subtitle">${escHtml(readingContext.volume)}</div>` : ''}
   `;
 }
 
