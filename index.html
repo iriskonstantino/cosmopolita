@@ -5187,6 +5187,7 @@ body:not(.admin-on) #tnav-drafts{
   --ms-editor-picker:#372f2f;
   --ms-editor-text:#1d1818;
   --ms-editor-placeholder:rgba(24,20,20,0.42);
+  --ms-focus-backdrop:rgba(8,6,7,0.98);
   --ms-stat-bg:rgba(255,255,255,0.03);
   --ms-summary-bg:rgba(255,255,255,0.03);
   --ms-chip-bg:rgba(255,255,255,0.04);
@@ -5247,6 +5248,7 @@ body:not(.admin-on) #tnav-drafts{
   --ms-editor-picker:#4b3830;
   --ms-editor-text:#241d18;
   --ms-editor-placeholder:rgba(74,51,40,0.45);
+  --ms-focus-backdrop:rgba(244,236,226,0.985);
   --ms-stat-bg:rgba(255,252,248,0.74);
   --ms-summary-bg:rgba(255,252,248,0.72);
   --ms-chip-bg:rgba(255,251,246,0.86);
@@ -5325,6 +5327,65 @@ body:not(.admin-on) #tnav-drafts{
   min-height:calc(100vh - 180px);
   background:var(--ms-shell-bg);
 }
+#manuscript-view.ms-editor-focus{
+  min-height:100vh;
+  background:var(--ms-focus-backdrop);
+}
+#manuscript-view.ms-editor-focus .manuscript-view-header,
+#manuscript-view.ms-editor-focus #manuscript-left-rail,
+#manuscript-view.ms-editor-focus #manuscript-right-rail,
+#manuscript-view.ms-editor-focus #manuscript-status{
+  display:none !important;
+}
+#manuscript-view.ms-editor-focus .manuscript-shell{
+  display:block;
+  min-height:100vh;
+  background:transparent;
+}
+#manuscript-view.ms-editor-focus .ms-center{
+  padding:0;
+  overflow:visible;
+}
+#manuscript-view.ms-editor-focus .ms-center-panel{
+  min-height:100vh;
+  padding:0;
+  border:none;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
+}
+#manuscript-view.ms-editor-focus .ms-crumbs,
+#manuscript-view.ms-editor-focus .ms-center-sub{
+  display:none;
+}
+#manuscript-view.ms-editor-focus .ms-center-head{
+  position:sticky;
+  top:0;
+  z-index:5;
+  padding:1rem 1.25rem 0;
+  margin:0;
+  background:linear-gradient(180deg,var(--ms-focus-backdrop) 72%,transparent);
+}
+#manuscript-view.ms-editor-focus .ms-status-row{
+  padding:0 1.25rem 0.85rem;
+  margin-top:0.45rem;
+}
+#manuscript-view.ms-editor-focus .ms-editor-frame{
+  margin:0;
+  border-left:none;
+  border-right:none;
+  border-bottom:none;
+  border-radius:0;
+  min-height:calc(100vh - 96px);
+}
+#manuscript-view.ms-editor-focus .ms-editor-host,
+#manuscript-view.ms-editor-focus .ms-editor-host .ql-container.ql-snow,
+#manuscript-view.ms-editor-focus .ms-editor-host .ql-editor{
+  min-height:calc(100vh - 168px);
+}
+#manuscript-view.ms-editor-focus .ms-editor-host .ql-editor{
+  padding:1.7rem clamp(1.2rem,5vw,4rem) 3rem;
+}
 .ms-rail,.ms-right{
   min-height:0;
   padding:1.1rem;
@@ -5399,6 +5460,9 @@ body:not(.admin-on) #tnav-drafts{
   border-color:var(--ms-btn-primary-border);
 }
 .ms-btn-row{display:flex;flex-wrap:wrap;gap:0.45rem}
+.ms-btn.emphasis{
+  box-shadow:0 0 0 1px var(--ms-btn-primary-border) inset;
+}
 .ms-theme-toggle{
   display:inline-flex;
   align-items:center;
@@ -5676,6 +5740,9 @@ body:not(.admin-on) #tnav-drafts{
   .ms-right{order:3}
   .ms-center-panel{min-height:0}
   .ms-editor-host .ql-editor{min-height:40vh}
+  #manuscript-view.ms-editor-focus .ms-center-head,
+  #manuscript-view.ms-editor-focus .ms-status-row{padding-left:0.85rem;padding-right:0.85rem}
+  #manuscript-view.ms-editor-focus .ms-editor-host .ql-editor{padding:1rem 1rem 2rem}
   .assets-wrap{grid-template-columns:1fr;}
   #assets-view .side-panel{position:relative;height:auto;border-left:none;border-top:1px solid var(--border);}
   .file-card{grid-template-columns:1fr;}
@@ -5966,7 +6033,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.21.02</div>
+<div id="site-version-stamp">v2026.05.21.03</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -14618,7 +14685,8 @@ function manuscriptUiDefaults(ui={}){
     manuscriptSearch:'',
     characterSearch:'',
     lastNodeId:'',
-    theme:'light'
+    theme:'light',
+    fullscreenEditor:false
   }, ui || {});
 }
 
@@ -15048,6 +15116,27 @@ async function setManuscriptTheme(theme='light'){
   renderManuscriptStudio();
 }
 
+function manuscriptEditorFocusEnabled(workspace){
+  return !!manuscriptUi(workspace).fullscreenEditor;
+}
+
+async function setManuscriptEditorFocus(enabled){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  manuscriptUi(workspace).fullscreenEditor = !!enabled;
+  await persistManuscriptWorkspace(workspace, {silent:true, message:enabled ? 'Entered fullscreen editor mode.' : 'Exited fullscreen editor mode.'});
+  renderManuscriptStudio();
+  if(enabled){
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+
+async function toggleManuscriptEditorFocus(){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  await setManuscriptEditorFocus(!manuscriptEditorFocusEnabled(workspace));
+}
+
 function manuscriptIsExpanded(workspace, nodeId){
   return manuscriptUi(workspace).expandedIds.includes(nodeId);
 }
@@ -15172,6 +15261,7 @@ function renderManuscriptCenter(){
   const childType = manuscriptChildType(node.type);
   const chapterNode = manuscriptChapterNodeForNode(workspace, node);
   const publishState = chapterNode ? getManuscriptChapterPublishState(chapterNode.id) : null;
+  const editorFocused = manuscriptEditorFocusEnabled(workspace);
   if(node.type !== 'subchapter'){
     const children = manuscriptNodeChildren(workspace, node.id);
     root.innerHTML = `
@@ -15213,6 +15303,7 @@ function renderManuscriptCenter(){
         </div>
         <div class="ms-btn-row">
           <button class="ms-btn primary" type="button" onclick="manuscriptAddChild('${escHtml(manuscriptPath(workspace, node.id).slice(-2)[0]?.id || node.id)}')">Add Sibling</button>
+          <button class="ms-btn ${editorFocused ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptEditorFocus()">${editorFocused ? 'Exit Fullscreen' : 'Fullscreen Editor'}</button>
           ${chapterNode ? `<button class="ms-btn primary" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish Chapter To TOC</button>` : ''}
           ${chapterNode && publishState?.linkedChapter ? `<button class="ms-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open TOC Chapter</button>` : ''}
           <button class="ms-btn" type="button" onclick="renameManuscriptNode('${escHtml(node.id)}')">Rename</button>
@@ -15672,11 +15763,21 @@ function renderManuscriptStudio(){
   if(!view) return;
   const workspace = activeManuscriptWorkspace();
   view.setAttribute('data-ms-theme', workspace ? manuscriptTheme(workspace) : 'light');
+  view.classList.toggle('ms-editor-focus', !!(workspace && manuscriptEditorFocusEnabled(workspace)));
   renderManuscriptLeftRail();
   renderManuscriptCenter();
   renderManuscriptRightRail();
   manuscriptStatus(_manuscriptStatusMessage);
 }
+
+window.addEventListener('keydown', event=>{
+  if(event.key !== 'Escape') return;
+  if(_currentView !== 'manuscript-view') return;
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace || !manuscriptEditorFocusEnabled(workspace)) return;
+  event.preventDefault();
+  setManuscriptEditorFocus(false);
+});
 
 // ════════════════════════════════════════════════════════
 // IN-PAGE CHAPTER EDITOR
@@ -23084,6 +23185,7 @@ Object.assign(window, {
   manuscriptOpenCharacter,
   publishManuscriptChapterToTOC,
   openPublishedChapterFromManuscript,
+  toggleManuscriptEditorFocus,
   queueManuscriptSave
 });
 attachPrimaryNavHandlers();
