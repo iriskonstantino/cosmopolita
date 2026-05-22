@@ -17585,7 +17585,7 @@ function renderManuscriptRightRail(){
       <div class="ms-banner-field-grid">
         <div class="ms-meta-field"><label>Banner Title</label><input class="ms-input" value="${escHtml(banner.title)}" onchange="updateManuscriptSubvolumeBannerField('title', this.value)"></div>
         <div class="ms-meta-field"><label>Kicker</label><input class="ms-input" value="${escHtml(banner.kicker)}" onchange="updateManuscriptSubvolumeBannerField('kicker', this.value)"></div>
-        <div class="ms-meta-field wide"><label>Banner Text</label><textarea class="ms-textarea" rows="4" onchange="updateManuscriptSubvolumeBannerField('summary', this.value)" oninput="updateManuscriptSubvolumeBannerField('summary', this.value)">${escHtml(banner.summary || '')}</textarea></div>
+        <div class="ms-meta-field wide"><label>Banner Text</label><textarea class="ms-textarea" rows="4" onchange="updateManuscriptSubvolumeBannerField('summary', this.value)">${escHtml(banner.summary || '')}</textarea></div>
         <div class="ms-meta-field wide"><label>Palette</label><input class="ms-input" value="${escHtml((banner.palette || []).join(', '))}" onchange="updateManuscriptSubvolumeBannerField('palette', this.value)"></div>
       </div>
       <div class="ms-result-snippet">${escHtml([workspace.title, subvolumeLineage?.act?.title, subvolumeLineage?.volume?.title, activeSubvolume.title].filter(Boolean).join(' / '))}</div>
