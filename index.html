@@ -321,8 +321,10 @@ body{
 .chdr-title{
   font-family:var(--display);
   font-weight:700;
-  font-size:clamp(2rem,4.5vw,3.8rem);
-  line-height:1.0;
+  font-size:clamp(1.65rem,3.4vw,2.5rem);
+  line-height:0.98;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
   color:var(--ink);
   margin-bottom:0.4rem;
 }
@@ -2849,12 +2851,20 @@ body:not(.admin-on) #tnav-drafts{
   background:var(--panel);
   padding:1rem 1.25rem;
 }
+.author-workspace-kicker{
+  font-family:var(--mono);
+  font-size:0.55rem;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:#999;
+  margin-bottom:0.4rem;
+}
 .author-workspace-title{
   font-family:var(--display);
   font-weight:700;
-  font-size:1.08rem;
-  line-height:1.16;
-  letter-spacing:0.1em;
+  font-size:clamp(1.4rem,2.7vw,2.2rem);
+  line-height:0.98;
+  letter-spacing:0.12em;
   text-transform:uppercase;
   color:var(--ink);
 }
@@ -2965,6 +2975,10 @@ body:not(.admin-on) #tnav-drafts{
   border:1px solid var(--border);
   background:var(--white);
 }
+.author-review-panel.collapsed .author-workspace-tabs,
+.author-review-panel.collapsed .author-tab-panel.active{
+  display:none;
+}
 .author-read-head,
 .author-review-head{
   display:flex;
@@ -2978,6 +2992,11 @@ body:not(.admin-on) #tnav-drafts{
   letter-spacing:0.16em;
   text-transform:uppercase;
   color:#aaa;
+}
+.author-review-head-right{
+  display:flex;
+  align-items:center;
+  gap:0.65rem;
 }
 .author-workspace-tabs{
   display:flex;
@@ -7044,7 +7063,7 @@ body:not(.admin-on) #tnav-drafts{
     <div class="author-workspace-shell">
       <div class="author-workspace-top">
         <div>
-          <div class="ce-kicker">Author Notes Workspace</div>
+          <div class="author-workspace-kicker">Author Notes Workspace</div>
           <div class="author-workspace-title" id="aw-title">Untitled Chapter</div>
           <div class="author-workspace-sub" id="aw-subtitle">Revision checklist</div>
         </div>
@@ -7106,7 +7125,10 @@ body:not(.admin-on) #tnav-drafts{
         <section class="author-review-panel">
           <div class="author-review-head">
             <span id="aw-panel-title">Revision Checklist</span>
-            <span id="aw-open-count">0 open</span>
+            <div class="author-review-head-right">
+              <span id="aw-open-count">0 open</span>
+              <button class="author-note-btn" id="aw-review-toggle" type="button" onclick="toggleAuthorReviewPanel()">Collapse</button>
+            </div>
           </div>
           <div class="author-workspace-tabs">
             <button class="author-tab-btn active" id="aw-tab-checklist" type="button" onclick="setAuthorWorkspaceTab('checklist')">Revision Checklist</button>
@@ -18303,6 +18325,11 @@ function authorWorkspaceOpenSections(){
   return ui.authorReviewOpen || {};
 }
 
+function authorReviewPanelCollapsed(){
+  const ui = authorWorkspaceUi();
+  return !!ui.authorReviewPanelCollapsed;
+}
+
 function authorWorkspaceActiveTab(){
   if(manuscriptContextActive()){
     const workspace = activeManuscriptWorkspace();
@@ -18314,6 +18341,10 @@ function authorWorkspaceActiveTab(){
 
 function setAuthorWorkspaceOpenSections(openSections){
   setChapterEditorDraftUi(_chapterEditorBaseId, {authorReviewOpen:openSections});
+}
+
+function setAuthorReviewPanelCollapsed(collapsed){
+  setChapterEditorDraftUi(_chapterEditorBaseId, {authorReviewPanelCollapsed:!!collapsed});
 }
 
 function setAuthorWorkspaceTab(tab){
@@ -18344,12 +18375,17 @@ function renderAuthorWorkspaceTabs(active=authorWorkspaceActiveTab()){
   const logicPanel = document.getElementById('aw-logic-panel');
   const draftsPanel = document.getElementById('aw-drafts-panel');
   const title = document.getElementById('aw-panel-title');
+  const reviewPanel = document.querySelector('#author-workspace .author-review-panel');
+  const reviewToggle = document.getElementById('aw-review-toggle');
+  const collapsed = authorReviewPanelCollapsed();
   [checklistTab, checklistPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'checklist'); });
   [routedTab, routedPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'routed'); });
   [researchTab, researchPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'research'); });
   [formTab, formPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'form'); });
   [logicTab, logicPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'logic'); });
   [draftsTab, draftsPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'drafts'); });
+  if(reviewPanel) reviewPanel.classList.toggle('collapsed', collapsed);
+  if(reviewToggle) reviewToggle.textContent = collapsed ? 'Expand' : 'Collapse';
   if(title) title.textContent = active === 'research' ? 'Research Board' : active === 'routed' ? 'Routed Ideas' : active === 'form' ? 'Chapter Form Report' : active === 'logic' ? 'Logic Check' : active === 'drafts' ? 'Drafts Observatory' : 'Revision Checklist';
   if(active === 'drafts'){
     ensureManuscriptDraftsMount();
@@ -19046,7 +19082,7 @@ function renderAuthorWorkspace(){
   const stats = authorReviewStats(notes);
   renderAuthorThesisBrief(notes);
   if(title) title.textContent = data.chapter || 'Untitled Chapter';
-  if(subtitle) subtitle.textContent = [data.book, data.subvolume, data.part].filter(Boolean).join(' · ') || 'Revision checklist';
+  if(subtitle) subtitle.textContent = [data.novel, data.act, data.book, data.subvolume, data.part].filter(Boolean).join(' · ') || 'Revision checklist';
   if(status) status.value = notes.status;
   if(rendered){
     const html = data.body ? parseBody(data.body) : '<p class="ed-note">Start typing in the editor to preview the chapter here.</p>';
@@ -19110,6 +19146,11 @@ function toggleAuthorReviewSection(id){
   const openSections = authorWorkspaceOpenSections();
   openSections[id] = openSections[id] === false;
   setAuthorWorkspaceOpenSections(openSections);
+  renderAuthorWorkspace();
+}
+
+function toggleAuthorReviewPanel(){
+  setAuthorReviewPanelCollapsed(!authorReviewPanelCollapsed());
   renderAuthorWorkspace();
 }
 
