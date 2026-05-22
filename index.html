@@ -5327,11 +5327,102 @@ body:not(.admin-on) #tnav-drafts{
   min-height:calc(100vh - 180px);
   background:var(--ms-shell-bg);
 }
+.manuscript-book-banner{
+  position:relative;
+  overflow:hidden;
+  border-bottom:1px solid var(--ms-border);
+  background:linear-gradient(135deg,rgba(12,10,11,0.78),rgba(18,14,15,0.58));
+}
+.manuscript-book-banner::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(120deg,rgba(255,255,255,0.06),transparent 42%),
+    linear-gradient(0deg,rgba(0,0,0,0.28),rgba(0,0,0,0.08));
+  pointer-events:none;
+}
+.ms-banner-frame{
+  position:relative;
+  min-height:220px;
+  padding:1.35rem 1.6rem;
+  background:
+    radial-gradient(circle at top left,var(--ms-banner-a, rgba(200,129,10,0.28)),transparent 34%),
+    radial-gradient(circle at 82% 18%,var(--ms-banner-b, rgba(184,50,50,0.2)),transparent 28%),
+    linear-gradient(135deg,var(--ms-banner-c, rgba(20,33,61,0.92)),rgba(10,10,12,0.86));
+}
+.ms-banner-frame.has-image{
+  background-size:cover;
+  background-position:center;
+}
+.ms-banner-overlay{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,0.06),transparent 22%),
+    linear-gradient(120deg,rgba(9,8,10,0.14),rgba(9,8,10,0.82));
+}
+.ms-banner-content{
+  position:relative;
+  z-index:1;
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  align-items:flex-end;
+  min-height:190px;
+}
+.ms-banner-copy{
+  max-width:48rem;
+}
+.ms-banner-kicker,
+.ms-banner-meta,
+.ms-section-title,
+.ms-note-label,
+.ms-tracker-label{
+  font-family:var(--mono);
+  text-transform:uppercase;
+}
+.ms-banner-kicker{
+  font-size:0.56rem;
+  letter-spacing:0.22em;
+  color:rgba(255,255,255,0.78);
+  margin-bottom:0.45rem;
+}
+.ms-banner-title{
+  font-family:var(--display);
+  font-size:clamp(1.8rem,4vw,3.1rem);
+  line-height:0.94;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#fff7ec;
+  text-shadow:0 12px 36px rgba(0,0,0,0.32);
+}
+.ms-banner-summary{
+  margin-top:0.65rem;
+  max-width:42rem;
+  color:rgba(255,247,236,0.84);
+  line-height:1.6;
+  font-size:0.94rem;
+}
+.ms-banner-meta{
+  display:grid;
+  gap:0.35rem;
+  justify-items:end;
+  font-size:0.5rem;
+  letter-spacing:0.16em;
+  color:rgba(255,247,236,0.7);
+}
+.ms-banner-chip{
+  border:1px solid rgba(255,247,236,0.18);
+  background:rgba(9,8,10,0.24);
+  padding:0.42rem 0.55rem;
+}
 #manuscript-view.ms-editor-focus{
   min-height:100vh;
   background:var(--ms-focus-backdrop);
 }
 #manuscript-view.ms-editor-focus .manuscript-view-header,
+#manuscript-view.ms-editor-focus #manuscript-book-banner,
 #manuscript-view.ms-editor-focus #manuscript-left-rail,
 #manuscript-view.ms-editor-focus #manuscript-right-rail,
 #manuscript-view.ms-editor-focus #manuscript-status{
@@ -5589,6 +5680,11 @@ body:not(.admin-on) #tnav-drafts{
 }
 .ms-tree{display:grid;gap:0.38rem}
 .ms-tree-level{display:grid;gap:0.38rem}
+.ms-tree-tools{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0.38rem;
+}
 .ms-tree-node{
   border:1px solid var(--ms-border);
   background:var(--ms-tree-bg);
@@ -5662,6 +5758,28 @@ body:not(.admin-on) #tnav-drafts{
   line-height:0.98;
   letter-spacing:0.09em;
   text-transform:uppercase;
+}
+.ms-center-modes{
+  display:inline-flex;
+  gap:0.25rem;
+  padding:0.18rem;
+  border:1px solid var(--ms-border-strong);
+  background:var(--ms-chip-bg);
+}
+.ms-center-tab{
+  border:none;
+  background:transparent;
+  color:var(--ms-btn-text);
+  cursor:pointer;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  padding:0.42rem 0.58rem;
+}
+.ms-center-tab.active{
+  background:var(--ms-btn-primary);
+  color:var(--ms-btn-hover-text);
 }
 .ms-center-sub{
   color:var(--ms-muted);
@@ -5739,6 +5857,68 @@ body:not(.admin-on) #tnav-drafts{
 .ms-editor-host .ql-snow .ql-stroke{stroke:var(--ms-editor-picker)}
 .ms-editor-host .ql-snow .ql-fill{fill:var(--ms-editor-picker)}
 .ms-editor-host .ql-snow .ql-picker-label{color:var(--ms-editor-picker)}
+.ms-note-shell{
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr);
+  gap:0.9rem;
+  margin-top:1rem;
+}
+.ms-note-rail{
+  border:1px solid var(--ms-border);
+  background:var(--ms-summary-bg);
+  padding:0.75rem;
+}
+.ms-section-title{
+  font-size:0.5rem;
+  letter-spacing:0.16em;
+  color:var(--ms-faint);
+  margin-bottom:0.55rem;
+}
+.ms-note-list{
+  display:grid;
+  gap:0.42rem;
+}
+.ms-note-card{
+  border:1px solid var(--ms-border);
+  background:var(--ms-tree-bg);
+  text-align:left;
+  padding:0.58rem;
+  cursor:pointer;
+}
+.ms-note-card.active{
+  border-color:var(--ms-tree-active-border);
+  box-shadow:var(--ms-tree-active-shadow);
+  background:var(--ms-tree-active-bg);
+}
+.ms-note-name{
+  font-family:var(--display);
+  font-size:0.86rem;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+.ms-note-meta{
+  margin-top:0.2rem;
+  color:var(--ms-faint);
+  font-family:var(--mono);
+  font-size:0.46rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+}
+.ms-note-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.32rem;
+  margin-top:0.35rem;
+}
+.ms-note-editor-wrap{
+  display:grid;
+  gap:0.8rem;
+}
+.ms-note-label{
+  font-size:0.48rem;
+  letter-spacing:0.14em;
+  color:var(--ms-faint);
+}
 .ms-stat-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -5765,7 +5945,7 @@ body:not(.admin-on) #tnav-drafts{
   letter-spacing:0.11em;
 }
 .ms-summary-list,.ms-result-list,.ms-character-list{display:grid;gap:0.5rem}
-.ms-summary-item,.ms-result-card,.ms-character-card,.ms-empty-state{
+.ms-summary-item,.ms-result-card,.ms-character-card,.ms-empty-state,.ms-tracker-card{
   border:1px solid var(--ms-border);
   background:var(--ms-summary-bg);
   padding:0.65rem;
@@ -5799,6 +5979,70 @@ body:not(.admin-on) #tnav-drafts{
   gap:0.38rem;
   flex-wrap:wrap;
   margin-top:0.45rem;
+}
+.ms-tracker-group{
+  display:grid;
+  gap:0.52rem;
+  margin-top:0.75rem;
+}
+.ms-tracker-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:0.6rem;
+}
+.ms-tracker-label{
+  color:var(--ms-faint);
+  font-size:0.48rem;
+  letter-spacing:0.13em;
+}
+.ms-tracker-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.32rem;
+  margin-top:0.38rem;
+}
+.ms-tracker-pill{
+  border:1px solid var(--ms-border);
+  background:var(--ms-chip-bg);
+  padding:0.22rem 0.35rem;
+  font-family:var(--mono);
+  font-size:0.45rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.ms-tracker-pill.manual{
+  border-color:var(--ms-btn-primary-border);
+  background:var(--ms-btn-primary);
+}
+.ms-tracker-pill.auto{
+  color:var(--ms-faint);
+}
+.ms-panel-title{
+  font-family:var(--display);
+  font-size:1rem;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+.ms-banner-field-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.7rem;
+  margin-top:0.7rem;
+}
+.ms-author-embed #drafts-view{
+  display:block;
+  padding-top:0;
+  background:transparent;
+}
+.ms-author-embed #drafts-view .chapter-header{
+  display:none;
+}
+.ms-author-embed #drafts-view .drafts-wrap{
+  min-height:0;
+}
+.ms-author-embed #drafts-view .drafts-help-drawer{
+  margin-top:0;
 }
 .ms-mini-btn{
   font-family:var(--mono);
@@ -5839,9 +6083,14 @@ body:not(.admin-on) #tnav-drafts{
   .ms-center{order:1}
   .ms-rail{order:2}
   .ms-right{order:3}
+  .ms-banner-content{display:block}
+  .ms-banner-meta{justify-items:start;margin-top:0.8rem}
   .ms-center-panel{min-height:0}
   .ms-editor-host .ql-editor{min-height:40vh}
   .ms-meta-grid{grid-template-columns:1fr;}
+  .ms-banner-field-grid,
+  .ms-note-shell,
+  .ms-tree-tools{grid-template-columns:1fr;}
   .ms-author-drawer{width:100vw;}
   #manuscript-view.ms-editor-focus .ms-center-head,
   #manuscript-view.ms-editor-focus .ms-status-row{padding-left:0.85rem;padding-right:0.85rem}
@@ -6129,14 +6378,13 @@ body:not(.admin-on) #tnav-drafts{
 	    <button class="tnav-link" id="tnav-chars"    onclick="showCharacters()">Characters</button>
 	    <button class="tnav-link" id="tnav-codex"    onclick="showWikiEntry()">Codex</button>
 	    <button class="tnav-link" id="tnav-proto"    onclick="showProtoevangelium()">Protoevangelium</button>
-	    <button class="tnav-link" id="tnav-drafts"   onclick="showDrafts()">Drafts</button>
 	    <button class="tnav-link admin-only" id="tnav-manuscript" onclick="showManuscriptStudio()">Manuscript Studio</button>
 	    <button class="tnav-link admin-only" id="tnav-logic"   onclick="showLogicMachine()">Logic Machine</button>
 	    <button class="tnav-link" id="tnav-assets"   onclick="showAssets()">Files</button>
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.22.01</div>
+<div id="site-version-stamp">v2026.05.22.02</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -6539,6 +6787,7 @@ body:not(.admin-on) #tnav-drafts{
             <button class="author-tab-btn" id="aw-tab-research" type="button" onclick="setAuthorWorkspaceTab('research')">Research</button>
             <button class="author-tab-btn" id="aw-tab-form" type="button" onclick="setAuthorWorkspaceTab('form')">Form Report</button>
             <button class="author-tab-btn" id="aw-tab-logic" type="button" onclick="setAuthorWorkspaceTab('logic')">Logic Check</button>
+            <button class="author-tab-btn" id="aw-tab-drafts" type="button" onclick="setAuthorWorkspaceTab('drafts')">Drafts</button>
           </div>
           <div class="author-tab-panel active" id="aw-checklist-panel">
             <div class="author-review-list" id="aw-review-list"></div>
@@ -6578,6 +6827,7 @@ body:not(.admin-on) #tnav-drafts{
           <div class="author-tab-panel" id="aw-logic-panel">
             <div class="author-research-wrap" id="aw-logic-board"></div>
           </div>
+          <div class="author-tab-panel" id="aw-drafts-panel"></div>
         </section>
       </div>
     </div>
@@ -6656,6 +6906,7 @@ body:not(.admin-on) #tnav-drafts{
       <div class="manuscript-header-badge">Private workspace · autosaves locally and syncs when available</div>
     </div>
   </div>
+  <div id="manuscript-book-banner" class="manuscript-book-banner"></div>
   <div class="manuscript-shell">
     <aside class="ms-rail" id="manuscript-left-rail"></aside>
     <main class="ms-center" id="manuscript-center"></main>
@@ -13928,12 +14179,11 @@ function _updateNavUI(){
     'char-detail-view':'tnav-chars',
     'wiki-view':'tnav-codex',
     'proto-view':'tnav-proto',
-    'drafts-view':'tnav-drafts',
     'manuscript-view':'tnav-manuscript',
     'logic-view':'tnav-logic',
     'assets-view':'tnav-assets'
   };
-  ['tnav-toc','tnav-chars','tnav-codex','tnav-proto','tnav-drafts','tnav-manuscript','tnav-logic','tnav-assets','tnav-about'].forEach(id=>{
+  ['tnav-toc','tnav-chars','tnav-codex','tnav-proto','tnav-manuscript','tnav-logic','tnav-assets','tnav-about'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.classList.toggle('active', map[_currentView]===id);
   });
@@ -13970,7 +14220,6 @@ function _showViewById(id){
     const overlay=document.querySelector('#char-hero-section .char-hero-overlay');
     if(overlay) overlay.style.opacity=0;
   }
-  if(id==='drafts-view') renderDraftsView();
   if(id==='manuscript-view') renderManuscriptStudio();
   if(id==='logic-view') renderLogicMachine();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -14736,6 +14985,7 @@ let _manuscriptWorkspaces = [];
 let _activeManuscriptWorkspaceId = '';
 let _activeManuscriptNodeId = '';
 let _manuscriptEditor = null;
+let _manuscriptEditorKind = 'document';
 let _manuscriptSaveTimer = null;
 let _manuscriptLoadingEditor = false;
 let _manuscriptStatusMessage = 'Manuscript Studio ready.';
@@ -14793,16 +15043,52 @@ function normalizeManuscriptDocument(value={}){
   };
 }
 
+function normalizeManuscriptNoteDocument(value={}, chapterNodeId='', fallbackOrder=0){
+  const now = Date.now();
+  const text = String(value.text || '');
+  return {
+    id:String(value.id || manuscriptId('note')),
+    chapterNodeId:String(value.chapterNodeId || chapterNodeId || ''),
+    title:String(value.title || '').trim() || `Notebook ${String(fallbackOrder + 1).padStart(2,'0')}`,
+    html:String(value.html || '<p><br></p>'),
+    text,
+    order:Number.isFinite(Number(value.order)) ? Number(value.order) : fallbackOrder,
+    updatedAt:Number(value.updatedAt || now)
+  };
+}
+
+const MANUSCRIPT_BANNER_PALETTES = [
+  ['#b83232','#14213d','#c8810a'],
+  ['#7e2e84','#14345a','#d5942c'],
+  ['#9d2f2f','#1b4944','#c3a15a'],
+  ['#3d3466','#6f1d1b','#d7a048']
+];
+
+function normalizeManuscriptBannerData(value={}, fallbackTitle='Book I', fallbackKicker='Manuscript Studio', paletteIndex=0){
+  const source = value && typeof value === 'object' ? value : {};
+  return {
+    image:String(source.image || '').trim(),
+    title:String(source.title || '').trim() || fallbackTitle,
+    kicker:String(source.kicker || '').trim() || fallbackKicker,
+    palette:normalizeBannerPalette(source.palette || MANUSCRIPT_BANNER_PALETTES[paletteIndex % MANUSCRIPT_BANNER_PALETTES.length]),
+    overlay:String(source.overlay || 'veil').trim() || 'veil'
+  };
+}
+
 function manuscriptUiDefaults(ui={}){
   return Object.assign({
     expandedIds:[],
     navSearch:'',
     manuscriptSearch:'',
     characterSearch:'',
+    trackerSearch:'',
     lastNodeId:'',
     theme:'light',
     fullscreenEditor:false,
-    authorDrawerOpen:false
+    authorDrawerOpen:false,
+    authorDeskTab:'checklist',
+    centerMode:'manuscript',
+    activeNoteIdByChapter:{}
   }, ui || {});
 }
 
@@ -14811,6 +15097,7 @@ function createInitialManuscriptWorkspace(title='Cosmopolita Manuscript Studio')
   const workspaceId = manuscriptId('workspace');
   const book = normalizeManuscriptNode({id:manuscriptId('book'), type:'book', title:'Book I', parentId:'', order:0, createdAt:now, updatedAt:now}, 'book', 0);
   book.bookId = book.id;
+  book.meta.banner = normalizeManuscriptBannerData(book.meta.banner, book.title, title, 0);
   const act = normalizeManuscriptNode({id:manuscriptId('act'), parentId:book.id, type:'act', title:'Act I', order:0, bookId:book.id, createdAt:now, updatedAt:now}, 'act', 0, book.id);
   const volume = normalizeManuscriptNode({id:manuscriptId('volume'), parentId:act.id, type:'volume', title:'Volume 01', order:0, bookId:book.id, createdAt:now, updatedAt:now}, 'volume', 0, book.id);
   const subvolume = normalizeManuscriptNode({id:manuscriptId('subvolume'), parentId:volume.id, type:'subvolume', title:'Subvolume 01', order:0, bookId:book.id, createdAt:now, updatedAt:now}, 'subvolume', 0, book.id);
@@ -14832,9 +15119,20 @@ function createInitialManuscriptWorkspace(title='Cosmopolita Manuscript Studio')
       wordCount:31,
       updatedAt:now
     })],
+    notesDocuments:[
+      normalizeManuscriptNoteDocument({
+        chapterNodeId:chapter.id,
+        title:'Story Notes',
+        html:'<p>Keep chapter-specific ideas, emotional targets, and spare lines here without publishing them to the TOC.</p>',
+        text:'Keep chapter-specific ideas, emotional targets, and spare lines here without publishing them to the TOC.',
+        order:0,
+        updatedAt:now
+      }, chapter.id, 0)
+    ],
     ui:manuscriptUiDefaults({
       expandedIds:[book.id, act.id, volume.id, subvolume.id, chapter.id],
-      lastNodeId:subchapter.id
+      lastNodeId:subchapter.id,
+      activeNoteIdByChapter:{[chapter.id]:''}
     })
   };
 }
@@ -14851,6 +15149,7 @@ function normalizeManuscriptWorkspace(value={}){
     books:Array.isArray(source.books) ? source.books.map(String) : [],
     nodes:[],
     documents:[],
+    notesDocuments:[],
     ui:manuscriptUiDefaults(source.ui)
   };
   workspace.nodes = (Array.isArray(source.nodes) ? source.nodes : []).map((node,index)=>normalizeManuscriptNode(node, node.type || 'chapter', index, node.bookId || ''));
@@ -14859,19 +15158,44 @@ function normalizeManuscriptWorkspace(value={}){
   }
   workspace.nodes = workspace.nodes.map(node=>{
     const rootBookId = node.type === 'book' ? node.id : node.bookId;
-    return Object.assign({}, node, {bookId:rootBookId || manuscriptFindBookId(workspace, node.id)});
+    const next = Object.assign({}, node, {bookId:rootBookId || manuscriptFindBookId(workspace, node.id)});
+    if(next.type === 'book'){
+      next.meta = next.meta && typeof next.meta === 'object' ? next.meta : {};
+      next.meta.banner = normalizeManuscriptBannerData(next.meta.banner, next.title, workspace.title, workspace.books.indexOf(next.id) >= 0 ? workspace.books.indexOf(next.id) : 0);
+    }
+    return next;
   });
   workspace.books = workspace.books.length ? workspace.books.filter(id=>workspace.nodes.some(node=>node.id===id && node.type==='book')) : workspace.nodes.filter(node=>node.type === 'book' && !node.parentId).map(node=>node.id);
   workspace.documents = (Array.isArray(source.documents) ? source.documents : []).map(normalizeManuscriptDocument)
     .filter(doc=>doc.nodeId && workspace.nodes.some(node=>node.id===doc.nodeId && node.type==='subchapter'));
+  workspace.notesDocuments = (Array.isArray(source.notesDocuments) ? source.notesDocuments : []).map((note,index)=>normalizeManuscriptNoteDocument(note, note.chapterNodeId || '', index))
+    .filter(note=>note.chapterNodeId && workspace.nodes.some(node=>node.id===note.chapterNodeId && node.type==='chapter'));
   workspace.nodes.filter(node=>node.type === 'subchapter').forEach(node=>{
     if(!workspace.documents.some(doc=>doc.nodeId === node.id)){
       workspace.documents.push(normalizeManuscriptDocument({nodeId:node.id, title:node.title, text:'', html:'<p><br></p>', updatedAt:workspace.updatedAt}));
     }
   });
+  workspace.nodes.filter(node=>node.type === 'chapter').forEach((node,index)=>{
+    if(!workspace.notesDocuments.some(note=>note.chapterNodeId === node.id)){
+      workspace.notesDocuments.push(normalizeManuscriptNoteDocument({
+        chapterNodeId:node.id,
+        title:'Story Notes',
+        html:'<p><br></p>',
+        text:'',
+        order:0,
+        updatedAt:workspace.updatedAt
+      }, node.id, index));
+    }
+  });
   if(!workspace.ui.lastNodeId || !workspace.nodes.some(node=>node.id===workspace.ui.lastNodeId)){
     workspace.ui.lastNodeId = workspace.nodes.find(node=>node.type === 'subchapter')?.id || workspace.nodes[0]?.id || '';
   }
+  workspace.ui.activeNoteIdByChapter = workspace.ui.activeNoteIdByChapter && typeof workspace.ui.activeNoteIdByChapter === 'object' ? workspace.ui.activeNoteIdByChapter : {};
+  workspace.nodes.filter(node=>node.type === 'chapter').forEach(node=>{
+    if(!workspace.ui.activeNoteIdByChapter[node.id]){
+      workspace.ui.activeNoteIdByChapter[node.id] = workspace.notesDocuments.find(note=>note.chapterNodeId === node.id)?.id || '';
+    }
+  });
   return workspace;
 }
 
@@ -14955,7 +15279,6 @@ async function manuscriptRefreshCache(){
     const preferred = workspace.ui.lastNodeId || workspace.nodes.find(node=>node.type === 'subchapter')?.id || workspace.nodes[0]?.id || '';
     _activeManuscriptNodeId = workspace.nodes.some(node=>node.id===_activeManuscriptNodeId) ? _activeManuscriptNodeId : preferred;
     workspace.ui.lastNodeId = _activeManuscriptNodeId;
-    if(_activeManuscriptNodeId) manuscriptExpandPath(workspace, _activeManuscriptNodeId);
   }
 }
 
@@ -14972,6 +15295,15 @@ function activeManuscriptDocument(){
   const workspace = activeManuscriptWorkspace();
   const node = activeManuscriptNode();
   return workspace && node ? workspace.documents.find(doc=>doc.nodeId === node.id) || null : null;
+}
+
+function activeManuscriptBook(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode()){
+  if(!workspace) return null;
+  if(node){
+    const lineage = manuscriptLineage(workspace, node.id);
+    if(lineage.book) return lineage.book;
+  }
+  return manuscriptNodeChildren(workspace, '').find(item=>item.type === 'book') || null;
 }
 
 function manuscriptNodeChildren(workspace, parentId=''){
@@ -15032,6 +15364,360 @@ function manuscriptPlainTextFromHtml(html=''){
   const el = document.createElement('div');
   el.innerHTML = String(html || '');
   return (el.textContent || el.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+function manuscriptCenterMode(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode()){
+  const ui = workspace ? manuscriptUi(workspace) : manuscriptUiDefaults();
+  const chapterNode = manuscriptChapterNodeForNode(workspace, node);
+  return ui.centerMode === 'notes' && chapterNode ? 'notes' : 'manuscript';
+}
+
+async function setManuscriptCenterMode(mode='manuscript'){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  manuscriptUi(workspace).centerMode = mode === 'notes' ? 'notes' : 'manuscript';
+  await persistManuscriptWorkspace(workspace, {silent:true, message:manuscriptUi(workspace).centerMode === 'notes' ? 'Opened chapter notebook.' : 'Returned to manuscript editor.'});
+  renderManuscriptStudio();
+}
+
+function manuscriptNotesForChapter(workspace, chapterNodeId=''){
+  return (workspace?.notesDocuments || [])
+    .filter(note=>note.chapterNodeId === chapterNodeId)
+    .sort((a,b)=>(a.order||0)-(b.order||0) || (b.updatedAt||0)-(a.updatedAt||0));
+}
+
+function manuscriptEnsureActiveNoteId(workspace, chapterNodeId=''){
+  if(!workspace || !chapterNodeId) return '';
+  const ui = manuscriptUi(workspace);
+  ui.activeNoteIdByChapter = ui.activeNoteIdByChapter && typeof ui.activeNoteIdByChapter === 'object' ? ui.activeNoteIdByChapter : {};
+  const notes = manuscriptNotesForChapter(workspace, chapterNodeId);
+  if(!notes.length) return '';
+  if(!ui.activeNoteIdByChapter[chapterNodeId] || !notes.some(note=>note.id === ui.activeNoteIdByChapter[chapterNodeId])){
+    ui.activeNoteIdByChapter[chapterNodeId] = notes[0].id;
+  }
+  return ui.activeNoteIdByChapter[chapterNodeId];
+}
+
+function activeManuscriptNote(workspace=activeManuscriptWorkspace(), chapterNode=manuscriptCurrentChapterNode()){
+  if(!workspace || !chapterNode) return null;
+  const activeId = manuscriptEnsureActiveNoteId(workspace, chapterNode.id);
+  return manuscriptNotesForChapter(workspace, chapterNode.id).find(note=>note.id === activeId) || null;
+}
+
+async function openManuscriptNote(noteId=''){
+  const workspace = activeManuscriptWorkspace();
+  const chapterNode = manuscriptCurrentChapterNode();
+  if(!workspace || !chapterNode || !noteId) return;
+  manuscriptUi(workspace).activeNoteIdByChapter[chapterNode.id] = noteId;
+  manuscriptUi(workspace).centerMode = 'notes';
+  await persistManuscriptWorkspace(workspace, {silent:true, message:'Opened notebook document.'});
+  renderManuscriptStudio();
+}
+
+async function createManuscriptNote(){
+  const workspace = activeManuscriptWorkspace();
+  const chapterNode = manuscriptCurrentChapterNode();
+  if(!workspace || !chapterNode || !requireAdmin()) return;
+  const notes = manuscriptNotesForChapter(workspace, chapterNode.id);
+  const note = normalizeManuscriptNoteDocument({
+    chapterNodeId:chapterNode.id,
+    title:`Notebook ${String(notes.length + 1).padStart(2,'0')}`,
+    html:'<p><br></p>',
+    text:'',
+    order:notes.length ? Math.max(...notes.map(item=>Number(item.order || 0))) + 1 : 0,
+    updatedAt:Date.now()
+  }, chapterNode.id, notes.length);
+  workspace.notesDocuments.push(note);
+  manuscriptUi(workspace).activeNoteIdByChapter[chapterNode.id] = note.id;
+  manuscriptUi(workspace).centerMode = 'notes';
+  await persistManuscriptWorkspace(workspace, {message:`Created ${note.title}.`});
+  renderManuscriptStudio();
+}
+
+async function renameManuscriptNote(noteId=''){
+  const workspace = activeManuscriptWorkspace();
+  const note = (workspace?.notesDocuments || []).find(item=>item.id === noteId);
+  if(!workspace || !note || !requireAdmin()) return;
+  const next = prompt('Rename notebook document', note.title);
+  if(next === null) return;
+  note.title = next.trim() || note.title;
+  note.updatedAt = Date.now();
+  await persistManuscriptWorkspace(workspace, {message:`Renamed ${note.title}.`});
+  renderManuscriptStudio();
+}
+
+async function moveManuscriptNote(noteId='', direction=0){
+  const workspace = activeManuscriptWorkspace();
+  const note = (workspace?.notesDocuments || []).find(item=>item.id === noteId);
+  if(!workspace || !note || !requireAdmin()) return;
+  const siblings = manuscriptNotesForChapter(workspace, note.chapterNodeId);
+  const index = siblings.findIndex(item=>item.id === noteId);
+  const nextIndex = index + Number(direction || 0);
+  if(index < 0 || nextIndex < 0 || nextIndex >= siblings.length) return;
+  const currentOrder = siblings[index].order;
+  siblings[index].order = siblings[nextIndex].order;
+  siblings[nextIndex].order = currentOrder;
+  siblings[index].updatedAt = Date.now();
+  siblings[nextIndex].updatedAt = Date.now();
+  await persistManuscriptWorkspace(workspace, {message:`Reordered ${note.title}.`});
+  renderManuscriptStudio();
+}
+
+async function deleteManuscriptNote(noteId=''){
+  const workspace = activeManuscriptWorkspace();
+  const note = (workspace?.notesDocuments || []).find(item=>item.id === noteId);
+  if(!workspace || !note || !requireAdmin()) return;
+  const siblings = manuscriptNotesForChapter(workspace, note.chapterNodeId);
+  if(siblings.length <= 1){
+    alert('Each chapter keeps at least one notebook document.');
+    return;
+  }
+  if(!confirm(`Delete ${note.title}?`)) return;
+  workspace.notesDocuments = workspace.notesDocuments.filter(item=>item.id !== noteId);
+  const nextActive = manuscriptNotesForChapter(workspace, note.chapterNodeId)[0];
+  if(nextActive){
+    manuscriptUi(workspace).activeNoteIdByChapter[note.chapterNodeId] = nextActive.id;
+  }
+  await persistManuscriptWorkspace(workspace, {message:`Deleted ${note.title}.`});
+  renderManuscriptStudio();
+}
+
+function manuscriptEditorContext(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode()){
+  const chapterNode = manuscriptChapterNodeForNode(workspace, node);
+  if(manuscriptCenterMode(workspace, node) === 'notes' && chapterNode){
+    const note = activeManuscriptNote(workspace, chapterNode);
+    return {
+      kind:'note',
+      title:note?.title || 'Notebook',
+      placeholder:'Capture chapter ideas, spare lines, continuity anchors, and research fragments here...',
+      html:note?.html || '<p><br></p>',
+      onTitleInput:'updateManuscriptNoteTitle(this.value)'
+    };
+  }
+  const doc = activeManuscriptDocument();
+  return {
+    kind:'document',
+    title:node?.title || 'Untitled Subchapter',
+    placeholder:'Begin writing this subchapter here...',
+    html:doc?.html || '<p><br></p>',
+    onTitleInput:'updateManuscriptNodeTitle(this.value)'
+  };
+}
+
+function updateManuscriptNoteTitle(value=''){
+  const workspace = activeManuscriptWorkspace();
+  const note = activeManuscriptNote();
+  if(!workspace || !note) return;
+  note.title = String(value || '').trim() || note.title || 'Notebook';
+  note.updatedAt = Date.now();
+  renderManuscriptCenter();
+  queueManuscriptSave({message:'Notebook title updated.'});
+}
+
+function manuscriptChapterText(workspace, chapterNodeId=''){
+  return manuscriptSubchaptersForChapter(workspace, chapterNodeId).map(subchapter=>{
+    const doc = (workspace.documents || []).find(item=>item.nodeId === subchapter.id) || {};
+    return [subchapter.title, doc.text || manuscriptPlainTextFromHtml(doc.html || '')].join('\n');
+  }).join('\n\n').trim();
+}
+
+function manuscriptTrackerMeta(chapterNode){
+  if(!chapterNode) return {pinned:[], lastDetected:{characters:[],locations:[],factions:[],other:[]}, lastScannedAt:0};
+  chapterNode.meta = chapterNode.meta && typeof chapterNode.meta === 'object' ? chapterNode.meta : {};
+  const tracker = chapterNode.meta.tracker && typeof chapterNode.meta.tracker === 'object' ? chapterNode.meta.tracker : {};
+  tracker.pinned = Array.isArray(tracker.pinned) ? tracker.pinned : [];
+  tracker.lastDetected = tracker.lastDetected && typeof tracker.lastDetected === 'object' ? tracker.lastDetected : {characters:[],locations:[],factions:[],other:[]};
+  tracker.lastScannedAt = Number(tracker.lastScannedAt || 0);
+  chapterNode.meta.tracker = tracker;
+  return tracker;
+}
+
+function manuscriptEntityMatch(text='', phrase=''){
+  const clean = String(phrase || '').trim();
+  if(!clean || clean.length < 3) return false;
+  const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, 'i').test(String(text || ''));
+}
+
+function manuscriptCharacterMatchesText(text=''){
+  return (characters || []).filter(char=>{
+    const values = [char.name, char.epithet].concat(characterTagValues(char) || []).filter(Boolean);
+    return values.some(value=>manuscriptEntityMatch(text, value));
+  }).slice(0, 24);
+}
+
+function manuscriptCodexBucket(entry){
+  const kind = [entry.cat, entry.kind, ...(entry.tags || [])].join(' ').toLowerCase();
+  if(/faction|organization|guild|order|house|syndicate/.test(kind)) return 'factions';
+  if(/nation|region|city|venue|location|territory|province|district|river|sea|mountain/.test(kind)) return 'locations';
+  return 'other';
+}
+
+function manuscriptCodexMatchesText(text=''){
+  return codexEntries().filter(entry=>entry && entry.t && manuscriptEntityMatch(text, entry.t)).slice(0, 32);
+}
+
+function detectTrackedCodexEntitiesForChapter(chapterNodeId=''){
+  const workspace = activeManuscriptWorkspace();
+  const chapterNode = (workspace?.nodes || []).find(node=>node.id === chapterNodeId && node.type === 'chapter') || null;
+  if(!workspace || !chapterNode) return {characters:[], locations:[], factions:[], other:[], pinned:[]};
+  const text = manuscriptChapterText(workspace, chapterNode.id);
+  const tracker = manuscriptTrackerMeta(chapterNode);
+  const charactersFound = manuscriptCharacterMatchesText(text).map(char=>({source:'character', entityType:'character', id:char.id, label:char.name}));
+  const codexFound = manuscriptCodexMatchesText(text).map(entry=>({source:'codex', entityType:manuscriptCodexBucket(entry), id:entry.key, label:entry.t}));
+  const byKey = new Map();
+  charactersFound.concat(codexFound).forEach(item=>{
+    const key = `${item.source}:${item.id}`;
+    if(!byKey.has(key)) byKey.set(key, item);
+  });
+  const grouped = {characters:[], locations:[], factions:[], other:[], pinned:Array.isArray(tracker.pinned) ? tracker.pinned : []};
+  Array.from(byKey.values()).forEach(item=>{
+    if(item.entityType === 'character') grouped.characters.push(item);
+    else if(item.entityType === 'locations') grouped.locations.push(item);
+    else if(item.entityType === 'factions') grouped.factions.push(item);
+    else grouped.other.push(item);
+  });
+  tracker.lastDetected = {
+    characters:grouped.characters.map(item=>item.id),
+    locations:grouped.locations.map(item=>item.id),
+    factions:grouped.factions.map(item=>item.id),
+    other:grouped.other.map(item=>item.id)
+  };
+  tracker.lastScannedAt = Date.now();
+  return grouped;
+}
+
+function manuscriptPinnedEntityResolved(item){
+  if(!item) return null;
+  if(item.source === 'character'){
+    const char = characters.find(entry=>entry.id === item.id);
+    if(!char) return null;
+    return {source:'character', entityType:'character', id:char.id, label:char.name};
+  }
+  const entry = E && E[item.id] ? normalizeCodexEntry(item.id, E[item.id]) : null;
+  if(!entry) return null;
+  return {source:'codex', entityType:item.entityType || manuscriptCodexBucket(entry), id:entry.key, label:entry.t};
+}
+
+async function toggleTrackedEntityPin(chapterNodeId='', source='character', entityId='', entityType='other'){
+  const workspace = activeManuscriptWorkspace();
+  const chapterNode = (workspace?.nodes || []).find(node=>node.id === chapterNodeId && node.type === 'chapter') || null;
+  if(!workspace || !chapterNode || !requireAdmin() || !entityId) return;
+  const tracker = manuscriptTrackerMeta(chapterNode);
+  const key = `${source}:${entityId}`;
+  const exists = tracker.pinned.some(item=>`${item.source}:${item.id}` === key);
+  tracker.pinned = exists
+    ? tracker.pinned.filter(item=>`${item.source}:${item.id}` !== key)
+    : tracker.pinned.concat([{source, id:entityId, entityType}]);
+  await persistManuscriptWorkspace(workspace, {silent:true, message:exists ? 'Removed tracker pin.' : 'Pinned tracker entity.'});
+  renderManuscriptRightRail();
+}
+
+function manuscriptTrackerSearchResults(query=''){
+  const term = String(query || '').trim().toLowerCase();
+  if(!term) return [];
+  const characterMatches = (characters || []).filter(char=>characterSearchText(char).includes(term)).slice(0, 5)
+    .map(char=>({source:'character', entityType:'character', id:char.id, label:char.name, meta:char.role || 'Character'}));
+  const codexMatches = codexSearch(term).slice(0, 7)
+    .map(entry=>({source:'codex', entityType:manuscriptCodexBucket(entry), id:entry.key, label:entry.t, meta:entry.cat || 'Codex'}));
+  return characterMatches.concat(codexMatches);
+}
+
+function manuscriptTrackedEntityOpen(item){
+  if(!item) return;
+  if(item.source === 'character') showCharDetail(item.id);
+  else showCodexEntry(item.id);
+}
+
+function manuscriptBannerData(workspace=activeManuscriptWorkspace(), bookNode=activeManuscriptBook(workspace)){
+  if(!workspace || !bookNode) return normalizeManuscriptBannerData({}, 'Manuscript Studio', workspace?.title || 'Workspace', 0);
+  bookNode.meta = bookNode.meta && typeof bookNode.meta === 'object' ? bookNode.meta : {};
+  bookNode.meta.banner = normalizeManuscriptBannerData(bookNode.meta.banner, bookNode.title, workspace.title, manuscriptNodeChildren(workspace, '').findIndex(item=>item.id === bookNode.id));
+  return bookNode.meta.banner;
+}
+
+async function updateManuscriptBookBannerField(field='', value=''){
+  const workspace = activeManuscriptWorkspace();
+  const bookNode = activeManuscriptBook(workspace);
+  if(!workspace || !bookNode) return;
+  const banner = manuscriptBannerData(workspace, bookNode);
+  if(field === 'palette'){
+    banner.palette = normalizeBannerPalette(value);
+  }else if(field === 'image'){
+    banner.image = String(value || '').trim();
+  }else if(field === 'title'){
+    banner.title = String(value || '').trim() || bookNode.title;
+  }else if(field === 'kicker'){
+    banner.kicker = String(value || '').trim() || workspace.title;
+  }else if(field === 'overlay'){
+    banner.overlay = String(value || '').trim() || 'veil';
+  }
+  bookNode.meta.banner = banner;
+  bookNode.updatedAt = Date.now();
+  await persistManuscriptWorkspace(workspace, {silent:true, message:'Book banner updated.'});
+  renderManuscriptStudio();
+}
+
+function renderManuscriptBanner(){
+  const root = document.getElementById('manuscript-book-banner');
+  const workspace = activeManuscriptWorkspace();
+  const bookNode = activeManuscriptBook(workspace);
+  if(!root){
+    return;
+  }
+  if(!workspace || !bookNode){
+    root.innerHTML = '';
+    return;
+  }
+  const banner = manuscriptBannerData(workspace, bookNode);
+  const chapterNode = manuscriptCurrentChapterNode();
+  const chapterData = chapterNode ? manuscriptChapterData(workspace, chapterNode) : null;
+  const counts = manuscriptStructureCounts(workspace);
+  const style = [
+    `--ms-banner-a:${banner.palette[0]}`,
+    `--ms-banner-b:${banner.palette[1]}`,
+    `--ms-banner-c:${banner.palette[2]}`,
+    banner.image ? `background-image:linear-gradient(120deg,rgba(9,8,10,0.1),rgba(9,8,10,0.85)),url('${escHtml(banner.image)}')` : ''
+  ].filter(Boolean).join(';');
+  root.innerHTML = `<div class="ms-banner-frame ${banner.image ? 'has-image' : ''}" style="${style}">
+    <div class="ms-banner-overlay"></div>
+    <div class="ms-banner-content">
+      <div class="ms-banner-copy">
+        <div class="ms-banner-kicker">${escHtml(banner.kicker || workspace.title)}</div>
+        <div class="ms-banner-title">${escHtml(banner.title || bookNode.title)}</div>
+        <div class="ms-banner-summary">The active writing room follows this book, carrying its atmosphere, visual palette, and narrative lane as you move through acts, volumes, subvolumes, chapters, and notebook layers.</div>
+      </div>
+      <div class="ms-banner-meta">
+        <div class="ms-banner-chip">${escHtml(bookNode.title)}</div>
+        <div class="ms-banner-chip">${counts.chapter} chapters · ${counts.subchapter} subchapters</div>
+        <div class="ms-banner-chip">${escHtml(chapterData ? (chapterData.chapter || chapterNode?.title || 'Chapter context ready') : 'Select a chapter')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function collapseAllManuscriptNodes(){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  manuscriptUi(workspace).expandedIds = [];
+  await persistManuscriptWorkspace(workspace, {silent:true, message:'Collapsed manuscript tree.'});
+  renderManuscriptLeftRail();
+}
+
+async function expandAllManuscriptNodes(){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  manuscriptUi(workspace).expandedIds = (workspace.nodes || []).filter(node=>manuscriptNodeChildren(workspace, node.id).length).map(node=>node.id);
+  await persistManuscriptWorkspace(workspace, {silent:true, message:'Expanded manuscript tree.'});
+  renderManuscriptLeftRail();
+}
+
+async function expandActiveManuscriptPath(){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace || !_activeManuscriptNodeId) return;
+  manuscriptExpandPath(workspace, _activeManuscriptNodeId);
+  await persistManuscriptWorkspace(workspace, {silent:true, message:'Expanded active path.'});
+  renderManuscriptLeftRail();
 }
 
 function normalizeManuscriptChapterData(value={}, fallback={}){
@@ -15117,6 +15803,14 @@ function ensureManuscriptAuthorWorkspaceMount(){
   const workspaceEl = document.getElementById('author-workspace');
   if(host && workspaceEl && workspaceEl.parentElement !== host){
     host.appendChild(workspaceEl);
+  }
+}
+
+function ensureManuscriptDraftsMount(){
+  const panel = document.getElementById('aw-drafts-panel');
+  const draftsView = document.getElementById('drafts-view');
+  if(panel && draftsView && draftsView.parentElement !== panel){
+    panel.appendChild(draftsView);
   }
 }
 
@@ -15401,9 +16095,20 @@ async function updateManuscriptChapterField(field='', value=''){
 function manuscriptChapterMetadataEditor(workspace, chapterNode){
   if(!workspace || !chapterNode) return '';
   const data = manuscriptChapterData(workspace, chapterNode);
+  const publishState = getManuscriptChapterPublishState(chapterNode.id);
   return `
     <section class="ms-panel ms-rail-section">
       <div class="ms-rail-kicker">Chapter Architecture</div>
+      <div class="ms-summary-list">
+        <div class="ms-summary-item">
+          <span class="ms-mini-label">Publishing</span>
+          <div class="ms-summary-value">${escHtml(publishState?.label || 'Not Published')}</div>
+          <div class="ms-character-actions">
+            <button class="ms-mini-btn" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish To TOC</button>
+            ${publishState?.linkedChapter ? `<button class="ms-mini-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open Published</button>` : ''}
+          </div>
+        </div>
+      </div>
       <div class="ms-meta-grid">
         <div class="ms-meta-field"><label>Novel</label><input class="ms-input" value="${escHtml(data.novel)}" onchange="updateManuscriptChapterField('novel', this.value)"></div>
         <div class="ms-meta-field"><label>Act</label><input class="ms-input" value="${escHtml(data.act)}" onchange="updateManuscriptChapterField('act', this.value)"></div>
@@ -15441,6 +16146,9 @@ function manuscriptEnsureLineageNode(workspace, parentId, type, title, bookId=''
     order:manuscriptNextOrder(workspace, parentId),
     bookId
   }, type, manuscriptNodeChildren(workspace, parentId).length, bookId);
+  if(type === 'book'){
+    node.meta.banner = normalizeManuscriptBannerData(node.meta.banner, node.title, workspace.title, manuscriptNodeChildren(workspace, '').length);
+  }
   workspace.nodes.push(node);
   return node;
 }
@@ -15499,6 +16207,15 @@ async function ensureManuscriptChapterForTOC(chapterId='', options={}){
     wordCount:manuscriptWordCount(stripTags(html || chapter.body || '')),
     updatedAt:Date.now()
   }));
+  workspace.notesDocuments.push(normalizeManuscriptNoteDocument({
+    chapterNodeId:chapterNode.id,
+    title:'Story Notes',
+    html:'<p><br></p>',
+    text:'',
+    order:0,
+    updatedAt:Date.now()
+  }, chapterNode.id, 0));
+  manuscriptUi(workspace).activeNoteIdByChapter[chapterNode.id] = workspace.notesDocuments.find(item=>item.chapterNodeId===chapterNode.id)?.id || '';
   manuscriptSetExpanded(workspace, book.id, true);
   manuscriptSetExpanded(workspace, act.id, true);
   manuscriptSetExpanded(workspace, volume.id, true);
@@ -15662,8 +16379,60 @@ function renderManuscriptLeftRail(){
     </section>
     <section class="ms-panel ms-rail-section">
       <div class="ms-rail-kicker">Manuscript Tree</div>
+      <div class="ms-tree-tools" style="margin-bottom:.6rem">
+        <button class="ms-mini-btn" type="button" onclick="collapseAllManuscriptNodes()">Collapse All</button>
+        <button class="ms-mini-btn" type="button" onclick="expandActiveManuscriptPath()">Active Path</button>
+        <button class="ms-mini-btn" type="button" onclick="expandAllManuscriptNodes()">Expand All</button>
+      </div>
       <div class="ms-tree">${tree || '<div class="ms-search-empty">No nodes match this filter.</div>'}</div>
     </section>`;
+}
+
+function manuscriptCenterTabs(workspace, chapterNode){
+  if(!workspace || !chapterNode) return '';
+  const mode = manuscriptCenterMode(workspace);
+  return `<div class="ms-center-modes" aria-label="Writing surface mode">
+    <button class="ms-center-tab ${mode==='manuscript' ? 'active' : ''}" type="button" onclick="setManuscriptCenterMode('manuscript')">Manuscript</button>
+    <button class="ms-center-tab ${mode==='notes' ? 'active' : ''}" type="button" onclick="setManuscriptCenterMode('notes')">Notes</button>
+  </div>`;
+}
+
+function renderManuscriptNotesWorkspace(workspace, chapterNode){
+  const notes = manuscriptNotesForChapter(workspace, chapterNode.id);
+  const note = activeManuscriptNote(workspace, chapterNode);
+  if(!note){
+    return `<div class="ms-empty-state"><div class="ms-empty-title">Chapter Notebook</div><div class="ms-empty-copy">Create a notebook document for this chapter to organize ideas, spare scenes, and structural notes.</div></div>`;
+  }
+  return `<div class="ms-note-shell">
+    <aside class="ms-note-rail">
+      <div class="ms-section-title">Chapter Notebook</div>
+      <div class="ms-note-list">
+        ${notes.map(item=>`
+          <div class="ms-note-card ${item.id===note.id ? 'active' : ''}">
+            <div class="ms-note-name">${escHtml(item.title)}</div>
+            <div class="ms-note-meta">${escHtml(new Date(item.updatedAt || Date.now()).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}))}</div>
+            <div class="ms-note-actions">
+              <button class="ms-mini-btn" type="button" onclick="openManuscriptNote('${escHtml(item.id)}')">Open</button>
+              <button class="ms-mini-btn" type="button" onclick="event.stopPropagation(); renameManuscriptNote('${escHtml(item.id)}')">Rename</button>
+              <button class="ms-mini-btn" type="button" onclick="event.stopPropagation(); moveManuscriptNote('${escHtml(item.id)}', -1)">Up</button>
+              <button class="ms-mini-btn" type="button" onclick="event.stopPropagation(); moveManuscriptNote('${escHtml(item.id)}', 1)">Down</button>
+              <button class="ms-mini-btn" type="button" onclick="event.stopPropagation(); deleteManuscriptNote('${escHtml(item.id)}')">Delete</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="ms-btn-row" style="margin-top:.7rem">
+        <button class="ms-btn primary" type="button" onclick="createManuscriptNote()">New Note</button>
+      </div>
+    </aside>
+    <div class="ms-note-editor-wrap">
+      <div class="ms-note-label">Notebook document for ${escHtml(chapterNode.title)}</div>
+      <div class="ms-editor-frame">
+        <input id="ms-node-title" class="ms-node-title-input" value="${escHtml(note.title)}" placeholder="Notebook title" oninput="updateManuscriptNoteTitle(this.value)">
+        <div id="manuscript-editor" class="ms-editor-host"></div>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderManuscriptCenter(){
@@ -15682,9 +16451,35 @@ function renderManuscriptCenter(){
   const crumbs = manuscriptPath(workspace, node.id).map(item=>item.title).join(' / ');
   const childType = manuscriptChildType(node.type);
   const chapterNode = manuscriptChapterNodeForNode(workspace, node);
-  const publishState = chapterNode ? getManuscriptChapterPublishState(chapterNode.id) : null;
   const editorFocused = manuscriptEditorFocusEnabled(workspace);
   const authorDrawerOpen = manuscriptAuthorDrawerOpen(workspace);
+  const centerMode = manuscriptCenterMode(workspace, node);
+  const modeTabs = manuscriptCenterTabs(workspace, chapterNode);
+  if(centerMode === 'notes' && chapterNode){
+    root.innerHTML = `
+      <section class="ms-panel ms-center-panel">
+        <div class="ms-crumbs">${escHtml(crumbs)}</div>
+        <div class="ms-center-head">
+          <div>
+            <div class="ms-center-title">${escHtml(chapterNode.title)} Notes</div>
+            <div class="ms-center-sub">Notebook documents stay chapter-scoped and never publish to the TOC. Use them for scene architecture, revisions, spare lines, continuity anchors, and idea clusters.</div>
+          </div>
+          <div class="ms-btn-row">
+            ${modeTabs}
+            <button class="ms-btn ${editorFocused ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptEditorFocus()">${editorFocused ? 'Exit Fullscreen' : 'Fullscreen Editor'}</button>
+            <button class="ms-btn ${authorDrawerOpen ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptAuthorDrawer()">${authorDrawerOpen ? 'Close Author Desk' : 'Open Author Desk'}</button>
+          </div>
+        </div>
+        <div class="ms-status-row">
+          <span class="ms-meta-chip">${manuscriptNotesForChapter(workspace, chapterNode.id).length} notebook document${manuscriptNotesForChapter(workspace, chapterNode.id).length===1 ? '' : 's'}</span>
+          <span class="ms-meta-chip">Chapter context: ${escHtml(chapterNode.title)}</span>
+        </div>
+        ${renderManuscriptNotesWorkspace(workspace, chapterNode)}
+      </section>`;
+    initManuscriptEditor();
+    syncManuscriptEditorFromActiveDocument();
+    return;
+  }
   if(node.type !== 'subchapter'){
     const children = manuscriptNodeChildren(workspace, node.id);
     root.innerHTML = `
@@ -15696,19 +16491,16 @@ function renderManuscriptCenter(){
             <div class="ms-center-sub">${escHtml(MANUSCRIPT_TYPE_LABELS[node.type])} overview. This level organizes the manuscript, while subchapters hold the actual writing documents.</div>
           </div>
           <div class="ms-btn-row">
+            ${modeTabs}
             ${childType ? `<button class="ms-btn primary" type="button" onclick="manuscriptAddChild('${escHtml(node.id)}')">Add ${escHtml(MANUSCRIPT_TYPE_LABELS[childType])}</button>` : ''}
-            ${node.type === 'chapter' ? `<button class="ms-btn primary" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(node.id)}')">Publish To TOC</button>` : ''}
             ${node.type === 'chapter' ? `<button class="ms-btn ${authorDrawerOpen ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptAuthorDrawer()">${authorDrawerOpen ? 'Close Author Desk' : 'Open Author Desk'}</button>` : ''}
-            ${node.type === 'chapter' && publishState?.linkedChapter ? `<button class="ms-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(node.id)}')">Open TOC Chapter</button>` : ''}
             <button class="ms-btn" type="button" onclick="renameManuscriptNode('${escHtml(node.id)}')">Rename</button>
           </div>
         </div>
         <div class="ms-status-row">
           <span class="ms-meta-chip">${escHtml(manuscriptNodeSummary(node, workspace))}</span>
           <span class="ms-meta-chip">Workspace: ${escHtml(workspace.title)}</span>
-          ${node.type === 'chapter' ? `<span class="ms-meta-chip ${manuscriptPublishChipClass(node.id)}">${escHtml(publishState?.label || 'Not Published')}</span>` : ''}
         </div>
-        ${chapterNode ? manuscriptChapterMetadataEditor(workspace, chapterNode) : ''}
         <div class="ms-empty-state" style="margin-top:1rem">
           <div class="ms-empty-title">${children.length ? 'Open a child node' : `Add your first ${MANUSCRIPT_TYPE_LABELS[childType] || 'section'}`}</div>
           <div class="ms-empty-copy">${children.length ? `This ${node.type} currently contains ${children.length} child item${children.length===1?'':'s'}. Select one from the left rail or add a new ${childType || 'node'}.` : 'This level is ready for structure, but it does not hold the prose itself.'}</div>
@@ -15727,11 +16519,10 @@ function renderManuscriptCenter(){
           <div class="ms-center-sub">Rich-text drafting surface for this subchapter. Autosave keeps the prose in local IndexedDB and syncs the workspace when admin storage is available.</div>
         </div>
         <div class="ms-btn-row">
+          ${modeTabs}
           <button class="ms-btn primary" type="button" onclick="manuscriptAddChild('${escHtml(manuscriptPath(workspace, node.id).slice(-2)[0]?.id || node.id)}')">Add Sibling</button>
           <button class="ms-btn ${editorFocused ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptEditorFocus()">${editorFocused ? 'Exit Fullscreen' : 'Fullscreen Editor'}</button>
           ${chapterNode ? `<button class="ms-btn ${authorDrawerOpen ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptAuthorDrawer()">${authorDrawerOpen ? 'Close Author Desk' : 'Open Author Desk'}</button>` : ''}
-          ${chapterNode ? `<button class="ms-btn primary" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish Chapter To TOC</button>` : ''}
-          ${chapterNode && publishState?.linkedChapter ? `<button class="ms-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open TOC Chapter</button>` : ''}
           <button class="ms-btn" type="button" onclick="renameManuscriptNode('${escHtml(node.id)}')">Rename</button>
         </div>
       </div>
@@ -15739,9 +16530,7 @@ function renderManuscriptCenter(){
         <span class="ms-meta-chip">${Number(doc.wordCount || 0).toLocaleString()} words</span>
         <span class="ms-meta-chip">${manuscriptReadingMinutes(doc.wordCount)} min read</span>
         <span class="ms-meta-chip">Updated ${escHtml(new Date(doc.updatedAt || Date.now()).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}))}</span>
-        ${chapterNode ? `<span class="ms-meta-chip ${manuscriptPublishChipClass(chapterNode.id)}">${escHtml(publishState?.label || 'Not Published')}</span>` : ''}
       </div>
-      ${chapterNode ? manuscriptChapterMetadataEditor(workspace, chapterNode) : ''}
       <div class="ms-editor-frame">
         <input id="ms-node-title" class="ms-node-title-input" value="${escHtml(node.title)}" placeholder="Subchapter title" oninput="updateManuscriptNodeTitle(this.value)">
         <div id="manuscript-editor" class="ms-editor-host"></div>
@@ -15776,6 +16565,52 @@ function renderManuscriptSearch(query=''){
   renderManuscriptRightRail();
 }
 
+function renderTrackedEntities(groupKey='', label='', items=[], chapterNode){
+  if(!chapterNode) return '';
+  const tracker = manuscriptTrackerMeta(chapterNode);
+  const pinnedKeys = new Set((tracker.pinned || []).map(item=>`${item.source}:${item.id}`));
+  const merged = new Map();
+  (items || []).forEach(item=>{
+    const key = `${item.source}:${item.id}`;
+    if(!merged.has(key)) merged.set(key, Object.assign({}, item, {auto:true, manual:pinnedKeys.has(key)}));
+    else merged.get(key).auto = true;
+  });
+  (tracker.pinned || [])
+    .map(manuscriptPinnedEntityResolved)
+    .filter(Boolean)
+    .filter(item=>{
+      if(groupKey === 'characters') return item.entityType === 'character';
+      if(groupKey === 'locations') return item.entityType === 'locations';
+      if(groupKey === 'factions') return item.entityType === 'factions';
+      return item.entityType === 'other';
+    })
+    .forEach(item=>{
+      const key = `${item.source}:${item.id}`;
+      if(!merged.has(key)) merged.set(key, Object.assign({}, item, {auto:false, manual:true}));
+      else merged.get(key).manual = true;
+    });
+  const rows = Array.from(merged.values());
+  return `<div class="ms-tracker-group">
+    <div class="ms-tracker-head">
+      <div class="ms-tracker-label">${escHtml(label)}</div>
+      <div class="ms-mini-label">${rows.length} tracked</div>
+    </div>
+    ${rows.length ? rows.map(item=>`
+      <div class="ms-tracker-card">
+        <div class="ms-summary-value">${escHtml(item.label)}</div>
+        <div class="ms-tracker-tags">
+          ${item.manual ? '<span class="ms-tracker-pill manual">Pinned</span>' : ''}
+          ${item.auto ? '<span class="ms-tracker-pill auto">Auto</span>' : ''}
+        </div>
+        <div class="ms-character-actions">
+          <button class="ms-mini-btn" type="button" onclick="manuscriptTrackedEntityOpen({source:'${escHtml(item.source)}',id:'${escHtml(item.id)}'})">Open</button>
+          <button class="ms-mini-btn" type="button" onclick="toggleTrackedEntityPin('${escHtml(chapterNode.id)}','${escHtml(item.source)}','${escHtml(item.id)}','${escHtml(item.entityType)}')">${item.manual ? 'Unpin' : 'Pin'}</button>
+        </div>
+      </div>
+    `).join('') : '<div class="ms-search-empty">No tracked items in this group yet.</div>'}
+  </div>`;
+}
+
 function renderManuscriptRightRail(){
   const root = document.getElementById('manuscript-right-rail');
   const workspace = activeManuscriptWorkspace();
@@ -15791,10 +16626,14 @@ function renderManuscriptRightRail(){
   const totalWords = manuscriptTotalWords(workspace);
   const searchResults = manuscriptSearchResults(workspace, ui.manuscriptSearch);
   const characterResults = manuscriptCharacterResults(ui.characterSearch);
+  const trackerMatches = manuscriptTrackerSearchResults(ui.trackerSearch);
   const pathText = node ? manuscriptPath(workspace, node.id).map(item=>item.title).join(' / ') : 'No active selection';
   const chapterNode = manuscriptChapterNodeForNode(workspace, node);
   const publishState = chapterNode ? getManuscriptChapterPublishState(chapterNode.id) : null;
   const authorNotes = chapterNode ? manuscriptEnsureChapterAuthorNotes(chapterNode) : null;
+  const activeBook = activeManuscriptBook(workspace, node);
+  const banner = activeBook ? manuscriptBannerData(workspace, activeBook) : null;
+  const tracked = chapterNode ? detectTrackedCodexEntitiesForChapter(chapterNode.id) : {characters:[], locations:[], factions:[], other:[], pinned:[]};
   root.innerHTML = `
     <section class="ms-panel ms-rail-section">
       <div class="ms-rail-kicker">Live Stats</div>
@@ -15810,9 +16649,21 @@ function renderManuscriptRightRail(){
       <div class="ms-summary-list">
         <div class="ms-summary-item"><span class="ms-mini-label">Current path</span><div class="ms-summary-value">${escHtml(pathText)}</div></div>
         <div class="ms-summary-item"><span class="ms-mini-label">Architecture</span><div class="ms-result-snippet">${counts.book} books · ${counts.act} acts · ${counts.volume} volumes · ${counts.subvolume} subvolumes · ${counts.chapter} chapters</div></div>
-        ${chapterNode ? `<div class="ms-summary-item"><span class="ms-mini-label">TOC Publish State</span><div class="ms-summary-value">${escHtml(publishState?.label || 'Not Published')}</div><div class="ms-character-actions"><button class="ms-mini-btn" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish</button><button class="ms-mini-btn" type="button" onclick="toggleManuscriptAuthorDrawer()">${manuscriptAuthorDrawerOpen(workspace) ? 'Close Desk' : 'Author Desk'}</button>${publishState?.linkedChapter ? `<button class="ms-mini-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open TOC</button>` : ''}</div><div class="ms-result-snippet">${escHtml(authorNotesSummaryText(authorNotes))}</div></div>` : ''}
+        ${chapterNode ? `<div class="ms-summary-item"><span class="ms-mini-label">TOC Publish State</span><div class="ms-summary-value">${escHtml(publishState?.label || 'Not Published')}</div><div class="ms-character-actions"><button class="ms-mini-btn" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish To TOC</button>${publishState?.linkedChapter ? `<button class="ms-mini-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open Published</button>` : ''}<button class="ms-mini-btn" type="button" onclick="toggleManuscriptAuthorDrawer()">${manuscriptAuthorDrawerOpen(workspace) ? 'Close Desk' : 'Author Desk'}</button></div><div class="ms-result-snippet">${escHtml(authorNotesSummaryText(authorNotes))}</div></div>` : ''}
       </div>
     </section>
+    ${chapterNode ? manuscriptChapterMetadataEditor(workspace, chapterNode) : ''}
+    ${activeBook && banner ? `<section class="ms-panel ms-rail-section">
+      <div class="ms-rail-kicker">Book Banner</div>
+      <div class="ms-panel-title">${escHtml(activeBook.title)}</div>
+      <div class="ms-result-snippet">This cinematic banner follows the active book and changes as you switch books in the manuscript tree.</div>
+      <div class="ms-banner-field-grid">
+        <div class="ms-meta-field"><label>Banner Title</label><input class="ms-input" value="${escHtml(banner.title)}" onchange="updateManuscriptBookBannerField('title', this.value)"></div>
+        <div class="ms-meta-field"><label>Kicker</label><input class="ms-input" value="${escHtml(banner.kicker)}" onchange="updateManuscriptBookBannerField('kicker', this.value)"></div>
+        <div class="ms-meta-field wide"><label>Image URL</label><input class="ms-input" value="${escHtml(banner.image)}" onchange="updateManuscriptBookBannerField('image', this.value)"></div>
+        <div class="ms-meta-field wide"><label>Palette</label><input class="ms-input" value="${escHtml((banner.palette || []).join(', '))}" onchange="updateManuscriptBookBannerField('palette', this.value)"></div>
+      </div>
+    </section>` : ''}
     <section class="ms-panel ms-rail-section">
       <div class="ms-rail-kicker">Search Manuscript</div>
       <input class="ms-input" type="search" value="${escHtml(ui.manuscriptSearch || '')}" placeholder="Search titles and prose" oninput="updateManuscriptGlobalSearch(this.value)">
@@ -15843,7 +16694,27 @@ function renderManuscriptRightRail(){
             </div>
           </div>`).join('') : `<div class="ms-search-empty">${ui.characterSearch ? 'No characters match that search.' : 'Type a name, tag, faction, family, or location.'}</div>`}
       </div>
-    </section>`;
+    </section>
+    ${chapterNode ? `<section class="ms-panel ms-rail-section">
+      <div class="ms-rail-kicker">Chapter Tracker</div>
+      <div class="ms-result-snippet">Auto-detects chapter entities from the manuscript and lets you pin characters, locations, factions, and other Codex anchors by hand.</div>
+      <input class="ms-input" type="search" value="${escHtml(ui.trackerSearch || '')}" placeholder="Find Codex or character entries to pin" oninput="updateManuscriptTrackerSearch(this.value)" style="margin-top:.65rem">
+      <div class="ms-result-list" style="margin-top:.55rem">
+        ${trackerMatches.length ? trackerMatches.map(item=>`
+          <div class="ms-result-card">
+            <div class="ms-result-title">${escHtml(item.label)}</div>
+            <div class="ms-result-meta">${escHtml(item.meta || item.entityType || 'Entry')}</div>
+            <div class="ms-result-actions">
+              <button class="ms-mini-btn" type="button" onclick="toggleTrackedEntityPin('${escHtml(chapterNode.id)}','${escHtml(item.source)}','${escHtml(item.id)}','${escHtml(item.entityType)}')">Pin</button>
+              <button class="ms-mini-btn" type="button" onclick="manuscriptTrackedEntityOpen({source:'${escHtml(item.source)}',id:'${escHtml(item.id)}'})">Open</button>
+            </div>
+          </div>`).join('') : `<div class="ms-search-empty">${ui.trackerSearch ? 'No Codex or character results for that search.' : 'Search to pin chapter entities by hand.'}</div>`}
+      </div>
+      ${renderTrackedEntities('characters', 'Characters', tracked.characters, chapterNode)}
+      ${renderTrackedEntities('locations', 'Locations', tracked.locations, chapterNode)}
+      ${renderTrackedEntities('factions', 'Factions & Organizations', tracked.factions, chapterNode)}
+      ${renderTrackedEntities('other', 'Other Codex Anchors', tracked.other, chapterNode)}
+    </section>` : ''}`;
 }
 
 function initManuscriptEditor(){
@@ -15855,9 +16726,10 @@ function initManuscriptEditor(){
     host.innerHTML = '<div class="ms-empty-state"><div class="ms-empty-title">Editor unavailable</div><div class="ms-empty-copy">The rich-text editor could not load from the CDN.</div></div>';
     return;
   }
+  const context = manuscriptEditorContext();
   _manuscriptEditor = new Quill(host, {
     theme:'snow',
-    placeholder:'Begin writing this subchapter here...',
+    placeholder:context.placeholder,
     modules:{
       toolbar:[
         [{header:[1,2,3,false]}],
@@ -15876,13 +16748,14 @@ function initManuscriptEditor(){
 }
 
 function syncManuscriptEditorFromActiveDocument(){
-  const node = activeManuscriptNode();
-  const doc = activeManuscriptDocument();
+  const context = manuscriptEditorContext();
   const titleInput = document.getElementById('ms-node-title');
-  if(titleInput && node) titleInput.value = node.title || '';
-  if(!_manuscriptEditor || !node || node.type !== 'subchapter' || !doc) return;
+  if(titleInput) titleInput.value = context.title || '';
+  if(!_manuscriptEditor) return;
+  _manuscriptEditorKind = context.kind || 'document';
   _manuscriptLoadingEditor = true;
-  const html = String(doc.html || '').trim() || '<p><br></p>';
+  const html = String(context.html || '').trim() || '<p><br></p>';
+  if(_manuscriptEditor.root) _manuscriptEditor.root.dataset.placeholder = context.placeholder || 'Begin writing here...';
   _manuscriptEditor.clipboard.dangerouslyPasteHTML(html, 'silent');
   _manuscriptLoadingEditor = false;
 }
@@ -15890,16 +16763,26 @@ function syncManuscriptEditorFromActiveDocument(){
 function saveActiveManuscriptFromEditor(){
   const workspace = activeManuscriptWorkspace();
   const node = activeManuscriptNode();
-  if(!workspace || !node || node.type !== 'subchapter' || !_manuscriptEditor) return;
+  if(!workspace || !node || !_manuscriptEditor) return;
   const html = _manuscriptEditor.root.innerHTML;
   const text = _manuscriptEditor.getText().trim();
-  const doc = workspace.documents.find(item=>item.nodeId === node.id) || normalizeManuscriptDocument({nodeId:node.id, title:node.title});
-  doc.title = node.title;
-  doc.html = html;
-  doc.text = text;
-  doc.wordCount = manuscriptWordCount(text);
-  doc.updatedAt = Date.now();
-  if(!workspace.documents.some(item=>item.nodeId === node.id)) workspace.documents.push(doc);
+  if(manuscriptCenterMode(workspace, node) === 'notes'){
+    const note = activeManuscriptNote();
+    if(!note) return;
+    note.title = note.title || 'Notebook';
+    note.html = html;
+    note.text = text;
+    note.updatedAt = Date.now();
+  }else{
+    if(node.type !== 'subchapter') return;
+    const doc = workspace.documents.find(item=>item.nodeId === node.id) || normalizeManuscriptDocument({nodeId:node.id, title:node.title});
+    doc.title = node.title;
+    doc.html = html;
+    doc.text = text;
+    doc.wordCount = manuscriptWordCount(text);
+    doc.updatedAt = Date.now();
+    if(!workspace.documents.some(item=>item.nodeId === node.id)) workspace.documents.push(doc);
+  }
   workspace.updatedAt = Date.now();
   manuscriptUi(workspace).lastNodeId = node.id;
   renderManuscriptRightRail();
@@ -15952,6 +16835,14 @@ function updateManuscriptCharacterSearch(value=''){
   queueManuscriptSave({silent:true});
 }
 
+function updateManuscriptTrackerSearch(value=''){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  manuscriptUi(workspace).trackerSearch = value;
+  renderManuscriptRightRail();
+  queueManuscriptSave({silent:true});
+}
+
 async function createManuscriptWorkspace(){
   if(!requireAdmin()) return;
   const title = prompt('Workspace title', `Manuscript Workspace ${_manuscriptWorkspaces.length + 1}`);
@@ -15969,7 +16860,6 @@ async function setActiveManuscriptWorkspace(id=''){
   _activeManuscriptWorkspaceId = id;
   const workspace = activeManuscriptWorkspace();
   _activeManuscriptNodeId = workspace?.ui?.lastNodeId || workspace?.nodes.find(node=>node.type==='subchapter')?.id || workspace?.nodes[0]?.id || '';
-  if(workspace && _activeManuscriptNodeId) manuscriptExpandPath(workspace, _activeManuscriptNodeId);
   renderManuscriptStudio();
   queueManuscriptSave({silent:true});
 }
@@ -15991,6 +16881,7 @@ async function manuscriptAddRootBook(){
     order:manuscriptNextOrder(workspace, '')
   }, 'book', manuscriptNodeChildren(workspace, '').length);
   node.bookId = node.id;
+  node.meta.banner = normalizeManuscriptBannerData(node.meta.banner, node.title, workspace.title, manuscriptNodeChildren(workspace, '').length);
   workspace.nodes.push(node);
   workspace.books = workspace.nodes.filter(item=>item.type==='book' && !item.parentId).map(item=>item.id);
   manuscriptSetExpanded(workspace, node.id, true);
@@ -16018,6 +16909,10 @@ async function manuscriptAddChild(parentId=''){
     bookId:parent.type === 'book' ? parent.id : parent.bookId
   }, childType, siblings.length, parent.type === 'book' ? parent.id : parent.bookId);
   workspace.nodes.push(node);
+  if(childType === 'book'){
+    node.meta.banner = normalizeManuscriptBannerData(node.meta.banner, node.title, workspace.title, manuscriptNodeChildren(workspace, '').length);
+    workspace.books = workspace.nodes.filter(item=>item.type==='book' && !item.parentId).map(item=>item.id);
+  }
   manuscriptSetExpanded(workspace, parent.id, true);
   if(childType === 'subchapter'){
     workspace.documents.push(normalizeManuscriptDocument({
@@ -16027,6 +16922,19 @@ async function manuscriptAddChild(parentId=''){
       text:'',
       updatedAt:Date.now()
     }));
+  }else if(childType === 'chapter'){
+    const notes = manuscriptNotesForChapter(workspace, node.id);
+    if(!notes.length){
+      workspace.notesDocuments.push(normalizeManuscriptNoteDocument({
+        chapterNodeId:node.id,
+        title:'Story Notes',
+        html:'<p><br></p>',
+        text:'',
+        order:0,
+        updatedAt:Date.now()
+      }, node.id, 0));
+      manuscriptUi(workspace).activeNoteIdByChapter[node.id] = workspace.notesDocuments.find(item=>item.chapterNodeId===node.id)?.id || '';
+    }
   }
   _activeManuscriptNodeId = node.id;
   manuscriptExpandPath(workspace, node.id);
@@ -16074,6 +16982,9 @@ async function deleteManuscriptNode(id=''){
   const fallback = workspace.nodes.find(item=>item.id === node.parentId) || workspace.nodes.find(item=>!doomed.has(item.id)) || null;
   workspace.nodes = workspace.nodes.filter(item=>!doomed.has(item.id));
   workspace.documents = workspace.documents.filter(item=>!doomed.has(item.nodeId));
+  workspace.notesDocuments = (workspace.notesDocuments || []).filter(item=>!doomed.has(item.chapterNodeId));
+  const ui = manuscriptUi(workspace);
+  ui.activeNoteIdByChapter = Object.fromEntries(Object.entries(ui.activeNoteIdByChapter || {}).filter(([chapterId])=>!doomed.has(chapterId)));
   workspace.books = workspace.nodes.filter(item=>item.type==='book' && !item.parentId).map(item=>item.id);
   _activeManuscriptNodeId = fallback?.id || workspace.nodes.find(item=>item.type==='subchapter')?.id || workspace.nodes[0]?.id || '';
   await persistManuscriptWorkspace(workspace, {message:`Deleted ${node.title}.`});
@@ -16196,6 +17107,8 @@ function renderManuscriptStudio(){
   const drawer = document.getElementById('manuscript-author-drawer');
   if(drawer) drawer.classList.toggle('open', !!(workspace && manuscriptAuthorDrawerOpen(workspace) && manuscriptCurrentChapterNode()));
   ensureManuscriptAuthorWorkspaceMount();
+  ensureManuscriptDraftsMount();
+  renderManuscriptBanner();
   renderManuscriptLeftRail();
   renderManuscriptCenter();
   renderManuscriptRightRail();
@@ -16442,6 +17355,10 @@ function authorWorkspaceOpenSections(){
 }
 
 function authorWorkspaceActiveTab(){
+  if(manuscriptContextActive()){
+    const workspace = activeManuscriptWorkspace();
+    if(workspace) return manuscriptUi(workspace).authorDeskTab || 'checklist';
+  }
   const ui = authorWorkspaceUi();
   return ui.authorWorkspaceTab || 'checklist';
 }
@@ -16451,8 +17368,16 @@ function setAuthorWorkspaceOpenSections(openSections){
 }
 
 function setAuthorWorkspaceTab(tab){
-  const next = ['research','routed','form','logic'].includes(tab) ? tab : 'checklist';
-  setChapterEditorDraftUi(_chapterEditorBaseId, {authorWorkspaceTab:next});
+  const next = ['research','routed','form','logic','drafts'].includes(tab) ? tab : 'checklist';
+  if(manuscriptContextActive()){
+    const workspace = activeManuscriptWorkspace();
+    if(workspace){
+      manuscriptUi(workspace).authorDeskTab = next;
+      persistManuscriptWorkspace(workspace, {silent:true}).catch(err=>console.warn('Author desk tab save failed:', err));
+    }
+  }else{
+    setChapterEditorDraftUi(_chapterEditorBaseId, {authorWorkspaceTab:next});
+  }
   renderAuthorWorkspaceTabs(next);
 }
 
@@ -16462,18 +17387,27 @@ function renderAuthorWorkspaceTabs(active=authorWorkspaceActiveTab()){
   const researchTab = document.getElementById('aw-tab-research');
   const formTab = document.getElementById('aw-tab-form');
   const logicTab = document.getElementById('aw-tab-logic');
+  const draftsTab = document.getElementById('aw-tab-drafts');
   const checklistPanel = document.getElementById('aw-checklist-panel');
   const routedPanel = document.getElementById('aw-routed-panel');
   const researchPanel = document.getElementById('aw-research-panel');
   const formPanel = document.getElementById('aw-form-panel');
   const logicPanel = document.getElementById('aw-logic-panel');
+  const draftsPanel = document.getElementById('aw-drafts-panel');
   const title = document.getElementById('aw-panel-title');
   [checklistTab, checklistPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'checklist'); });
   [routedTab, routedPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'routed'); });
   [researchTab, researchPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'research'); });
   [formTab, formPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'form'); });
   [logicTab, logicPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'logic'); });
-  if(title) title.textContent = active === 'research' ? 'Research Board' : active === 'routed' ? 'Routed Ideas' : active === 'form' ? 'Chapter Form Report' : active === 'logic' ? 'Logic Check' : 'Revision Checklist';
+  [draftsTab, draftsPanel].forEach(el=>{ if(el) el.classList.toggle('active', active === 'drafts'); });
+  if(title) title.textContent = active === 'research' ? 'Research Board' : active === 'routed' ? 'Routed Ideas' : active === 'form' ? 'Chapter Form Report' : active === 'logic' ? 'Logic Check' : active === 'drafts' ? 'Drafts Observatory' : 'Revision Checklist';
+  if(active === 'drafts'){
+    ensureManuscriptDraftsMount();
+    const draftsView = document.getElementById('drafts-view');
+    if(draftsView) draftsView.style.display = 'block';
+    renderDraftsView({keepCache:true}).catch(err=>console.warn('Drafts render failed inside author desk:', err));
+  }
   updateAuthorWorkspaceStatsOnly();
 }
 
@@ -22395,13 +23329,11 @@ async function renderDraftsView(options={}){
 
 async function showDrafts(){
   if(!requireAdmin()) return;
-  updateAdminUI();
-  _pushNav('drafts-view');
-  const view = document.getElementById('drafts-view');
-  if(view) view.style.display = 'block';
-  hideOthers('drafts-view');
+  await showManuscriptStudio();
+  await setManuscriptAuthorDrawer(true);
+  setAuthorWorkspaceTab('drafts');
   maybeStartDraftsTour();
-  await renderDraftsView();
+  await renderDraftsView({keepCache:false});
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -23511,7 +24443,6 @@ function attachPrimaryNavHandlers(){
     ['tnav-chars', ()=>showCharacters()],
     ['tnav-codex', ()=>showWikiEntry()],
     ['tnav-proto', ()=>showProtoevangelium()],
-    ['tnav-drafts', ()=>showDrafts()],
     ['tnav-manuscript', ()=>showManuscriptStudio()],
     ['tnav-logic', ()=>showLogicMachine()],
     ['tnav-assets', ()=>showAssets()],
