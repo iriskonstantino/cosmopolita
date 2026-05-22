@@ -5417,6 +5417,40 @@ body:not(.admin-on) #tnav-drafts{
   background:rgba(9,8,10,0.24);
   padding:0.42rem 0.55rem;
 }
+.ms-banner-editor{
+  margin-top:0.75rem;
+  display:grid;
+  gap:0.7rem;
+}
+.ms-banner-editor.hidden{
+  display:none;
+}
+.ms-banner-crop-panel{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:0.65rem;
+}
+.ms-banner-preview{
+  min-height:150px;
+  border:1px solid var(--ms-border);
+  background:
+    linear-gradient(120deg,rgba(9,8,10,0.12),rgba(9,8,10,0.72)),
+    linear-gradient(135deg,var(--ms-banner-c, rgba(20,33,61,0.92)),rgba(10,10,12,0.86));
+  background-repeat:no-repeat;
+}
+.ms-banner-crop-slider{
+  display:grid;
+  gap:0.28rem;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--ms-faint);
+}
+.ms-banner-crop-slider input{
+  width:100%;
+  accent-color:var(--red);
+}
 #manuscript-view.ms-editor-focus{
   min-height:100vh;
   background:var(--ms-focus-backdrop);
@@ -6384,7 +6418,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.22.02</div>
+<div id="site-version-stamp">v2026.05.22.03</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -15071,7 +15105,13 @@ function normalizeManuscriptBannerData(value={}, fallbackTitle='Book I', fallbac
     title:String(source.title || '').trim() || fallbackTitle,
     kicker:String(source.kicker || '').trim() || fallbackKicker,
     palette:normalizeBannerPalette(source.palette || MANUSCRIPT_BANNER_PALETTES[paletteIndex % MANUSCRIPT_BANNER_PALETTES.length]),
-    overlay:String(source.overlay || 'veil').trim() || 'veil'
+    overlay:String(source.overlay || 'veil').trim() || 'veil',
+    crop:{
+      x:Number.isFinite(Number(source.crop && source.crop.x)) ? Number(source.crop.x) : 50,
+      y:Number.isFinite(Number(source.crop && source.crop.y)) ? Number(source.crop.y) : 50,
+      zoom:Number.isFinite(Number(source.crop && source.crop.zoom)) ? Number(source.crop.zoom) : 100
+    },
+    editorOpen:!!source.editorOpen
   };
 }
 
@@ -15304,6 +15344,15 @@ function activeManuscriptBook(workspace=activeManuscriptWorkspace(), node=active
     if(lineage.book) return lineage.book;
   }
   return manuscriptNodeChildren(workspace, '').find(item=>item.type === 'book') || null;
+}
+
+function activeManuscriptSubvolume(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode()){
+  if(!workspace) return null;
+  if(node){
+    const lineage = manuscriptLineage(workspace, node.id);
+    if(lineage.subvolume) return lineage.subvolume;
+  }
+  return (workspace.nodes || []).find(item=>item.type === 'subvolume') || null;
 }
 
 function manuscriptNodeChildren(workspace, parentId=''){
@@ -15629,31 +15678,67 @@ function manuscriptTrackedEntityOpen(item){
   else showCodexEntry(item.id);
 }
 
-function manuscriptBannerData(workspace=activeManuscriptWorkspace(), bookNode=activeManuscriptBook(workspace)){
-  if(!workspace || !bookNode) return normalizeManuscriptBannerData({}, 'Manuscript Studio', workspace?.title || 'Workspace', 0);
-  bookNode.meta = bookNode.meta && typeof bookNode.meta === 'object' ? bookNode.meta : {};
-  bookNode.meta.banner = normalizeManuscriptBannerData(bookNode.meta.banner, bookNode.title, workspace.title, manuscriptNodeChildren(workspace, '').findIndex(item=>item.id === bookNode.id));
-  return bookNode.meta.banner;
+function manuscriptBannerCropStyle(banner){
+  const crop = banner && banner.crop ? banner.crop : {x:50,y:50,zoom:100};
+  return `background-position:${crop.x}% ${crop.y}%;background-size:${crop.zoom}% auto;`;
 }
 
-async function updateManuscriptBookBannerField(field='', value=''){
+async function toggleManuscriptBannerEditor(){
   const workspace = activeManuscriptWorkspace();
-  const bookNode = activeManuscriptBook(workspace);
-  if(!workspace || !bookNode) return;
-  const banner = manuscriptBannerData(workspace, bookNode);
+  const subvolumeNode = activeManuscriptSubvolume(workspace);
+  if(!workspace || !subvolumeNode) return;
+  const banner = manuscriptBannerData(workspace, subvolumeNode);
+  await updateManuscriptSubvolumeBannerField('editorOpen', !banner.editorOpen);
+}
+
+async function handleManuscriptBannerUpload(event){
+  const file = event?.target?.files?.[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    await updateManuscriptSubvolumeBannerField('image', String(reader.result || ''));
+    if(event.target) event.target.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function manuscriptBannerData(workspace=activeManuscriptWorkspace(), subvolumeNode=activeManuscriptSubvolume(workspace)){
+  if(!workspace || !subvolumeNode) return normalizeManuscriptBannerData({}, 'Manuscript Studio', workspace?.title || 'Workspace', 0);
+  const lineage = manuscriptLineage(workspace, subvolumeNode.id);
+  const paletteIndex = (workspace.nodes || []).filter(item=>item.type === 'subvolume').findIndex(item=>item.id === subvolumeNode.id);
+  const fallbackTitle = subvolumeNode.title || lineage.book?.title || 'Subvolume';
+  const fallbackKicker = [lineage.book?.title, lineage.volume?.title].filter(Boolean).join(' · ') || workspace.title;
+  subvolumeNode.meta = subvolumeNode.meta && typeof subvolumeNode.meta === 'object' ? subvolumeNode.meta : {};
+  subvolumeNode.meta.banner = normalizeManuscriptBannerData(subvolumeNode.meta.banner, fallbackTitle, fallbackKicker, paletteIndex >= 0 ? paletteIndex : 0);
+  return subvolumeNode.meta.banner;
+}
+
+async function updateManuscriptSubvolumeBannerField(field='', value=''){
+  const workspace = activeManuscriptWorkspace();
+  const subvolumeNode = activeManuscriptSubvolume(workspace);
+  if(!workspace || !subvolumeNode) return;
+  const banner = manuscriptBannerData(workspace, subvolumeNode);
   if(field === 'palette'){
     banner.palette = normalizeBannerPalette(value);
   }else if(field === 'image'){
     banner.image = String(value || '').trim();
   }else if(field === 'title'){
-    banner.title = String(value || '').trim() || bookNode.title;
+    banner.title = String(value || '').trim() || subvolumeNode.title;
   }else if(field === 'kicker'){
     banner.kicker = String(value || '').trim() || workspace.title;
   }else if(field === 'overlay'){
     banner.overlay = String(value || '').trim() || 'veil';
+  }else if(field === 'crop.x'){
+    banner.crop.x = Math.max(0, Math.min(100, Number(value || 50)));
+  }else if(field === 'crop.y'){
+    banner.crop.y = Math.max(0, Math.min(100, Number(value || 50)));
+  }else if(field === 'crop.zoom'){
+    banner.crop.zoom = Math.max(100, Math.min(220, Number(value || 100)));
+  }else if(field === 'editorOpen'){
+    banner.editorOpen = !!value;
   }
-  bookNode.meta.banner = banner;
-  bookNode.updatedAt = Date.now();
+  subvolumeNode.meta.banner = banner;
+  subvolumeNode.updatedAt = Date.now();
   await persistManuscriptWorkspace(workspace, {silent:true, message:'Book banner updated.'});
   renderManuscriptStudio();
 }
@@ -15661,15 +15746,16 @@ async function updateManuscriptBookBannerField(field='', value=''){
 function renderManuscriptBanner(){
   const root = document.getElementById('manuscript-book-banner');
   const workspace = activeManuscriptWorkspace();
-  const bookNode = activeManuscriptBook(workspace);
+  const subvolumeNode = activeManuscriptSubvolume(workspace);
   if(!root){
     return;
   }
-  if(!workspace || !bookNode){
+  if(!workspace || !subvolumeNode){
     root.innerHTML = '';
     return;
   }
-  const banner = manuscriptBannerData(workspace, bookNode);
+  const lineage = manuscriptLineage(workspace, subvolumeNode.id);
+  const banner = manuscriptBannerData(workspace, subvolumeNode);
   const chapterNode = manuscriptCurrentChapterNode();
   const chapterData = chapterNode ? manuscriptChapterData(workspace, chapterNode) : null;
   const counts = manuscriptStructureCounts(workspace);
@@ -15677,18 +15763,20 @@ function renderManuscriptBanner(){
     `--ms-banner-a:${banner.palette[0]}`,
     `--ms-banner-b:${banner.palette[1]}`,
     `--ms-banner-c:${banner.palette[2]}`,
-    banner.image ? `background-image:linear-gradient(120deg,rgba(9,8,10,0.1),rgba(9,8,10,0.85)),url('${escHtml(banner.image)}')` : ''
+    banner.image ? `background-image:linear-gradient(120deg,rgba(9,8,10,0.1),rgba(9,8,10,0.85)),url('${escHtml(banner.image)}')` : '',
+    banner.image ? manuscriptBannerCropStyle(banner) : ''
   ].filter(Boolean).join(';');
   root.innerHTML = `<div class="ms-banner-frame ${banner.image ? 'has-image' : ''}" style="${style}">
     <div class="ms-banner-overlay"></div>
     <div class="ms-banner-content">
       <div class="ms-banner-copy">
         <div class="ms-banner-kicker">${escHtml(banner.kicker || workspace.title)}</div>
-        <div class="ms-banner-title">${escHtml(banner.title || bookNode.title)}</div>
-        <div class="ms-banner-summary">The active writing room follows this book, carrying its atmosphere, visual palette, and narrative lane as you move through acts, volumes, subvolumes, chapters, and notebook layers.</div>
+        <div class="ms-banner-title">${escHtml(banner.title || subvolumeNode.title)}</div>
+        <div class="ms-banner-summary">This banner now belongs to the active subvolume, so each lane of the manuscript can carry its own image, crop, and atmosphere while you move through chapters and notebook layers.</div>
       </div>
       <div class="ms-banner-meta">
-        <div class="ms-banner-chip">${escHtml(bookNode.title)}</div>
+        <div class="ms-banner-chip">${escHtml(lineage.book?.title || 'Book')}</div>
+        <div class="ms-banner-chip">${escHtml(subvolumeNode.title)}</div>
         <div class="ms-banner-chip">${counts.chapter} chapters · ${counts.subchapter} subchapters</div>
         <div class="ms-banner-chip">${escHtml(chapterData ? (chapterData.chapter || chapterNode?.title || 'Chapter context ready') : 'Select a chapter')}</div>
       </div>
@@ -16631,8 +16719,9 @@ function renderManuscriptRightRail(){
   const chapterNode = manuscriptChapterNodeForNode(workspace, node);
   const publishState = chapterNode ? getManuscriptChapterPublishState(chapterNode.id) : null;
   const authorNotes = chapterNode ? manuscriptEnsureChapterAuthorNotes(chapterNode) : null;
-  const activeBook = activeManuscriptBook(workspace, node);
-  const banner = activeBook ? manuscriptBannerData(workspace, activeBook) : null;
+  const activeSubvolume = activeManuscriptSubvolume(workspace, node);
+  const banner = activeSubvolume ? manuscriptBannerData(workspace, activeSubvolume) : null;
+  const subvolumeLineage = activeSubvolume ? manuscriptLineage(workspace, activeSubvolume.id) : null;
   const tracked = chapterNode ? detectTrackedCodexEntitiesForChapter(chapterNode.id) : {characters:[], locations:[], factions:[], other:[], pinned:[]};
   root.innerHTML = `
     <section class="ms-panel ms-rail-section">
@@ -16653,15 +16742,28 @@ function renderManuscriptRightRail(){
       </div>
     </section>
     ${chapterNode ? manuscriptChapterMetadataEditor(workspace, chapterNode) : ''}
-    ${activeBook && banner ? `<section class="ms-panel ms-rail-section">
-      <div class="ms-rail-kicker">Book Banner</div>
-      <div class="ms-panel-title">${escHtml(activeBook.title)}</div>
-      <div class="ms-result-snippet">This cinematic banner follows the active book and changes as you switch books in the manuscript tree.</div>
+    ${activeSubvolume && banner ? `<section class="ms-panel ms-rail-section">
+      <div class="ms-rail-kicker">Subvolume Banner</div>
+      <div class="ms-panel-title">${escHtml(activeSubvolume.title)}</div>
+      <div class="ms-result-snippet">This cinematic banner follows the active subvolume, so each major lane can have its own image, crop, and atmosphere.</div>
+      <div class="ms-character-actions" style="margin-top:.55rem">
+        <button class="ms-mini-btn" type="button" onclick="toggleManuscriptBannerEditor()">${banner.editorOpen ? 'Hide Banner Editor' : 'Edit Banner Image'}</button>
+      </div>
       <div class="ms-banner-field-grid">
-        <div class="ms-meta-field"><label>Banner Title</label><input class="ms-input" value="${escHtml(banner.title)}" onchange="updateManuscriptBookBannerField('title', this.value)"></div>
-        <div class="ms-meta-field"><label>Kicker</label><input class="ms-input" value="${escHtml(banner.kicker)}" onchange="updateManuscriptBookBannerField('kicker', this.value)"></div>
-        <div class="ms-meta-field wide"><label>Image URL</label><input class="ms-input" value="${escHtml(banner.image)}" onchange="updateManuscriptBookBannerField('image', this.value)"></div>
-        <div class="ms-meta-field wide"><label>Palette</label><input class="ms-input" value="${escHtml((banner.palette || []).join(', '))}" onchange="updateManuscriptBookBannerField('palette', this.value)"></div>
+        <div class="ms-meta-field"><label>Banner Title</label><input class="ms-input" value="${escHtml(banner.title)}" onchange="updateManuscriptSubvolumeBannerField('title', this.value)"></div>
+        <div class="ms-meta-field"><label>Kicker</label><input class="ms-input" value="${escHtml(banner.kicker)}" onchange="updateManuscriptSubvolumeBannerField('kicker', this.value)"></div>
+        <div class="ms-meta-field wide"><label>Palette</label><input class="ms-input" value="${escHtml((banner.palette || []).join(', '))}" onchange="updateManuscriptSubvolumeBannerField('palette', this.value)"></div>
+      </div>
+      <div class="ms-result-snippet">${escHtml([subvolumeLineage?.book?.title, subvolumeLineage?.volume?.title, activeSubvolume.title].filter(Boolean).join(' / '))}</div>
+      <div class="ms-banner-editor ${banner.editorOpen ? '' : 'hidden'}">
+        <div class="ms-meta-field wide"><label>Image URL</label><input class="ms-input" value="${escHtml(banner.image)}" onchange="updateManuscriptSubvolumeBannerField('image', this.value)"></div>
+        <div class="ms-meta-field wide"><label>Upload Image</label><input class="ms-input" type="file" accept="image/*" onchange="handleManuscriptBannerUpload(event)"></div>
+        <div class="ms-banner-crop-panel">
+          <div class="ms-banner-preview" style="${banner.image ? `background-image:linear-gradient(120deg,rgba(9,8,10,0.12),rgba(9,8,10,0.72)),url('${escHtml(banner.image)}');${manuscriptBannerCropStyle(banner)}` : ''}"></div>
+          <label class="ms-banner-crop-slider">Horizontal <input type="range" min="0" max="100" value="${escHtml(banner.crop.x)}" oninput="updateManuscriptSubvolumeBannerField('crop.x', this.value)"> <span>${Math.round(banner.crop.x)}%</span></label>
+          <label class="ms-banner-crop-slider">Vertical <input type="range" min="0" max="100" value="${escHtml(banner.crop.y)}" oninput="updateManuscriptSubvolumeBannerField('crop.y', this.value)"> <span>${Math.round(banner.crop.y)}%</span></label>
+          <label class="ms-banner-crop-slider">Zoom <input type="range" min="100" max="220" value="${escHtml(banner.crop.zoom)}" oninput="updateManuscriptSubvolumeBannerField('crop.zoom', this.value)"> <span>${Math.round(banner.crop.zoom)}%</span></label>
+        </div>
       </div>
     </section>` : ''}
     <section class="ms-panel ms-rail-section">
