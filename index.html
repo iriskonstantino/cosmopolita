@@ -7223,16 +7223,7 @@ body:not(.admin-on) #tnav-drafts{
 
 <!-- ════ MANUSCRIPT STUDIO ═════════════════════════ -->
 <div id="manuscript-view" class="admin-only" style="display:none">
-  <div class="manuscript-view-header">
-    <div class="manuscript-header-inner">
-      <div>
-        <div class="manuscript-kicker">Author-only long-form composition workspace</div>
-        <div class="manuscript-title">Manuscript Studio</div>
-        <div class="manuscript-subtitle">A cinematic writing room for books, volumes, subvolumes, chapters, and subchapters. Draft in rich text, switch manuscript units instantly, track counts live, and search your characters and prose without leaving the page.</div>
-      </div>
-      <div class="manuscript-header-badge">Private workspace · autosaves locally and syncs when available</div>
-    </div>
-  </div>
+  <div id="manuscript-book-banner" class="manuscript-book-banner"></div>
   <div id="manuscript-chiasm-glance" class="ms-chiasm-glance"></div>
   <div class="manuscript-shell">
     <aside class="ms-rail" id="manuscript-left-rail"></aside>
@@ -18065,6 +18056,7 @@ function renderManuscriptStudio(){
   if(drawer) drawer.classList.toggle('open', !!(workspace && manuscriptAuthorDrawerOpen(workspace) && manuscriptCurrentChapterNode()));
   ensureManuscriptAuthorWorkspaceMount();
   ensureManuscriptDraftsMount();
+  renderManuscriptBanner();
   renderManuscriptChiasmGlanceStrip();
   renderManuscriptLeftRail();
   renderManuscriptCenter();
