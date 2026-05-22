@@ -5358,9 +5358,7 @@ body:not(.admin-on) #tnav-drafts{
 .ms-banner-overlay{
   position:absolute;
   inset:0;
-  background:
-    linear-gradient(180deg,rgba(255,255,255,0.06),transparent 22%),
-    linear-gradient(120deg,rgba(9,8,10,0.14),rgba(9,8,10,0.82));
+  background:none;
 }
 .ms-banner-content{
   position:relative;
@@ -5433,9 +5431,7 @@ body:not(.admin-on) #tnav-drafts{
 .ms-banner-preview{
   min-height:150px;
   border:1px solid var(--ms-border);
-  background:
-    linear-gradient(120deg,rgba(9,8,10,0.12),rgba(9,8,10,0.72)),
-    linear-gradient(135deg,var(--ms-banner-c, rgba(20,33,61,0.92)),rgba(10,10,12,0.86));
+  background:linear-gradient(135deg,var(--ms-banner-c, rgba(20,33,61,0.92)),rgba(10,10,12,0.86));
   background-repeat:no-repeat;
 }
 .ms-banner-crop-slider{
@@ -15437,6 +15433,7 @@ function normalizeManuscriptBannerData(value={}, fallbackTitle='Book I', fallbac
     image:String(source.image || '').trim(),
     title:String(source.title || '').trim() || fallbackTitle,
     kicker:String(source.kicker || '').trim() || fallbackKicker,
+    summary:String(source.summary || '').trim() || 'This banner now belongs to the active subvolume, so each lane of the manuscript can carry its own image, crop, and atmosphere while you move through chapters and notebook layers.',
     palette:normalizeBannerPalette(source.palette || MANUSCRIPT_BANNER_PALETTES[paletteIndex % MANUSCRIPT_BANNER_PALETTES.length]),
     overlay:String(source.overlay || 'veil').trim() || 'veil',
     crop:{
@@ -16331,6 +16328,8 @@ async function updateManuscriptSubvolumeBannerField(field='', value=''){
     banner.title = String(value || '').trim() || subvolumeNode.title;
   }else if(field === 'kicker'){
     banner.kicker = String(value || '').trim() || workspace.title;
+  }else if(field === 'summary'){
+    banner.summary = String(value || '').trim();
   }else if(field === 'overlay'){
     banner.overlay = String(value || '').trim() || 'veil';
   }else if(field === 'crop.x'){
@@ -16364,11 +16363,18 @@ function renderManuscriptBanner(){
   const chapterNode = manuscriptCurrentChapterNode();
   const chapterData = chapterNode ? manuscriptChapterData(workspace, chapterNode) : null;
   const counts = manuscriptStructureCounts(workspace);
+  const metaChips = [
+    workspace.title ? `Novel · ${workspace.title}` : '',
+    lineage.act?.title ? `Act · ${lineage.act.title}` : '',
+    lineage.volume?.title ? `Volume · ${lineage.volume.title}` : '',
+    subvolumeNode.title ? `Subvolume · ${subvolumeNode.title}` : '',
+    chapterData ? `Chapter · ${chapterData.chapter || chapterNode?.title || 'Context Ready'}` : `Chapters · ${counts.chapter}`
+  ].filter(Boolean);
   const style = [
     `--ms-banner-a:${banner.palette[0]}`,
     `--ms-banner-b:${banner.palette[1]}`,
     `--ms-banner-c:${banner.palette[2]}`,
-    banner.image ? `background-image:linear-gradient(120deg,rgba(9,8,10,0.1),rgba(9,8,10,0.85)),url('${escHtml(banner.image)}')` : '',
+    banner.image ? `background-image:url('${escHtml(banner.image)}')` : '',
     banner.image ? manuscriptBannerCropStyle(banner) : ''
   ].filter(Boolean).join(';');
   root.innerHTML = `<div class="ms-banner-frame ${banner.image ? 'has-image' : ''}" style="${style}">
@@ -16377,13 +16383,11 @@ function renderManuscriptBanner(){
       <div class="ms-banner-copy">
         <div class="ms-banner-kicker">${escHtml(banner.kicker || workspace.title)}</div>
         <div class="ms-banner-title">${escHtml(banner.title || subvolumeNode.title)}</div>
-        <div class="ms-banner-summary">This banner now belongs to the active subvolume, so each lane of the manuscript can carry its own image, crop, and atmosphere while you move through chapters and notebook layers.</div>
+        <div class="ms-banner-summary">${escHtml(banner.summary || '')}</div>
       </div>
       <div class="ms-banner-meta">
-        <div class="ms-banner-chip">${escHtml(lineage.book?.title || 'Book')}</div>
-        <div class="ms-banner-chip">${escHtml(subvolumeNode.title)}</div>
+        ${metaChips.map(item=>`<div class="ms-banner-chip">${escHtml(item)}</div>`).join('')}
         <div class="ms-banner-chip">${counts.chapter} chapters · ${counts.subchapter} subchapters</div>
-        <div class="ms-banner-chip">${escHtml(chapterData ? (chapterData.chapter || chapterNode?.title || 'Chapter context ready') : 'Select a chapter')}</div>
       </div>
     </div>
   </div>`;
@@ -17581,14 +17585,15 @@ function renderManuscriptRightRail(){
       <div class="ms-banner-field-grid">
         <div class="ms-meta-field"><label>Banner Title</label><input class="ms-input" value="${escHtml(banner.title)}" onchange="updateManuscriptSubvolumeBannerField('title', this.value)"></div>
         <div class="ms-meta-field"><label>Kicker</label><input class="ms-input" value="${escHtml(banner.kicker)}" onchange="updateManuscriptSubvolumeBannerField('kicker', this.value)"></div>
+        <div class="ms-meta-field wide"><label>Banner Text</label><textarea class="ms-textarea" rows="4" onchange="updateManuscriptSubvolumeBannerField('summary', this.value)" oninput="updateManuscriptSubvolumeBannerField('summary', this.value)">${escHtml(banner.summary || '')}</textarea></div>
         <div class="ms-meta-field wide"><label>Palette</label><input class="ms-input" value="${escHtml((banner.palette || []).join(', '))}" onchange="updateManuscriptSubvolumeBannerField('palette', this.value)"></div>
       </div>
-      <div class="ms-result-snippet">${escHtml([subvolumeLineage?.book?.title, subvolumeLineage?.volume?.title, activeSubvolume.title].filter(Boolean).join(' / '))}</div>
+      <div class="ms-result-snippet">${escHtml([workspace.title, subvolumeLineage?.act?.title, subvolumeLineage?.volume?.title, activeSubvolume.title].filter(Boolean).join(' / '))}</div>
       <div class="ms-banner-editor ${banner.editorOpen ? '' : 'hidden'}">
         <div class="ms-meta-field wide"><label>Image URL</label><input class="ms-input" value="${escHtml(banner.image)}" onchange="updateManuscriptSubvolumeBannerField('image', this.value)"></div>
         <div class="ms-meta-field wide"><label>Upload Image</label><input class="ms-input" type="file" accept="image/*" onchange="handleManuscriptBannerUpload(event)"></div>
         <div class="ms-banner-crop-panel">
-          <div class="ms-banner-preview" style="${banner.image ? `background-image:linear-gradient(120deg,rgba(9,8,10,0.12),rgba(9,8,10,0.72)),url('${escHtml(banner.image)}');${manuscriptBannerCropStyle(banner)}` : ''}"></div>
+          <div class="ms-banner-preview" style="${banner.image ? `background-image:url('${escHtml(banner.image)}');${manuscriptBannerCropStyle(banner)}` : ''}"></div>
           <label class="ms-banner-crop-slider">Horizontal <input type="range" min="0" max="100" value="${escHtml(banner.crop.x)}" oninput="updateManuscriptSubvolumeBannerField('crop.x', this.value)"> <span>${Math.round(banner.crop.x)}%</span></label>
           <label class="ms-banner-crop-slider">Vertical <input type="range" min="0" max="100" value="${escHtml(banner.crop.y)}" oninput="updateManuscriptSubvolumeBannerField('crop.y', this.value)"> <span>${Math.round(banner.crop.y)}%</span></label>
           <label class="ms-banner-crop-slider">Zoom <input type="range" min="100" max="220" value="${escHtml(banner.crop.zoom)}" oninput="updateManuscriptSubvolumeBannerField('crop.zoom', this.value)"> <span>${Math.round(banner.crop.zoom)}%</span></label>
