@@ -5463,6 +5463,107 @@ body:not(.admin-on) #tnav-drafts{
 .ms-btn.emphasis{
   box-shadow:0 0 0 1px var(--ms-btn-primary-border) inset;
 }
+.ms-meta-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.7rem;
+  margin-top:1rem;
+}
+.ms-meta-field{
+  display:grid;
+  gap:0.28rem;
+}
+.ms-meta-field.wide{
+  grid-column:1 / -1;
+}
+.ms-meta-field label,
+.ms-author-drawer-head,
+.ms-author-summary,
+.ms-author-stats{
+  font-family:var(--mono);
+  letter-spacing:0.11em;
+  text-transform:uppercase;
+}
+.ms-meta-field label{
+  font-size:0.48rem;
+  color:var(--ms-faint-2);
+}
+.ms-textarea{
+  width:100%;
+  min-height:5.25rem;
+  border:1px solid var(--ms-border-strong);
+  background:var(--ms-input-bg);
+  color:var(--ms-input-text);
+  font-family:var(--serif);
+  font-size:0.92rem;
+  line-height:1.55;
+  padding:0.7rem;
+  resize:vertical;
+}
+.ms-meta-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.5rem;
+  margin-top:0.8rem;
+}
+.ms-author-drawer{
+  position:fixed;
+  top:48px;
+  right:0;
+  bottom:0;
+  width:min(620px, 48vw);
+  max-width:100%;
+  background:var(--ms-shell-bg);
+  border-left:1px solid var(--ms-border);
+  box-shadow:-24px 0 64px rgba(0,0,0,0.24);
+  transform:translateX(100%);
+  transition:transform .22s ease;
+  z-index:40;
+  overflow:auto;
+}
+.ms-author-drawer.open{
+  transform:translateX(0);
+}
+.ms-author-drawer-head{
+  position:sticky;
+  top:0;
+  z-index:3;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:0.8rem;
+  padding:0.9rem 1rem;
+  background:var(--ms-panel-alt-2);
+  border-bottom:1px solid var(--ms-border);
+  font-size:0.5rem;
+  color:var(--ms-faint);
+}
+.ms-author-drawer-body{
+  padding:0;
+}
+.ms-author-summary{
+  font-size:0.48rem;
+  color:var(--ms-faint);
+}
+.ms-author-stats{
+  font-size:0.45rem;
+  color:var(--ms-faint-2);
+  margin-top:0.3rem;
+}
+.ms-author-embed #author-workspace{
+  display:block;
+  background:transparent;
+  border-top:none;
+}
+.ms-author-embed .author-workspace-shell{
+  min-height:0;
+}
+.ms-author-embed .author-workspace-top{
+  top:0;
+}
+.ms-author-embed .author-workspace-grid{
+  padding-bottom:1rem;
+}
 .ms-theme-toggle{
   display:inline-flex;
   align-items:center;
@@ -5740,6 +5841,8 @@ body:not(.admin-on) #tnav-drafts{
   .ms-right{order:3}
   .ms-center-panel{min-height:0}
   .ms-editor-host .ql-editor{min-height:40vh}
+  .ms-meta-grid{grid-template-columns:1fr;}
+  .ms-author-drawer{width:100vw;}
   #manuscript-view.ms-editor-focus .ms-center-head,
   #manuscript-view.ms-editor-focus .ms-status-row{padding-left:0.85rem;padding-right:0.85rem}
   #manuscript-view.ms-editor-focus .ms-editor-host .ql-editor{padding:1rem 1rem 2rem}
@@ -6033,7 +6136,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.21.03</div>
+<div id="site-version-stamp">v2026.05.22.01</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -6559,6 +6662,18 @@ body:not(.admin-on) #tnav-drafts{
     <aside class="ms-right" id="manuscript-right-rail"></aside>
   </div>
   <div id="manuscript-status" class="ms-status"></div>
+  <div id="manuscript-author-drawer" class="ms-author-drawer">
+    <div class="ms-author-drawer-head">
+      <div>
+        <div class="ms-author-summary">Author Desk</div>
+        <div id="ms-author-stats" class="ms-author-stats">Revision, research, form, logic, and private notes for the active manuscript chapter.</div>
+      </div>
+      <button class="ms-btn" type="button" onclick="toggleManuscriptAuthorDrawer()">Close</button>
+    </div>
+    <div id="manuscript-author-drawer-body" class="ms-author-drawer-body">
+      <div id="manuscript-author-host" class="ms-author-embed"></div>
+    </div>
+  </div>
 </div>
 
 
@@ -14686,7 +14801,8 @@ function manuscriptUiDefaults(ui={}){
     characterSearch:'',
     lastNodeId:'',
     theme:'light',
-    fullscreenEditor:false
+    fullscreenEditor:false,
+    authorDrawerOpen:false
   }, ui || {});
 }
 
@@ -14906,6 +15022,126 @@ function manuscriptSimpleHash(value=''){
   return `ms-${Math.abs(hash)}`;
 }
 
+function stripTags(text=''){
+  const el = document.createElement('div');
+  el.innerHTML = String(text || '');
+  return (el.textContent || el.innerText || '').trim();
+}
+
+function manuscriptPlainTextFromHtml(html=''){
+  const el = document.createElement('div');
+  el.innerHTML = String(html || '');
+  return (el.textContent || el.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeManuscriptChapterData(value={}, fallback={}){
+  const source = value && typeof value === 'object' ? value : {};
+  const meta = source.meta && typeof source.meta === 'object' ? source.meta : {};
+  const fallbackMeta = fallback.meta && typeof fallback.meta === 'object' ? fallback.meta : {};
+  return {
+    num:String(source.num || fallback.num || ''),
+    novel:canonicalNovelTitle(source.novel || fallback.novel || ''),
+    act:String(source.act || fallback.act || ''),
+    book:String(source.book || fallback.book || ''),
+    volume:String(source.volume || fallback.volume || ''),
+    subvolume:String(source.subvolume || fallback.subvolume || ''),
+    part:String(source.part || fallback.part || ''),
+    chapter:String(source.chapter || fallback.chapter || ''),
+    meta:{
+      narrator:String(meta.narrator || fallbackMeta.narrator || ''),
+      setting:String(meta.setting || fallbackMeta.setting || ''),
+      year:String(meta.year || fallbackMeta.year || ''),
+      aesthetic:String(meta.aesthetic || fallbackMeta.aesthetic || ''),
+      mode:String(meta.mode || fallbackMeta.mode || '')
+    }
+  };
+}
+
+function manuscriptChapterData(workspace, chapterNode){
+  if(!workspace || !chapterNode) return normalizeManuscriptChapterData();
+  const lineage = manuscriptLineage(workspace, chapterNode.id);
+  const stored = chapterNode.meta && chapterNode.meta.chapterData ? chapterNode.meta.chapterData : {};
+  return normalizeManuscriptChapterData(stored, {
+    novel:workspace.title || '',
+    act:lineage.act?.title || '',
+    book:lineage.book?.title || '',
+    volume:lineage.volume?.title || '',
+    subvolume:lineage.subvolume?.title || '',
+    chapter:chapterNode.title || ''
+  });
+}
+
+function manuscriptCurrentChapterNode(){
+  const workspace = activeManuscriptWorkspace();
+  const node = activeManuscriptNode();
+  return manuscriptChapterNodeForNode(workspace, node);
+}
+
+function manuscriptContextKey(){
+  const workspace = activeManuscriptWorkspace();
+  const chapterNode = manuscriptCurrentChapterNode();
+  return workspace && chapterNode ? `ms:${workspace.id}:${chapterNode.id}` : _chapterEditorBaseId;
+}
+
+function manuscriptContextActive(){
+  return _currentView === 'manuscript-view' && !!manuscriptCurrentChapterNode();
+}
+
+function manuscriptEnsureChapterAuthorNotes(chapterNode){
+  if(!chapterNode) return normalizeAuthorNotes();
+  chapterNode.meta = chapterNode.meta && typeof chapterNode.meta === 'object' ? chapterNode.meta : {};
+  chapterNode.meta.authorNotes = normalizeAuthorNotes(chapterNode.meta.authorNotes || {});
+  return chapterNode.meta.authorNotes;
+}
+
+function manuscriptAuthorDrawerOpen(workspace){
+  return !!manuscriptUi(workspace).authorDrawerOpen;
+}
+
+async function setManuscriptAuthorDrawer(open){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  manuscriptUi(workspace).authorDrawerOpen = !!open;
+  await persistManuscriptWorkspace(workspace, {silent:true, message:open ? 'Opened author desk.' : 'Closed author desk.'});
+  renderManuscriptStudio();
+}
+
+async function toggleManuscriptAuthorDrawer(){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  await setManuscriptAuthorDrawer(!manuscriptAuthorDrawerOpen(workspace));
+}
+
+function ensureManuscriptAuthorWorkspaceMount(){
+  const host = document.getElementById('manuscript-author-host');
+  const workspaceEl = document.getElementById('author-workspace');
+  if(host && workspaceEl && workspaceEl.parentElement !== host){
+    host.appendChild(workspaceEl);
+  }
+}
+
+function manuscriptSyncLegacyAuthorState(){
+  const workspace = activeManuscriptWorkspace();
+  const chapterNode = manuscriptCurrentChapterNode();
+  if(!workspace || !chapterNode) return;
+  _chapterEditorBaseId = manuscriptContextKey();
+  _editingChapterId = chapterNode.meta?.tocChapterId || '';
+  _chapterEditorAuthorNotes = manuscriptEnsureChapterAuthorNotes(chapterNode);
+}
+
+function manuscriptUpdateAuthorStatsText(){
+  const el = document.getElementById('ms-author-stats');
+  const chapterNode = manuscriptCurrentChapterNode();
+  if(!el || !chapterNode) return;
+  const notes = manuscriptEnsureChapterAuthorNotes(chapterNode);
+  el.textContent = authorNotesSummaryText(notes);
+}
+
+function manuscriptRenderedChapterBody(workspace, chapterNode){
+  const payload = manuscriptPublishPayload(workspace, chapterNode?.id || '');
+  return payload?.body || '';
+}
+
 async function syncManuscriptsToSupabase(){
   const client = notesClient();
   if(!client || !isAdmin()) return;
@@ -15027,6 +15263,7 @@ function manuscriptPublishPayload(workspace, chapterNodeId=''){
   const chapterNode = (workspace?.nodes || []).find(node=>node.id === chapterNodeId && node.type === 'chapter') || null;
   if(!workspace || !chapterNode) return null;
   const lineage = manuscriptLineage(workspace, chapterNodeId);
+  const chapterData = manuscriptChapterData(workspace, chapterNode);
   const subchapters = manuscriptSubchaptersForChapter(workspace, chapterNodeId);
   const sections = subchapters.map(subchapter=>{
     const doc = workspace.documents.find(item=>item.nodeId === subchapter.id) || null;
@@ -15040,25 +15277,28 @@ function manuscriptPublishPayload(workspace, chapterNodeId=''){
   const body = sections.join('\n\n');
   const payload = normalizeChapterList([{
     id:existing?.id || chapterNode.meta?.tocChapterId || manuscriptId('ch'),
-    num:existing?.num || '',
-    novel:workspace.title || existing?.novel || '',
-    act:lineage.act?.title || existing?.act || '',
-    book:lineage.book?.title || existing?.book || '',
-    volume:lineage.volume?.title || existing?.volume || '',
-    subvolume:lineage.subvolume?.title || existing?.subvolume || '',
-    part:existing?.part || '',
-    chapter:chapterNode.title || existing?.chapter || '',
-    meta:existing?.meta || {},
+    num:chapterData.num || existing?.num || '',
+    novel:chapterData.novel || workspace.title || existing?.novel || '',
+    act:chapterData.act || lineage.act?.title || existing?.act || '',
+    book:chapterData.book || lineage.book?.title || existing?.book || '',
+    volume:chapterData.volume || lineage.volume?.title || existing?.volume || '',
+    subvolume:chapterData.subvolume || lineage.subvolume?.title || existing?.subvolume || '',
+    part:chapterData.part || existing?.part || '',
+    chapter:chapterData.chapter || chapterNode.title || existing?.chapter || '',
+    meta:Object.assign({}, existing?.meta || {}, chapterData.meta || {}),
     body,
-    authorNotes:existing?.authorNotes || normalizeAuthorNotes()
+    authorNotes:manuscriptEnsureChapterAuthorNotes(chapterNode)
   }])[0];
   const fingerprint = JSON.stringify({
-    workspaceTitle:workspace.title || '',
+    workspaceTitle:chapterData.novel || workspace.title || '',
     book:payload.book,
     act:payload.act,
     volume:payload.volume,
     subvolume:payload.subvolume,
     chapter:payload.chapter,
+    part:payload.part,
+    num:payload.num,
+    meta:payload.meta,
     subchapters:subchapters.map(subchapter=>{
       const doc = workspace.documents.find(item=>item.nodeId === subchapter.id) || {};
       return {
@@ -15114,6 +15354,188 @@ async function setManuscriptTheme(theme='light'){
   if(view) view.setAttribute('data-ms-theme', manuscriptTheme(workspace));
   await persistManuscriptWorkspace(workspace, {silent:true, message:`Theme switched to ${manuscriptTheme(workspace)} mode.`});
   renderManuscriptStudio();
+}
+
+async function updateManuscriptChapterField(field='', value=''){
+  const workspace = activeManuscriptWorkspace();
+  const chapterNode = manuscriptCurrentChapterNode();
+  if(!workspace || !chapterNode) return;
+  const lineage = manuscriptLineage(workspace, chapterNode.id);
+  chapterNode.meta = chapterNode.meta && typeof chapterNode.meta === 'object' ? chapterNode.meta : {};
+  const data = manuscriptChapterData(workspace, chapterNode);
+  const next = String(value || '');
+  if(field === 'novel'){
+    workspace.title = canonicalNovelTitle(next || workspace.title || 'Untitled Manuscript Workspace');
+  }else if(field === 'book' && lineage.book){
+    lineage.book.title = next || lineage.book.title;
+    lineage.book.updatedAt = Date.now();
+  }else if(field === 'act' && lineage.act){
+    lineage.act.title = next || lineage.act.title;
+    lineage.act.updatedAt = Date.now();
+  }else if(field === 'volume' && lineage.volume){
+    lineage.volume.title = next || lineage.volume.title;
+    lineage.volume.updatedAt = Date.now();
+  }else if(field === 'subvolume' && lineage.subvolume){
+    lineage.subvolume.title = next || lineage.subvolume.title;
+    lineage.subvolume.updatedAt = Date.now();
+  }else if(field === 'chapter'){
+    chapterNode.title = next || chapterNode.title;
+    chapterNode.updatedAt = Date.now();
+  }else if(field === 'num' || field === 'part'){
+    data[field] = next;
+  }else if(field.startsWith('meta.')){
+    const key = field.split('.')[1];
+    if(key && Object.prototype.hasOwnProperty.call(data.meta, key)) data.meta[key] = next;
+  }
+  data.novel = workspace.title || data.novel;
+  data.act = lineage.act?.title || data.act;
+  data.book = lineage.book?.title || data.book;
+  data.volume = lineage.volume?.title || data.volume;
+  data.subvolume = lineage.subvolume?.title || data.subvolume;
+  data.chapter = chapterNode.title || data.chapter;
+  chapterNode.meta.chapterData = normalizeManuscriptChapterData(data);
+  await persistManuscriptWorkspace(workspace, {silent:true, message:'Chapter metadata updated.'});
+  renderManuscriptStudio();
+}
+
+function manuscriptChapterMetadataEditor(workspace, chapterNode){
+  if(!workspace || !chapterNode) return '';
+  const data = manuscriptChapterData(workspace, chapterNode);
+  return `
+    <section class="ms-panel ms-rail-section">
+      <div class="ms-rail-kicker">Chapter Architecture</div>
+      <div class="ms-meta-grid">
+        <div class="ms-meta-field"><label>Novel</label><input class="ms-input" value="${escHtml(data.novel)}" onchange="updateManuscriptChapterField('novel', this.value)"></div>
+        <div class="ms-meta-field"><label>Act</label><input class="ms-input" value="${escHtml(data.act)}" onchange="updateManuscriptChapterField('act', this.value)"></div>
+        <div class="ms-meta-field"><label>Chapter Number / Label</label><input class="ms-input" value="${escHtml(data.num)}" onchange="updateManuscriptChapterField('num', this.value)"></div>
+        <div class="ms-meta-field"><label>Book</label><input class="ms-input" value="${escHtml(data.book)}" onchange="updateManuscriptChapterField('book', this.value)"></div>
+        <div class="ms-meta-field"><label>Volume</label><input class="ms-input" value="${escHtml(data.volume)}" onchange="updateManuscriptChapterField('volume', this.value)"></div>
+        <div class="ms-meta-field"><label>Subvolume</label><input class="ms-input" value="${escHtml(data.subvolume)}" onchange="updateManuscriptChapterField('subvolume', this.value)"></div>
+        <div class="ms-meta-field"><label>Part</label><input class="ms-input" value="${escHtml(data.part)}" onchange="updateManuscriptChapterField('part', this.value)"></div>
+        <div class="ms-meta-field wide"><label>Chapter Title</label><input class="ms-input" value="${escHtml(data.chapter)}" onchange="updateManuscriptChapterField('chapter', this.value)"></div>
+        <div class="ms-meta-field"><label>Narrator</label><input class="ms-input" value="${escHtml(data.meta.narrator)}" onchange="updateManuscriptChapterField('meta.narrator', this.value)"></div>
+        <div class="ms-meta-field"><label>Setting</label><input class="ms-input" value="${escHtml(data.meta.setting)}" onchange="updateManuscriptChapterField('meta.setting', this.value)"></div>
+        <div class="ms-meta-field"><label>Year</label><input class="ms-input" value="${escHtml(data.meta.year)}" onchange="updateManuscriptChapterField('meta.year', this.value)"></div>
+        <div class="ms-meta-field"><label>Dominant Aesthetic</label><input class="ms-input" value="${escHtml(data.meta.aesthetic)}" onchange="updateManuscriptChapterField('meta.aesthetic', this.value)"></div>
+        <div class="ms-meta-field wide"><label>Mode</label><input class="ms-input" value="${escHtml(data.meta.mode)}" onchange="updateManuscriptChapterField('meta.mode', this.value)"></div>
+      </div>
+    </section>`;
+}
+
+function manuscriptExistingChapterLink(chapterId=''){
+  for(const workspace of _manuscriptWorkspaces){
+    const node = (workspace.nodes || []).find(item=>item.type === 'chapter' && item.meta && item.meta.tocChapterId === chapterId);
+    if(node) return {workspace, node};
+  }
+  return null;
+}
+
+function manuscriptEnsureLineageNode(workspace, parentId, type, title, bookId=''){
+  const wanted = String(title || '').trim();
+  const existing = manuscriptNodeChildren(workspace, parentId).find(node=>node.type === type && String(node.title || '').trim().toLowerCase() === wanted.toLowerCase());
+  if(existing) return existing;
+  const node = normalizeManuscriptNode({
+    type,
+    title:wanted || manuscriptDefaultTitle(type, manuscriptNodeChildren(workspace, parentId).length + 1),
+    parentId,
+    order:manuscriptNextOrder(workspace, parentId),
+    bookId
+  }, type, manuscriptNodeChildren(workspace, parentId).length, bookId);
+  workspace.nodes.push(node);
+  return node;
+}
+
+async function ensureManuscriptChapterForTOC(chapterId='', options={}){
+  const chapter = chapters.find(item=>item.id === chapterId) || null;
+  if(!chapter) return null;
+  let linked = manuscriptExistingChapterLink(chapterId);
+  if(linked){
+    _activeManuscriptWorkspaceId = linked.workspace.id;
+    _activeManuscriptNodeId = options.openSubchapter === false ? linked.node.id : manuscriptSubchaptersForChapter(linked.workspace, linked.node.id)[0]?.id || linked.node.id;
+    return linked;
+  }
+  await manuscriptRefreshCache();
+  let workspace = activeManuscriptWorkspace() || _manuscriptWorkspaces[0];
+  if(!workspace){
+    workspace = createInitialManuscriptWorkspace(chapter.novel || 'Cosmopolita Manuscript Studio');
+    _manuscriptWorkspaces = [workspace];
+  }
+  if(chapter.novel && (!workspace.title || workspace.title === 'Cosmopolita Manuscript Studio')){
+    workspace.title = canonicalNovelTitle(chapter.novel);
+  }
+  const book = manuscriptEnsureLineageNode(workspace, '', 'book', chapter.book || 'Book I');
+  book.bookId = book.id;
+  const act = manuscriptEnsureLineageNode(workspace, book.id, 'act', chapter.act || 'Act I', book.id);
+  const volume = manuscriptEnsureLineageNode(workspace, act.id, 'volume', chapter.volume || 'Volume 01', book.id);
+  const subvolume = manuscriptEnsureLineageNode(workspace, volume.id, 'subvolume', chapter.subvolume || 'Subvolume 01', book.id);
+  const chapterNode = normalizeManuscriptNode({
+    type:'chapter',
+    title:chapter.chapter || 'Untitled Chapter',
+    parentId:subvolume.id,
+    order:manuscriptNextOrder(workspace, subvolume.id),
+    bookId:book.id,
+    meta:{
+      tocChapterId:chapter.id,
+      lastPublishedAt:Date.now(),
+      chapterData:normalizeManuscriptChapterData(chapter),
+      authorNotes:normalizeAuthorNotes(chapter.authorNotes || {})
+    }
+  }, 'chapter', manuscriptNodeChildren(workspace, subvolume.id).length, book.id);
+  workspace.nodes.push(chapterNode);
+  const subchapterNode = normalizeManuscriptNode({
+    type:'subchapter',
+    title:chapter.chapter || 'Draft',
+    parentId:chapterNode.id,
+    order:0,
+    bookId:book.id
+  }, 'subchapter', 0, book.id);
+  workspace.nodes.push(subchapterNode);
+  const html = parseBody(chapter.body || '');
+  workspace.documents.push(normalizeManuscriptDocument({
+    nodeId:subchapterNode.id,
+    title:subchapterNode.title,
+    html:html || '<p><br></p>',
+    text:stripTags(html || chapter.body || ''),
+    wordCount:manuscriptWordCount(stripTags(html || chapter.body || '')),
+    updatedAt:Date.now()
+  }));
+  manuscriptSetExpanded(workspace, book.id, true);
+  manuscriptSetExpanded(workspace, act.id, true);
+  manuscriptSetExpanded(workspace, volume.id, true);
+  manuscriptSetExpanded(workspace, subvolume.id, true);
+  manuscriptSetExpanded(workspace, chapterNode.id, true);
+  await persistManuscriptWorkspace(workspace, {silent:true, message:`Imported ${chapter.chapter || chapter.book || chapter.id} into Manuscript Studio.`});
+  _activeManuscriptWorkspaceId = workspace.id;
+  _activeManuscriptNodeId = options.openSubchapter === false ? chapterNode.id : subchapterNode.id;
+  return {workspace, node:chapterNode};
+}
+
+async function openUnifiedWorkspaceForChapter(chapterId=''){
+  if(!requireAdmin()) return;
+  await ensureManuscriptChapterForTOC(chapterId, {openSubchapter:true});
+  await showManuscriptStudio();
+}
+
+async function createUnifiedWorkspaceChapter(){
+  if(!requireAdmin()) return;
+  await showManuscriptStudio();
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  let book = manuscriptNodeChildren(workspace, '').find(node=>node.type === 'book') || null;
+  if(!book){
+    await manuscriptAddRootBook();
+    book = manuscriptNodeChildren(activeManuscriptWorkspace(), '').find(node=>node.type === 'book') || null;
+  }
+  const activeWorkspace = activeManuscriptWorkspace();
+  if(!book || !activeWorkspace) return;
+  const act = manuscriptEnsureLineageNode(activeWorkspace, book.id, 'act', 'Act I', book.id);
+  const volume = manuscriptEnsureLineageNode(activeWorkspace, act.id, 'volume', 'Volume 01', book.id);
+  const subvolume = manuscriptEnsureLineageNode(activeWorkspace, volume.id, 'subvolume', 'Subvolume 01', book.id);
+  await manuscriptAddChild(subvolume.id);
+  const chapterNode = activeManuscriptNode();
+  if(chapterNode && chapterNode.type === 'chapter'){
+    await manuscriptAddChild(chapterNode.id);
+  }
 }
 
 function manuscriptEditorFocusEnabled(workspace){
@@ -15262,6 +15684,7 @@ function renderManuscriptCenter(){
   const chapterNode = manuscriptChapterNodeForNode(workspace, node);
   const publishState = chapterNode ? getManuscriptChapterPublishState(chapterNode.id) : null;
   const editorFocused = manuscriptEditorFocusEnabled(workspace);
+  const authorDrawerOpen = manuscriptAuthorDrawerOpen(workspace);
   if(node.type !== 'subchapter'){
     const children = manuscriptNodeChildren(workspace, node.id);
     root.innerHTML = `
@@ -15275,6 +15698,7 @@ function renderManuscriptCenter(){
           <div class="ms-btn-row">
             ${childType ? `<button class="ms-btn primary" type="button" onclick="manuscriptAddChild('${escHtml(node.id)}')">Add ${escHtml(MANUSCRIPT_TYPE_LABELS[childType])}</button>` : ''}
             ${node.type === 'chapter' ? `<button class="ms-btn primary" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(node.id)}')">Publish To TOC</button>` : ''}
+            ${node.type === 'chapter' ? `<button class="ms-btn ${authorDrawerOpen ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptAuthorDrawer()">${authorDrawerOpen ? 'Close Author Desk' : 'Open Author Desk'}</button>` : ''}
             ${node.type === 'chapter' && publishState?.linkedChapter ? `<button class="ms-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(node.id)}')">Open TOC Chapter</button>` : ''}
             <button class="ms-btn" type="button" onclick="renameManuscriptNode('${escHtml(node.id)}')">Rename</button>
           </div>
@@ -15284,6 +15708,7 @@ function renderManuscriptCenter(){
           <span class="ms-meta-chip">Workspace: ${escHtml(workspace.title)}</span>
           ${node.type === 'chapter' ? `<span class="ms-meta-chip ${manuscriptPublishChipClass(node.id)}">${escHtml(publishState?.label || 'Not Published')}</span>` : ''}
         </div>
+        ${chapterNode ? manuscriptChapterMetadataEditor(workspace, chapterNode) : ''}
         <div class="ms-empty-state" style="margin-top:1rem">
           <div class="ms-empty-title">${children.length ? 'Open a child node' : `Add your first ${MANUSCRIPT_TYPE_LABELS[childType] || 'section'}`}</div>
           <div class="ms-empty-copy">${children.length ? `This ${node.type} currently contains ${children.length} child item${children.length===1?'':'s'}. Select one from the left rail or add a new ${childType || 'node'}.` : 'This level is ready for structure, but it does not hold the prose itself.'}</div>
@@ -15304,6 +15729,7 @@ function renderManuscriptCenter(){
         <div class="ms-btn-row">
           <button class="ms-btn primary" type="button" onclick="manuscriptAddChild('${escHtml(manuscriptPath(workspace, node.id).slice(-2)[0]?.id || node.id)}')">Add Sibling</button>
           <button class="ms-btn ${editorFocused ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptEditorFocus()">${editorFocused ? 'Exit Fullscreen' : 'Fullscreen Editor'}</button>
+          ${chapterNode ? `<button class="ms-btn ${authorDrawerOpen ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptAuthorDrawer()">${authorDrawerOpen ? 'Close Author Desk' : 'Open Author Desk'}</button>` : ''}
           ${chapterNode ? `<button class="ms-btn primary" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish Chapter To TOC</button>` : ''}
           ${chapterNode && publishState?.linkedChapter ? `<button class="ms-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open TOC Chapter</button>` : ''}
           <button class="ms-btn" type="button" onclick="renameManuscriptNode('${escHtml(node.id)}')">Rename</button>
@@ -15315,6 +15741,7 @@ function renderManuscriptCenter(){
         <span class="ms-meta-chip">Updated ${escHtml(new Date(doc.updatedAt || Date.now()).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}))}</span>
         ${chapterNode ? `<span class="ms-meta-chip ${manuscriptPublishChipClass(chapterNode.id)}">${escHtml(publishState?.label || 'Not Published')}</span>` : ''}
       </div>
+      ${chapterNode ? manuscriptChapterMetadataEditor(workspace, chapterNode) : ''}
       <div class="ms-editor-frame">
         <input id="ms-node-title" class="ms-node-title-input" value="${escHtml(node.title)}" placeholder="Subchapter title" oninput="updateManuscriptNodeTitle(this.value)">
         <div id="manuscript-editor" class="ms-editor-host"></div>
@@ -15367,6 +15794,7 @@ function renderManuscriptRightRail(){
   const pathText = node ? manuscriptPath(workspace, node.id).map(item=>item.title).join(' / ') : 'No active selection';
   const chapterNode = manuscriptChapterNodeForNode(workspace, node);
   const publishState = chapterNode ? getManuscriptChapterPublishState(chapterNode.id) : null;
+  const authorNotes = chapterNode ? manuscriptEnsureChapterAuthorNotes(chapterNode) : null;
   root.innerHTML = `
     <section class="ms-panel ms-rail-section">
       <div class="ms-rail-kicker">Live Stats</div>
@@ -15382,7 +15810,7 @@ function renderManuscriptRightRail(){
       <div class="ms-summary-list">
         <div class="ms-summary-item"><span class="ms-mini-label">Current path</span><div class="ms-summary-value">${escHtml(pathText)}</div></div>
         <div class="ms-summary-item"><span class="ms-mini-label">Architecture</span><div class="ms-result-snippet">${counts.book} books · ${counts.act} acts · ${counts.volume} volumes · ${counts.subvolume} subvolumes · ${counts.chapter} chapters</div></div>
-        ${chapterNode ? `<div class="ms-summary-item"><span class="ms-mini-label">TOC Publish State</span><div class="ms-summary-value">${escHtml(publishState?.label || 'Not Published')}</div><div class="ms-character-actions"><button class="ms-mini-btn" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish</button>${publishState?.linkedChapter ? `<button class="ms-mini-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open TOC</button>` : ''}</div></div>` : ''}
+        ${chapterNode ? `<div class="ms-summary-item"><span class="ms-mini-label">TOC Publish State</span><div class="ms-summary-value">${escHtml(publishState?.label || 'Not Published')}</div><div class="ms-character-actions"><button class="ms-mini-btn" type="button" onclick="publishManuscriptChapterToTOC('${escHtml(chapterNode.id)}')">Publish</button><button class="ms-mini-btn" type="button" onclick="toggleManuscriptAuthorDrawer()">${manuscriptAuthorDrawerOpen(workspace) ? 'Close Desk' : 'Author Desk'}</button>${publishState?.linkedChapter ? `<button class="ms-mini-btn" type="button" onclick="openPublishedChapterFromManuscript('${escHtml(chapterNode.id)}')">Open TOC</button>` : ''}</div><div class="ms-result-snippet">${escHtml(authorNotesSummaryText(authorNotes))}</div></div>` : ''}
       </div>
     </section>
     <section class="ms-panel ms-rail-section">
@@ -15723,7 +16151,7 @@ async function publishManuscriptChapterToTOC(chapterNodeId=''){
 function openPublishedChapterFromManuscript(chapterNodeId=''){
   const state = getManuscriptChapterPublishState(chapterNodeId);
   if(!state.linkedChapter) return;
-  openChapterEditor(state.linkedChapter.id);
+  showChapter(state.linkedChapter.id);
 }
 
 function insertCharacterIntoManuscript(id=''){
@@ -15762,11 +16190,16 @@ function renderManuscriptStudio(){
   const view = document.getElementById('manuscript-view');
   if(!view) return;
   const workspace = activeManuscriptWorkspace();
+  manuscriptSyncLegacyAuthorState();
   view.setAttribute('data-ms-theme', workspace ? manuscriptTheme(workspace) : 'light');
   view.classList.toggle('ms-editor-focus', !!(workspace && manuscriptEditorFocusEnabled(workspace)));
+  const drawer = document.getElementById('manuscript-author-drawer');
+  if(drawer) drawer.classList.toggle('open', !!(workspace && manuscriptAuthorDrawerOpen(workspace) && manuscriptCurrentChapterNode()));
+  ensureManuscriptAuthorWorkspaceMount();
   renderManuscriptLeftRail();
   renderManuscriptCenter();
   renderManuscriptRightRail();
+  if(workspace && manuscriptAuthorDrawerOpen(workspace) && manuscriptCurrentChapterNode()) renderAuthorWorkspace();
   manuscriptStatus(_manuscriptStatusMessage);
 }
 
@@ -15890,6 +16323,18 @@ function getChapterEditorValue(id){
 }
 
 function readAuthorNotesEditor(){
+  if(manuscriptContextActive()){
+    manuscriptSyncLegacyAuthorState();
+    const chapterNode = manuscriptCurrentChapterNode();
+    const status = document.getElementById('aw-author-status') || document.getElementById('ms-author-status');
+    _chapterEditorAuthorNotes.status = status ? status.value : _chapterEditorAuthorNotes.status;
+    _chapterEditorAuthorNotes = normalizeAuthorNotes(_chapterEditorAuthorNotes);
+    if(chapterNode){
+      chapterNode.meta = chapterNode.meta && typeof chapterNode.meta === 'object' ? chapterNode.meta : {};
+      chapterNode.meta.authorNotes = normalizeAuthorNotes(_chapterEditorAuthorNotes);
+    }
+    return _chapterEditorAuthorNotes;
+  }
   const status = document.getElementById('ce-author-status');
   _chapterEditorAuthorNotes.status = status ? status.value : _chapterEditorAuthorNotes.status;
   _chapterEditorAuthorNotes = normalizeAuthorNotes(_chapterEditorAuthorNotes);
@@ -15912,8 +16357,9 @@ function authorNotesSummaryText(notes=readAuthorNotesEditor()){
 }
 
 function updateAuthorNotesSummary(){
-  const el = document.getElementById('ce-author-summary');
+  const el = document.getElementById('ce-author-summary') || document.getElementById('ms-author-summary');
   if(el) el.textContent = authorNotesSummaryText();
+  manuscriptUpdateAuthorStatsText();
 }
 
 function renderAuthorNotesEditor(){
@@ -16701,6 +17147,7 @@ function updateAuthorRoutedIdea(id, field, value){
 }
 
 function renderAuthorWorkspace(){
+  if(manuscriptContextActive()) manuscriptSyncLegacyAuthorState();
   const data = readChapterEditorData();
   const notes = readAuthorNotesEditor();
   const title = document.getElementById('aw-title');
@@ -16741,10 +17188,15 @@ function renderAuthorWorkspace(){
   renderAuthorLogicBoard();
   renderAuthorWorkspaceTabs();
   renderAuthorNotesEditor();
+  manuscriptUpdateAuthorStatsText();
 }
 
 function openAuthorWorkspace(){
   if(!requireAdmin()) return;
+  if(manuscriptContextActive()){
+    setManuscriptAuthorDrawer(true);
+    return;
+  }
   handleChapterEditorInput();
   const view = document.getElementById('chapter-view');
   if(view) view.classList.add('author-workspace-open');
@@ -16753,6 +17205,10 @@ function openAuthorWorkspace(){
 }
 
 function closeAuthorWorkspace(){
+  if(manuscriptContextActive()){
+    setManuscriptAuthorDrawer(false);
+    return;
+  }
   const view = document.getElementById('chapter-view');
   if(view) view.classList.remove('author-workspace-open');
   handleChapterEditorInput();
@@ -17004,6 +17460,11 @@ function deleteAuthorResearchGap(id){
 }
 
 function selectedAuthorWorkspaceText(){
+  if(manuscriptContextActive() && _manuscriptEditor){
+    const range = _manuscriptEditor.getSelection();
+    const text = range ? (_manuscriptEditor.getText(range.index, range.length) || '').trim() : '';
+    if(text) return text;
+  }
   const selection = window.getSelection ? window.getSelection() : null;
   const rendered = document.getElementById('aw-rendered-text');
   if(selection && rendered && selection.rangeCount){
@@ -17024,7 +17485,7 @@ function selectedAuthorWorkspaceText(){
 function createAuthorResearchPassageFromSelection(subjectId=firstResearchSubjectId()){
   const quote = selectedAuthorWorkspaceText();
   if(!quote){ alert('Select a segment of the chapter text first.'); return; }
-  const body = document.getElementById('ce-body') ? document.getElementById('ce-body').value : '';
+  const body = manuscriptContextActive() ? readChapterEditorData().body : (document.getElementById('ce-body') ? document.getElementById('ce-body').value : '');
   const index = body.indexOf(quote);
   ensureAuthorResearch().passages.unshift({
     id:authorNoteId('passage'),
@@ -17079,7 +17540,7 @@ function toggleAuthorFlag(id){
 }
 
 function updateAuthorInlineMatches(){
-  const body = document.getElementById('ce-body') ? document.getElementById('ce-body').value : '';
+  const body = manuscriptContextActive() ? readChapterEditorData().body : (document.getElementById('ce-body') ? document.getElementById('ce-body').value : '');
   _chapterEditorAuthorNotes.inline.forEach(note=>{
     const card = Array.from(document.querySelectorAll('.author-note-card[data-inline-id]')).find(el=>el.dataset.inlineId === note.id);
     if(!card) return;
@@ -17136,6 +17597,22 @@ function deleteAuthorThreadNote(id){
 }
 
 function addAuthorInlineNoteFromSelection(){
+  if(manuscriptContextActive()){
+    const quote = _manuscriptEditor ? (_manuscriptEditor.getText((_manuscriptEditor.getSelection() || {}).index || 0, (_manuscriptEditor.getSelection() || {}).length || 0) || '').trim() : '';
+    if(!quote){ alert('Select source text first, then add an inline note.'); return; }
+    _chapterEditorAuthorNotes.inline.unshift({
+      id:authorNoteId('inline'),
+      quote,
+      before:'',
+      after:'',
+      body:'',
+      createdAt:Date.now(),
+      updatedAt:Date.now()
+    });
+    renderAuthorNotesEditor();
+    handleChapterEditorInput();
+    return;
+  }
   const area = chapterEditorTextArea();
   addAuthorInlineNoteFromArea(area);
 }
@@ -17177,6 +17654,16 @@ function deleteAuthorInlineNote(id){
 }
 
 function scrollToAuthorInlineQuote(id){
+  if(manuscriptContextActive()){
+    const note = _chapterEditorAuthorNotes.inline.find(item=>item.id===id);
+    if(!_manuscriptEditor || !note || !note.quote) return;
+    const body = _manuscriptEditor.getText() || '';
+    const index = body.indexOf(note.quote);
+    if(index < 0){ alert('That quote is no longer present in the source text.'); return; }
+    _manuscriptEditor.focus();
+    _manuscriptEditor.setSelection(index, note.quote.length, 'silent');
+    return;
+  }
   const area = chapterEditorTextArea();
   const note = _chapterEditorAuthorNotes.inline.find(item=>item.id===id);
   if(!area || !note || !note.quote) return;
@@ -17208,6 +17695,26 @@ function populateChapterEditor(data){
 }
 
 function readChapterEditorData(){
+  if(manuscriptContextActive()){
+    manuscriptSyncLegacyAuthorState();
+    const workspace = activeManuscriptWorkspace();
+    const chapterNode = manuscriptCurrentChapterNode();
+    const chapterData = manuscriptChapterData(workspace, chapterNode);
+    return {
+      id:chapterNode?.meta?.tocChapterId || chapterNode?.id || '',
+      num:chapterData.num || '',
+      novel:chapterData.novel || '',
+      act:chapterData.act || '',
+      book:chapterData.book || '',
+      volume:chapterData.volume || '',
+      subvolume:chapterData.subvolume || '',
+      part:chapterData.part || '',
+      chapter:chapterData.chapter || chapterNode?.title || '',
+      meta:Object.assign({narrator:'', setting:'', year:'', aesthetic:'', mode:''}, chapterData.meta || {}),
+      body:manuscriptRenderedChapterBody(workspace, chapterNode),
+      authorNotes:readAuthorNotesEditor()
+    };
+  }
   return {
     id:_editingChapterId || '',
     num:getChapterEditorValue('ce-num'),
@@ -17310,6 +17817,15 @@ function scheduleChapterEditorDraftSave(){
 }
 
 function handleChapterEditorInput(){
+  if(manuscriptContextActive()){
+    readAuthorNotesEditor();
+    updateAuthorNotesSummary();
+    updateAuthorInlineMatches();
+    queueManuscriptSave({silent:true});
+    renderManuscriptRightRail();
+    renderAuthorWorkspace();
+    return;
+  }
   updateChapterEditorPreview();
   updateAuthorNotesSummary();
   updateAuthorInlineMatches();
@@ -17340,6 +17856,12 @@ function renderChapterEditorHeader(data){
 }
 
 function openChapterEditor(id=null){
+  if(id){
+    openUnifiedWorkspaceForChapter(id);
+    return;
+  }
+  createUnifiedWorkspaceChapter();
+  return;
   if(!requireAdmin()) return;
   const existing = id ? chapters.find(c=>c.id===id) : null;
   if(id && !existing) return;
@@ -17373,19 +17895,27 @@ function openChapterEditor(id=null){
 }
 
 function openNewChapterModal(){
-  openChapterEditor(null);
+  createUnifiedWorkspaceChapter();
 }
 
 function openEditChapterModal(id){
-  openChapterEditor(id);
+  openUnifiedWorkspaceForChapter(id);
 }
 
 function openEditorialAuthorWorkspace(id){
-  openChapterEditor(id);
-  openAuthorWorkspace();
+  openUnifiedWorkspaceForChapter(id).then(()=>setManuscriptAuthorDrawer(true));
 }
 
 function openAdjacentChapterEditor(direction){
+  if(manuscriptContextActive()){
+    const chapterId = manuscriptCurrentChapterNode()?.meta?.tocChapterId || '';
+    const ordered = orderedChapters(chapters || []);
+    const idx = ordered.findIndex(ch=>ch.id === chapterId);
+    const next = ordered[idx + (direction < 0 ? -1 : 1)];
+    if(next) openUnifiedWorkspaceForChapter(next.id);
+    else createUnifiedWorkspaceChapter();
+    return;
+  }
   if(!requireAdmin()) return;
   const idx = chapterEditorCurrentIndex();
   if(idx < 0 && direction < 0) return;
@@ -17556,6 +18086,12 @@ function collectLegacyModalChapterData(){
 
 async function saveChapter(){
   if(!requireAdmin()) return;
+  if(manuscriptContextActive()){
+    const chapterNode = manuscriptCurrentChapterNode();
+    if(!chapterNode){ alert('No manuscript chapter is active.'); return; }
+    await publishManuscriptChapterToTOC(chapterNode.id);
+    return;
+  }
   const inEditor = document.getElementById('chapter-view') && document.getElementById('chapter-view').classList.contains('chapter-editing');
   const editorData = inEditor ? readChapterEditorData() : collectLegacyModalChapterData();
   const chData = Object.assign({}, editorData, {
