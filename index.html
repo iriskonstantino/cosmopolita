@@ -7233,7 +7233,6 @@ body:not(.admin-on) #tnav-drafts{
       <div class="manuscript-header-badge">Private workspace · autosaves locally and syncs when available</div>
     </div>
   </div>
-  <div id="manuscript-book-banner" class="manuscript-book-banner"></div>
   <div id="manuscript-chiasm-glance" class="ms-chiasm-glance"></div>
   <div class="manuscript-shell">
     <aside class="ms-rail" id="manuscript-left-rail"></aside>
@@ -18066,7 +18065,6 @@ function renderManuscriptStudio(){
   if(drawer) drawer.classList.toggle('open', !!(workspace && manuscriptAuthorDrawerOpen(workspace) && manuscriptCurrentChapterNode()));
   ensureManuscriptAuthorWorkspaceMount();
   ensureManuscriptDraftsMount();
-  renderManuscriptBanner();
   renderManuscriptChiasmGlanceStrip();
   renderManuscriptLeftRail();
   renderManuscriptCenter();
