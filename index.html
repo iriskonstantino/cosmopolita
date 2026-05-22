@@ -5358,7 +5358,9 @@ body:not(.admin-on) #tnav-drafts{
 .ms-banner-overlay{
   position:absolute;
   inset:0;
-  background:none;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,0.04),transparent 24%),
+    linear-gradient(120deg,rgba(9,8,10,0.08),rgba(9,8,10,0.2));
 }
 .ms-banner-content{
   position:relative;
@@ -16374,7 +16376,7 @@ function renderManuscriptBanner(){
     `--ms-banner-a:${banner.palette[0]}`,
     `--ms-banner-b:${banner.palette[1]}`,
     `--ms-banner-c:${banner.palette[2]}`,
-    banner.image ? `background-image:url('${escHtml(banner.image)}')` : '',
+    banner.image ? `background-image:linear-gradient(120deg,rgba(9,8,10,0.04),rgba(9,8,10,0.12)),url('${escHtml(banner.image)}')` : '',
     banner.image ? manuscriptBannerCropStyle(banner) : ''
   ].filter(Boolean).join(';');
   root.innerHTML = `<div class="ms-banner-frame ${banner.image ? 'has-image' : ''}" style="${style}">
