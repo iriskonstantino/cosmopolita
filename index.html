@@ -6078,6 +6078,295 @@ body:not(.admin-on) #tnav-drafts{
 .ms-author-embed #drafts-view .drafts-help-drawer{
   margin-top:0;
 }
+.ms-chiasm-glance{
+  position:relative;
+  border-bottom:1px solid var(--ms-border);
+  background:linear-gradient(180deg,var(--ms-panel-alt),var(--ms-panel-bg));
+}
+.ms-chiasm-glance-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:0.8rem;
+  padding:0.48rem 1.15rem;
+}
+.ms-chiasm-glance-label{
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--ms-faint);
+}
+.ms-chiasm-glance-copy{
+  color:var(--ms-muted);
+  font-size:0.78rem;
+}
+.ms-chiasm-glance-panel{
+  max-height:0;
+  overflow:hidden;
+  opacity:0;
+  transform:translateY(-0.15rem);
+  transition:max-height .22s ease, opacity .18s ease, transform .18s ease, padding .18s ease;
+  padding:0 1.15rem;
+}
+.ms-chiasm-glance:hover .ms-chiasm-glance-panel,
+.ms-chiasm-glance:focus-within .ms-chiasm-glance-panel,
+.ms-chiasm-glance.expanded .ms-chiasm-glance-panel{
+  max-height:520px;
+  opacity:1;
+  transform:translateY(0);
+  padding:0 1.15rem 0.9rem;
+}
+.ms-chiasm-glance-groups{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0.8rem;
+}
+.ms-chiasm-glance-group{
+  border:1px solid var(--ms-border);
+  background:var(--ms-summary-bg);
+  padding:0.7rem;
+}
+.ms-chiasm-glance-list{
+  display:grid;
+  gap:0.45rem;
+  margin-top:0.55rem;
+}
+.ms-chiasm-glance-card{
+  width:100%;
+  text-align:left;
+  border:1px solid var(--ms-border);
+  background:var(--ms-tree-bg);
+  color:var(--ms-text);
+  padding:0.58rem;
+  cursor:pointer;
+}
+.ms-chiasm-glance-card.active{
+  border-color:var(--ms-tree-active-border);
+  box-shadow:var(--ms-tree-active-shadow);
+  background:var(--ms-tree-active-bg);
+}
+.ms-chiasm-glance-card:hover{
+  background:var(--ms-btn-hover-bg);
+}
+.ms-chiasm-glance-card-title{
+  font-family:var(--display);
+  font-size:0.84rem;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+.ms-chiasm-glance-card-meta{
+  margin-top:0.22rem;
+  color:var(--ms-faint);
+  font-size:0.46rem;
+  letter-spacing:0.11em;
+  text-transform:uppercase;
+}
+.ms-chiasm-glance-card-copy{
+  margin-top:0.24rem;
+  color:var(--ms-muted);
+  font-size:0.78rem;
+  line-height:1.45;
+}
+#manuscript-view.ms-editor-focus #manuscript-chiasm-glance{
+  display:none !important;
+}
+.ms-chiasm-shell{
+  display:grid;
+  grid-template-columns:240px minmax(0,1fr);
+  gap:0.9rem;
+  margin-top:1rem;
+}
+.ms-chiasm-rail{
+  border:1px solid var(--ms-border);
+  background:var(--ms-summary-bg);
+  padding:0.75rem;
+}
+.ms-chiasm-group{
+  display:grid;
+  gap:0.42rem;
+}
+.ms-chiasm-group + .ms-chiasm-group{
+  margin-top:0.8rem;
+}
+.ms-chiasm-card{
+  border:1px solid var(--ms-border);
+  background:var(--ms-tree-bg);
+  padding:0.58rem;
+}
+.ms-chiasm-card.active{
+  border-color:var(--ms-tree-active-border);
+  box-shadow:var(--ms-tree-active-shadow);
+  background:var(--ms-tree-active-bg);
+}
+.ms-chiasm-card-title{
+  font-family:var(--display);
+  font-size:0.84rem;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+.ms-chiasm-card-meta{
+  margin-top:0.22rem;
+  color:var(--ms-faint);
+  font-size:0.46rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+}
+.ms-chiasm-card-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.32rem;
+  margin-top:0.35rem;
+}
+.ms-chiasm-workspace{
+  display:grid;
+  gap:0.85rem;
+}
+.ms-chiasm-head{
+  display:flex;
+  justify-content:space-between;
+  gap:0.9rem;
+  align-items:flex-start;
+}
+.ms-chiasm-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.45rem;
+  margin-top:0.45rem;
+}
+.ms-chiasm-board{
+  display:grid;
+  gap:0.7rem;
+}
+.ms-chiasm-description{
+  min-height:4.25rem;
+}
+.ms-chiasm-x{
+  border:1px solid var(--ms-border-strong);
+  background:linear-gradient(180deg,var(--ms-panel-alt),var(--ms-panel-bg));
+  padding:0.85rem;
+  text-align:center;
+}
+.ms-chiasm-x-symbol{
+  font-family:var(--display);
+  font-size:1.45rem;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+}
+.ms-chiasm-x-copy{
+  margin-top:0.38rem;
+  color:var(--ms-muted);
+  font-size:0.83rem;
+  line-height:1.48;
+}
+.ms-chiasm-pair{
+  border:1px solid var(--ms-border);
+  background:var(--ms-summary-bg);
+  padding:0.78rem;
+}
+.ms-chiasm-pair-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);
+  gap:0.75rem;
+  align-items:start;
+}
+.ms-chiasm-side{
+  border:1px solid var(--ms-border);
+  background:var(--ms-panel-bg);
+  padding:0.72rem;
+}
+.ms-chiasm-side-title{
+  margin-bottom:0.5rem;
+}
+.ms-chiasm-side-label,
+.ms-chiasm-row-label{
+  font-family:var(--mono);
+  font-size:0.46rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--ms-faint);
+}
+.ms-chiasm-row-axis{
+  display:grid;
+  justify-items:center;
+  gap:0.45rem;
+  padding-top:0.3rem;
+}
+.ms-chiasm-axis-line{
+  width:1px;
+  min-height:100%;
+  background:linear-gradient(180deg,var(--ms-border-strong),transparent);
+}
+.ms-chiasm-axis-x{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:2rem;
+  height:2rem;
+  border:1px solid var(--ms-border-strong);
+  background:var(--ms-chip-bg);
+  font-family:var(--display);
+  font-size:1rem;
+  letter-spacing:0.1em;
+}
+.ms-chiasm-side-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.32rem;
+  margin-top:0.45rem;
+}
+.ms-chiasm-side-meta{
+  margin-top:0.45rem;
+  display:grid;
+  gap:0.45rem;
+}
+.ms-chiasm-link-note{
+  color:var(--ms-faint);
+  font-size:0.46rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+}
+.ms-chiasm-tags{
+  min-height:3.5rem;
+}
+.ms-chiasm-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0.55rem;
+}
+.ms-chiasm-stat{
+  border:1px solid var(--ms-border);
+  background:var(--ms-stat-bg);
+  padding:0.6rem;
+}
+.ms-chiasm-stat-value{
+  display:block;
+  font-family:var(--display);
+  font-size:1rem;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+.ms-chiasm-stat-label{
+  display:block;
+  margin-top:0.22rem;
+  color:var(--ms-faint-2);
+  font-size:0.45rem;
+  letter-spacing:0.1em;
+}
+.ms-chiasm-inline-pick{
+  display:grid;
+  gap:0.3rem;
+}
+.ms-chiasm-inline-pick .ms-select{
+  font-size:0.83rem;
+}
+.ms-chiasm-author-note{
+  margin-top:0.55rem;
+  color:var(--ms-faint);
+  font-size:0.48rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+}
 .ms-mini-btn{
   font-family:var(--mono);
   font-size:0.48rem;
@@ -6124,7 +6413,13 @@ body:not(.admin-on) #tnav-drafts{
   .ms-meta-grid{grid-template-columns:1fr;}
   .ms-banner-field-grid,
   .ms-note-shell,
-  .ms-tree-tools{grid-template-columns:1fr;}
+  .ms-tree-tools,
+  .ms-chiasm-glance-groups,
+  .ms-chiasm-shell,
+  .ms-chiasm-pair-grid,
+  .ms-chiasm-summary-grid{grid-template-columns:1fr;}
+  .ms-chiasm-row-axis{grid-auto-flow:column;align-items:center;justify-content:flex-start;}
+  .ms-chiasm-axis-line{width:2.5rem;min-height:1px;height:1px;}
   .ms-author-drawer{width:100vw;}
   #manuscript-view.ms-editor-focus .ms-center-head,
   #manuscript-view.ms-editor-focus .ms-status-row{padding-left:0.85rem;padding-right:0.85rem}
@@ -6418,7 +6713,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.22.03</div>
+<div id="site-version-stamp">v2026.05.22.04</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -6941,6 +7236,7 @@ body:not(.admin-on) #tnav-drafts{
     </div>
   </div>
   <div id="manuscript-book-banner" class="manuscript-book-banner"></div>
+  <div id="manuscript-chiasm-glance" class="ms-chiasm-glance"></div>
   <div class="manuscript-shell">
     <aside class="ms-rail" id="manuscript-left-rail"></aside>
     <main class="ms-center" id="manuscript-center"></main>
@@ -15091,6 +15387,43 @@ function normalizeManuscriptNoteDocument(value={}, chapterNodeId='', fallbackOrd
   };
 }
 
+function normalizeManuscriptChiasmPair(value={}, fallbackOrder=0){
+  return {
+    id:String(value.id || manuscriptId('pair')),
+    leftTitle:String(value.leftTitle || '').trim() || `A${fallbackOrder + 1}`,
+    leftBody:String(value.leftBody || ''),
+    rightTitle:String(value.rightTitle || '').trim() || `A'${fallbackOrder + 1}`,
+    rightBody:String(value.rightBody || ''),
+    linkedLeftNodeId:String(value.linkedLeftNodeId || ''),
+    linkedRightNodeId:String(value.linkedRightNodeId || ''),
+    leftStatus:['pending','partial','drafted'].includes(value.leftStatus) ? value.leftStatus : 'pending',
+    rightStatus:['pending','partial','drafted'].includes(value.rightStatus) ? value.rightStatus : 'pending',
+    tags:Array.isArray(value.tags) ? value.tags.map(String) : String(value.tags || '').split(',').map(item=>item.trim()).filter(Boolean),
+    order:Number.isFinite(Number(value.order)) ? Number(value.order) : fallbackOrder
+  };
+}
+
+function normalizeManuscriptChiasmDocument(value={}, scopeType='chapter', scopeNodeId='', fallbackOrder=0){
+  const now = Date.now();
+  const type = ['chapter','subchapter'].includes(value.scopeType) ? value.scopeType : scopeType;
+  return {
+    id:String(value.id || manuscriptId('chiasm')),
+    scopeType:type,
+    scopeNodeId:String(value.scopeNodeId || scopeNodeId || ''),
+    title:String(value.title || '').trim() || `${type === 'chapter' ? 'Chapter' : 'Subchapter'} Chiasm ${String(fallbackOrder + 1).padStart(2,'0')}`,
+    xLabel:String(value.xLabel || '').trim() || 'X',
+    xBody:String(value.xBody || ''),
+    description:String(value.description || ''),
+    pairs:(Array.isArray(value.pairs) ? value.pairs : []).map((pair,index)=>normalizeManuscriptChiasmPair(pair, index))
+      .sort((a,b)=>(a.order||0)-(b.order||0)),
+    order:Number.isFinite(Number(value.order)) ? Number(value.order) : fallbackOrder,
+    updatedAt:Number(value.updatedAt || now),
+    color:String(value.color || '').trim(),
+    status:['pending','partial','drafted'].includes(value.status) ? value.status : 'pending',
+    collapsed:!!value.collapsed
+  };
+}
+
 const MANUSCRIPT_BANNER_PALETTES = [
   ['#b83232','#14213d','#c8810a'],
   ['#7e2e84','#14345a','#d5942c'],
@@ -15128,7 +15461,10 @@ function manuscriptUiDefaults(ui={}){
     authorDrawerOpen:false,
     authorDeskTab:'checklist',
     centerMode:'manuscript',
-    activeNoteIdByChapter:{}
+    activeNoteIdByChapter:{},
+    activeChiasmIdByScope:{},
+    chiasmGlanceExpanded:false,
+    chiasmScopeView:'mixed'
   }, ui || {});
 }
 
@@ -15169,10 +15505,12 @@ function createInitialManuscriptWorkspace(title='Cosmopolita Manuscript Studio')
         updatedAt:now
       }, chapter.id, 0)
     ],
+    chiasmDocuments:[],
     ui:manuscriptUiDefaults({
       expandedIds:[book.id, act.id, volume.id, subvolume.id, chapter.id],
       lastNodeId:subchapter.id,
-      activeNoteIdByChapter:{[chapter.id]:''}
+      activeNoteIdByChapter:{[chapter.id]:''},
+      activeChiasmIdByScope:{}
     })
   };
 }
@@ -15190,6 +15528,7 @@ function normalizeManuscriptWorkspace(value={}){
     nodes:[],
     documents:[],
     notesDocuments:[],
+    chiasmDocuments:[],
     ui:manuscriptUiDefaults(source.ui)
   };
   workspace.nodes = (Array.isArray(source.nodes) ? source.nodes : []).map((node,index)=>normalizeManuscriptNode(node, node.type || 'chapter', index, node.bookId || ''));
@@ -15210,6 +15549,8 @@ function normalizeManuscriptWorkspace(value={}){
     .filter(doc=>doc.nodeId && workspace.nodes.some(node=>node.id===doc.nodeId && node.type==='subchapter'));
   workspace.notesDocuments = (Array.isArray(source.notesDocuments) ? source.notesDocuments : []).map((note,index)=>normalizeManuscriptNoteDocument(note, note.chapterNodeId || '', index))
     .filter(note=>note.chapterNodeId && workspace.nodes.some(node=>node.id===note.chapterNodeId && node.type==='chapter'));
+  workspace.chiasmDocuments = (Array.isArray(source.chiasmDocuments) ? source.chiasmDocuments : []).map((chiasm,index)=>normalizeManuscriptChiasmDocument(chiasm, chiasm.scopeType || 'chapter', chiasm.scopeNodeId || '', index))
+    .filter(chiasm=>chiasm.scopeNodeId && workspace.nodes.some(node=>node.id===chiasm.scopeNodeId && node.type===chiasm.scopeType));
   workspace.nodes.filter(node=>node.type === 'subchapter').forEach(node=>{
     if(!workspace.documents.some(doc=>doc.nodeId === node.id)){
       workspace.documents.push(normalizeManuscriptDocument({nodeId:node.id, title:node.title, text:'', html:'<p><br></p>', updatedAt:workspace.updatedAt}));
@@ -15231,6 +15572,7 @@ function normalizeManuscriptWorkspace(value={}){
     workspace.ui.lastNodeId = workspace.nodes.find(node=>node.type === 'subchapter')?.id || workspace.nodes[0]?.id || '';
   }
   workspace.ui.activeNoteIdByChapter = workspace.ui.activeNoteIdByChapter && typeof workspace.ui.activeNoteIdByChapter === 'object' ? workspace.ui.activeNoteIdByChapter : {};
+  workspace.ui.activeChiasmIdByScope = workspace.ui.activeChiasmIdByScope && typeof workspace.ui.activeChiasmIdByScope === 'object' ? workspace.ui.activeChiasmIdByScope : {};
   workspace.nodes.filter(node=>node.type === 'chapter').forEach(node=>{
     if(!workspace.ui.activeNoteIdByChapter[node.id]){
       workspace.ui.activeNoteIdByChapter[node.id] = workspace.notesDocuments.find(note=>note.chapterNodeId === node.id)?.id || '';
@@ -15418,14 +15760,22 @@ function manuscriptPlainTextFromHtml(html=''){
 function manuscriptCenterMode(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode()){
   const ui = workspace ? manuscriptUi(workspace) : manuscriptUiDefaults();
   const chapterNode = manuscriptChapterNodeForNode(workspace, node);
-  return ui.centerMode === 'notes' && chapterNode ? 'notes' : 'manuscript';
+  if(ui.centerMode === 'notes' && chapterNode) return 'notes';
+  if(ui.centerMode === 'chiasm' && chapterNode && node && (node.type === 'chapter' || node.type === 'subchapter')) return 'chiasm';
+  return 'manuscript';
 }
 
 async function setManuscriptCenterMode(mode='manuscript'){
   const workspace = activeManuscriptWorkspace();
   if(!workspace) return;
-  manuscriptUi(workspace).centerMode = mode === 'notes' ? 'notes' : 'manuscript';
-  await persistManuscriptWorkspace(workspace, {silent:true, message:manuscriptUi(workspace).centerMode === 'notes' ? 'Opened chapter notebook.' : 'Returned to manuscript editor.'});
+  const next = mode === 'notes' ? 'notes' : mode === 'chiasm' ? 'chiasm' : 'manuscript';
+  manuscriptUi(workspace).centerMode = next;
+  const message = next === 'notes'
+    ? 'Opened chapter notebook.'
+    : next === 'chiasm'
+      ? 'Opened chiastic structure engine.'
+      : 'Returned to manuscript editor.';
+  await persistManuscriptWorkspace(workspace, {silent:true, message});
   renderManuscriptStudio();
 }
 
@@ -15529,6 +15879,261 @@ async function deleteManuscriptNote(noteId=''){
   }
   await persistManuscriptWorkspace(workspace, {message:`Deleted ${note.title}.`});
   renderManuscriptStudio();
+}
+
+function manuscriptChiasmScopeKey(scopeType='chapter', scopeNodeId=''){
+  return `${scopeType}:${scopeNodeId}`;
+}
+
+function manuscriptChiasmsForScope(workspace, scopeType='chapter', scopeNodeId=''){
+  return (workspace?.chiasmDocuments || [])
+    .filter(chiasm=>chiasm.scopeType === scopeType && chiasm.scopeNodeId === scopeNodeId)
+    .sort((a,b)=>(a.order||0)-(b.order||0) || (b.updatedAt||0)-(a.updatedAt||0));
+}
+
+function manuscriptEnsureActiveChiasmId(workspace, scopeType='chapter', scopeNodeId=''){
+  if(!workspace || !scopeNodeId) return '';
+  const ui = manuscriptUi(workspace);
+  ui.activeChiasmIdByScope = ui.activeChiasmIdByScope && typeof ui.activeChiasmIdByScope === 'object' ? ui.activeChiasmIdByScope : {};
+  const key = manuscriptChiasmScopeKey(scopeType, scopeNodeId);
+  const rows = manuscriptChiasmsForScope(workspace, scopeType, scopeNodeId);
+  if(!rows.length) return '';
+  if(!ui.activeChiasmIdByScope[key] || !rows.some(item=>item.id === ui.activeChiasmIdByScope[key])){
+    ui.activeChiasmIdByScope[key] = rows[0].id;
+  }
+  return ui.activeChiasmIdByScope[key];
+}
+
+function manuscriptChiasmScopesForNode(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode()){
+  const chapterNode = manuscriptChapterNodeForNode(workspace, node);
+  if(!workspace || !node || !chapterNode) return [];
+  if(node.type === 'subchapter'){
+    return [
+      {scopeType:'subchapter', scopeNodeId:node.id, label:'Subchapter Chiasms', primary:true},
+      {scopeType:'chapter', scopeNodeId:chapterNode.id, label:'Chapter Chiasms', primary:false}
+    ];
+  }
+  if(node.type === 'chapter'){
+    return [{scopeType:'chapter', scopeNodeId:chapterNode.id, label:'Chapter Chiasms', primary:true}];
+  }
+  return [];
+}
+
+function activeManuscriptChiasm(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode()){
+  const scopes = manuscriptChiasmScopesForNode(workspace, node);
+  for(const scope of scopes){
+    const activeId = manuscriptEnsureActiveChiasmId(workspace, scope.scopeType, scope.scopeNodeId);
+    const found = manuscriptChiasmsForScope(workspace, scope.scopeType, scope.scopeNodeId).find(item=>item.id === activeId);
+    if(found) return found;
+  }
+  return null;
+}
+
+function manuscriptChiasmSummary(chiasm){
+  if(!chiasm) return 'No chiastic structure selected.';
+  const pairs = (chiasm.pairs || []).length;
+  return `${pairs} paired row${pairs===1?'':'s'} · X = ${chiasm.xLabel || 'X'}`;
+}
+
+function manuscriptRelevantLinkNodes(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode(), chapterNode=manuscriptCurrentChapterNode()){
+  if(!workspace || !chapterNode) return [];
+  const subchapters = manuscriptSubchaptersForChapter(workspace, chapterNode.id);
+  const rows = [];
+  rows.push({id:chapterNode.id, title:chapterNode.title, label:'Chapter'});
+  subchapters.forEach(subchapter=>{
+    rows.push({id:subchapter.id, title:subchapter.title, label:subchapter.id === node?.id ? 'Current Subchapter' : 'Subchapter'});
+  });
+  return rows;
+}
+
+function manuscriptLinkedNodeLabel(nodeId=''){
+  const workspace = activeManuscriptWorkspace();
+  const node = (workspace?.nodes || []).find(item=>item.id === nodeId) || null;
+  return node ? `${node.title} · ${MANUSCRIPT_TYPE_LABELS[node.type]}` : 'No manuscript node linked';
+}
+
+function manuscriptChiasmScopeOptions(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode()){
+  return manuscriptChiasmScopesForNode(workspace, node).map(scope=>{
+    return Object.assign({}, scope, {items:manuscriptChiasmsForScope(workspace, scope.scopeType, scope.scopeNodeId)});
+  });
+}
+
+async function setActiveManuscriptChiasm(scopeType='chapter', scopeNodeId='', chiasmId=''){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace || !scopeNodeId || !chiasmId) return;
+  manuscriptUi(workspace).activeChiasmIdByScope[manuscriptChiasmScopeKey(scopeType, scopeNodeId)] = chiasmId;
+  manuscriptUi(workspace).centerMode = 'chiasm';
+  await persistManuscriptWorkspace(workspace, {silent:true, message:'Opened chiastic structure.'});
+  renderManuscriptStudio();
+}
+
+async function createManuscriptChiasm(scopeType='chapter', scopeNodeId=''){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace || !scopeNodeId || !requireAdmin()) return;
+  const rows = manuscriptChiasmsForScope(workspace, scopeType, scopeNodeId);
+  const chiasm = normalizeManuscriptChiasmDocument({
+    scopeType,
+    scopeNodeId,
+    title:`${scopeType === 'chapter' ? 'Chapter' : 'Subchapter'} Chiasm ${String(rows.length + 1).padStart(2,'0')}`,
+    xLabel:'X',
+    xBody:'',
+    description:'',
+    pairs:[normalizeManuscriptChiasmPair({}, 0)],
+    order:rows.length ? Math.max(...rows.map(item=>Number(item.order || 0))) + 1 : 0,
+    updatedAt:Date.now()
+  }, scopeType, scopeNodeId, rows.length);
+  workspace.chiasmDocuments.push(chiasm);
+  manuscriptUi(workspace).activeChiasmIdByScope[manuscriptChiasmScopeKey(scopeType, scopeNodeId)] = chiasm.id;
+  manuscriptUi(workspace).centerMode = 'chiasm';
+  await persistManuscriptWorkspace(workspace, {message:`Created ${chiasm.title}.`});
+  renderManuscriptStudio();
+}
+
+async function renameManuscriptChiasm(chiasmId=''){
+  const workspace = activeManuscriptWorkspace();
+  const chiasm = (workspace?.chiasmDocuments || []).find(item=>item.id === chiasmId);
+  if(!workspace || !chiasm || !requireAdmin()) return;
+  const next = prompt('Rename chiastic structure', chiasm.title);
+  if(next === null) return;
+  chiasm.title = next.trim() || chiasm.title;
+  chiasm.updatedAt = Date.now();
+  await persistManuscriptWorkspace(workspace, {message:`Renamed ${chiasm.title}.`});
+  renderManuscriptStudio();
+}
+
+async function moveManuscriptChiasm(chiasmId='', direction=0){
+  const workspace = activeManuscriptWorkspace();
+  const chiasm = (workspace?.chiasmDocuments || []).find(item=>item.id === chiasmId);
+  if(!workspace || !chiasm || !requireAdmin()) return;
+  const rows = manuscriptChiasmsForScope(workspace, chiasm.scopeType, chiasm.scopeNodeId);
+  const index = rows.findIndex(item=>item.id === chiasmId);
+  const nextIndex = index + Number(direction || 0);
+  if(index < 0 || nextIndex < 0 || nextIndex >= rows.length) return;
+  const currentOrder = rows[index].order;
+  rows[index].order = rows[nextIndex].order;
+  rows[nextIndex].order = currentOrder;
+  rows[index].updatedAt = Date.now();
+  rows[nextIndex].updatedAt = Date.now();
+  await persistManuscriptWorkspace(workspace, {message:`Reordered ${chiasm.title}.`});
+  renderManuscriptStudio();
+}
+
+async function deleteManuscriptChiasm(chiasmId=''){
+  const workspace = activeManuscriptWorkspace();
+  const chiasm = (workspace?.chiasmDocuments || []).find(item=>item.id === chiasmId);
+  if(!workspace || !chiasm || !requireAdmin()) return;
+  if(!confirm(`Delete ${chiasm.title}?`)) return;
+  workspace.chiasmDocuments = (workspace.chiasmDocuments || []).filter(item=>item.id !== chiasmId);
+  const key = manuscriptChiasmScopeKey(chiasm.scopeType, chiasm.scopeNodeId);
+  const next = manuscriptChiasmsForScope(workspace, chiasm.scopeType, chiasm.scopeNodeId)[0];
+  manuscriptUi(workspace).activeChiasmIdByScope[key] = next ? next.id : '';
+  await persistManuscriptWorkspace(workspace, {message:`Deleted ${chiasm.title}.`});
+  renderManuscriptStudio();
+}
+
+async function updateManuscriptChiasmField(chiasmId='', field='', value=''){
+  const workspace = activeManuscriptWorkspace();
+  const chiasm = (workspace?.chiasmDocuments || []).find(item=>item.id === chiasmId);
+  if(!workspace || !chiasm) return;
+  if(field === 'title' || field === 'xLabel' || field === 'xBody' || field === 'description' || field === 'color'){
+    chiasm[field] = value;
+  }else if(field === 'status'){
+    chiasm.status = ['pending','partial','drafted'].includes(value) ? value : 'pending';
+  }
+  chiasm.updatedAt = Date.now();
+  renderManuscriptRightRail();
+  renderManuscriptChiasmGlanceStrip();
+  if(manuscriptAuthorDrawerOpen(workspace) && manuscriptCurrentChapterNode()) renderAuthorWorkspace();
+  queueManuscriptSave({message:'Chiastic structure updated.'});
+}
+
+async function addManuscriptChiasmPair(chiasmId=''){
+  const workspace = activeManuscriptWorkspace();
+  const chiasm = (workspace?.chiasmDocuments || []).find(item=>item.id === chiasmId);
+  if(!workspace || !chiasm || !requireAdmin()) return;
+  const pairs = (chiasm.pairs || []).slice().sort((a,b)=>(a.order||0)-(b.order||0));
+  chiasm.pairs.push(normalizeManuscriptChiasmPair({
+    order:pairs.length ? Math.max(...pairs.map(item=>Number(item.order || 0))) + 1 : 0
+  }, pairs.length));
+  chiasm.updatedAt = Date.now();
+  await persistManuscriptWorkspace(workspace, {message:`Added a mirrored row to ${chiasm.title}.`});
+  renderManuscriptStudio();
+}
+
+async function moveManuscriptChiasmPair(chiasmId='', pairId='', direction=0){
+  const workspace = activeManuscriptWorkspace();
+  const chiasm = (workspace?.chiasmDocuments || []).find(item=>item.id === chiasmId);
+  if(!workspace || !chiasm || !requireAdmin()) return;
+  const pairs = (chiasm.pairs || []).sort((a,b)=>(a.order||0)-(b.order||0));
+  const index = pairs.findIndex(item=>item.id === pairId);
+  const nextIndex = index + Number(direction || 0);
+  if(index < 0 || nextIndex < 0 || nextIndex >= pairs.length) return;
+  const currentOrder = pairs[index].order;
+  pairs[index].order = pairs[nextIndex].order;
+  pairs[nextIndex].order = currentOrder;
+  chiasm.updatedAt = Date.now();
+  await persistManuscriptWorkspace(workspace, {message:`Reordered a mirrored row in ${chiasm.title}.`});
+  renderManuscriptStudio();
+}
+
+async function deleteManuscriptChiasmPair(chiasmId='', pairId=''){
+  const workspace = activeManuscriptWorkspace();
+  const chiasm = (workspace?.chiasmDocuments || []).find(item=>item.id === chiasmId);
+  if(!workspace || !chiasm || !requireAdmin()) return;
+  if((chiasm.pairs || []).length <= 1){
+    alert('Each chiasm keeps at least one mirrored row.');
+    return;
+  }
+  chiasm.pairs = (chiasm.pairs || []).filter(pair=>pair.id !== pairId);
+  chiasm.updatedAt = Date.now();
+  await persistManuscriptWorkspace(workspace, {message:`Deleted a mirrored row from ${chiasm.title}.`});
+  renderManuscriptStudio();
+}
+
+function updateManuscriptChiasmPairField(chiasmId='', pairId='', field='', value=''){
+  const workspace = activeManuscriptWorkspace();
+  const chiasm = (workspace?.chiasmDocuments || []).find(item=>item.id === chiasmId);
+  const pair = (chiasm?.pairs || []).find(item=>item.id === pairId);
+  if(!workspace || !chiasm || !pair) return;
+  if(field === 'tags'){
+    pair.tags = String(value || '').split(',').map(item=>item.trim()).filter(Boolean);
+  }else if(field === 'leftStatus' || field === 'rightStatus'){
+    pair[field] = ['pending','partial','drafted'].includes(value) ? value : 'pending';
+  }else if(field in pair){
+    pair[field] = value;
+  }
+  chiasm.updatedAt = Date.now();
+  renderManuscriptRightRail();
+  renderManuscriptChiasmGlanceStrip();
+  queueManuscriptSave({message:'Chiastic row updated.'});
+}
+
+function linkManuscriptChiasmPairSide(chiasmId='', pairId='', side='left', nodeId=''){
+  const field = side === 'right' ? 'linkedRightNodeId' : 'linkedLeftNodeId';
+  updateManuscriptChiasmPairField(chiasmId, pairId, field, nodeId);
+}
+
+function assignCurrentSubchapterToChiasmPairSide(chiasmId='', pairId='', side='left'){
+  const node = activeManuscriptNode();
+  if(!node || node.type !== 'subchapter') return;
+  linkManuscriptChiasmPairSide(chiasmId, pairId, side, node.id);
+}
+
+async function openLinkedManuscriptNodeFromChiasm(nodeId=''){
+  const workspace = activeManuscriptWorkspace();
+  const node = (workspace?.nodes || []).find(item=>item.id === nodeId) || null;
+  if(!workspace || !node) return;
+  manuscriptUi(workspace).centerMode = node.type === 'subchapter' ? 'manuscript' : 'chiasm';
+  await openManuscriptNode(nodeId);
+}
+
+async function toggleManuscriptChiasmGlance(force){
+  const workspace = activeManuscriptWorkspace();
+  if(!workspace) return;
+  const ui = manuscriptUi(workspace);
+  ui.chiasmGlanceExpanded = typeof force === 'boolean' ? force : !ui.chiasmGlanceExpanded;
+  await persistManuscriptWorkspace(workspace, {silent:true, message:ui.chiasmGlanceExpanded ? 'Expanded chiastic glance strip.' : 'Collapsed chiastic glance strip.'});
+  renderManuscriptChiasmGlanceStrip();
 }
 
 function manuscriptEditorContext(workspace=activeManuscriptWorkspace(), node=activeManuscriptNode()){
@@ -15784,6 +16389,56 @@ function renderManuscriptBanner(){
   </div>`;
 }
 
+function renderManuscriptChiasmGlanceStrip(){
+  const root = document.getElementById('manuscript-chiasm-glance');
+  const workspace = activeManuscriptWorkspace();
+  const node = activeManuscriptNode();
+  const chapterNode = manuscriptCurrentChapterNode();
+  if(!root){
+    return;
+  }
+  if(!workspace || !node || !chapterNode || (node.type !== 'chapter' && node.type !== 'subchapter')){
+    root.innerHTML = '';
+    root.classList.remove('expanded');
+    return;
+  }
+  const scopes = manuscriptChiasmScopeOptions(workspace, node);
+  const active = activeManuscriptChiasm(workspace, node);
+  const localCount = scopes.reduce((sum, scope)=>sum + scope.items.length, 0);
+  const summary = active ? `${active.title} · ${manuscriptChiasmSummary(active)}` : `${localCount} chiastic structure${localCount===1?'':'s'} in view`;
+  const expanded = !!manuscriptUi(workspace).chiasmGlanceExpanded;
+  root.classList.toggle('expanded', expanded);
+  root.innerHTML = `<div class="ms-chiasm-glance-bar">
+    <div>
+      <div class="ms-chiasm-glance-label">Chiastic Glance</div>
+      <div class="ms-chiasm-glance-copy">${escHtml(summary)}</div>
+    </div>
+    <div class="ms-btn-row">
+      <button class="ms-mini-btn" type="button" onclick="setManuscriptCenterMode('chiasm')">Open Board</button>
+      <button class="ms-mini-btn" type="button" onclick="toggleManuscriptChiasmGlance()">${expanded ? 'Hide' : 'Pin Open'}</button>
+    </div>
+  </div>
+  <div class="ms-chiasm-glance-panel">
+    <div class="ms-chiasm-glance-groups">
+      ${scopes.map(scope=>{
+        const activeId = manuscriptEnsureActiveChiasmId(workspace, scope.scopeType, scope.scopeNodeId);
+        return `<div class="ms-chiasm-glance-group">
+          <div class="ms-mini-label">${escHtml(scope.label)}</div>
+          <div class="ms-chiasm-glance-list">
+            ${scope.items.length ? scope.items.map(chiasm=>`
+              <button class="ms-chiasm-glance-card ${chiasm.id===activeId ? 'active' : ''}" type="button" onclick="setActiveManuscriptChiasm('${escHtml(scope.scopeType)}','${escHtml(scope.scopeNodeId)}','${escHtml(chiasm.id)}')">
+                <div class="ms-chiasm-glance-card-title">${escHtml(chiasm.title)}</div>
+                <div class="ms-chiasm-glance-card-meta">${escHtml(chiasm.xLabel || 'X')} · ${(chiasm.pairs || []).length} rows</div>
+                <div class="ms-chiasm-glance-card-copy">${escHtml(chiasm.description || manuscriptChiasmSummary(chiasm))}</div>
+              </button>
+            `).join('') : '<div class="ms-search-empty">No structures here yet.</div>'}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
 async function collapseAllManuscriptNodes(){
   const workspace = activeManuscriptWorkspace();
   if(!workspace) return;
@@ -15916,7 +16571,13 @@ function manuscriptUpdateAuthorStatsText(){
   const chapterNode = manuscriptCurrentChapterNode();
   if(!el || !chapterNode) return;
   const notes = manuscriptEnsureChapterAuthorNotes(chapterNode);
-  el.textContent = authorNotesSummaryText(notes);
+  const workspace = activeManuscriptWorkspace();
+  const node = activeManuscriptNode();
+  const chiasmScopes = manuscriptChiasmScopeOptions(workspace, node);
+  const chiasmCount = chiasmScopes.reduce((sum, scope)=>sum + scope.items.length, 0);
+  const active = activeManuscriptChiasm(workspace, node);
+  const chiasmText = active ? `${active.title} · ${manuscriptChiasmSummary(active)}` : `${chiasmCount} chiastic structure${chiasmCount===1?'':'s'}`;
+  el.textContent = `${authorNotesSummaryText(notes)} · ${chiasmText}`;
 }
 
 function manuscriptRenderedChapterBody(workspace, chapterNode){
@@ -16476,12 +17137,13 @@ function renderManuscriptLeftRail(){
     </section>`;
 }
 
-function manuscriptCenterTabs(workspace, chapterNode){
+function manuscriptCenterTabs(workspace, chapterNode, node=activeManuscriptNode()){
   if(!workspace || !chapterNode) return '';
   const mode = manuscriptCenterMode(workspace);
   return `<div class="ms-center-modes" aria-label="Writing surface mode">
     <button class="ms-center-tab ${mode==='manuscript' ? 'active' : ''}" type="button" onclick="setManuscriptCenterMode('manuscript')">Manuscript</button>
     <button class="ms-center-tab ${mode==='notes' ? 'active' : ''}" type="button" onclick="setManuscriptCenterMode('notes')">Notes</button>
+    ${(node && (node.type === 'chapter' || node.type === 'subchapter')) ? `<button class="ms-center-tab ${mode==='chiasm' ? 'active' : ''}" type="button" onclick="setManuscriptCenterMode('chiasm')">Chiasm</button>` : ''}
   </div>`;
 }
 
@@ -16523,6 +17185,146 @@ function renderManuscriptNotesWorkspace(workspace, chapterNode){
   </div>`;
 }
 
+function renderManuscriptChiasmRailCard(scope, chiasm, activeId){
+  return `<div class="ms-chiasm-card ${chiasm.id===activeId ? 'active' : ''}">
+    <div class="ms-chiasm-card-title">${escHtml(chiasm.title)}</div>
+    <div class="ms-chiasm-card-meta">${escHtml(manuscriptChiasmSummary(chiasm))}</div>
+    <div class="ms-chiasm-card-actions">
+      <button class="ms-mini-btn" type="button" onclick="setActiveManuscriptChiasm('${escHtml(scope.scopeType)}','${escHtml(scope.scopeNodeId)}','${escHtml(chiasm.id)}')">Open</button>
+      <button class="ms-mini-btn" type="button" onclick="renameManuscriptChiasm('${escHtml(chiasm.id)}')">Rename</button>
+      <button class="ms-mini-btn" type="button" onclick="moveManuscriptChiasm('${escHtml(chiasm.id)}', -1)">Up</button>
+      <button class="ms-mini-btn" type="button" onclick="moveManuscriptChiasm('${escHtml(chiasm.id)}', 1)">Down</button>
+      <button class="ms-mini-btn" type="button" onclick="deleteManuscriptChiasm('${escHtml(chiasm.id)}')">Delete</button>
+    </div>
+  </div>`;
+}
+
+function renderManuscriptChiasmPair(chiasm, pair, index, linkNodes, activeNode){
+  const tagText = Array.isArray(pair.tags) ? pair.tags.join(', ') : '';
+  const selectOptions = `<option value="">No linked node</option>${linkNodes.map(item=>`<option value="${escHtml(item.id)}">${escHtml(item.label)} · ${escHtml(item.title)}</option>`).join('')}`;
+  const sidePanel = (side)=>{
+    const isRight = side === 'right';
+    const titleField = isRight ? 'rightTitle' : 'leftTitle';
+    const bodyField = isRight ? 'rightBody' : 'leftBody';
+    const statusField = isRight ? 'rightStatus' : 'leftStatus';
+    const linkedField = isRight ? pair.linkedRightNodeId : pair.linkedLeftNodeId;
+    return `<div class="ms-chiasm-side">
+      <div class="ms-chiasm-side-label">${isRight ? 'Right Arm' : 'Left Arm'}</div>
+      <input class="ms-input ms-chiasm-side-title" value="${escHtml(pair[titleField] || '')}" placeholder="${isRight ? 'Right title' : 'Left title'}" oninput="updateManuscriptChiasmPairField('${escHtml(chiasm.id)}','${escHtml(pair.id)}','${titleField}', this.value)">
+      <textarea class="ms-textarea" rows="6" placeholder="${isRight ? 'Mirror, reversal, echo, answer...' : 'Setup, motif, pressure, image...'}" oninput="updateManuscriptChiasmPairField('${escHtml(chiasm.id)}','${escHtml(pair.id)}','${bodyField}', this.value)">${escHtml(pair[bodyField] || '')}</textarea>
+      <div class="ms-chiasm-side-meta">
+        <div class="ms-chiasm-inline-pick">
+          <label class="ms-chiasm-row-label">Linked Manuscript Node</label>
+          <select class="ms-select" onchange="linkManuscriptChiasmPairSide('${escHtml(chiasm.id)}','${escHtml(pair.id)}','${side}', this.value)">${selectOptions.replace(`value=\"${escHtml(linkedField)}\"`, `value=\"${escHtml(linkedField)}\" selected`)}</select>
+          <div class="ms-chiasm-link-note">${escHtml(manuscriptLinkedNodeLabel(linkedField))}</div>
+        </div>
+        <div class="ms-chiasm-inline-pick">
+          <label class="ms-chiasm-row-label">Draft Status</label>
+          <select class="ms-select" onchange="updateManuscriptChiasmPairField('${escHtml(chiasm.id)}','${escHtml(pair.id)}','${statusField}', this.value)">
+            ${['pending','partial','drafted'].map(level=>`<option value="${level}" ${pair[statusField]===level?'selected':''}>${escHtml(level)}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="ms-chiasm-side-actions">
+        ${activeNode && activeNode.type === 'subchapter' ? `<button class="ms-mini-btn" type="button" onclick="assignCurrentSubchapterToChiasmPairSide('${escHtml(chiasm.id)}','${escHtml(pair.id)}','${side}')">Link Current</button>` : ''}
+        ${linkedField ? `<button class="ms-mini-btn" type="button" onclick="openLinkedManuscriptNodeFromChiasm('${escHtml(linkedField)}')">Open Linked</button>` : ''}
+      </div>
+    </div>`;
+  };
+  return `<section class="ms-chiasm-pair">
+    <div class="ms-chiasm-pair-grid">
+      ${sidePanel('left')}
+      <div class="ms-chiasm-row-axis">
+        <div class="ms-chiasm-row-label">Pair ${String(index + 1).padStart(2,'0')}</div>
+        <div class="ms-chiasm-axis-x">X</div>
+        <div class="ms-chiasm-axis-line"></div>
+      </div>
+      ${sidePanel('right')}
+    </div>
+    <div class="ms-chiasm-side-meta" style="margin-top:.7rem">
+      <label class="ms-chiasm-row-label">Tags</label>
+      <textarea class="ms-textarea ms-chiasm-tags" rows="2" placeholder="motif, image system, pressure, answer, reversal..." oninput="updateManuscriptChiasmPairField('${escHtml(chiasm.id)}','${escHtml(pair.id)}','tags', this.value)">${escHtml(tagText)}</textarea>
+      <div class="ms-chiasm-side-actions">
+        <button class="ms-mini-btn" type="button" onclick="moveManuscriptChiasmPair('${escHtml(chiasm.id)}','${escHtml(pair.id)}', -1)">Move Up</button>
+        <button class="ms-mini-btn" type="button" onclick="moveManuscriptChiasmPair('${escHtml(chiasm.id)}','${escHtml(pair.id)}', 1)">Move Down</button>
+        <button class="ms-mini-btn" type="button" onclick="deleteManuscriptChiasmPair('${escHtml(chiasm.id)}','${escHtml(pair.id)}')">Delete Pair</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderManuscriptChiasmWorkspace(workspace, node, chapterNode){
+  const scopes = manuscriptChiasmScopeOptions(workspace, node);
+  if(!scopes.length){
+    return `<div class="ms-empty-state"><div class="ms-empty-title">Chiastic Engine</div><div class="ms-empty-copy">Select a chapter or subchapter to build mirrored structures around an explicit X.</div></div>`;
+  }
+  const active = activeManuscriptChiasm(workspace, node);
+  const activeScope = active ? scopes.find(scope=>scope.scopeType === active.scopeType && scope.scopeNodeId === active.scopeNodeId) || scopes[0] : scopes[0];
+  const activeScopeNode = (workspace.nodes || []).find(item=>item.id === activeScope.scopeNodeId) || chapterNode;
+  const linkNodes = manuscriptRelevantLinkNodes(workspace, node, chapterNode);
+  const totalCount = scopes.reduce((sum, scope)=>sum + scope.items.length, 0);
+  return `<div class="ms-chiasm-shell">
+    <aside class="ms-chiasm-rail">
+      <div class="ms-section-title">Chiastic Structures</div>
+      ${scopes.map(scope=>{
+        const activeId = manuscriptEnsureActiveChiasmId(workspace, scope.scopeType, scope.scopeNodeId);
+        return `<div class="ms-chiasm-group">
+          <div class="ms-mini-label">${escHtml(scope.label)} · ${scope.items.length}</div>
+          ${scope.items.length ? scope.items.map(item=>renderManuscriptChiasmRailCard(scope, item, activeId)).join('') : `<div class="ms-search-empty">No ${scope.scopeType} chiasms yet.</div>`}
+          <div class="ms-btn-row">
+            <button class="ms-btn primary" type="button" onclick="createManuscriptChiasm('${escHtml(scope.scopeType)}','${escHtml(scope.scopeNodeId)}')">New ${escHtml(scope.scopeType)}</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </aside>
+    <div class="ms-chiasm-workspace">
+      ${active ? `
+        <div class="ms-panel" style="padding:1rem">
+          <div class="ms-chiasm-head">
+            <div>
+              <div class="ms-panel-title">${escHtml(active.title)}</div>
+              <div class="ms-result-snippet">Mirrored planning board for ${escHtml(activeScopeNode?.title || active.scopeType)}. Use the left arm for setup and pressure, the right arm for return, inversion, and answer, with the center X holding the turn.</div>
+              <div class="ms-chiasm-meta">
+                <span class="ms-meta-chip">${escHtml(active.scopeType)}</span>
+                <span class="ms-meta-chip">${(active.pairs || []).length} mirrored row${(active.pairs || []).length===1 ? '' : 's'}</span>
+                <span class="ms-meta-chip">Updated ${escHtml(new Date(active.updatedAt || Date.now()).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}))}</span>
+              </div>
+            </div>
+            <div class="ms-btn-row">
+              <button class="ms-btn primary" type="button" onclick="addManuscriptChiasmPair('${escHtml(active.id)}')">Add Pair</button>
+              <button class="ms-btn" type="button" onclick="renameManuscriptChiasm('${escHtml(active.id)}')">Rename</button>
+            </div>
+          </div>
+          <div class="ms-meta-grid">
+            <div class="ms-meta-field wide"><label>Chiasm Title</label><input class="ms-input" value="${escHtml(active.title)}" onchange="updateManuscriptChiasmField('${escHtml(active.id)}','title', this.value)"></div>
+            <div class="ms-meta-field"><label>Status</label><select class="ms-select" onchange="updateManuscriptChiasmField('${escHtml(active.id)}','status', this.value)">${['pending','partial','drafted'].map(level=>`<option value="${level}" ${active.status===level?'selected':''}>${escHtml(level)}</option>`).join('')}</select></div>
+            <div class="ms-meta-field"><label>Center X Label</label><input class="ms-input" value="${escHtml(active.xLabel || 'X')}" onchange="updateManuscriptChiasmField('${escHtml(active.id)}','xLabel', this.value)"></div>
+            <div class="ms-meta-field wide"><label>Structural Intent</label><textarea class="ms-textarea ms-chiasm-description" rows="3" oninput="updateManuscriptChiasmField('${escHtml(active.id)}','description', this.value)">${escHtml(active.description || '')}</textarea></div>
+          </div>
+        </div>
+        <div class="ms-chiasm-summary-grid">
+          <div class="ms-chiasm-stat"><span class="ms-chiasm-stat-value">${(active.pairs || []).length}</span><span class="ms-chiasm-stat-label">Mirrored Rows</span></div>
+          <div class="ms-chiasm-stat"><span class="ms-chiasm-stat-value">${totalCount}</span><span class="ms-chiasm-stat-label">Visible Chiasms</span></div>
+          <div class="ms-chiasm-stat"><span class="ms-chiasm-stat-value">${escHtml(active.scopeType)}</span><span class="ms-chiasm-stat-label">Active Scope</span></div>
+        </div>
+        <div class="ms-chiasm-x">
+          <div class="ms-chiasm-x-symbol">${escHtml(active.xLabel || 'X')}</div>
+          <div class="ms-chiasm-x-copy">The explicit center point. Use this for the hinge, revelation, wound, confession, image, or choice that turns the mirror.</div>
+          <textarea class="ms-textarea" rows="4" placeholder="Write the central hinge here..." oninput="updateManuscriptChiasmField('${escHtml(active.id)}','xBody', this.value)" style="margin-top:.7rem">${escHtml(active.xBody || '')}</textarea>
+        </div>
+        <div class="ms-chiasm-board">
+          ${(active.pairs || []).sort((a,b)=>(a.order||0)-(b.order||0)).map((pair,index)=>renderManuscriptChiasmPair(active, pair, index, linkNodes, node)).join('')}
+        </div>
+      ` : `
+        <div class="ms-empty-state">
+          <div class="ms-empty-title">No Chiastic Structure Yet</div>
+          <div class="ms-empty-copy">Create a chapter-level or subchapter-level chiasm to start mapping mirrored beats around an explicit X.</div>
+        </div>
+      `}
+    </div>
+  </div>`;
+}
+
 function renderManuscriptCenter(){
   const root = document.getElementById('manuscript-center');
   const workspace = activeManuscriptWorkspace();
@@ -16542,7 +17344,31 @@ function renderManuscriptCenter(){
   const editorFocused = manuscriptEditorFocusEnabled(workspace);
   const authorDrawerOpen = manuscriptAuthorDrawerOpen(workspace);
   const centerMode = manuscriptCenterMode(workspace, node);
-  const modeTabs = manuscriptCenterTabs(workspace, chapterNode);
+  const modeTabs = manuscriptCenterTabs(workspace, chapterNode, node);
+  if(centerMode === 'chiasm' && chapterNode && (node.type === 'chapter' || node.type === 'subchapter')){
+    root.innerHTML = `
+      <section class="ms-panel ms-center-panel">
+        <div class="ms-crumbs">${escHtml(crumbs)}</div>
+        <div class="ms-center-head">
+          <div>
+            <div class="ms-center-title">${escHtml(chapterNode.title)} Chiasm</div>
+            <div class="ms-center-sub">Chiastic structures stay private to Manuscript Studio. Build as many mirrored boards as you need at the chapter and subchapter levels, then write against them while keeping the central X visible.</div>
+          </div>
+          <div class="ms-btn-row">
+            ${modeTabs}
+            ${node.type === 'subchapter' ? `<button class="ms-btn ${editorFocused ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptEditorFocus()">${editorFocused ? 'Exit Fullscreen' : 'Fullscreen Editor'}</button>` : ''}
+            <button class="ms-btn ${authorDrawerOpen ? 'emphasis' : ''}" type="button" onclick="toggleManuscriptAuthorDrawer()">${authorDrawerOpen ? 'Close Author Desk' : 'Open Author Desk'}</button>
+          </div>
+        </div>
+        <div class="ms-status-row">
+          <span class="ms-meta-chip">${escHtml(node.type === 'subchapter' ? 'Subchapter context with parent chapter inheritance' : 'Chapter context')}</span>
+          <span class="ms-meta-chip">Visible structures: ${manuscriptChiasmScopeOptions(workspace, node).reduce((sum, scope)=>sum + scope.items.length, 0)}</span>
+        </div>
+        ${renderManuscriptChiasmWorkspace(workspace, node, chapterNode)}
+      </section>`;
+    _manuscriptEditor = null;
+    return;
+  }
   if(centerMode === 'notes' && chapterNode){
     root.innerHTML = `
       <section class="ms-panel ms-center-panel">
@@ -16723,6 +17549,9 @@ function renderManuscriptRightRail(){
   const banner = activeSubvolume ? manuscriptBannerData(workspace, activeSubvolume) : null;
   const subvolumeLineage = activeSubvolume ? manuscriptLineage(workspace, activeSubvolume.id) : null;
   const tracked = chapterNode ? detectTrackedCodexEntitiesForChapter(chapterNode.id) : {characters:[], locations:[], factions:[], other:[], pinned:[]};
+  const chiasmScopes = manuscriptChiasmScopeOptions(workspace, node);
+  const chiasmCount = chiasmScopes.reduce((sum, scope)=>sum + scope.items.length, 0);
+  const activeChiasm = activeManuscriptChiasm(workspace, node);
   root.innerHTML = `
     <section class="ms-panel ms-rail-section">
       <div class="ms-rail-kicker">Live Stats</div>
@@ -16763,6 +17592,21 @@ function renderManuscriptRightRail(){
           <label class="ms-banner-crop-slider">Horizontal <input type="range" min="0" max="100" value="${escHtml(banner.crop.x)}" oninput="updateManuscriptSubvolumeBannerField('crop.x', this.value)"> <span>${Math.round(banner.crop.x)}%</span></label>
           <label class="ms-banner-crop-slider">Vertical <input type="range" min="0" max="100" value="${escHtml(banner.crop.y)}" oninput="updateManuscriptSubvolumeBannerField('crop.y', this.value)"> <span>${Math.round(banner.crop.y)}%</span></label>
           <label class="ms-banner-crop-slider">Zoom <input type="range" min="100" max="220" value="${escHtml(banner.crop.zoom)}" oninput="updateManuscriptSubvolumeBannerField('crop.zoom', this.value)"> <span>${Math.round(banner.crop.zoom)}%</span></label>
+        </div>
+      </div>
+    </section>` : ''}
+    ${chapterNode ? `<section class="ms-panel ms-rail-section">
+      <div class="ms-rail-kicker">Chiastic Engine</div>
+      <div class="ms-summary-list">
+        <div class="ms-summary-item">
+          <span class="ms-mini-label">Visible Structures</span>
+          <div class="ms-summary-value">${chiasmCount}</div>
+          <div class="ms-result-snippet">${escHtml(activeChiasm ? `${activeChiasm.title} · ${manuscriptChiasmSummary(activeChiasm)}` : 'Build mirrored structures for the active chapter and subchapter, then keep them nearby while drafting.')}</div>
+          <div class="ms-character-actions">
+            <button class="ms-mini-btn" type="button" onclick="setManuscriptCenterMode('chiasm')">Open Chiasm Tab</button>
+            ${node && node.type === 'subchapter' ? `<button class="ms-mini-btn" type="button" onclick="createManuscriptChiasm('subchapter','${escHtml(node.id)}')">New Subchapter</button>` : ''}
+            <button class="ms-mini-btn" type="button" onclick="createManuscriptChiasm('chapter','${escHtml(chapterNode.id)}')">New Chapter</button>
+          </div>
         </div>
       </div>
     </section>` : ''}
@@ -17085,8 +17929,13 @@ async function deleteManuscriptNode(id=''){
   workspace.nodes = workspace.nodes.filter(item=>!doomed.has(item.id));
   workspace.documents = workspace.documents.filter(item=>!doomed.has(item.nodeId));
   workspace.notesDocuments = (workspace.notesDocuments || []).filter(item=>!doomed.has(item.chapterNodeId));
+  workspace.chiasmDocuments = (workspace.chiasmDocuments || []).filter(item=>!doomed.has(item.scopeNodeId));
   const ui = manuscriptUi(workspace);
   ui.activeNoteIdByChapter = Object.fromEntries(Object.entries(ui.activeNoteIdByChapter || {}).filter(([chapterId])=>!doomed.has(chapterId)));
+  ui.activeChiasmIdByScope = Object.fromEntries(Object.entries(ui.activeChiasmIdByScope || {}).filter(([key])=>{
+    const parts = String(key || '').split(':');
+    return parts.length < 2 || !doomed.has(parts.slice(1).join(':'));
+  }));
   workspace.books = workspace.nodes.filter(item=>item.type==='book' && !item.parentId).map(item=>item.id);
   _activeManuscriptNodeId = fallback?.id || workspace.nodes.find(item=>item.type==='subchapter')?.id || workspace.nodes[0]?.id || '';
   await persistManuscriptWorkspace(workspace, {message:`Deleted ${node.title}.`});
@@ -17211,6 +18060,7 @@ function renderManuscriptStudio(){
   ensureManuscriptAuthorWorkspaceMount();
   ensureManuscriptDraftsMount();
   renderManuscriptBanner();
+  renderManuscriptChiasmGlanceStrip();
   renderManuscriptLeftRail();
   renderManuscriptCenter();
   renderManuscriptRightRail();
