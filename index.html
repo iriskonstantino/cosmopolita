@@ -6788,7 +6788,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.22.10</div>
+<div id="site-version-stamp">v2026.05.22.11</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -13485,6 +13485,12 @@ function getTOCBookSubvolumes(volumeSlot){
     blurb: sub.blurb || '',
     bannerMotif: sub.bannerMotif || '',
     bannerPalette: normalizeBannerPalette(sub.bannerPalette),
+    image: String(sub.image || '').trim(),
+    crop: {
+      x: Number.isFinite(Number(sub && sub.crop && sub.crop.x)) ? Number(sub.crop.x) : 50,
+      y: Number.isFinite(Number(sub && sub.crop && sub.crop.y)) ? Number(sub.crop.y) : 50,
+      zoom: Number.isFinite(Number(sub && sub.crop && sub.crop.zoom)) ? Number(sub.crop.zoom) : 100
+    },
     chapters: []
   }));
   const volumeChapters = orderedChapters(volumeSlot ? volumeSlot.chapters : []);
