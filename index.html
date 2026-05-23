@@ -6788,7 +6788,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.22.09</div>
+<div id="site-version-stamp">v2026.05.22.10</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -12793,6 +12793,17 @@ async function syncProtoevangeliumToSupabase(){
   if(error) throw error;
 }
 
+async function syncBookArchitectureToSupabase(){
+  const client = notesClient();
+  if(!client || !isAdmin()) return;
+  const {error} = await client.from('poetic_engines').upsert({
+    id:'book-architecture',
+    data:normalizeBookArchitecture(bookArchitecture),
+    updated_at:new Date().toISOString()
+  });
+  if(error) throw error;
+}
+
 async function saveProtoevangelium(){
   if(!requireAdmin()) return;
   saveProtoevangeliumLocal({silent:true});
@@ -13246,6 +13257,9 @@ function saveBookArchitecture(){
   }
   saveBookArchitectureToIndexedDB(normalized).catch(err=>{
     console.warn('Book architecture could not be saved in IndexedDB:', err);
+  });
+  syncBookArchitectureToSupabase().catch(err=>{
+    console.warn('Book architecture Supabase sync unavailable:', err);
   });
   return true;
 }
@@ -20726,6 +20740,31 @@ async function loadUniversalContent(){
       console.warn('Shared Protoevangelium sync unavailable:', protoErr);
       const status = document.getElementById('proto-status');
       if(status && isAdmin()) status.textContent = 'Protoevangelium is local-only until the poetic_engines Supabase table is installed.';
+    }
+    try{
+      const {data:bookArchRow,error:bookArchError} = await client
+        .from('poetic_engines')
+        .select('id,data,updated_at')
+        .eq('id','book-architecture')
+        .maybeSingle();
+      if(bookArchError) throw bookArchError;
+      if(bookArchRow && bookArchRow.data){
+        bookArchitecture = normalizeBookArchitecture(bookArchRow.data);
+        try{
+          localStorage.setItem(BOOK_ARCH_STORAGE_KEY, JSON.stringify(bookArchitecture));
+        }catch(err){
+          console.warn('Book architecture local cache refresh failed:', err);
+        }
+        await saveBookArchitectureToIndexedDB(bookArchitecture).catch(()=>{});
+        renderTOC();
+        if(_currentChapterId){
+          const current = chapters.find(c=>c.id===_currentChapterId);
+          if(current) renderChapter(current);
+        }
+        if(_currentView === 'manuscript-view') renderManuscriptStudio();
+      }
+    }catch(bookArchErr){
+      console.warn('Shared book architecture sync unavailable:', bookArchErr);
     }
     try{
       const {data:chapterRows,error:chapterError} = await client
