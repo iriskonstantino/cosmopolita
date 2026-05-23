@@ -216,6 +216,34 @@ body{
 .toc-compact-header .chdr-deco{
   display:none;
 }
+.chapter-header .ms-banner-frame{
+  min-height:190px;
+  padding:1.2rem 2.5rem 1.15rem;
+}
+.chapter-header .ms-banner-content{
+  min-height:160px;
+}
+.chapter-header .ms-banner-title.chapter-banner-title{
+  font-size:clamp(1.45rem,3vw,2.4rem);
+  line-height:0.98;
+  letter-spacing:0.1em;
+}
+.chapter-header .ms-banner-summary{
+  max-width:46rem;
+}
+.chapter-header .ms-banner-meta{
+  align-self:flex-end;
+}
+.toc-compact-header .ms-banner-frame{
+  min-height:150px;
+  padding:1rem 2.5rem 0.95rem;
+}
+.toc-compact-header .ms-banner-content{
+  min-height:120px;
+}
+.toc-compact-header .chapter-banner-title{
+  font-size:clamp(1.2rem,2.4vw,1.8rem);
+}
 .chdr-left{
   padding:1.6rem 2.5rem 1.4rem 2.5rem;
   position:relative;
@@ -2112,11 +2140,20 @@ body.links-on .wl:hover{color:var(--red)}
   border-bottom:1.5px solid var(--ink);
   padding:1rem 0 1.1rem;
 }
+.editorial-dashboard.collapsed .editorial-summary-grid,
+.editorial-dashboard.collapsed .editorial-grid{
+  display:none;
+}
 .editorial-dashboard-top{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
   gap:1rem;
   align-items:end;
+}
+.editorial-title-row{
+  display:flex;
+  align-items:flex-start;
+  gap:0.8rem;
 }
 .editorial-kicker,
 .editorial-panel-label,
@@ -12856,15 +12893,8 @@ function renderChapter(ch){
   // Header
   const headerLeft = document.getElementById('cv-header-left');
   const readingContext = getChapterReadingContext(ch);
-  const subtitleHtml = readingContext.volume ? `<div class="chdr-subtitle">${escHtml(readingContext.volume)}</div>` : '';
-  const contextBits = [readingContext.novel, readingContext.subvolume].filter(Boolean);
-  const contextHtml = contextBits.length ? `<div class="chdr-context">${contextBits.map(bit=>`<span>${escHtml(bit)}</span>`).join('')}</div>` : '';
   headerLeft.innerHTML = `
-    ${renderSubvolumeBanner(readingContext)}
-    ${contextHtml}
-    ${readingContext.act ? `<div class="chdr-architect">${escHtml(readingContext.act)}</div>` : ''}
-    <div class="chdr-title">${escHtml(ch.chapter || readingContext.volume || ch.book || 'Untitled Chapter')}</div>
-    ${subtitleHtml}
+    ${renderChapterManuscriptBanner(ch, readingContext, ch.chapter || readingContext.subvolume || ch.book || 'Untitled Chapter')}
   `;
 
   // Body
@@ -13007,6 +13037,7 @@ const DEFAULT_BOOK_ARCHITECTURE = {
 let _tocBooksState = {novel:null, act:null, volume:null, subvolume:null};
 let _tocBooksEditorOpen = false;
 let _editorialDashboardFilters = {status:'all', scope:'all', attentionOnly:true};
+let _editorialDashboardCollapsed = false;
 
 function tocJsArg(value){
   const escaped = String(value || '')
@@ -13396,6 +13427,53 @@ function getChapterReadingContext(ch){
     subvolumeBlurb: group && group.blurb ? group.blurb : '',
     ...normalizeSubvolumeBanner(group || {})
   };
+}
+
+function linkedManuscriptBannerForChapter(ch){
+  if(!ch || !ch.id) return null;
+  const linked = manuscriptExistingChapterLink(ch.id);
+  if(!linked || !linked.workspace || !linked.node) return null;
+  const lineage = manuscriptLineage(linked.workspace, linked.node.id);
+  if(!lineage.subvolume) return null;
+  return manuscriptBannerData(linked.workspace, lineage.subvolume);
+}
+
+function renderChapterManuscriptBanner(ch, readingContext, titleText=''){
+  const linkedBanner = linkedManuscriptBannerForChapter(ch);
+  const banner = linkedBanner || {
+    image:'',
+    title:readingContext.subvolume || '',
+    kicker:readingContext.novel || 'Cosmopolita',
+    summary:readingContext.subvolumeBlurb || readingContext.volumeBlurb || '',
+    palette:normalizeBannerPalette(readingContext.bannerPalette),
+    crop:{x:50,y:50,zoom:100}
+  };
+  const chips = [
+    readingContext.novel ? `Novel · ${readingContext.novel}` : '',
+    readingContext.act ? `Act · ${readingContext.act}` : '',
+    readingContext.volume ? `Volume · ${readingContext.volume}` : '',
+    readingContext.subvolume ? `Subvolume · ${readingContext.subvolume}` : ''
+  ].filter(Boolean);
+  const style = [
+    `--ms-banner-a:${(banner.palette || [])[0] || '#b83232'}`,
+    `--ms-banner-b:${(banner.palette || [])[1] || '#14213d'}`,
+    `--ms-banner-c:${(banner.palette || [])[2] || '#c8810a'}`,
+    banner.image ? `background-image:linear-gradient(120deg,rgba(9,8,10,0.04),rgba(9,8,10,0.12)),url('${escHtml(banner.image)}')` : '',
+    banner.image ? manuscriptBannerCropStyle(banner) : ''
+  ].filter(Boolean).join(';');
+  return `<div class="ms-banner-frame ${banner.image ? 'has-image' : ''}" style="${style}">
+    <div class="ms-banner-overlay"></div>
+    <div class="ms-banner-content">
+      <div class="ms-banner-copy">
+        <div class="ms-banner-kicker">${escHtml(banner.kicker || readingContext.novel || 'Cosmopolita')}</div>
+        <div class="ms-banner-title chapter-banner-title">${escHtml(titleText || 'Untitled Chapter')}</div>
+        <div class="ms-banner-summary">${escHtml(banner.summary || readingContext.subvolumeBlurb || readingContext.volumeBlurb || '')}</div>
+      </div>
+      <div class="ms-banner-meta">
+        ${chips.map(item=>`<div class="ms-banner-chip">${escHtml(item)}</div>`).join('')}
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderSubvolumeBanner(theme){
@@ -14111,6 +14189,11 @@ function editorialUpdateFilter(field, value){
   renderTOCDashboard();
 }
 
+function toggleEditorialDashboardCollapsed(){
+  _editorialDashboardCollapsed = !_editorialDashboardCollapsed;
+  renderTOCDashboard();
+}
+
 function renderEditorialDashboard(){
   const rows = editorialChapterRows();
   const drafts = editorialDraftRows();
@@ -14126,11 +14209,14 @@ function renderEditorialDashboard(){
   const attentionLabel = _editorialDashboardFilters.attentionOnly ? 'Needs attention' : 'All chapters';
 
   return `
-    <section class="editorial-dashboard admin-only" aria-label="Editorial dashboard">
+    <section class="editorial-dashboard admin-only ${_editorialDashboardCollapsed ? 'collapsed' : ''}" aria-label="Editorial dashboard">
       <div class="editorial-dashboard-top">
         <div>
           <div class="editorial-kicker">Editorial Dashboard</div>
-          <div class="editorial-title">What needs work next</div>
+          <div class="editorial-title-row">
+            <div class="editorial-title">What needs work next</div>
+            <button class="author-note-btn" type="button" onclick="toggleEditorialDashboardCollapsed()">${_editorialDashboardCollapsed ? 'Expand' : 'Collapse'}</button>
+          </div>
           <div class="editorial-sub">${escHtml(attentionLabel)} · ${chapters.length} chapters · ${formatWordCount(totalWords)} · ${reviewPct}% review complete</div>
         </div>
         <div class="editorial-filters">
@@ -19768,14 +19854,8 @@ function renderChapterEditorHeader(data){
   const headerLeft = document.getElementById('cv-header-left');
   if(!headerLeft) return;
   const readingContext = getChapterReadingContext(data);
-  const contextBits = [readingContext.novel, readingContext.subvolume].filter(Boolean);
-  const contextHtml = contextBits.length ? `<div class="chdr-context">${contextBits.map(bit=>`<span>${escHtml(bit)}</span>`).join('')}</div>` : '';
   headerLeft.innerHTML = `
-    ${renderSubvolumeBanner(readingContext)}
-    ${contextHtml}
-    ${readingContext.act ? `<div class="chdr-architect">${escHtml(readingContext.act)}</div>` : ''}
-    <div class="chdr-title">${escHtml(data.chapter || (_editingChapterId ? 'Edit Chapter' : 'New Chapter'))}</div>
-    ${readingContext.volume ? `<div class="chdr-subtitle">${escHtml(readingContext.volume)}</div>` : ''}
+    ${renderChapterManuscriptBanner(data, readingContext, data.chapter || (_editingChapterId ? 'Edit Chapter' : 'New Chapter'))}
   `;
 }
 
