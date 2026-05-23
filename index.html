@@ -192,19 +192,16 @@ body{
 
 /* ─── CHAPTER HEADER ──────────────────── */
 .chapter-header{
-  background:var(--white);
-  border-bottom:1.5px solid var(--ink);
+  background:transparent;
+  border-bottom:none;
   display:grid;
   grid-template-columns:1fr;
-  min-height:180px;
+  min-height:0;
   overflow:hidden;
 }
 .toc-compact-header{
   grid-template-columns:1fr;
   min-height:0;
-}
-.toc-compact-header .chdr-left{
-  padding:1.15rem 2.5rem 1rem;
 }
 .toc-compact-header .chdr-title{
   font-size:clamp(1.55rem,3vw,2.35rem);
@@ -216,12 +213,18 @@ body{
 .toc-compact-header .chdr-deco{
   display:none;
 }
-.chapter-header .ms-banner-frame{
-  min-height:190px;
-  padding:1.2rem 2.5rem 1.15rem;
+.chapter-header .chdr-left,
+.toc-compact-header .chdr-left{
+  padding:0;
 }
-.chapter-header .ms-banner-content{
-  min-height:160px;
+.chapter-header .ms-banner-frame,
+.toc-compact-header .ms-banner-frame{
+  min-height:220px;
+  padding:1.35rem 1.6rem;
+}
+.chapter-header .ms-banner-content,
+.toc-compact-header .ms-banner-content{
+  min-height:190px;
 }
 .chapter-header .ms-banner-title.chapter-banner-title{
   font-size:clamp(1.45rem,3vw,2.4rem);
@@ -233,13 +236,6 @@ body{
 }
 .chapter-header .ms-banner-meta{
   align-self:flex-end;
-}
-.toc-compact-header .ms-banner-frame{
-  min-height:150px;
-  padding:1rem 2.5rem 0.95rem;
-}
-.toc-compact-header .ms-banner-content{
-  min-height:120px;
 }
 .toc-compact-header .chapter-banner-title{
   font-size:clamp(1.2rem,2.4vw,1.8rem);
@@ -6792,7 +6788,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.22.06</div>
+<div id="site-version-stamp">v2026.05.22.08</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -13472,7 +13468,7 @@ function linkedManuscriptBannerForChapter(ch){
 
 function renderChapterManuscriptBanner(ch, readingContext, titleText=''){
   const linkedBanner = linkedManuscriptBannerForChapter(ch);
-  const banner = linkedBanner || {
+  const tocBanner = {
     image:readingContext.image || '',
     title:readingContext.subvolume || '',
     kicker:readingContext.novel || 'Cosmopolita',
@@ -13480,6 +13476,17 @@ function renderChapterManuscriptBanner(ch, readingContext, titleText=''){
     palette:normalizeBannerPalette(readingContext.bannerPalette),
     crop:readingContext.crop || {x:50,y:50,zoom:100}
   };
+  const banner = linkedBanner
+    ? {
+        ...tocBanner,
+        ...linkedBanner,
+        image:String(linkedBanner.image || '').trim() || tocBanner.image,
+        summary:String(linkedBanner.summary || '').trim() || tocBanner.summary,
+        kicker:String(linkedBanner.kicker || '').trim() || tocBanner.kicker,
+        palette:Array.isArray(linkedBanner.palette) && linkedBanner.palette.length ? linkedBanner.palette : tocBanner.palette,
+        crop:String(linkedBanner.image || '').trim() ? (linkedBanner.crop || tocBanner.crop) : tocBanner.crop
+      }
+    : tocBanner;
   const chips = [
     readingContext.novel ? `Novel · ${readingContext.novel}` : '',
     readingContext.act ? `Act · ${readingContext.act}` : '',
