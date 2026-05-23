@@ -6788,7 +6788,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.22.08</div>
+<div id="site-version-stamp">v2026.05.22.09</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -12124,6 +12124,7 @@ async function exportFullBackup(){
 
 let chapters = normalizeChapterList(loadChapters());
 let _bookArchitectureReady = false;
+let _bookArchDBPromise = null;
 let _editingChapterId = null;
 let _chapterEditorBaseId = null;
 let _chapterEditorDraftTimer = null;
@@ -13017,6 +13018,10 @@ function groupChaptersForTOC(list){
 }
 
 const BOOK_ARCH_STORAGE_KEY = 'cosmopolita_book_architecture';
+const BOOK_ARCH_DB_NAME = 'cosmopolita-book-architecture';
+const BOOK_ARCH_DB_VERSION = 1;
+const BOOK_ARCH_STORE = 'architecture';
+const BOOK_ARCH_RECORD_ID = 'book-architecture';
 const DEFAULT_BOOK_ACT_TITLES = ['Her Comforting Light','Her Maternal City','Her Tropical Dreambath'];
 const TOC_BOOK_VOLUME_COUNT = 11;
 const DEFAULT_SUBVOLUME_BANNER = {
@@ -13190,12 +13195,82 @@ function loadBookArchitecture(){
   return normalizeBookArchitecture(DEFAULT_BOOK_ARCHITECTURE);
 }
 
+function openBookArchitectureDB(){
+  if(_bookArchDBPromise) return _bookArchDBPromise;
+  _bookArchDBPromise = new Promise((resolve,reject)=>{
+    if(!window.indexedDB){ reject(new Error('IndexedDB is not available in this browser.')); return; }
+    const req = indexedDB.open(BOOK_ARCH_DB_NAME, BOOK_ARCH_DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if(!db.objectStoreNames.contains(BOOK_ARCH_STORE)){
+        db.createObjectStore(BOOK_ARCH_STORE, {keyPath:'id'});
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error('Could not open book architecture storage.'));
+  });
+  return _bookArchDBPromise;
+}
+
+async function loadBookArchitectureFromIndexedDB(){
+  const db = await openBookArchitectureDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(BOOK_ARCH_STORE, 'readonly');
+    const req = tx.objectStore(BOOK_ARCH_STORE).get(BOOK_ARCH_RECORD_ID);
+    req.onsuccess = () => resolve(req.result && req.result.data ? normalizeBookArchitecture(req.result.data) : null);
+    req.onerror = () => reject(req.error || new Error('Could not load book architecture from IndexedDB.'));
+  });
+}
+
+async function saveBookArchitectureToIndexedDB(data=bookArchitecture){
+  const db = await openBookArchitectureDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(BOOK_ARCH_STORE, 'readwrite');
+    tx.objectStore(BOOK_ARCH_STORE).put({
+      id: BOOK_ARCH_RECORD_ID,
+      updatedAt: new Date().toISOString(),
+      data: normalizeBookArchitecture(data)
+    });
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error || new Error('Could not save book architecture to IndexedDB.'));
+  });
+}
+
 function saveBookArchitecture(){
+  const normalized = normalizeBookArchitecture(bookArchitecture);
+  bookArchitecture = normalized;
   try{
-    localStorage.setItem(BOOK_ARCH_STORAGE_KEY, JSON.stringify(bookArchitecture));
-    return true;
+    localStorage.setItem(BOOK_ARCH_STORAGE_KEY, JSON.stringify(normalized));
   }catch(e){
     console.warn('Book architecture could not be saved in this browser:', e);
+  }
+  saveBookArchitectureToIndexedDB(normalized).catch(err=>{
+    console.warn('Book architecture could not be saved in IndexedDB:', err);
+  });
+  return true;
+}
+
+async function hydrateBookArchitectureStorage(){
+  let refreshed = null;
+  try{
+    refreshed = await loadBookArchitectureFromIndexedDB();
+  }catch(err){
+    console.warn('Book architecture IndexedDB load unavailable:', err);
+  }
+  if(refreshed){
+    bookArchitecture = refreshed;
+    try{
+      localStorage.setItem(BOOK_ARCH_STORAGE_KEY, JSON.stringify(bookArchitecture));
+    }catch(err){
+      console.warn('Book architecture local cache refresh failed:', err);
+    }
+    return true;
+  }
+  try{
+    await saveBookArchitectureToIndexedDB(bookArchitecture);
+    return true;
+  }catch(err){
+    console.warn('Book architecture IndexedDB seed failed:', err);
     return false;
   }
 }
@@ -14720,6 +14795,15 @@ document.addEventListener('DOMContentLoaded',()=>{
   _updateNavUI();
   attachDraftControlHandlers();
   renderTOC();
+  hydrateBookArchitectureStorage().then(changed=>{
+    if(!changed) return;
+    renderTOC();
+    if(_currentChapterId){
+      const current = chapters.find(ch=>ch.id === _currentChapterId);
+      if(current && _currentView === 'chapter-view') renderChapter(current);
+    }
+    if(_currentView === 'manuscript-view') renderManuscriptStudio();
+  }).catch(err=>console.warn('Book architecture hydration failed:', err));
   loadPublishedChapters();
   initCharacterFeature();
   setTextLayout(loadTextAlignment());
