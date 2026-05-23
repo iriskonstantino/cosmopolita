@@ -1934,6 +1934,31 @@ body.links-on .wl:hover{color:var(--red)}
   line-height:1.4;
   margin-top:0.45rem;
 }
+.toc-books-banner-preview{
+  min-height:160px;
+  border:1px solid var(--border);
+  background:linear-gradient(135deg,#241a24,#3c2c54 48%,#74516e);
+  background-repeat:no-repeat;
+  margin-top:0.45rem;
+}
+.toc-books-banner-crop{
+  display:grid;
+  gap:0.55rem;
+  margin-top:0.55rem;
+}
+.toc-books-banner-slider{
+  display:grid;
+  gap:0.24rem;
+  font-family:var(--mono);
+  font-size:0.5rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:#999;
+}
+.toc-books-banner-slider input{
+  width:100%;
+  accent-color:var(--red);
+}
 .toc-books-editor-actions{
   display:flex;
   flex-wrap:wrap;
@@ -6767,7 +6792,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.22.05</div>
+<div id="site-version-stamp">v2026.05.22.06</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -13082,9 +13107,16 @@ function normalizeBannerPalette(value){
 }
 
 function normalizeSubvolumeBanner(sub){
+  const crop = sub && typeof sub.crop === 'object' ? sub.crop : {};
   return {
     bannerMotif: String(sub.bannerMotif || sub.motif || DEFAULT_SUBVOLUME_BANNER.bannerMotif).trim(),
-    bannerPalette: normalizeBannerPalette(sub.bannerPalette || sub.palette)
+    bannerPalette: normalizeBannerPalette(sub.bannerPalette || sub.palette),
+    image:String(sub.image || '').trim(),
+    crop:{
+      x:Number.isFinite(Number(crop.x)) ? Number(crop.x) : 50,
+      y:Number.isFinite(Number(crop.y)) ? Number(crop.y) : 50,
+      zoom:Number.isFinite(Number(crop.zoom)) ? Number(crop.zoom) : 100
+    }
   };
 }
 
@@ -13441,12 +13473,12 @@ function linkedManuscriptBannerForChapter(ch){
 function renderChapterManuscriptBanner(ch, readingContext, titleText=''){
   const linkedBanner = linkedManuscriptBannerForChapter(ch);
   const banner = linkedBanner || {
-    image:'',
+    image:readingContext.image || '',
     title:readingContext.subvolume || '',
     kicker:readingContext.novel || 'Cosmopolita',
     summary:readingContext.subvolumeBlurb || readingContext.volumeBlurb || '',
     palette:normalizeBannerPalette(readingContext.bannerPalette),
-    crop:{x:50,y:50,zoom:100}
+    crop:readingContext.crop || {x:50,y:50,zoom:100}
   };
   const chips = [
     readingContext.novel ? `Novel · ${readingContext.novel}` : '',
@@ -13526,12 +13558,85 @@ function tocInputValue(selector){
   return el ? el.value.trim() : '';
 }
 
+function tocSubvolumeFieldSelector(index, field){
+  return index === 'new'
+    ? `[data-book-new-subvolume-${field}]`
+    : `[data-book-subvolume-${field}="${index}"]`;
+}
+
+function tocSubvolumeFieldValue(index, field){
+  return tocInputValue(tocSubvolumeFieldSelector(index, field));
+}
+
+function tocSubvolumeNumberValue(index, field, fallback){
+  const el = document.querySelector(tocSubvolumeFieldSelector(index, field));
+  if(!el) return fallback;
+  const value = Number(el.value);
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function tocSubvolumePreviewNode(index){
+  return document.querySelector(index === 'new' ? '[data-book-new-subvolume-preview]' : `[data-book-subvolume-preview="${index}"]`);
+}
+
+function tocSubvolumeBannerPreviewStyle(image='', crop={}){
+  const x = Number.isFinite(Number(crop.x)) ? Number(crop.x) : 50;
+  const y = Number.isFinite(Number(crop.y)) ? Number(crop.y) : 50;
+  const zoom = Number.isFinite(Number(crop.zoom)) ? Number(crop.zoom) : 100;
+  return image ? `background-image:url('${image}');background-position:${x}% ${y}%;background-size:${zoom}% auto;` : '';
+}
+
+function updateTOCSubvolumeBannerPreview(index){
+  const image = tocSubvolumeFieldValue(index, 'image');
+  const crop = {
+    x:tocSubvolumeNumberValue(index, 'crop-x', 50),
+    y:tocSubvolumeNumberValue(index, 'crop-y', 50),
+    zoom:tocSubvolumeNumberValue(index, 'crop-zoom', 100)
+  };
+  const preview = tocSubvolumePreviewNode(index);
+  if(preview){
+    preview.setAttribute('style', tocSubvolumeBannerPreviewStyle(image, crop));
+  }
+  const xLabel = document.querySelector(tocSubvolumeFieldSelector(index, 'crop-x-value'));
+  const yLabel = document.querySelector(tocSubvolumeFieldSelector(index, 'crop-y-value'));
+  const zoomLabel = document.querySelector(tocSubvolumeFieldSelector(index, 'crop-zoom-value'));
+  if(xLabel) xLabel.textContent = `${Math.round(crop.x)}%`;
+  if(yLabel) yLabel.textContent = `${Math.round(crop.y)}%`;
+  if(zoomLabel) zoomLabel.textContent = `${Math.round(crop.zoom)}%`;
+}
+
+function handleTOCSubvolumeBannerUpload(event, index){
+  const file = event?.target?.files?.[0];
+  if(!file) return;
+  if(!String(file.type || '').startsWith('image/')){
+    alert('Choose an image file for the subvolume banner.');
+    event.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const input = document.querySelector(tocSubvolumeFieldSelector(index, 'image'));
+    if(input) input.value = String(reader.result || '');
+    updateTOCSubvolumeBannerPreview(index);
+  };
+  reader.readAsDataURL(file);
+}
+
 function subvolumeEditorFields(index){
   const existing = getBookArchVolume(_tocBooksState.novel, _tocBooksState.act, _tocBooksState.volume).subvolumes[index] || {};
   return {
     ...existing,
     title: tocInputValue(`[data-book-subvolume-title="${index}"]`),
-    blurb: tocInputValue(`[data-book-subvolume-blurb="${index}"]`)
+    blurb: tocInputValue(`[data-book-subvolume-blurb="${index}"]`),
+    ...normalizeSubvolumeBanner({
+      ...existing,
+      image:tocSubvolumeFieldValue(index, 'image') || existing.image || '',
+      crop:{
+        x:tocSubvolumeNumberValue(index, 'crop-x', existing.crop && existing.crop.x || 50),
+        y:tocSubvolumeNumberValue(index, 'crop-y', existing.crop && existing.crop.y || 50),
+        zoom:tocSubvolumeNumberValue(index, 'crop-zoom', existing.crop && existing.crop.zoom || 100)
+      }
+    })
   };
 }
 
@@ -13677,7 +13782,14 @@ function saveTOCBookSubvolumeEditor(){
     volume.subvolumes.push({
       title: newTitle,
       blurb: tocInputValue('[data-book-new-subvolume-blurb]'),
-      ...normalizeSubvolumeBanner({})
+      ...normalizeSubvolumeBanner({
+        image:tocSubvolumeFieldValue('new', 'image'),
+        crop:{
+          x:tocSubvolumeNumberValue('new', 'crop-x', 50),
+          y:tocSubvolumeNumberValue('new', 'crop-y', 50),
+          zoom:tocSubvolumeNumberValue('new', 'crop-zoom', 100)
+        }
+      })
     });
   }
   bookArchitecture = normalizeBookArchitecture(bookArchitecture);
@@ -13801,6 +13913,14 @@ function renderTOCBooksEditor(){
             <div class="toc-books-edit-label">Subvolume ${String(index + 1).padStart(2,'0')}</div>
             <input class="toc-books-edit-input" data-book-subvolume-title="${index}" value="${escHtml(sub.title)}" placeholder="Subvolume title">
             <textarea class="toc-books-edit-textarea" data-book-subvolume-blurb="${index}" placeholder="Subvolume blurb">${escHtml(sub.blurb)}</textarea>
+            <input class="toc-books-edit-input" data-book-subvolume-image="${index}" value="${escHtml(sub.image || '')}" placeholder="Banner image URL" oninput="updateTOCSubvolumeBannerPreview(${index})">
+            <input class="toc-books-edit-input" type="file" accept="image/*" onchange="handleTOCSubvolumeBannerUpload(event, ${index})">
+            <div class="toc-books-banner-preview" data-book-subvolume-preview="${index}" style="${escHtml(tocSubvolumeBannerPreviewStyle(sub.image || '', sub.crop || {}))}"></div>
+            <div class="toc-books-banner-crop">
+              <label class="toc-books-banner-slider">Horizontal <input class="toc-books-edit-input" type="range" min="0" max="100" value="${escHtml((sub.crop && sub.crop.x) ?? 50)}" data-book-subvolume-crop-x="${index}" oninput="updateTOCSubvolumeBannerPreview(${index})"> <span data-book-subvolume-crop-x-value="${index}">${Math.round((sub.crop && sub.crop.x) ?? 50)}%</span></label>
+              <label class="toc-books-banner-slider">Vertical <input class="toc-books-edit-input" type="range" min="0" max="100" value="${escHtml((sub.crop && sub.crop.y) ?? 50)}" data-book-subvolume-crop-y="${index}" oninput="updateTOCSubvolumeBannerPreview(${index})"> <span data-book-subvolume-crop-y-value="${index}">${Math.round((sub.crop && sub.crop.y) ?? 50)}%</span></label>
+              <label class="toc-books-banner-slider">Zoom <input class="toc-books-edit-input" type="range" min="100" max="220" value="${escHtml((sub.crop && sub.crop.zoom) ?? 100)}" data-book-subvolume-crop-zoom="${index}" oninput="updateTOCSubvolumeBannerPreview(${index})"> <span data-book-subvolume-crop-zoom-value="${index}">${Math.round((sub.crop && sub.crop.zoom) ?? 100)}%</span></label>
+            </div>
             <div class="toc-books-row-actions">
               <div class="toc-books-reorder-group">
                 <button class="toc-books-move-btn" type="button" onclick="moveTOCBookSubvolume(${index}, -1)" ${index===0?'disabled':''}>Move Up</button>
@@ -13814,6 +13934,14 @@ function renderTOCBooksEditor(){
           <div class="toc-books-edit-label">Add Subvolume</div>
           <input class="toc-books-edit-input" data-book-new-subvolume-title placeholder="New subvolume title">
           <textarea class="toc-books-edit-textarea" data-book-new-subvolume-blurb placeholder="New subvolume blurb"></textarea>
+          <input class="toc-books-edit-input" data-book-new-subvolume-image placeholder="Banner image URL" oninput="updateTOCSubvolumeBannerPreview('new')">
+          <input class="toc-books-edit-input" type="file" accept="image/*" onchange="handleTOCSubvolumeBannerUpload(event, 'new')">
+          <div class="toc-books-banner-preview" data-book-new-subvolume-preview></div>
+          <div class="toc-books-banner-crop">
+            <label class="toc-books-banner-slider">Horizontal <input class="toc-books-edit-input" type="range" min="0" max="100" value="50" data-book-new-subvolume-crop-x oninput="updateTOCSubvolumeBannerPreview('new')"> <span data-book-new-subvolume-crop-x-value>50%</span></label>
+            <label class="toc-books-banner-slider">Vertical <input class="toc-books-edit-input" type="range" min="0" max="100" value="50" data-book-new-subvolume-crop-y oninput="updateTOCSubvolumeBannerPreview('new')"> <span data-book-new-subvolume-crop-y-value>50%</span></label>
+            <label class="toc-books-banner-slider">Zoom <input class="toc-books-edit-input" type="range" min="100" max="220" value="100" data-book-new-subvolume-crop-zoom oninput="updateTOCSubvolumeBannerPreview('new')"> <span data-book-new-subvolume-crop-zoom-value>100%</span></label>
+          </div>
         </div>
       </div>
       <div class="toc-books-editor-actions">
