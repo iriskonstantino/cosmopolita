@@ -6788,7 +6788,7 @@ body:not(.admin-on) #tnav-drafts{
     <button class="tnav-link" id="tnav-about"    onclick="showAbout()">About</button>
   </nav>
 </nav>
-<div id="site-version-stamp">v2026.05.22.11</div>
+<div id="site-version-stamp">v2026.05.22.12</div>
 
 <!-- ════ LANDING ════════════════════════════════════ -->
 <section id="landing">
@@ -14873,6 +14873,12 @@ function goBack(){
   _updateNavUI();
   _showViewById(prev);
 }
+
+function resetViewportToTop(){
+  window.scrollTo({top:0,behavior:'auto'});
+  requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'auto'}));
+}
+
 function _showViewById(id){
   if(id==='landing'){goHome();return;}
   const el=document.getElementById(id);
@@ -14887,7 +14893,7 @@ function _showViewById(id){
   }
   if(id==='manuscript-view') renderManuscriptStudio();
   if(id==='logic-view') renderLogicMachine();
-  window.scrollTo({top:0,behavior:'smooth'});
+  resetViewportToTop();
 }
 
 // ── Begin reading — opens the chapter dashboard ──
@@ -14901,7 +14907,7 @@ function showAbout(){
   const av=document.getElementById('about-view');
   av.style.display='block';
   hideOthers('about-view');
-  window.scrollTo({top:0,behavior:'smooth'});
+  resetViewportToTop();
 }
 
 // ── Show landing (= TOC after scroll) ──
@@ -14921,7 +14927,7 @@ function showChapter(id){
   document.getElementById('chapter-view').style.display='block';
   hideOthers('chapter-view');
   renderChapter(ch);
-  window.scrollTo({top:0,behavior:'smooth'});
+  resetViewportToTop();
 }
 
 function nextChapter(){
